@@ -1,0 +1,96 @@
+#include "pch.h"
+#include "Window.h"
+
+#include <atlbase.h>
+#include <atlconv.h>
+
+struct Window_State
+{
+	WindowProps Props;
+	HWND WndHandle;
+};
+Window_State s_WindowState;
+
+LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch (msg)
+	{
+	default:
+		return DefWindowProc(hWnd, msg, wParam, lParam);
+	}
+}
+
+void Window_Create(const WindowProps* props)
+{
+	s_WindowState.Props = *props;
+	WNDCLASSEX wndClass = { sizeof(wndClass), CS_OWNDC,
+			WndProc, 0, 0, GetModuleHandle(nullptr), nullptr,
+			nullptr, nullptr, nullptr, L"DXR", nullptr };
+
+	if (!RegisterClassEx(&wndClass))
+		CORE_LOG_ERROR("RegisterWndClass-Failed");
+
+	RECT rect = { 0, 0, s_WindowState.Props.Width, s_WindowState.Props.Height };
+	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
+
+	s_WindowState.WndHandle = CreateWindowEx(0, wndClass.lpszClassName, CA2T(s_WindowState.Props.Title),
+		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+		rect.right - rect.left, rect.bottom - rect.top, nullptr, nullptr, wndClass.hInstance, nullptr);
+
+	if (!s_WindowState.WndHandle)
+		CORE_LOG_ERROR("CreateWindowEx-Failed");
+
+	ShowWindow(s_WindowState.WndHandle, SW_SHOW);
+}
+
+void DispatchMsg()
+{
+	MSG msg;
+	if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+}
+
+void Window_Update()
+{
+	DispatchMsg();
+}
+
+void Window_Shutdown()
+{
+	DestroyWindow(s_WindowState.WndHandle);
+}
+
+uint32_t Window_GetWidth()
+{
+	return s_WindowState.Props.Width;
+}
+
+uint32_t Window_GetHeight()
+{
+	return s_WindowState.Props.Height;
+}
+
+void Window_SetWindowTitle(const char* title)
+{
+	char temp[256];
+	sprintf_s(temp, 256, "%s - %s", s_WindowState.Props.Title, title);
+	SetWindowTextA(s_WindowState.WndHandle, temp);
+}
+
+void Window_SetVSync(bool enable)
+{
+	s_WindowState.Props.VSync = enable;
+}
+
+bool Window_IsVSync()
+{
+	return s_WindowState.Props.VSync;
+}
+
+void* Window_GetWindowHandler()
+{
+	return s_WindowState.WndHandle;
+}
