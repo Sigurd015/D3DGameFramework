@@ -1,7 +1,5 @@
 #pragma once
 
-#include <stdint.h>
-
 enum Log_Level
 {
     LOG_LEVEL_ERROR = 0,

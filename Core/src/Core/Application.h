@@ -1,7 +1,5 @@
 #pragma once
 
-#include <stdint.h>
-
 struct Application;
 
 struct ApplicationCommandLineArgs
@@ -16,6 +14,6 @@ struct ApplicationSpecification
     ApplicationCommandLineArgs CommandLineArgs;
 };
 
-void Application_Create(Application* appInst);
+void Application_Ininialize(Application* appInst);
 
 void Application_Run();

@@ -1,7 +1,4 @@
-#include <Windows.h>
 #include <stdint.h>
-
-#include "Event/Event.h"
 
 struct WindowProps
 {
@@ -10,7 +7,8 @@ struct WindowProps
 	uint32_t Height;
 
 	bool VSync;
-	void(*EventCallBack)(Event* event);
+	void (*WindowResize)(float width, float height);
+	void (*WindowClose)();
 };
 
 void Window_Create(const WindowProps* props);

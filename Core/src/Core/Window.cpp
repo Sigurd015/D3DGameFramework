@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Window.h"
 
+#include <Windows.h>
 #include <atlbase.h>
 #include <atlconv.h>
 
@@ -15,6 +16,35 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
+	case WM_SIZE:
+	{
+		static bool first = true;  //TODO:The first WM_SIZE call before RenderingContext_Ininialize() can crash the app
+		if (first)
+		{
+			first = false;
+			return 0;
+		}
+
+		WindowProps& data = s_WindowState.Props;
+		if (wParam == SIZE_MINIMIZED)
+		{
+			data.Width = data.Height = 0;
+		}
+		else
+		{
+			data.Width = LOWORD(lParam);
+			data.Height = HIWORD(lParam);
+		}
+
+		data.WindowResize(data.Width, data.Height);
+		return 0;
+	}
+	case WM_CLOSE:
+	{
+		WindowProps& data = s_WindowState.Props;
+		data.WindowClose();
+		return 0;
+	}
 	default:
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
@@ -28,7 +58,7 @@ void Window_Create(const WindowProps* props)
 			nullptr, nullptr, nullptr, L"DXR", nullptr };
 
 	if (!RegisterClassEx(&wndClass))
-		CORE_LOG_ERROR("RegisterWndClass-Failed");
+		CORE_LOG_ERROR("RegisterClass-Failed");
 
 	RECT rect = { 0, 0, s_WindowState.Props.Width, s_WindowState.Props.Height };
 	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
@@ -38,7 +68,7 @@ void Window_Create(const WindowProps* props)
 		rect.right - rect.left, rect.bottom - rect.top, nullptr, nullptr, wndClass.hInstance, nullptr);
 
 	if (!s_WindowState.WndHandle)
-		CORE_LOG_ERROR("CreateWindowEx-Failed");
+		CORE_LOG_ERROR("CreateWindow-Failed");
 
 	ShowWindow(s_WindowState.WndHandle, SW_SHOW);
 }
@@ -56,6 +86,7 @@ void DispatchMsg()
 void Window_Update()
 {
 	DispatchMsg();
+	//TODO: SwapBuffers
 }
 
 void Window_Shutdown()
@@ -76,7 +107,7 @@ uint32_t Window_GetHeight()
 void Window_SetWindowTitle(const char* title)
 {
 	char temp[256];
-	sprintf_s(temp, 256, "%s - %s", s_WindowState.Props.Title, title);
+	sprintf_s(temp, 256, "%s - %s", title, s_WindowState.Props.Title);
 	SetWindowTextA(s_WindowState.WndHandle, temp);
 }
 

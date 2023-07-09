@@ -9,5 +9,4 @@ struct Application
     void(*Ininialize)(Application* appInst);
     void(*Shutdown)(Application* appInst);
     void(*Update)(float timeStep);
-    //void(*OnEvent)(Event* e);
 };

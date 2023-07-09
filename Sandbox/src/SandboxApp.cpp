@@ -1,6 +1,7 @@
+﻿#include "DX2D.h"
 #include "EntryPoint.h"
-#include "Core/ApplicationTypes.h"
-#include "DX2D.h"
+
+#include <stdio.h>
 
 void Sandbox_Ininialize(Application* appInst)
 {
@@ -11,7 +12,9 @@ void Sandbox_Ininialize(Application* appInst)
 
 void Sandbox_Update(float timeStep)
 {
-	//CORE_LOG_INFO("Test Msg");
+	static char buffer[32];
+	sprintf(buffer, "%f", timeStep);
+	Window_SetWindowTitle(buffer);
 }
 
 void Sandbox_Shutdown(Application* appInst)
