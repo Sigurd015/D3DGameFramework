@@ -1,6 +1,6 @@
-# 2D_Batch_Renderer
+# BulletMayhem
 
-A Tiny DX11 2D Batch Renderer
+A 2D Game made with DX11
 
 ## Getting Started
 
