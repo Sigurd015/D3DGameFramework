@@ -38,7 +38,8 @@ void Application_Ininialize(Application* appInst)
 {
 	s_AppState.AppInst = appInst;
 
-	WindowProps props = { appInst->Spec.Name,1920,1080,true,
+	WindowProps props = { appInst->Spec.Name,appInst->Spec.Width,appInst->Spec.Height,
+		appInst->Spec.VSync,appInst->Spec.Resizable,appInst->Spec.Maximized,
 		Application_Resize ,Application_Close };
 
 	Window_Create(&props);

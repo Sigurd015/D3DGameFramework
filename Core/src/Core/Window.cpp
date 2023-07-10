@@ -41,6 +41,7 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	}
 	case WM_CLOSE:
 	{
+		Window_Shutdown();
 		WindowProps& data = s_WindowState.Props;
 		data.WindowClose();
 		return 0;
@@ -60,11 +61,19 @@ void Window_Create(const WindowProps* props)
 	if (!RegisterClassEx(&wndClass))
 		CORE_LOG_ERROR("RegisterClass-Failed");
 
+	DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+
+	if (s_WindowState.Props.Maximized)
+		style |= WS_MAXIMIZE;
+	
+	if (s_WindowState.Props.Resizable)
+		style |= WS_THICKFRAME;
+
 	RECT rect = { 0, 0, s_WindowState.Props.Width, s_WindowState.Props.Height };
-	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
+	AdjustWindowRect(&rect, style, false);
 
 	s_WindowState.WndHandle = CreateWindowEx(0, wndClass.lpszClassName, CA2T(s_WindowState.Props.Title),
-		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+		style, CW_USEDEFAULT, CW_USEDEFAULT,
 		rect.right - rect.left, rect.bottom - rect.top, nullptr, nullptr, wndClass.hInstance, nullptr);
 
 	if (!s_WindowState.WndHandle)
@@ -121,7 +130,7 @@ bool Window_IsVSync()
 	return s_WindowState.Props.VSync;
 }
 
-void* Window_GetWindowHandler()
+void* Window_GetWindowHandle()
 {
-	return s_WindowState.WndHandle;
+	return &s_WindowState.WndHandle;
 }

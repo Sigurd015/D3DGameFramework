@@ -1,4 +1,4 @@
-project "Sandbox"
+project "Game"
 	language "C"
 	staticruntime "on"
 
@@ -43,18 +43,18 @@ project "Sandbox"
 
 	filter "configurations:Debug"
 		kind "ConsoleApp"
-		defines "DX2D_DEBUG"
+		defines "BM_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Release"
 		kind "ConsoleApp"
-		defines "DX2D_RELEASE"
+		defines "BM_RELEASE"
 		runtime "Release"
 		optimize "on"
 
 	filter "configurations:Dist"
 		kind "WindowedApp"
-		defines "DX2D_DIST"
+		defines "BM_DIST"
 		runtime "Release"
 		optimize "on"

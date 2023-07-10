@@ -7,6 +7,8 @@ struct WindowProps
 	uint32_t Height;
 
 	bool VSync;
+	bool Resizable;
+	bool Maximized;
 	void (*WindowResize)(float width, float height);
 	void (*WindowClose)();
 };
@@ -19,4 +21,4 @@ uint32_t Window_GetHeight();
 void Window_SetWindowTitle(const char* title);
 void Window_SetVSync(bool enable);
 bool Window_IsVSync();
-void* Window_GetWindowHandler();
+void* Window_GetWindowHandle();

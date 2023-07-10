@@ -1,6 +1,6 @@
-workspace "2D_Batch_Renderer"
+workspace "BulletMayhem"
 	architecture "x86_64"
-	startproject "Sandbox"
+	startproject "Game"
 
 	configurations
 	{
@@ -18,5 +18,5 @@ outputdir = "%{wks.location}/build/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architect
 intdir = "%{wks.location}/build/int/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 include "Core"
-include "Sandbox"
+include "Game"
 
