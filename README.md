@@ -1,6 +1,6 @@
-# BulletMayhem
+# BloodVeil
 
-A 2D Game made with DX11
+A 2D Bloodborne demake made with DirectX 11
 
 ## Getting Started
 

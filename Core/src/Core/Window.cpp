@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Window.h"
+#include "Renderer/RendererAPI.h"
 
 #include <Windows.h>
 #include <atlbase.h>
@@ -10,7 +11,7 @@ struct Window_State
 	WindowProps Props;
 	HWND WndHandle;
 };
-Window_State s_WindowState;
+static Window_State s_WindowState;
 
 LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -18,7 +19,7 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_SIZE:
 	{
-		static bool first = true;  //TODO:The first WM_SIZE call before RenderingContext_Ininialize() can crash the app
+		static bool first = true;  //TODO:The first WM_SIZE call before RenderingContext Ininialized can crash the app
 		if (first)
 		{
 			first = false;
@@ -54,20 +55,26 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 void Window_Create(const WindowProps* props)
 {
 	s_WindowState.Props = *props;
-	WNDCLASSEX wndClass = { sizeof(wndClass), CS_OWNDC,
+	WNDCLASSEX wndClass = { sizeof(WNDCLASSEX), CS_OWNDC,
 			WndProc, 0, 0, GetModuleHandle(nullptr), nullptr,
 			nullptr, nullptr, nullptr, L"DXR", nullptr };
 
 	if (!RegisterClassEx(&wndClass))
 		CORE_LOG_ERROR("RegisterClass-Failed");
 
-	DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+	DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU;
 
-	if (s_WindowState.Props.Maximized)
-		style |= WS_MAXIMIZE;
-	
+	if (s_WindowState.Props.Minimizable)
+		style |= WS_MINIMIZEBOX;
+
+	if (s_WindowState.Props.Maximizable)
+		style |= WS_MAXIMIZEBOX;
+
 	if (s_WindowState.Props.Resizable)
 		style |= WS_THICKFRAME;
+
+	if (s_WindowState.Props.MaximizedOnStart)
+		style |= WS_MAXIMIZE;
 
 	RECT rect = { 0, 0, s_WindowState.Props.Width, s_WindowState.Props.Height };
 	AdjustWindowRect(&rect, style, false);
@@ -78,6 +85,8 @@ void Window_Create(const WindowProps* props)
 
 	if (!s_WindowState.WndHandle)
 		CORE_LOG_ERROR("CreateWindow-Failed");
+
+	RendererContext_Initialize(&s_WindowState.WndHandle);
 
 	ShowWindow(s_WindowState.WndHandle, SW_SHOW);
 }
@@ -95,7 +104,8 @@ void DispatchMsg()
 void Window_Update()
 {
 	DispatchMsg();
-	//TODO: SwapBuffers
+
+	RendererContext_SwapBuffer(s_WindowState.Props.VSync);
 }
 
 void Window_Shutdown()

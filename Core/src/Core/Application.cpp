@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "ApplicationTypes.h"
 #include "Window.h"
+#include "Renderer/RendererAPI.h"
 
 #include <time.h>
 
@@ -31,7 +32,7 @@ void Application_Resize(float width, float height)
 	}
 
 	s_AppState.Minimized = false;
-	//TODO: Resize
+	RendererAPI_SetViewport(width, height);
 }
 
 void Application_Ininialize(Application* appInst)
@@ -39,10 +40,12 @@ void Application_Ininialize(Application* appInst)
 	s_AppState.AppInst = appInst;
 
 	WindowProps props = { appInst->Spec.Name,appInst->Spec.Width,appInst->Spec.Height,
-		appInst->Spec.VSync,appInst->Spec.Resizable,appInst->Spec.Maximized,
+		appInst->Spec.VSync,appInst->Spec.Resizable,appInst->Spec.Maximizable,appInst->Spec.Minimizable,appInst->Spec.MaximizedOnStart,
 		Application_Resize ,Application_Close };
 
 	Window_Create(&props);
+
+	RendererAPI_Initialize();
 
 	s_AppState.AppInst->Ininialize(s_AppState.AppInst);
 }
@@ -56,7 +59,7 @@ void Application_Run()
 		s_AppState.LastFrameTime = currentTime;
 
 		if (!s_AppState.Minimized)
-		{
+		{	
 			s_AppState.AppInst->Update(timestep);
 		}
 

@@ -8,7 +8,10 @@ struct WindowProps
 
 	bool VSync;
 	bool Resizable;
-	bool Maximized;
+	bool Maximizable = false;
+	bool Minimizable = false;
+	bool MaximizedOnStart = false;
+
 	void (*WindowResize)(float width, float height);
 	void (*WindowClose)();
 };

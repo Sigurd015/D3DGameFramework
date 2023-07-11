@@ -2,7 +2,6 @@
 
 #include "Core/Application.h"
 #include "Core/Log.h"
-#include "Core/ApplicationTypes.h"
 
 extern void CreateApplication(Application* appInst, ApplicationCommandLineArgs args);
 
@@ -17,7 +16,7 @@ int Main(int argc, char** argv)
 	return 0;
 }
 
-#ifdef DX2D_DIST
+#ifdef BV_DIST
 #include <Windows.h>
 
 int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow)

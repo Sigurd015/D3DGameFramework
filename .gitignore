@@ -4,4 +4,5 @@ build/
 *.filters
 *.vcxproj
 *.sln
-Sandbox/assets/shaders/cache
+Game/assets/shaders/cache
+Game/log.txt

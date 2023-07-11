@@ -12,12 +12,15 @@ struct ApplicationCommandLineArgs
 
 struct ApplicationSpecification
 {
-	char* Name = "DX2D App";
+	char* Name = "App";
 	uint32_t Width = 1920;
 	uint32_t Height = 1080;
 	bool Resizable = false;
-	bool Maximized = false;
+	bool Maximizable = false;
+	bool Minimizable = false;
+	bool MaximizedOnStart = false;
 	bool VSync = true;
+	
 	ApplicationCommandLineArgs CommandLineArgs;
 };
 

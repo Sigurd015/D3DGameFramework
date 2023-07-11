@@ -1,4 +1,4 @@
-workspace "BulletMayhem"
+workspace "BloodVeil"
 	architecture "x86_64"
 	startproject "Game"
 

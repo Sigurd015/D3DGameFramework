@@ -1,5 +1,5 @@
 #pragma once
-enum MouseCodes
+enum MouseCode
 {
 	ButtonLeft = 0x0001,
 	ButtonRight = 0x0002,

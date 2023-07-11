@@ -1,5 +1,5 @@
 #pragma once
-enum KeyCodes
+enum KeyCode
 {
 	/* Alphanumeric keys */
 	A = 0x41,
