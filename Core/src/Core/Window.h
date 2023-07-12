@@ -6,8 +6,8 @@ struct WindowProps
 	uint32_t Width;
 	uint32_t Height;
 
-	bool VSync;
-	bool Resizable;
+	bool VSync = true;
+	bool Resizable = false;
 	bool Maximizable = false;
 	bool Minimizable = false;
 	bool MaximizedOnStart = false;
