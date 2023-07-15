@@ -1,8 +1,10 @@
 .vs/
 build/
+packages/
 *.user
 *.filters
 *.vcxproj
 *.sln
+*.config
 Game/assets/shaders/cache
 Game/log.txt

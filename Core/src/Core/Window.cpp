@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Window.h"
-#include "Renderer/RendererAPI.h"
+#include "Renderer/RendererContext.h"
 
 #include <Windows.h>
 #include <atlbase.h>
@@ -60,7 +60,7 @@ void Window_Create(const WindowProps* props)
 			nullptr, nullptr, nullptr, L"DXR", nullptr };
 
 	if (!RegisterClassEx(&wndClass))
-		CORE_LOG_ERROR("RegisterClass-Failed");
+		CORE_LOG_ERROR("RegisterClass - Failed");
 
 	DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU;
 
@@ -84,7 +84,7 @@ void Window_Create(const WindowProps* props)
 		rect.right - rect.left, rect.bottom - rect.top, nullptr, nullptr, wndClass.hInstance, nullptr);
 
 	if (!s_WindowState.WndHandle)
-		CORE_LOG_ERROR("CreateWindow-Failed");
+		CORE_LOG_ERROR("CreateWindow - Failed");
 
 	RendererContext_Initialize(&s_WindowState.WndHandle);
 

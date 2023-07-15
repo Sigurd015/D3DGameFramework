@@ -5,9 +5,81 @@
 
 void Game_Ininialize(Application* appInst)
 {
-	CORE_LOG_INFO("Test Msg");
-	CORE_LOG_WARN("Test Msg");
-	CORE_LOG_ERROR("Test Msg");
+	APP_LOG_INFO("Test Msg");
+	APP_LOG_INFO("Test Msg");
+	APP_LOG_INFO("Test Msg");
+
+	{
+		List list;
+		List_Create(&list);
+
+		for (uint32_t i = 0; i < 1500; i++)
+		{
+			int* newInt = (int*)malloc(sizeof(int));
+			*newInt = i;
+			List_Add(&list, newInt);
+		}
+
+		for (uint32_t i = 0; i < List_Size(&list); i++)
+		{
+			char tempChar[256];
+			sprintf_s(tempChar, 256, "%d", *(int*)List_Get(&list, i));
+			APP_LOG_INFO(tempChar);
+		}
+
+		List_Clear(&list);
+
+		for (uint32_t i = 0; i < 800; i++)
+		{
+			int* newInt = (int*)malloc(sizeof(int));
+			*newInt = i;
+			List_Add(&list, newInt);
+		}
+
+		for (uint32_t i = 0; i < List_Size(&list); i++)
+		{
+			char tempChar[256];
+			sprintf_s(tempChar, 256, "%d", *(int*)List_Get(&list, i));
+			APP_LOG_INFO(tempChar);
+		}
+
+		List_Free(&list);
+	}
+
+	{
+		List list;
+		List_Create(&list);
+
+		for (uint32_t i = 0; i < 1500; i++)
+		{
+			char tempChar[256];
+			sprintf_s(tempChar, 256, "the number is %d", i);
+			char* newString = strdup(tempChar);
+			List_Add(&list, newString);
+		}
+
+		for (uint32_t i = 0; i < List_Size(&list); i++)
+		{
+			APP_LOG_INFO((char*)List_Get(&list, i));
+		}
+
+		List_Clear(&list);
+
+		for (uint32_t i = 0; i < 800; i++)
+		{
+			char tempChar[256];
+			sprintf_s(tempChar, 256, "the number is %d", i);
+			char* newString = strdup(tempChar);
+			List_Add(&list, newString);
+		}
+
+		for (uint32_t i = 0; i < List_Size(&list); i++)
+		{
+			APP_LOG_INFO((char*)List_Get(&list, i));
+		}
+
+		List_Free(&list);
+	}
 }
 
 void Game_Update(float timeStep)

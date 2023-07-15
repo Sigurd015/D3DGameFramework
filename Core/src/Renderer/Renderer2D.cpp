@@ -1,6 +1,12 @@
 #include "pch.h"
 #include "Renderer2D.h"
 #include "RendererAPI.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+#include "Shader.h"
+#include "Pipeline.h"
+#include "ConstantBuffer.h"
+#include "Texture.h"
 
 struct QuadVertex
 {
@@ -126,13 +132,9 @@ void Renderer2D_Initialize()
 		IndexBuffer_Create(&s_Data.QuadIndexBuffer, indices, s_Data.MaxIndices);
 		delete[] indices;
 
-		//PipelineSpecification pipelineSpec;
-		//pipelineSpec.Layout = layout;
-		//pipelineSpec.Shader = Renderer::GetShader("Renderer2D_Quad");
-		//pipelineSpec.Topology = PrimitiveTopology::Triangles;
-
-		//s_Data->QuadPipeline = Pipeline::Create(pipelineSpec);
-		//s_Data->QuadMaterial = Material::Create(pipelineSpec.Shader);
+		Shader shader;
+		Shader_Create(&shader, "Renderer2D_Quad");
+		Pipeline_Create(&s_Data.QuadPipeline, &shader, &layout);
 
 		s_Data.QuadVertexBufferBase = new QuadVertex[s_Data.MaxVertices];
 	}
@@ -153,13 +155,9 @@ void Renderer2D_Initialize()
 
 		s_Data.CircleIndexBuffer = s_Data.QuadIndexBuffer;
 
-		/*PipelineSpecification pipelineSpec;
-		pipelineSpec.Layout = layout;
-		pipelineSpec.Shader = Renderer::GetShader("Renderer2D_Circle");
-		pipelineSpec.Topology = PrimitiveTopology::Triangles;
-
-		s_Data->CirclePipeline = Pipeline::Create(pipelineSpec);
-		s_Data->CircleMaterial = Material::Create(pipelineSpec.Shader);*/
+		Shader shader;
+		Shader_Create(&shader, "Renderer2D_Circle");
+		Pipeline_Create(&s_Data.CirclePipeline, &shader, &layout);
 
 		s_Data.CircleVertexBufferBase = new CircleVertex[s_Data.MaxVertices];
 	}
@@ -175,13 +173,9 @@ void Renderer2D_Initialize()
 		VertexBuffer_Create(&s_Data.LineVertexBuffer, s_Data.MaxVertices * sizeof(LineVertex));
 		VertexBuffer_SetLayout(&s_Data.LineVertexBuffer, &layout);
 
-		//PipelineSpecification pipelineSpec;
-		//pipelineSpec.Layout = layout;
-		//pipelineSpec.Shader = Renderer::GetShader("Renderer2D_Line");
-		//pipelineSpec.Topology = PrimitiveTopology::Lines;
-
-		//s_Data->LinePipeline = Pipeline::Create(pipelineSpec);
-		//s_Data->LineMaterial = Material::Create(pipelineSpec.Shader);
+		Shader shader;
+		Shader_Create(&shader, "Renderer2D_Line");
+		Pipeline_Create(&s_Data.LinePipeline, &shader, &layout);
 
 		s_Data.LineVertexBufferBase = new LineVertex[s_Data.MaxVertices];
 	}
@@ -215,13 +209,9 @@ void Renderer2D_Initialize()
 		IndexBuffer_Create(&s_Data.TextIndexBuffer, indices, s_Data.MaxIndices);
 		delete[] indices;
 
-		/*PipelineSpecification pipelineSpec;
-		pipelineSpec.Layout = layout;
-		pipelineSpec.Shader = Renderer::GetShader("Renderer2D_Text");
-		pipelineSpec.Topology = PrimitiveTopology::Triangles;
-
-		s_Data->TextPipeline = Pipeline::Create(pipelineSpec);
-		s_Data->TextMaterial = Material::Create(pipelineSpec.Shader);*/
+		Shader shader;
+		Shader_Create(&shader, "Renderer2D_Text");
+		Pipeline_Create(&s_Data.TextPipeline, &shader, &layout);
 
 		s_Data.TextVertexBufferBase = new TextVertex[s_Data.MaxVertices];
 	}
@@ -234,7 +224,8 @@ void Renderer2D_Initialize()
 }
 
 void Renderer2D_Shutdown()
-{}
+{
+}
 
 void Renderer2D_BeginScene()
 {}
@@ -242,5 +233,5 @@ void Renderer2D_BeginScene()
 void Renderer2D_EndScene()
 {}
 
-void Renderer2D_DrawQuad(const Vec2* position, const Vec2* size, const Vec4* color)
+void Renderer2D_DrawQuad()
 {}

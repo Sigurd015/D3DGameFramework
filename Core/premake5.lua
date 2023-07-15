@@ -2,7 +2,8 @@ project "Core"
 	kind "StaticLib"
 	language "C"
 	staticruntime "on"
-
+	nuget { "directxtk_desktop_win10:2023.4.28.1" }
+	
 	targetdir (outputdir .. "/%{prj.name}")
 	objdir (intdir .. "/%{prj.name}")
 

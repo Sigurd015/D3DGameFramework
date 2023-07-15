@@ -3,7 +3,6 @@
 #include "ApplicationTypes.h"
 #include "Window.h"
 #include "Renderer/RendererAPI.h"
-#include "Renderer/Renderer2D.h"
 
 #include <time.h>
 
@@ -48,8 +47,6 @@ void Application_Ininialize(Application* appInst)
 
 	RendererAPI_Initialize();
 
-	Renderer2D_Initialize();
-
 	s_AppState.AppInst->Ininialize(s_AppState.AppInst);
 }
 
@@ -72,7 +69,6 @@ void Application_Run()
 
 void Application_Shutdown()
 {
-	Renderer2D_Shutdown();
-
+	RendererAPI_Shutdown();
 	s_AppState.AppInst->Shutdown(s_AppState.AppInst);
 }
