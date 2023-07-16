@@ -77,7 +77,6 @@ struct Renderer2DData
 	Texture2D Textures[32];// 0 is white texture
 	uint32_t TextureSlotIndex = 1;
 	Texture2D FontAtlasTexture;
-	Texture2D WhiteTexture;
 
 	Vec4 QuadVertexPositions[4] =
 	{ { -0.5f, -0.5f, 0.0f, 1.0f },
@@ -134,7 +133,11 @@ void Renderer2D_Initialize()
 
 		Shader shader;
 		Shader_Create(&shader, "Renderer2D_Quad");
-		Pipeline_Create(&s_Data.QuadPipeline, &shader, &layout);
+
+		PipelineSpecification spec;
+		spec.Layout = &layout;
+		spec.Shader = &shader;
+		Pipeline_Create(&s_Data.QuadPipeline, &spec);
 
 		s_Data.QuadVertexBufferBase = new QuadVertex[s_Data.MaxVertices];
 	}
@@ -157,7 +160,11 @@ void Renderer2D_Initialize()
 
 		Shader shader;
 		Shader_Create(&shader, "Renderer2D_Circle");
-		Pipeline_Create(&s_Data.CirclePipeline, &shader, &layout);
+
+		PipelineSpecification spec;
+		spec.Layout = &layout;
+		spec.Shader = &shader;
+		Pipeline_Create(&s_Data.CirclePipeline, &spec);
 
 		s_Data.CircleVertexBufferBase = new CircleVertex[s_Data.MaxVertices];
 	}
@@ -175,7 +182,11 @@ void Renderer2D_Initialize()
 
 		Shader shader;
 		Shader_Create(&shader, "Renderer2D_Line");
-		Pipeline_Create(&s_Data.LinePipeline, &shader, &layout);
+
+		PipelineSpecification spec;
+		spec.Layout = &layout;
+		spec.Shader = &shader;
+		Pipeline_Create(&s_Data.LinePipeline, &spec);
 
 		s_Data.LineVertexBufferBase = new LineVertex[s_Data.MaxVertices];
 	}
@@ -211,20 +222,52 @@ void Renderer2D_Initialize()
 
 		Shader shader;
 		Shader_Create(&shader, "Renderer2D_Text");
-		Pipeline_Create(&s_Data.TextPipeline, &shader, &layout);
+
+		PipelineSpecification spec;
+		spec.Layout = &layout;
+		spec.Shader = &shader;
+		Pipeline_Create(&s_Data.TextPipeline, &spec);
 
 		s_Data.TextVertexBufferBase = new TextVertex[s_Data.MaxVertices];
 	}
 
 	// Set WhiteTexture slots to 0
-	//s_Data->WhiteTexture = Renderer::GetTexture("White");
-	//s_Data->TextureSlots[0] = s_Data->WhiteTexture;
-	//
+	TextureSpecification spec;
+	spec.Width = 1;
+	spec.Height = 1;
+	spec.Format = ImageFormat::RGBA8;
+
+	Texture2D_Create(&s_Data.Textures[0], &spec);
+	uint32_t whiteTextureData = 0xffffffff;
+	Texture2D_SetData(&s_Data.Textures[0], &whiteTextureData, sizeof(uint32_t));
+
 	ConstantBuffer_Create(&s_Data.CameraConstantBuffer, sizeof(Renderer2DData::CameraData), 0);
 }
 
 void Renderer2D_Shutdown()
 {
+	VertexBuffer_Release(&s_Data.QuadVertexBuffer);
+	VertexBuffer_Release(&s_Data.CircleVertexBuffer);
+	VertexBuffer_Release(&s_Data.LineVertexBuffer);
+	VertexBuffer_Release(&s_Data.TextVertexBuffer);
+
+	IndexBuffer_Release(&s_Data.QuadIndexBuffer);
+	IndexBuffer_Release(&s_Data.CircleIndexBuffer);
+	IndexBuffer_Release(&s_Data.TextIndexBuffer);
+
+	Pipeline_Release(&s_Data.QuadPipeline);
+	Pipeline_Release(&s_Data.CirclePipeline);
+	Pipeline_Release(&s_Data.LinePipeline);
+
+	ConstantBuffer_Release(&s_Data.CameraConstantBuffer);
+
+	for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
+		Texture2D_Release(&s_Data.Textures[i]);
+
+	delete[] s_Data.QuadVertexBufferBase;
+	delete[] s_Data.CircleVertexBufferBase;
+	delete[] s_Data.LineVertexBufferBase;
+	delete[] s_Data.TextVertexBufferBase;
 }
 
 void Renderer2D_BeginScene()

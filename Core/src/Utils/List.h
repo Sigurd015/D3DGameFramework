@@ -4,7 +4,6 @@
 struct List
 {
 	void** Data = nullptr;
-	uint32_t Count = 0;
 	uint32_t Index = 0;
 	uint32_t Capacity = 50;
 };

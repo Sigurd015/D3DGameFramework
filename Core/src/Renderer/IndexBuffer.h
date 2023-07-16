@@ -11,3 +11,4 @@ struct IndexBuffer
 
 void IndexBuffer_Create(IndexBuffer* out, void* indices, uint32_t count);
 void IndexBuffer_Bind(IndexBuffer* out);
+void IndexBuffer_Release(IndexBuffer* out);

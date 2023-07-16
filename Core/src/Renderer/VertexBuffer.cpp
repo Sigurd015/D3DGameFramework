@@ -66,3 +66,8 @@ void VertexBuffer_Bind(VertexBuffer* out)
 	const UINT offset = 0;
 	RendererContext_GetDeviceContext()->IASetVertexBuffers(0, 1, &out->Buffer, &out->Stride, &offset);
 }
+
+void VertexBuffer_Release(VertexBuffer* out)
+{
+	out->Buffer->Release();
+}

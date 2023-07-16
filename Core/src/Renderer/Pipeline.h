@@ -9,15 +9,18 @@
 struct PipelineSpecification
 {
 	Shader* Shader;
-	VertexBufferLayout Layout;
+	VertexBufferLayout* Layout;
 };
 
 struct Pipeline
 {
+	PipelineSpecification Spec;
+
 	Shader* Shader;
 	VertexBufferLayout* Layout;
 	ID3D11InputLayout* InputLayout;
 };
 
-void Pipeline_Create(Pipeline* out, Shader* shader, VertexBufferLayout* layout);
+void Pipeline_Create(Pipeline* out, const PipelineSpecification* spec);
 void Pipeline_Bind(Pipeline* out);
+void Pipeline_Release(Pipeline* out);

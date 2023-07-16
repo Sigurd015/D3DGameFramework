@@ -31,3 +31,10 @@ void Shader_Bind(Shader* out)
 	RendererContext_GetDeviceContext()->VSSetShader(out->VertexShader, nullptr, 0);
 	RendererContext_GetDeviceContext()->PSSetShader(out->PixelShader, nullptr, 0);
 }
+
+void Shader_Release(Shader* out)
+{
+	out->VertexShaderBlob->Release();
+	out->VertexShader->Release();
+	out->PixelShader->Release();
+}

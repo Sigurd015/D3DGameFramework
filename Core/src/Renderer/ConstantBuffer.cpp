@@ -32,3 +32,8 @@ void ConstantBuffer_Bind(ConstantBuffer* out)
 	RendererContext_GetDeviceContext()->VSSetConstantBuffers(out->BindSlot, 1, &out->Buffer);
 	RendererContext_GetDeviceContext()->PSSetConstantBuffers(out->BindSlot, 1, &out->Buffer);
 }
+
+void ConstantBuffer_Release(ConstantBuffer* out)
+{
+	out->Buffer->Release();
+}

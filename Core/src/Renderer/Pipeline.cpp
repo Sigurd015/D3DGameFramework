@@ -22,19 +22,20 @@ static DXGI_FORMAT ShaderDataTypeToDX11BaseType(ShaderDataType type)
 	return DXGI_FORMAT_UNKNOWN;
 }
 
-void Pipeline_Create(Pipeline* out, Shader* shader, VertexBufferLayout* layout)
+void Pipeline_Create(Pipeline* out, const PipelineSpecification* spec)
 {
-	out->Layout = layout;
-	out->Shader = shader;
+	out->Spec = *spec;
+	out->Layout = spec->Layout;
+	out->Shader = spec->Shader;
 
 	List temp;
 	List_Create(&temp);
-	for (size_t i = 0; i < layout->ElementCount; i++)
+	for (size_t i = 0; i < out->Layout->ElementCount; i++)
 	{
 		D3D11_INPUT_ELEMENT_DESC* tempDesc = (D3D11_INPUT_ELEMENT_DESC*)malloc(sizeof(D3D11_INPUT_ELEMENT_DESC));
 		*tempDesc = {
-			layout->Elements[i].Name,0,ShaderDataTypeToDX11BaseType(layout->Elements[i].Type),
-			0,(UINT)layout->Elements[i].Offset ,D3D11_INPUT_PER_VERTEX_DATA ,0 };
+			out->Layout->Elements[i].Name,0,ShaderDataTypeToDX11BaseType(out->Layout->Elements[i].Type),
+			0,(UINT)out->Layout->Elements[i].Offset ,D3D11_INPUT_PER_VERTEX_DATA ,0 };
 		List_Add(&temp, tempDesc);
 	}
 
@@ -45,8 +46,8 @@ void Pipeline_Create(Pipeline* out, Shader* shader, VertexBufferLayout* layout)
 	}
 
 	BV_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateInputLayout(
-		tempList, (UINT)List_Size(&temp), shader->VertexShaderBlob->GetBufferPointer(),
-		shader->VertexShaderBlob->GetBufferSize(), &out->InputLayout));
+		tempList, (UINT)List_Size(&temp), out->Shader->VertexShaderBlob->GetBufferPointer(),
+		out->Shader->VertexShaderBlob->GetBufferSize(), &out->InputLayout));
 
 	free(tempList);
 	List_Free(&temp);
@@ -55,4 +56,10 @@ void Pipeline_Create(Pipeline* out, Shader* shader, VertexBufferLayout* layout)
 void Pipeline_Bind(Pipeline* out)
 {
 	RendererContext_GetDeviceContext()->IASetInputLayout(out->InputLayout);
+}
+
+void Pipeline_Release(Pipeline* out)
+{
+	out->InputLayout->Release();
+	Shader_Release(out->Shader);
 }

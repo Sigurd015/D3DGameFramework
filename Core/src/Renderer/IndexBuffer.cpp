@@ -24,3 +24,8 @@ void IndexBuffer_Bind(IndexBuffer* out)
 {
 	RendererContext_GetDeviceContext()->IASetIndexBuffer(out->Buffer, DXGI_FORMAT_R32_UINT, 0);
 }
+
+void IndexBuffer_Release(IndexBuffer* out)
+{
+	out->Buffer->Release();
+}

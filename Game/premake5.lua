@@ -30,7 +30,7 @@ project "Game"
 
 	links
 	{
-		"Core"
+		"Core",
 	}
 
 	postbuildcommands 

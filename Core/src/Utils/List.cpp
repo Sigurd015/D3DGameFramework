@@ -12,13 +12,12 @@ void List_Create(List* out)
 		return;
 	}
 
-	out->Count = 0;
 	out->Index = 0;
 }
 
 void* List_Get(List* out, uint32_t index)
 {
-	if (index >= out->Count)
+	if (index >= out->Index)
 	{
 		return nullptr;
 	}
@@ -27,7 +26,7 @@ void* List_Get(List* out, uint32_t index)
 
 void List_Set(List* out, uint32_t index, void* data)
 {
-	if (index >= out->Count)
+	if (index >= out->Index)
 	{
 		return;
 	}
@@ -36,7 +35,7 @@ void List_Set(List* out, uint32_t index, void* data)
 
 void List_Add(List* out, void* data)
 {
-	if (out->Count + 1 > out->Capacity)
+	if (out->Index + 1 > out->Capacity)
 	{
 		out->Capacity *= 2;
 		out->Data = (void**)realloc(out->Data, out->Capacity * sizeof(void*));
@@ -49,34 +48,31 @@ void List_Add(List* out, void* data)
 
 	out->Data[out->Index] = data;
 	out->Index++;
-	out->Count++;
 }
 
 void List_RemoveAt(List* out, uint32_t index)
 {
-	if (index >= out->Count)
+	if (index >= out->Index)
 	{
 		return;
 	}
 
-	for (uint32_t i = index; i < out->Count - 1; i++)
+	for (uint32_t i = index; i < out->Index - 1; i++)
 	{
 		out->Data[i] = out->Data[i + 1];
 	}
 
 	out->Index--;
-	out->Count--;
 }
 
 void List_Clear(List* out)
 {
-	out->Count = 0;
 	out->Index = 0;
 }
 
 void List_Free(List* out)
 {
-	for (size_t i = 0; i < out->Count; i++)
+	for (size_t i = 0; i < out->Index; i++)
 	{
 		free(out->Data[i]);
 	}
@@ -85,5 +81,5 @@ void List_Free(List* out)
 
 uint32_t List_Size(List* out)
 {
-	return out->Count;
+	return out->Index;
 }

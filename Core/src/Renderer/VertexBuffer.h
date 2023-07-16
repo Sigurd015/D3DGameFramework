@@ -7,7 +7,7 @@
 
 enum ShaderDataType
 {
-	None = 0, Float, Float2, Float3, Float4, Int, Int2, Int3, Int4, Bool
+	NoneType = 0, Float, Float2, Float3, Float4, Int, Int2, Int3, Int4, Bool
 };
 
 struct VertexBufferLayoutEmelent
@@ -38,3 +38,4 @@ void VertexBuffer_Create(VertexBuffer* out, uint32_t size);
 void VertexBuffer_SetData(VertexBuffer* out, void* data, uint32_t size);
 void VertexBuffer_SetLayout(VertexBuffer* out, VertexBufferLayout* layout);
 void VertexBuffer_Bind(VertexBuffer* out);
+void VertexBuffer_Release(VertexBuffer* out);

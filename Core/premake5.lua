@@ -2,7 +2,6 @@ project "Core"
 	kind "StaticLib"
 	language "C"
 	staticruntime "on"
-	nuget { "directxtk_desktop_win10:2023.4.28.1" }
 	
 	targetdir (outputdir .. "/%{prj.name}")
 	objdir (intdir .. "/%{prj.name}")
@@ -19,6 +18,7 @@ project "Core"
 	includedirs
 	{
 		"src",
+		"%{IncludeDir.DirectXTK}",
 	}
 
 	links
@@ -35,12 +35,27 @@ project "Core"
 		runtime "Debug"
 		symbols "on"
 
+		links
+		{
+			"%{Library.DirectXTK_Debug}"
+		}
+
 	filter "configurations:Release"
 		defines "BV_RELEASE"	
 		runtime "Release"
 		optimize "on"
 
+		links
+		{
+			"%{Library.DirectXTK_Release}"
+		}
+
 	filter "configurations:Dist"
 		defines "BV_DIST"
 		runtime "Release"
 		optimize "on"
+
+		links
+		{
+			"%{Library.DirectXTK_Release}"
+		}
