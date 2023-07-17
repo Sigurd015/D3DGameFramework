@@ -19,6 +19,6 @@ VertexOutput main(VertexInput Input)
 {
     VertexOutput Output;
     Output.Color = Input.a_Color;
-    Output.Pos = mul(u_ViewProjection,float4(Input.a_Position, 1.0f));
+    Output.Pos = mul(float4(Input.a_Position, 1.0f), u_ViewProjection);
     return Output;
 }

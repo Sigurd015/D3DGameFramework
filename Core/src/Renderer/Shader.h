@@ -11,6 +11,6 @@ struct Shader
 	ID3DBlob* VertexShaderBlob;
 };
 
-void Shader_Create(Shader* out, const char* name);
-void Shader_Bind(Shader* out);
-void Shader_Release(Shader* out);
+void Shader_Create(Shader& out, const char* name);
+void Shader_Bind(const Shader& out);
+void Shader_Release(Shader& out);

@@ -30,9 +30,9 @@ struct Texture2D
 	DXGI_FORMAT DataFormat;
 };
 
-void Texture2D_Create(Texture2D* out, const char* path);
-void Texture2D_Create(Texture2D* out, const TextureSpecification* spec);
-void Texture2D_SetData(Texture2D* out, void* data, uint32_t size);
-void Texture2D_Bind(Texture2D* out, uint32_t slot);
-bool Texture2D_IsSame(Texture2D* out, Texture2D* other);
-void Texture2D_Release(Texture2D* out);
+void Texture2D_Create(Texture2D& out, const char* path);
+void Texture2D_Create(Texture2D& out, const TextureSpecification& spec);
+void Texture2D_SetData(Texture2D& out, void* data, uint32_t size);
+void Texture2D_Bind(const Texture2D& out, uint32_t slot);
+bool Texture2D_IsSame(const Texture2D& out, const Texture2D& other);
+void Texture2D_Release(Texture2D& out);

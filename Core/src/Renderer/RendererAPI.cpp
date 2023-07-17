@@ -78,9 +78,9 @@ void RendererAPI_SetViewport(uint32_t width, uint32_t height)
 	SetBuffer(width, height);
 }
 
-void RendererAPI_SetClearColor(const Vec4* color)
+void RendererAPI_SetClearColor(const Vec4& color)
 {
-	s_RendererAPIState.ClearColor = *color;
+	s_RendererAPIState.ClearColor = color;
 }
 
 void RendererAPI_Clear()
@@ -90,12 +90,21 @@ void RendererAPI_Clear()
 	s_RendererAPIState.DeviceContext->OMSetRenderTargets(1, &s_RendererAPIState.RenderTargetView, s_RendererAPIState.DepthStencilView);
 }
 
-void RendererAPI_DrawIndexed(const VertexBuffer* vertexBuffer, const IndexBuffer* indexBuffer, uint32_t indexCount)
+void RendererAPI_DrawIndexed(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, const Pipeline& pipeline, uint32_t indexCount)
 {
+	VertexBuffer_Bind(vertexBuffer);
+	IndexBuffer_Bind(indexBuffer);
+	Pipeline_Bind(pipeline);
 
+	s_RendererAPIState.DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	s_RendererAPIState.DeviceContext->DrawIndexed(indexCount, 0, 0);
 }
 
-void RendererAPI_DrawLines(const VertexBuffer* vertexBuffer, uint32_t vertexCount)
+void RendererAPI_DrawLines(const VertexBuffer& vertexBuffer, const Pipeline& pipeline, uint32_t vertexCount)
 {
+	VertexBuffer_Bind(vertexBuffer);
+	Pipeline_Bind(pipeline);
 
+	s_RendererAPIState.DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+	s_RendererAPIState.DeviceContext->Draw(vertexCount, 0);
 }

@@ -28,6 +28,6 @@ VertexOutput main(VertexInput Input)
     Output.TexCoord = Input.a_TexCoord;
     Output.TexIndex = Input.a_TexIndex;
     Output.TilingFactor = Input.a_TilingFactor;
-    Output.Pos = mul(u_ViewProjection, float4(Input.a_Position, 1.0f));
+    Output.Pos = mul(float4(Input.a_Position, 1.0f), u_ViewProjection);
     return Output;
 }

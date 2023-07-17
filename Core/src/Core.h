@@ -18,6 +18,12 @@
 #include "Renderer/Texture.h"
 #include "Renderer/Pipeline.h"
 
+//-------Scene----------
+#include "Scene/Scene.h"
+#include "Scene/SceneSerializer.h"
+#include "Scene/Components.h"
+#include "Scene/Entity.h"
+
 //-------Input----------
 #include "Input/Keycode.h"
 #include "Input/MouseCode.h"

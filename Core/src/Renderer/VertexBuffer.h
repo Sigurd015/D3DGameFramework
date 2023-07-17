@@ -32,10 +32,10 @@ struct VertexBuffer
 	VertexBufferLayout Layout;
 };
 
-void VertexBufferLayout_CalculateOffsetsAndStride(VertexBufferLayout* out);
+void VertexBufferLayout_CalculateOffsetsAndStride(VertexBufferLayout& out);
 
-void VertexBuffer_Create(VertexBuffer* out, uint32_t size);
-void VertexBuffer_SetData(VertexBuffer* out, void* data, uint32_t size);
-void VertexBuffer_SetLayout(VertexBuffer* out, VertexBufferLayout* layout);
-void VertexBuffer_Bind(VertexBuffer* out);
-void VertexBuffer_Release(VertexBuffer* out);
+void VertexBuffer_Create(VertexBuffer& out, uint32_t size);
+void VertexBuffer_SetData(VertexBuffer& out, void* data, uint32_t size);
+void VertexBuffer_SetLayout(VertexBuffer& out, VertexBufferLayout& layout);
+void VertexBuffer_Bind(const VertexBuffer& out);
+void VertexBuffer_Release(VertexBuffer& out);
