@@ -23,6 +23,6 @@ struct SceneCamera
 	Mat Projection = DirectX::XMMatrixIdentity();
 };
 
-void SceneCamera_Create(SceneCamera* out, const CameraSpecification* spec);
-const Mat* SceneCamera_GetProjectionMatrix(const SceneCamera* out);
-void SceneCamera_SetViewportSize(SceneCamera* out, uint32_t width, uint32_t height);
+void SceneCamera_Create(SceneCamera& out, const CameraSpecification& spec);
+const Mat& SceneCamera_GetProjectionMatrix(const SceneCamera& out);
+void SceneCamera_SetViewportSize(SceneCamera& out, uint32_t width, uint32_t height);

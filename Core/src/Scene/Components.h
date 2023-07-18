@@ -20,7 +20,7 @@ enum ComponentType
 
 struct TagComponent
 {
-	char* Tag;
+	char* Name;
 };
 
 struct TransformComponent
@@ -110,9 +110,10 @@ struct Entity;
 
 struct ScriptComponent
 {
-	void (*OnCreate)(Entity* entity);
-	void (*OnUpdate)(Entity* entity, float timeStep);
-	void (*OnDestroy)(Entity* entity);
+	void (*OnCreate)(Entity& entity);
+	void (*OnUpdate)(Entity& entity, float timeStep);
+	void (*OnDestroy)(Entity& entity);
+	void (*OnCollision)(Entity& entity, Entity& other);
 
 	Entity* Entity;
 };

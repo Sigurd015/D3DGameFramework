@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 
+SceneCamera camera;
+
 void Game_Ininialize(Application* appInst)
 {
 	APP_LOG_INFO("Test Msg");
@@ -83,6 +85,13 @@ void Game_Ininialize(Application* appInst)
 
 	Scene scene;
 	SceneSerializer_Deserialize(scene, "assets/test.txt");
+
+	CameraSpecification spec;
+	spec.ProjectionType = ProjectionType::Orthographic;
+	spec.AspectRatio = 16.0f / 9.0f;
+	spec.OrthographicSize = 5.0f;
+	spec.OrthographicNear = 0.01f;
+	SceneCamera_Create(camera, spec);
 }
 
 void Game_Update(float timeStep)
@@ -100,10 +109,22 @@ void Game_Update(float timeStep)
 
 	RendererAPI_SetClearColor(color);
 	RendererAPI_Clear();
+
+	Mat view = DirectX::XMMatrixIdentity();
+	Mat model = DirectX::XMMatrixIdentity();
+	Mat viewProj = view * camera.Projection;
+	Renderer2D_BeginScene(viewProj);	
+	//Renderer2D_DrawQuad(model);
+	Renderer2D_DrawCircle(model);
+	Renderer2D_DrawRect(model);
+	//Renderer2D_DrawQuad(model, { 1.0f, 0.0f, 0.0f, 1.0f });	
+	Renderer2D_EndScene();
 }
 
 void Game_Shutdown(Application* appInst)
-{}
+{
+
+}
 
 void CreateApplication(Application* appInst, ApplicationCommandLineArgs args)
 {

@@ -27,17 +27,17 @@ void Pipeline_Create(Pipeline& out, const PipelineSpecification& spec)
 	out.Layout = spec.Layout;
 	out.Shader = spec.Shader;
 
-	D3D11_INPUT_ELEMENT_DESC* tempList = (D3D11_INPUT_ELEMENT_DESC*)malloc(sizeof(D3D11_INPUT_ELEMENT_DESC) * out.Layout->ElementCount);
-	for (size_t i = 0; i < out.Layout->ElementCount; i++)
+	D3D11_INPUT_ELEMENT_DESC* tempList = (D3D11_INPUT_ELEMENT_DESC*)malloc(sizeof(D3D11_INPUT_ELEMENT_DESC) * out.Layout.ElementCount);
+	for (size_t i = 0; i < out.Layout.ElementCount; i++)
 	{
 		tempList[i] = {
-			out.Layout->Elements[i].Name,0,ShaderDataTypeToDX11BaseType(out.Layout->Elements[i].Type),
-			0,(UINT)out.Layout->Elements[i].Offset ,D3D11_INPUT_PER_VERTEX_DATA ,0 };
+			out.Layout.Elements[i].Name,0,ShaderDataTypeToDX11BaseType(out.Layout.Elements[i].Type),
+			0,(UINT)out.Layout.Elements[i].Offset ,D3D11_INPUT_PER_VERTEX_DATA ,0 };
 	}
 
 	BV_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateInputLayout(
-		tempList, (UINT)out.Layout->ElementCount, out.Shader->VertexShaderBlob->GetBufferPointer(),
-		out.Shader->VertexShaderBlob->GetBufferSize(), &out.InputLayout));
+		tempList, (UINT)out.Layout.ElementCount, out.Shader.VertexShaderBlob->GetBufferPointer(),
+		out.Shader.VertexShaderBlob->GetBufferSize(), &out.InputLayout));
 
 	free(tempList);
 
@@ -53,7 +53,7 @@ void Pipeline_Bind(const Pipeline& out)
 {
 	RendererContext_GetDeviceContext()->IASetInputLayout(out.InputLayout);
 
-	Shader_Bind(*out.Shader);
+	Shader_Bind(out.Shader);
 
 	uint32_t size = List_Size(out.ConstantBuffers);
 	if (size)
@@ -68,6 +68,6 @@ void Pipeline_Bind(const Pipeline& out)
 void Pipeline_Release(Pipeline& out)
 {
 	out.InputLayout->Release();
-	Shader_Release(*out.Shader);
+	Shader_Release(out.Shader);
 	List_Free(out.ConstantBuffers);
 }

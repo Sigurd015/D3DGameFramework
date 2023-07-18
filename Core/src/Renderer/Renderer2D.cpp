@@ -135,8 +135,8 @@ void Renderer2D_Initialize()
 		Shader_Create(shader, "Renderer2D_Quad");
 
 		PipelineSpecification spec;
-		spec.Layout = &layout;
-		spec.Shader = &shader;
+		spec.Layout = layout;
+		spec.Shader = shader;
 		Pipeline_Create(s_Data.QuadPipeline, spec);
 
 		s_Data.QuadVertexBufferBase = new QuadVertex[s_Data.MaxVertices];
@@ -162,8 +162,8 @@ void Renderer2D_Initialize()
 		Shader_Create(shader, "Renderer2D_Circle");
 
 		PipelineSpecification spec;
-		spec.Layout = &layout;
-		spec.Shader = &shader;
+		spec.Layout = layout;
+		spec.Shader = shader;
 		Pipeline_Create(s_Data.CirclePipeline, spec);
 
 		s_Data.CircleVertexBufferBase = new CircleVertex[s_Data.MaxVertices];
@@ -184,8 +184,8 @@ void Renderer2D_Initialize()
 		Shader_Create(shader, "Renderer2D_Line");
 
 		PipelineSpecification spec;
-		spec.Layout = &layout;
-		spec.Shader = &shader;
+		spec.Layout = layout;
+		spec.Shader = shader;
 		Pipeline_Create(s_Data.LinePipeline, spec);
 
 		s_Data.LineVertexBufferBase = new LineVertex[s_Data.MaxVertices];
@@ -224,8 +224,8 @@ void Renderer2D_Initialize()
 		Shader_Create(shader, "Renderer2D_Text");
 
 		PipelineSpecification spec;
-		spec.Layout = &layout;
-		spec.Shader = &shader;
+		spec.Layout = layout;
+		spec.Shader = shader;
 		Pipeline_Create(s_Data.TextPipeline, spec);
 
 		s_Data.TextVertexBufferBase = new TextVertex[s_Data.MaxVertices];
@@ -370,7 +370,7 @@ void SetQuadVertex(const Mat& transform,
 	s_Data.QuadIndexCount += 6;
 }
 
-void DrawQuad(const Mat& transform, const Vec4& color)
+void Renderer2D_DrawQuad(const Mat& transform, const Vec4& color)
 {
 	if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
 		NextBatch();
@@ -405,7 +405,7 @@ float GetTextureID(const Texture2D& texture)
 	return texIndex;
 }
 
-void DrawQuad(const Mat& transform, const Texture2D& texture, Vec2 uv0, Vec2 uv1, static const Vec4& tintColor, float tilingFactor)
+void Renderer2D_DrawQuad(const Mat& transform, const Texture2D& texture, Vec2 uv0, Vec2 uv1, static const Vec4& tintColor, float tilingFactor)
 {
 	if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
 		NextBatch();
@@ -414,7 +414,7 @@ void DrawQuad(const Mat& transform, const Texture2D& texture, Vec2 uv0, Vec2 uv1
 	SetQuadVertex(transform, tintColor, textureCoords, GetTextureID(texture), tilingFactor);
 }
 
-void DrawCircle(const Mat& transform, const Vec4& color, static float thickness, float fade)
+void Renderer2D_DrawCircle(const Mat& transform, const Vec4& color, static float thickness, float fade)
 {
 	if (s_Data.CircleIndexCount >= Renderer2DData::MaxIndices)
 		NextBatch();
@@ -432,7 +432,7 @@ void DrawCircle(const Mat& transform, const Vec4& color, static float thickness,
 	s_Data.CircleIndexCount += 6;
 }
 
-void DrawLine(const Vec3& p0, Vec3& p1, const Vec4& color)
+void Renderer2D_DrawLine(const Vec3& p0, Vec3& p1, const Vec4& color)
 {
 	s_Data.LineVertexBufferPtr->Position = p0;
 	s_Data.LineVertexBufferPtr->Color = color;
@@ -445,27 +445,27 @@ void DrawLine(const Vec3& p0, Vec3& p1, const Vec4& color)
 	s_Data.LineVertexCount += 2;
 }
 
-void DrawRect(const Vec3& position, const Vec2& size, const Vec4& color)
+void Renderer2D_DrawRect(const Vec3& position, const Vec2& size, const Vec4& color)
 {
 	Vec3 p0 = Vec3(position.x - size.x * 0.5f, position.y - size.y * 0.5f, position.z);
 	Vec3 p1 = Vec3(position.x + size.x * 0.5f, position.y - size.y * 0.5f, position.z);
 	Vec3 p2 = Vec3(position.x + size.x * 0.5f, position.y + size.y * 0.5f, position.z);
 	Vec3 p3 = Vec3(position.x - size.x * 0.5f, position.y + size.y * 0.5f, position.z);
 
-	DrawLine(p0, p1, color);
-	DrawLine(p1, p2, color);
-	DrawLine(p2, p3, color);
-	DrawLine(p3, p0, color);
+	Renderer2D_DrawLine(p0, p1, color);
+	Renderer2D_DrawLine(p1, p2, color);
+	Renderer2D_DrawLine(p2, p3, color);
+	Renderer2D_DrawLine(p3, p0, color);
 }
 
-void DrawRect(const Mat& transform, const Vec4& color)
+void Renderer2D_DrawRect(const Mat& transform, const Vec4& color)
 {
 	Vec3 lineVertices[4];
 	for (size_t i = 0; i < 4; i++)
 		lineVertices[i] = Vec4ToVec3(Vec4MulMat(s_Data.QuadVertexPositions[i], transform));
 
-	DrawLine(lineVertices[0], lineVertices[1], color);
-	DrawLine(lineVertices[1], lineVertices[2], color);
-	DrawLine(lineVertices[2], lineVertices[3], color);
-	DrawLine(lineVertices[3], lineVertices[0], color);
-}
+	Renderer2D_DrawLine(lineVertices[0], lineVertices[1], color);
+	Renderer2D_DrawLine(lineVertices[1], lineVertices[2], color);
+	Renderer2D_DrawLine(lineVertices[2], lineVertices[3], color);
+	Renderer2D_DrawLine(lineVertices[3], lineVertices[0], color);
+}  

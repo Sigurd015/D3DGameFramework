@@ -10,16 +10,16 @@
 
 struct PipelineSpecification
 {
-	Shader* Shader;
-	VertexBufferLayout* Layout;
+	Shader Shader;
+	VertexBufferLayout Layout;
 };
 
 struct Pipeline
 {
 	PipelineSpecification Spec;
 
-	Shader* Shader;
-	VertexBufferLayout* Layout;
+	Shader Shader;
+	VertexBufferLayout Layout;
 	ID3D11InputLayout* InputLayout;
 
 	List ConstantBuffers;
