@@ -34,7 +34,7 @@ Mat TransformComponent_GetTransform(const TransformComponent& transform);
 
 struct CameraComponent
 {
-	SceneCamera Camera;
+	SceneCamera* Camera;
 	bool Primary = true;
 	bool FixedAspectRatio = false;
 };

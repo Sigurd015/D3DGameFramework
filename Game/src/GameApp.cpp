@@ -1,10 +1,12 @@
 ﻿#include "Core.h"
 #include "EntryPoint.h"
+#include "ScriptGlue.h"
 
 #include <stdio.h>
 
 SceneCamera camera;
-
+Texture2D texture;
+Scene scene;
 void Game_Ininialize(Application* appInst)
 {
 	APP_LOG_INFO("Test Msg");
@@ -83,15 +85,18 @@ void Game_Ininialize(Application* appInst)
 		List_Free(list);
 	}
 
-	Scene scene;
-	SceneSerializer_Deserialize(scene, "assets/test.txt");
-
 	CameraSpecification spec;
 	spec.ProjectionType = ProjectionType::Orthographic;
 	spec.AspectRatio = 16.0f / 9.0f;
-	spec.OrthographicSize = 5.0f;
-	spec.OrthographicNear = 0.01f;
 	SceneCamera_Create(camera, spec);
+
+	Texture2D_Create(texture, "assets/textures/Checkerboard.png");
+
+	Scene_Create(scene);
+
+	ScriptGlue_Ininialize(scene);
+
+	Scene_Ininialize(scene);
 }
 
 void Game_Update(float timeStep)
@@ -107,18 +112,24 @@ void Game_Update(float timeStep)
 	if (Input_IsKeyPressed(KeyCode::W))
 		color.w = 1.0f;
 
+	Scene_OnViewportResize(scene, Window_GetWidth(), Window_GetHeight());
+
 	RendererAPI_SetClearColor(color);
 	RendererAPI_Clear();
 
-	Mat view = DirectX::XMMatrixIdentity();
-	Mat model = DirectX::XMMatrixIdentity();
-	Mat viewProj = view * camera.Projection;
-	Renderer2D_BeginScene(viewProj);	
-	//Renderer2D_DrawQuad(model);
-	Renderer2D_DrawCircle(model);
-	Renderer2D_DrawRect(model);
-	//Renderer2D_DrawQuad(model, { 1.0f, 0.0f, 0.0f, 1.0f });	
-	Renderer2D_EndScene();
+	Scene_OnUpdate(scene, timeStep);
+
+	//Mat view = DirectX::XMMatrixIdentity();
+	//Mat model = DirectX::XMMatrixIdentity();
+	//Mat viewProj = view * camera.Projection;
+	//Vec2 UVStart = { 0.0f, 0.0f };
+	//Vec2 UVEnd = { 1.0f,1.0f };
+	//Renderer2D_BeginScene(viewProj);
+	////Renderer2D_DrawQuad(model);
+	//Renderer2D_DrawQuad(model, texture, UVStart, UVEnd);
+	////Renderer2D_DrawCircle(model);
+	//Renderer2D_DrawRect(model);
+	//Renderer2D_EndScene();
 }
 
 void Game_Shutdown(Application* appInst)

@@ -10,8 +10,8 @@
 
 struct PipelineSpecification
 {
-	Shader Shader;
-	VertexBufferLayout Layout;
+	Shader* Shader;
+	VertexBufferLayout* Layout;
 };
 
 struct Pipeline

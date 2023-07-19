@@ -55,57 +55,49 @@ void Entity_AddComponent(Entity* entity, ComponentType type, void* component)
 	}
 	case ComponentType_Camera:
 	{
-		BV_ASSERT(entity->Camera, "Entity already has component!");
-		return;
+		BV_ASSERT(!entity->Camera, "Entity already has component!");
 		entity->Camera = (CameraComponent*)component;
 		break;
 	}
 	case ComponentType_SpriteRenderer:
 	{
-		BV_ASSERT(entity->SpriteRenderer, "Entity already has component!");
-		return;
+		BV_ASSERT(!entity->SpriteRenderer, "Entity already has component!");
 		entity->SpriteRenderer = (SpriteRendererComponent*)component;
 		break;
 	}
 	case ComponentType_CircleRenderer:
 	{
-		BV_ASSERT(entity->CircleRenderer, "Entity already has component!");
-		return;
+		BV_ASSERT(!entity->CircleRenderer, "Entity already has component!");
 		entity->CircleRenderer = (CircleRendererComponent*)component;
 		break;
 	}
 	case ComponentType_Rigidbody2D:
 	{
-		BV_ASSERT(entity->Rigidbody2D, "Entity already has component!");
-		return;
+		BV_ASSERT(!entity->Rigidbody2D, "Entity already has component!");
 		entity->Rigidbody2D = (Rigidbody2DComponent*)component;
 		break;
 	}
 	case ComponentType_BoxCollider2D:
 	{
-		BV_ASSERT(entity->BoxCollider2D, "Entity already has component!");
-		return;
+		BV_ASSERT(!entity->BoxCollider2D, "Entity already has component!");
 		entity->BoxCollider2D = (BoxCollider2DComponent*)component;
 		break;
 	}
 	case ComponentType_CircleCollider2D:
 	{
-		BV_ASSERT(entity->CircleCollider2D, "Entity already has component!");
-		return;
+		BV_ASSERT(!entity->CircleCollider2D, "Entity already has component!");
 		entity->CircleCollider2D = (CircleCollider2DComponent*)component;
 		break;
 	}
 	case ComponentType_Text:
 	{
-		BV_ASSERT(entity->Text, "Entity already has component!");
-		return;
+		BV_ASSERT(!entity->Text, "Entity already has component!");
 		entity->Text = (TextComponent*)component;
 		break;
 	}
 	case ComponentType_Script:
 	{
-		BV_ASSERT(entity->Script, "Entity already has component!");
-		return;
+		BV_ASSERT(!entity->Script, "Entity already has component!");
 		ScriptComponent* script = (ScriptComponent*)component;
 		script->Entity = entity;
 		entity->Script = script;

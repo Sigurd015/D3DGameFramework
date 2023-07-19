@@ -8,6 +8,11 @@
 #include "ConstantBuffer.h"
 #include "Texture.h"
 
+enum CBBingSlot
+{
+	CAMERA = 0,
+};
+
 struct QuadVertex
 {
 	Vec3 Position;
@@ -135,8 +140,8 @@ void Renderer2D_Initialize()
 		Shader_Create(shader, "Renderer2D_Quad");
 
 		PipelineSpecification spec;
-		spec.Layout = layout;
-		spec.Shader = shader;
+		spec.Layout = &layout;
+		spec.Shader = &shader;
 		Pipeline_Create(s_Data.QuadPipeline, spec);
 
 		s_Data.QuadVertexBufferBase = new QuadVertex[s_Data.MaxVertices];
@@ -162,8 +167,8 @@ void Renderer2D_Initialize()
 		Shader_Create(shader, "Renderer2D_Circle");
 
 		PipelineSpecification spec;
-		spec.Layout = layout;
-		spec.Shader = shader;
+		spec.Layout = &layout;
+		spec.Shader = &shader;
 		Pipeline_Create(s_Data.CirclePipeline, spec);
 
 		s_Data.CircleVertexBufferBase = new CircleVertex[s_Data.MaxVertices];
@@ -184,8 +189,8 @@ void Renderer2D_Initialize()
 		Shader_Create(shader, "Renderer2D_Line");
 
 		PipelineSpecification spec;
-		spec.Layout = layout;
-		spec.Shader = shader;
+		spec.Layout = &layout;
+		spec.Shader = &shader;
 		Pipeline_Create(s_Data.LinePipeline, spec);
 
 		s_Data.LineVertexBufferBase = new LineVertex[s_Data.MaxVertices];
@@ -224,8 +229,8 @@ void Renderer2D_Initialize()
 		Shader_Create(shader, "Renderer2D_Text");
 
 		PipelineSpecification spec;
-		spec.Layout = layout;
-		spec.Shader = shader;
+		spec.Layout = &layout;
+		spec.Shader = &shader;
 		Pipeline_Create(s_Data.TextPipeline, spec);
 
 		s_Data.TextVertexBufferBase = new TextVertex[s_Data.MaxVertices];
@@ -241,7 +246,7 @@ void Renderer2D_Initialize()
 	uint32_t whiteTextureData = 0xffffffff;
 	Texture2D_SetData(s_Data.Textures[0], &whiteTextureData, sizeof(uint32_t));
 
-	ConstantBuffer_Create(s_Data.CameraConstantBuffer, sizeof(Renderer2DData::CameraData), 0);
+	ConstantBuffer_Create(s_Data.CameraConstantBuffer, sizeof(Renderer2DData::CameraData), CBBingSlot::CAMERA);
 }
 
 void Renderer2D_Shutdown()
@@ -405,7 +410,7 @@ float GetTextureID(const Texture2D& texture)
 	return texIndex;
 }
 
-void Renderer2D_DrawQuad(const Mat& transform, const Texture2D& texture, Vec2 uv0, Vec2 uv1, static const Vec4& tintColor, float tilingFactor)
+void Renderer2D_DrawQuad(const Mat& transform, const Texture2D& texture, Vec2 uv0, Vec2 uv1, const Vec4& tintColor, float tilingFactor)
 {
 	if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
 		NextBatch();
@@ -414,7 +419,7 @@ void Renderer2D_DrawQuad(const Mat& transform, const Texture2D& texture, Vec2 uv
 	SetQuadVertex(transform, tintColor, textureCoords, GetTextureID(texture), tilingFactor);
 }
 
-void Renderer2D_DrawCircle(const Mat& transform, const Vec4& color, static float thickness, float fade)
+void Renderer2D_DrawCircle(const Mat& transform, const Vec4& color, float thickness, float fade)
 {
 	if (s_Data.CircleIndexCount >= Renderer2DData::MaxIndices)
 		NextBatch();
@@ -468,4 +473,4 @@ void Renderer2D_DrawRect(const Mat& transform, const Vec4& color)
 	Renderer2D_DrawLine(lineVertices[1], lineVertices[2], color);
 	Renderer2D_DrawLine(lineVertices[2], lineVertices[3], color);
 	Renderer2D_DrawLine(lineVertices[3], lineVertices[0], color);
-}  
+}
