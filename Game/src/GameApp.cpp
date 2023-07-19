@@ -7,6 +7,9 @@
 SceneCamera camera;
 Texture2D texture;
 Scene scene;
+
+bool showPhysicsDebug = false;
+
 void Game_Ininialize(Application* appInst)
 {
 	APP_LOG_INFO("Test Msg");
@@ -31,7 +34,7 @@ void Game_Ininialize(Application* appInst)
 			APP_LOG_INFO(tempChar);
 		}
 
-		List_Clear(list);
+		List_Clear(list, true);
 
 		for (uint32_t i = 0; i < 800; i++)
 		{
@@ -47,7 +50,7 @@ void Game_Ininialize(Application* appInst)
 			APP_LOG_INFO(tempChar);
 		}
 
-		List_Free(list);
+		List_Free(list, true);
 	}
 
 	{
@@ -67,7 +70,7 @@ void Game_Ininialize(Application* appInst)
 			APP_LOG_INFO((char*)List_Get(list, i));
 		}
 
-		List_Clear(list);
+		List_Clear(list, true);
 
 		for (uint32_t i = 0; i < 800; i++)
 		{
@@ -82,7 +85,7 @@ void Game_Ininialize(Application* appInst)
 			APP_LOG_INFO((char*)List_Get(list, i));
 		}
 
-		List_Free(list);
+		List_Free(list, true);
 	}
 
 	CameraSpecification spec;
@@ -103,21 +106,24 @@ void Game_Update(float timeStep)
 {
 	Vec4 color = { 0, 0, 0, 0 };
 
-	if (Input_IsKeyPressed(KeyCode::A))
-		color.x = 1.0f;
-	if (Input_IsKeyPressed(KeyCode::S))
-		color.y = 1.0f;
-	if (Input_IsKeyPressed(KeyCode::D))
-		color.z = 1.0f;
-	if (Input_IsKeyPressed(KeyCode::W))
-		color.w = 1.0f;
+	//if (Input_IsKeyPressed(KeyCode::A))
+	//	color.x = 1.0f;
+	//if (Input_IsKeyPressed(KeyCode::S))
+	//	color.y = 1.0f;
+	//if (Input_IsKeyPressed(KeyCode::D))
+	//	color.z = 1.0f;
+	//if (Input_IsKeyPressed(KeyCode::W))
+	//	color.w = 1.0f;
+
+	if (Input_IsKeyPressed(KeyCode::I))
+		showPhysicsDebug = !showPhysicsDebug;
 
 	Scene_OnViewportResize(scene, Window_GetWidth(), Window_GetHeight());
 
 	RendererAPI_SetClearColor(color);
 	RendererAPI_Clear();
 
-	Scene_OnUpdate(scene, timeStep);
+	Scene_OnUpdate(scene, timeStep, showPhysicsDebug);
 
 	//Mat view = DirectX::XMMatrixIdentity();
 	//Mat model = DirectX::XMMatrixIdentity();
@@ -134,7 +140,7 @@ void Game_Update(float timeStep)
 
 void Game_Shutdown(Application* appInst)
 {
-
+	Scene_Destroy(scene);
 }
 
 void CreateApplication(Application* appInst, ApplicationCommandLineArgs args)

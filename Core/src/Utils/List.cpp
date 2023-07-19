@@ -65,23 +65,31 @@ void List_RemoveAt(List& out, uint32_t index)
 	out.Index--;
 }
 
-void List_Clear(List& out)
+void List_Clear(List& out, bool freeEachElement)
 {
-	for (size_t i = 0; i < out.Index; i++)
+	if (freeEachElement)
 	{
-		if (out.Data[i] != nullptr)
-			free(out.Data[i]);
+		for (size_t i = 0; i < out.Index; i++)
+		{
+			if (out.Data[i] != nullptr)
+				free(out.Data[i]);
+		}
 	}
+
 	out.Index = 0;
 }
 
-void List_Free(List& out)
+void List_Free(List& out, bool freeEachElement)
 {
-	for (size_t i = 0; i < out.Index; i++)
+	if (freeEachElement)
 	{
-		if (out.Data[i] != nullptr)
-			free(out.Data[i]);
+		for (size_t i = 0; i < out.Index; i++)
+		{
+			if (out.Data[i] != nullptr)
+				free(out.Data[i]);
+		}
 	}
+
 	free(out.Data);
 }
 

@@ -263,6 +263,7 @@ void Renderer2D_Shutdown()
 	Pipeline_Release(s_Data.QuadPipeline);
 	Pipeline_Release(s_Data.CirclePipeline);
 	Pipeline_Release(s_Data.LinePipeline);
+	Pipeline_Release(s_Data.TextPipeline);
 
 	ConstantBuffer_Release(s_Data.CameraConstantBuffer);
 

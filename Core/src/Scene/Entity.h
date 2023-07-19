@@ -1,9 +1,12 @@
 #pragma once
 #include "Components.h"
 
+// Forward declarations
+struct Scene;
+
 struct Entity
 {
-	uint32_t ID;
+	Scene* Scene = nullptr;
 
 	TagComponent Tag;
 	TransformComponent Transform;
@@ -17,7 +20,7 @@ struct Entity
 	ScriptComponent* Script = nullptr;
 };
 
-bool Entity_HasComponent(Entity* entity, ComponentType type);
-void* Entity_GetComponent(Entity* entity, ComponentType type);
-void Entity_AddComponent(Entity* entity, ComponentType type, void* component);
-void Entity_RemoveComponent(Entity* entity, ComponentType type);
+bool Entity_HasComponent(Entity& entity, ComponentType type);
+void* Entity_GetComponent(Entity& entity, ComponentType type);
+void Entity_AddComponent(Entity& entity, ComponentType type, void* component);
+void Entity_RemoveComponent(Entity& entity, ComponentType type);

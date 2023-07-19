@@ -19,11 +19,6 @@ void List_Set(List& out, uint32_t index, void* data);
 /// </summary>
 void List_Add(List& out, void* data);
 void List_RemoveAt(List& out, uint32_t index);
-
-/// <summary>
-/// Notice: This function do free the data stored in the list.
-/// </summary>
-void List_Clear(List& out);
-
-void List_Free(List& out);
+void List_Clear(List& out,bool freeEachElement);
+void List_Free(List& out, bool freeEachElement);
 uint32_t List_Size(const List& out);

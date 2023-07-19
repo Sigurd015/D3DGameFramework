@@ -20,10 +20,10 @@ struct ApplicationSpecification
 	bool Minimizable = false;
 	bool MaximizedOnStart = false;
 	bool VSync = true;
-	
+
 	ApplicationCommandLineArgs CommandLineArgs;
 };
 
 void Application_Ininialize(Application* appInst);
-
 void Application_Run();
+void Application_Shutdown();

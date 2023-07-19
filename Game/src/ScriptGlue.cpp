@@ -20,18 +20,19 @@ void ScriptGlue_Ininialize(Scene& scene)
 		CameraComponent* cameraComponent = (CameraComponent*)malloc(sizeof(CameraComponent));
 		*cameraComponent = {};
 		cameraComponent->Camera = sceneCamera;
-		Entity_AddComponent(camera, ComponentType::ComponentType_Camera, cameraComponent);
+		Entity_AddComponent(*camera, ComponentType::ComponentType_Camera, cameraComponent);
 
 		Scene_AddEntity(scene, *camera);
 	}
+
 	{
 		Entity* quad = (Entity*)malloc(sizeof(Entity));
 		*quad = {};
-		quad->Tag.Name = "Test Quad";
+		quad->Tag.Name = "Player";
 
 		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
 		*spriteRenderer = {};
-		Entity_AddComponent(quad, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);;
+		Entity_AddComponent(*quad, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
 		ScriptComponent* scriptComponent = (ScriptComponent*)malloc(sizeof(ScriptComponent));
 		*scriptComponent = {};
@@ -39,11 +40,46 @@ void ScriptGlue_Ininialize(Scene& scene)
 		scriptComponent->OnUpdate = PlayerController_OnUpdate;
 		scriptComponent->OnDestroy = PlayerController_OnDestroy;
 		scriptComponent->OnCollision = PlayerController_OnCollision;
-		Entity_AddComponent(quad, ComponentType::ComponentType_Script, scriptComponent);
+		Entity_AddComponent(*quad, ComponentType::ComponentType_Script, scriptComponent);
+
+		BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+		*boxCollider2D = {};
+		Entity_AddComponent(*quad, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
 
 		Scene_AddEntity(scene, *quad);
 	}
-}
 
-void ScriptGlue_Shutdown()
-{}
+	{
+		Entity* quad = (Entity*)malloc(sizeof(Entity));
+		*quad = {};
+		quad->Tag.Name = "Test Quad";
+		quad->Transform.Translation.x = -2.0f;
+
+		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+		*spriteRenderer = {};
+		Entity_AddComponent(*quad, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+		BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+		*boxCollider2D = {};
+		Entity_AddComponent(*quad, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+		Scene_AddEntity(scene, *quad);
+	}
+
+	{
+		Entity* circle = (Entity*)malloc(sizeof(Entity));
+		*circle = {};
+		circle->Tag.Name = "Test Circle";
+		circle->Transform.Translation.x = -3.0f;
+
+		CircleRendererComponent* circleRenderer = (CircleRendererComponent*)malloc(sizeof(CircleRendererComponent));
+		*circleRenderer = {};
+		Entity_AddComponent(*circle, ComponentType::ComponentType_CircleRenderer, circleRenderer);
+
+		CircleCollider2DComponent* circleCollider2D = (CircleCollider2DComponent*)malloc(sizeof(CircleCollider2DComponent));
+		*circleCollider2D = {};
+		Entity_AddComponent(*circle, ComponentType::ComponentType_CircleCollider2D, circleCollider2D);
+
+		Scene_AddEntity(scene, *circle);
+	}
+}

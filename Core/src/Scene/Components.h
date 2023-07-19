@@ -114,6 +114,4 @@ struct ScriptComponent
 	void (*OnUpdate)(Entity& entity, float timeStep);
 	void (*OnDestroy)(Entity& entity);
 	void (*OnCollision)(Entity& entity, Entity& other);
-
-	Entity* Entity;
 };

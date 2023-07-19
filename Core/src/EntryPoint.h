@@ -12,6 +12,7 @@ int Main(int argc, char** argv)
 	CreateApplication(&app, { argc, argv });
 	Application_Ininialize(&app);
 	Application_Run();
+	Application_Shutdown();
 	Log_Shutdown();
 	return 0;
 }

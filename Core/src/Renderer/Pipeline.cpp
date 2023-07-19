@@ -69,5 +69,15 @@ void Pipeline_Release(Pipeline& out)
 {
 	out.InputLayout->Release();
 	Shader_Release(out.Shader);
-	List_Free(out.ConstantBuffers);
+
+	uint32_t size = List_Size(out.ConstantBuffers);
+	if (size)
+	{
+		for (size_t i = 0; i < size; i++)
+		{
+			ConstantBuffer_Release(*(ConstantBuffer*)List_Get(out.ConstantBuffers, i));
+		}
+	}
+
+	List_Free(out.ConstantBuffers, false);
 }
