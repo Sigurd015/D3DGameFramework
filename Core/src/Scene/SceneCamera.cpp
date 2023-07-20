@@ -6,11 +6,13 @@ void RecalculateProjection(SceneCamera& out)
 {
 	if (out.Spec.ProjectionType == ProjectionType::Orthographic)
 	{
-		float viewWidth = -out.Spec.OrthographicSize * out.Spec.AspectRatio * 0.5f;
-		float viewHeight = -out.Spec.OrthographicSize * 0.5f;
+		float orthoLeft = -out.Spec.OrthographicSize * out.Spec.AspectRatio * 0.5f;
+		float orthoRight = -orthoLeft;
+		float orthoBottom = -out.Spec.OrthographicSize * 0.5f;
+		float orthoTop = -orthoBottom;
 
-		out.Projection = DirectX::XMMatrixOrthographicLH(viewWidth,
-			viewHeight, out.Spec.OrthographicNear, out.Spec.OrthographicFar);
+		out.Projection = DirectX::XMMatrixOrthographicOffCenterLH(orthoLeft,
+			orthoRight, orthoBottom, orthoTop, out.Spec.OrthographicNear, out.Spec.OrthographicFar);
 	}
 }
 

@@ -35,7 +35,8 @@ void Scene_Destroy(Scene& out)
 
 		if (Entity_HasComponent(*temp, ComponentType_Camera))
 		{
-			free(temp->Camera->Camera);
+			if (temp->Camera->Camera)
+				free(temp->Camera->Camera);
 			free(temp->Camera);
 		}
 
@@ -114,18 +115,17 @@ void Scene_OnUpdate(const Scene& out, float timeStep, bool enablePhysicsVisualiz
 			return;
 
 		SceneCamera* camera = mainCamera->Camera->Camera;
-		TransformComponent ts = mainCamera->Transform;
+		TransformComponent* ts = &mainCamera->Transform;
 
-		Mat viewProjection = TransformComponent_GetTransform(ts) * camera->Projection;
+		Mat viewProjection = TransformComponent_GetTransform(*ts) * camera->Projection;
 		Renderer2D_BeginScene(viewProjection);
-
 	}
 
 	uint32_t size = List_Size(out.Entities);
 	for (size_t i = 0; i < size; i++)
 	{
 		Entity* temp = (Entity*)List_Get(out.Entities, i);
-		TransformComponent tc = temp->Transform;
+		TransformComponent* tc = &temp->Transform;
 
 		// Update scripts
 		{
@@ -148,9 +148,9 @@ void Scene_OnUpdate(const Scene& out, float timeStep, bool enablePhysicsVisualiz
 
 				if (enablePhysicsVisualization)
 				{
-					Vec3 translation = Vec3Add(tc.Translation, Vec3(cc2d->Offset.x, cc2d->Offset.y, 0.001f));
+					Vec3 translation = Vec3Add(tc->Translation, Vec3(cc2d->Offset.x, cc2d->Offset.y, 0.001f));
 					float radius = cc2d->Radius * 2.05f;
-					Vec3 scale = Vec3MulVec3(Vec3(radius, radius, radius), tc.Scale);
+					Vec3 scale = Vec3MulVec3(Vec3(radius, radius, radius), tc->Scale);
 
 					Mat transform = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z)
 						* DirectX::XMMatrixTranslation(translation.x, translation.y, translation.z);
@@ -166,14 +166,14 @@ void Scene_OnUpdate(const Scene& out, float timeStep, bool enablePhysicsVisualiz
 				if (enablePhysicsVisualization)
 				{
 					Vec3 bc2dTranslation = Vec3(bc2d->Offset.x, bc2d->Offset.y, 0.001f);
-					Vec3 translation = Vec3Add(tc.Translation, bc2dTranslation);
+					Vec3 translation = Vec3Add(tc->Translation, bc2dTranslation);
 					Vec2 size = Vec2MulFloat(bc2d->Size, 2.05f);
-					Vec3 scale = Vec3MulVec3(Vec3(size.x, size.y, 1.0f), tc.Scale);
+					Vec3 scale = Vec3MulVec3(Vec3(size.x, size.y, 1.0f), tc->Scale);
 
 					Mat transform = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z)
 						* DirectX::XMMatrixTranslation(bc2dTranslation.x, bc2dTranslation.y, bc2dTranslation.z)
-						* DirectX::XMMatrixRotationZ(tc.Rotation.z)
-						* DirectX::XMMatrixTranslation(tc.Translation.x, tc.Translation.y, tc.Translation.z);
+						* DirectX::XMMatrixRotationZ(tc->Rotation.z)
+						* DirectX::XMMatrixTranslation(tc->Translation.x, tc->Translation.y, tc->Translation.z);
 
 					Renderer2D_DrawRect(transform, Vec4(0, 1, 0, 1));
 				}
@@ -189,7 +189,7 @@ void Scene_OnUpdate(const Scene& out, float timeStep, bool enablePhysicsVisualiz
 				if (sprite->Texture)
 				{
 					Renderer2D_DrawQuad(
-						TransformComponent_GetTransform(tc),
+						TransformComponent_GetTransform(*tc),
 						*sprite->Texture,
 						sprite->UVStart,
 						sprite->UVEnd,
@@ -199,7 +199,7 @@ void Scene_OnUpdate(const Scene& out, float timeStep, bool enablePhysicsVisualiz
 				}
 				else
 				{
-					Renderer2D_DrawQuad(TransformComponent_GetTransform(tc), sprite->Color);
+					Renderer2D_DrawQuad(TransformComponent_GetTransform(*tc), sprite->Color);
 				}
 
 				continue;
@@ -210,7 +210,7 @@ void Scene_OnUpdate(const Scene& out, float timeStep, bool enablePhysicsVisualiz
 				CircleRendererComponent* circle = temp->CircleRenderer;
 
 				Renderer2D_DrawCircle(
-					TransformComponent_GetTransform(tc),
+					TransformComponent_GetTransform(*tc),
 					circle->Color,
 					circle->Thickness,
 					circle->Fade

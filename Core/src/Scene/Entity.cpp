@@ -113,7 +113,8 @@ void Entity_RemoveComponent(Entity* entity, ComponentType type)
 	case ComponentType_Transform:
 		return;
 	case ComponentType_Camera:
-		free(entity->Camera->Camera);
+		if (entity->Camera->Camera)
+			free(entity->Camera->Camera);
 		free(entity->Camera);
 		entity->Camera = nullptr;
 		return;

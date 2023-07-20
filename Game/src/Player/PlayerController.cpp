@@ -20,13 +20,13 @@ void PlayerController_OnUpdate(Entity& entity, float timeStep)
 	static float speed = 0.03f;
 
 	if (Input_IsKeyPressed(KeyCode::W))
-		position.y -= speed;
-	if (Input_IsKeyPressed(KeyCode::S))
 		position.y += speed;
+	if (Input_IsKeyPressed(KeyCode::S))
+		position.y -= speed;
 	if (Input_IsKeyPressed(KeyCode::A))
-		position.x += speed;
-	if (Input_IsKeyPressed(KeyCode::D))
 		position.x -= speed;
+	if (Input_IsKeyPressed(KeyCode::D))
+		position.x += speed;
 
 	s_Data.Transform->Translation = position;
 }

@@ -53,7 +53,7 @@ void ScriptGlue_Ininialize(Scene& scene)
 		Entity* quad = (Entity*)malloc(sizeof(Entity));
 		*quad = {};
 		quad->Tag.Name = "Test Quad";
-		quad->Transform.Translation.x = -2.0f;
+		quad->Transform.Translation.x = -2.5f;
 
 		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
 		*spriteRenderer = {};
@@ -70,7 +70,7 @@ void ScriptGlue_Ininialize(Scene& scene)
 		Entity* circle = (Entity*)malloc(sizeof(Entity));
 		*circle = {};
 		circle->Tag.Name = "Test Circle";
-		circle->Transform.Translation.x = -3.0f;
+		circle->Transform.Translation.x = -4.0f;
 
 		CircleRendererComponent* circleRenderer = (CircleRendererComponent*)malloc(sizeof(CircleRendererComponent));
 		*circleRenderer = {};
