@@ -1,5 +1,5 @@
 #pragma once
-#include "Core/base.h"
+#include "Core/Base.h"
 #include "Math/Math.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"

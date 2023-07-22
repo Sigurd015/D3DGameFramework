@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "DXTrace.h"
 #include "RendererContext.h"
 #include "Texture.h"
@@ -53,9 +53,16 @@ void Texture2D_Create(Texture2D& out, const char* path)
 	size_t convertedChars = 0;
 	mbstowcs_s(&convertedChars, wcstring, newsize, path, _TRUNCATE);
 
-	DirectX::CreateWICTextureFromFile(RendererContext_GetDevice(), wcstring, nullptr, &out.TextureView);
+	BV_CHECK_DX_RESULT(DirectX::CreateWICTextureFromFile(RendererContext_GetDevice(), wcstring, reinterpret_cast<ID3D11Resource**>(&out.Texture), &out.TextureView));
 
 	delete[]wcstring;
+
+	D3D11_TEXTURE2D_DESC desc;
+	out.Texture->GetDesc(&desc);
+	out.DataFormat = desc.Format;
+	out.Spec.Width = desc.Width;
+	out.Spec.Height = desc.Height;
+	out.Spec.Format = ImageFormat::RGBA8;
 
 	CreateSamplerState(&out.SamplerState);
 }
@@ -111,7 +118,19 @@ bool Texture2D_IsSame(const Texture2D& out, const Texture2D& other)
 
 void Texture2D_Release(Texture2D& out)
 {
-	out.Texture->Release();
-	out.TextureView->Release();
-	out.SamplerState->Release();
+	if (out.Texture)
+	{
+		out.Texture->Release();
+		out.Texture = nullptr;
+	}
+	if (out.TextureView)
+	{
+		out.TextureView->Release();
+		out.TextureView = nullptr;
+	}
+	if (out.SamplerState)
+	{
+		out.SamplerState->Release();
+		out.SamplerState = nullptr;
+	}
 }

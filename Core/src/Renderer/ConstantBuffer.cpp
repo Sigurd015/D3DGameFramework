@@ -35,5 +35,9 @@ void ConstantBuffer_Bind(const ConstantBuffer& out)
 
 void ConstantBuffer_Release(ConstantBuffer& out)
 {
-	out.Buffer->Release();
+	if (out.Buffer)
+	{
+		out.Buffer->Release();
+		out.Buffer = nullptr;
+	}
 }

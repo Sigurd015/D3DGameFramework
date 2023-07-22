@@ -79,7 +79,8 @@ struct Renderer2DData
 	TextVertex* TextVertexBufferBase = nullptr;
 	TextVertex* TextVertexBufferPtr = nullptr;
 
-	Texture2D Textures[32];// 0 is white texture
+	Texture2D* Textures[32];// 0 is white texture
+	Texture2D WhiteTexture;
 	uint32_t TextureSlotIndex = 1;
 	Texture2D FontAtlasTexture;
 
@@ -242,9 +243,10 @@ void Renderer2D_Initialize()
 	spec.Height = 1;
 	spec.Format = ImageFormat::RGBA8;
 
-	Texture2D_Create(s_Data.Textures[0], spec);
+	Texture2D_Create(s_Data.WhiteTexture, spec);
 	uint32_t whiteTextureData = 0xffffffff;
-	Texture2D_SetData(s_Data.Textures[0], &whiteTextureData, sizeof(uint32_t));
+	Texture2D_SetData(s_Data.WhiteTexture, &whiteTextureData, sizeof(uint32_t));
+	s_Data.Textures[0] = &s_Data.WhiteTexture;
 
 	ConstantBuffer_Create(s_Data.CameraConstantBuffer, sizeof(Renderer2DData::CameraData), CBBingSlot::CAMERA);
 }
@@ -266,9 +268,6 @@ void Renderer2D_Shutdown()
 	Pipeline_Release(s_Data.TextPipeline);
 
 	ConstantBuffer_Release(s_Data.CameraConstantBuffer);
-
-	for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
-		Texture2D_Release(s_Data.Textures[i]);
 
 	delete[] s_Data.QuadVertexBufferBase;
 	delete[] s_Data.CircleVertexBufferBase;
@@ -295,7 +294,7 @@ void StartBatch()
 
 void Renderer2D_BeginScene(const Mat& viewProjection)
 {
-	s_Data.SceneBuffer.ViewProjection = viewProjection;
+	s_Data.SceneBuffer.ViewProjection = DirectX::XMMatrixTranspose(viewProjection);
 
 	ConstantBuffer_SetData(s_Data.CameraConstantBuffer, &s_Data.SceneBuffer);
 
@@ -316,7 +315,7 @@ void Flush()
 
 		// Bind textures
 		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
-			Texture2D_Bind(s_Data.Textures[i], i);
+			Texture2D_Bind(*s_Data.Textures[i], i);
 
 		RendererAPI_DrawIndexed(s_Data.QuadVertexBuffer, s_Data.QuadIndexBuffer, s_Data.QuadPipeline, s_Data.QuadIndexCount);
 	}
@@ -387,12 +386,12 @@ void Renderer2D_DrawQuad(const Mat& transform, const Vec4& color)
 	SetQuadVertex(transform, color, s_Data.QuadTexCoord, texIndex, tilingFactor);
 }
 
-float GetTextureID(const Texture2D& texture)
+float GetTextureID(Texture2D& texture)
 {
 	float texIndex = 0.0f;
 	for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
 	{
-		if (Texture2D_IsSame(s_Data.Textures[i], texture))
+		if (Texture2D_IsSame(*s_Data.Textures[i], texture))
 		{
 			texIndex = (float)i;
 			break;
@@ -405,13 +404,13 @@ float GetTextureID(const Texture2D& texture)
 			NextBatch();
 
 		texIndex = (float)s_Data.TextureSlotIndex;
-		s_Data.Textures[s_Data.TextureSlotIndex] = texture;
+		s_Data.Textures[s_Data.TextureSlotIndex] = &texture;
 		s_Data.TextureSlotIndex++;
 	}
 	return texIndex;
 }
 
-void Renderer2D_DrawQuad(const Mat& transform, const Texture2D& texture, Vec2 uv0, Vec2 uv1, const Vec4& tintColor, float tilingFactor)
+void Renderer2D_DrawQuad(const Mat& transform, Texture2D& texture, Vec2 uv0, Vec2 uv1, const Vec4& tintColor, float tilingFactor)
 {
 	if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
 		NextBatch();

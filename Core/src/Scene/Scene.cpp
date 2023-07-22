@@ -19,6 +19,8 @@ void Scene_Ininialize(Scene& out)
 			temp->Script->OnCreate(*temp);
 		}
 	}
+
+	PhysicsWorld2D_Create(out.PhysicsWorld);
 }
 
 void Scene_Destroy(Scene& out)
@@ -43,7 +45,12 @@ void Scene_Destroy(Scene& out)
 		if (Entity_HasComponent(*temp, ComponentType_SpriteRenderer))
 		{
 			if (temp->SpriteRenderer->Texture)
+			{
 				Texture2D_Release(*temp->SpriteRenderer->Texture);
+				//TODO: Data has been freed by other entity(That using same texture), so we can't free it again
+				// Maybe we should make a reference counter feature
+				//free(temp->SpriteRenderer->Texture);
+			}
 			free(temp->SpriteRenderer);
 		}
 
@@ -73,6 +80,8 @@ void Scene_Destroy(Scene& out)
 	}
 
 	List_Free(out.Entities, true);
+
+	PhysicsWorld2D_Destory(out.PhysicsWorld);
 }
 
 void Scene_AddEntity(Scene& out, Entity& entity)
@@ -106,7 +115,7 @@ Entity* Scene_GetPrimaryCamera(const Scene& out)
 	return nullptr;
 }
 
-void Scene_OnUpdate(const Scene& out, float timeStep, bool enablePhysicsVisualization)
+void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
 {
 	// Find primary camera
 	{
@@ -115,11 +124,12 @@ void Scene_OnUpdate(const Scene& out, float timeStep, bool enablePhysicsVisualiz
 			return;
 
 		SceneCamera* camera = mainCamera->Camera->Camera;
-		TransformComponent* ts = &mainCamera->Transform;
-
-		Mat viewProjection = TransformComponent_GetTransform(*ts) * camera->Projection;
+		TransformComponent* cameraTrans = &mainCamera->Transform;
+		Mat viewProjection = DirectX::XMMatrixInverse(nullptr, TransformComponent_GetTransform(*cameraTrans)) * camera->Projection;
 		Renderer2D_BeginScene(viewProjection);
 	}
+
+	bool isFixedUpdate = PhysicsWorld2D_IsFixedUpdate(timeStep);
 
 	uint32_t size = List_Size(out.Entities);
 	for (size_t i = 0; i < size; i++)
@@ -139,12 +149,23 @@ void Scene_OnUpdate(const Scene& out, float timeStep, bool enablePhysicsVisualiz
 		{
 			if (Entity_HasComponent(*temp, ComponentType_Rigidbody2D))
 			{
-
+				//TODO: Implement Rigidbody2D When we need it
 			}
 
 			if (Entity_HasComponent(*temp, ComponentType_CircleCollider2D))
 			{
 				CircleCollider2DComponent* cc2d = temp->CircleCollider2D;
+
+				if (isFixedUpdate)
+				{
+					CircleCollider2D collider = {
+						{ tc->Translation.x + cc2d->Offset.x, tc->Translation.y + cc2d->Offset.y },
+						cc2d->Radius * tc->Scale.x,// Notice: CircleCollider2D only support uniform scale
+						temp,
+					};
+
+					PhysicsWorld2D_AddCircleCollider2D(out.PhysicsWorld, collider);
+				}
 
 				if (enablePhysicsVisualization)
 				{
@@ -162,6 +183,19 @@ void Scene_OnUpdate(const Scene& out, float timeStep, bool enablePhysicsVisualiz
 			if (Entity_HasComponent(*temp, ComponentType_BoxCollider2D))
 			{
 				BoxCollider2DComponent* bc2d = temp->BoxCollider2D;
+
+				if (isFixedUpdate)
+				{
+					BoxCollider2D collider = {
+						{ tc->Translation.x + bc2d->Offset.x, tc->Translation.y + bc2d->Offset.y },
+						bc2d->Size.x * tc->Scale.x,
+						bc2d->Size.y * tc->Scale.y,
+						tc->Rotation.z,
+						temp,
+					};
+
+					PhysicsWorld2D_AddBoxCollider2D(out.PhysicsWorld, collider);
+				}
 
 				if (enablePhysicsVisualization)
 				{
@@ -201,8 +235,6 @@ void Scene_OnUpdate(const Scene& out, float timeStep, bool enablePhysicsVisualiz
 				{
 					Renderer2D_DrawQuad(TransformComponent_GetTransform(*tc), sprite->Color);
 				}
-
-				continue;
 			}
 
 			if (Entity_HasComponent(*temp, ComponentType_CircleRenderer))
@@ -215,10 +247,14 @@ void Scene_OnUpdate(const Scene& out, float timeStep, bool enablePhysicsVisualiz
 					circle->Thickness,
 					circle->Fade
 				);
-
-				continue;
 			}
 		}
+	}
+
+	if (isFixedUpdate)
+	{
+		PhysicsWorld2D_Update(out.PhysicsWorld);
+		PhysicsWorld2D_Clear(out.PhysicsWorld);
 	}
 
 	Renderer2D_EndScene();

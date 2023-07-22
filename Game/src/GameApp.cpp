@@ -8,8 +8,6 @@ SceneCamera camera;
 Texture2D texture;
 Scene scene;
 
-bool showPhysicsDebug = false;
-
 void Game_Ininialize(Application* appInst)
 {
 	APP_LOG_INFO("Test Msg");
@@ -104,7 +102,7 @@ void Game_Ininialize(Application* appInst)
 
 void Game_Update(float timeStep)
 {
-	Vec4 color = { 0, 0, 0, 0 };
+	const Vec4 color = { 0.3f, 0.3f, 0.3f, 1.0f };
 
 	//if (Input_IsKeyPressed(KeyCode::A))
 	//	color.x = 1.0f;
@@ -115,15 +113,16 @@ void Game_Update(float timeStep)
 	//if (Input_IsKeyPressed(KeyCode::W))
 	//	color.w = 1.0f;
 
-	if (Input_IsKeyPressed(KeyCode::I))
-		showPhysicsDebug = !showPhysicsDebug;
-
 	Scene_OnViewportResize(scene, Window_GetWidth(), Window_GetHeight());
 
 	RendererAPI_SetClearColor(color);
 	RendererAPI_Clear();
 
-	Scene_OnUpdate(scene, timeStep, showPhysicsDebug);
+#ifndef BV_DIST
+	Scene_OnUpdate(scene, timeStep, true);
+#else
+	Scene_OnUpdate(scene, timeStep);
+#endif
 
 	//Mat view = DirectX::XMMatrixIdentity();
 	//Mat model = DirectX::XMMatrixIdentity();

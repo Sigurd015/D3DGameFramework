@@ -27,5 +27,9 @@ void IndexBuffer_Bind(const IndexBuffer& out)
 
 void IndexBuffer_Release(IndexBuffer& out)
 {
-	out.Buffer->Release();
+	if (out.Buffer)
+	{
+		out.Buffer->Release();
+		out.Buffer = nullptr;
+	}
 }

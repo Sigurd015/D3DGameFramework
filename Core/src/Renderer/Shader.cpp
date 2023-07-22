@@ -34,7 +34,19 @@ void Shader_Bind(const Shader& out)
 
 void Shader_Release(Shader& out)
 {
-	out.VertexShaderBlob->Release();
-	out.VertexShader->Release();
-	out.PixelShader->Release();
+	if (out.VertexShaderBlob)
+	{
+		out.VertexShaderBlob->Release();
+		out.VertexShaderBlob = nullptr;
+	}
+	if (out.VertexShader)
+	{
+		out.VertexShader->Release();
+		out.VertexShader = nullptr;
+	}
+	if (out.PixelShader)
+	{
+		out.PixelShader->Release();
+		out.PixelShader = nullptr;
+	}
 }

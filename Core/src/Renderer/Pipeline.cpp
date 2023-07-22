@@ -67,7 +67,11 @@ void Pipeline_Bind(const Pipeline& out)
 
 void Pipeline_Release(Pipeline& out)
 {
-	out.InputLayout->Release();
+	if (out.InputLayout)
+	{
+		out.InputLayout->Release();
+		out.InputLayout = nullptr;
+	}
 	Shader_Release(out.Shader);
 
 	uint32_t size = List_Size(out.ConstantBuffers);

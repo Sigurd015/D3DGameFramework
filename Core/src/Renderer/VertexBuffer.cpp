@@ -69,5 +69,9 @@ void VertexBuffer_Bind(const VertexBuffer& out)
 
 void VertexBuffer_Release(VertexBuffer& out)
 {
-	out.Buffer->Release();
+	if (out.Buffer)
+	{
+		out.Buffer->Release();
+		out.Buffer = nullptr;
+	}
 }
