@@ -7,44 +7,51 @@ struct PhysicsWorldData
 };
 static PhysicsWorldData s_Data;
 
-void PhysicsWorld2D_Create(PhysicsWorld2D& world)
+void PhysicsWorld2D_Create(PhysicsWorld2D& world, void(*CollisionCallback)(void* entity1, void* entity2))
 {
-	List_Create(world.BoxCollider2Ds, PHYSICS_COLLIDER_POOL_SIZE);
-	List_Create(world.CircleCollider2Ds, PHYSICS_COLLIDER_POOL_SIZE);
-	{
-		for (size_t i = 0; i < PHYSICS_COLLIDER_POOL_SIZE; i++)
-		{
-			BoxCollider2D* collider = (BoxCollider2D*)malloc(sizeof(BoxCollider2D));
-			*collider = {};
-			List_Add(world.BoxCollider2Ds, collider);
-		}
-	}
+	world.CollisionCallback = CollisionCallback;
 
+	List_Create(world.Rigidbody2Ds, PHYSICS_POOL_SIZE);
 	{
-		for (size_t i = 0; i < PHYSICS_COLLIDER_POOL_SIZE; i++)
+		for (size_t i = 0; i < PHYSICS_POOL_SIZE; i++)
 		{
-			CircleCollider2D* collider = (CircleCollider2D*)malloc(sizeof(CircleCollider2D));
-			*collider = {};
-			List_Add(world.CircleCollider2Ds, collider);
+			Rigidbody2D* rigidbody2D = (Rigidbody2D*)malloc(sizeof(Rigidbody2D));
+			*rigidbody2D = {};
+			List_Add(world.Rigidbody2Ds, rigidbody2D);
 		}
 	}
-	world.BoxCollider2DCount = 0;
-	world.CircleCollider2DCount = 0;
+	world.Rigidbody2DCount = 0;
 }
 
 void PhysicsWorld2D_Clear(PhysicsWorld2D& world)
 {
-	world.BoxCollider2DCount = 0;
-	world.CircleCollider2DCount = 0;
+	world.Rigidbody2DCount = 0;
 }
 
 void PhysicsWorld2D_Destory(PhysicsWorld2D& world)
 {
-	List_Free(world.BoxCollider2Ds, true);
-	List_Free(world.CircleCollider2Ds, true);
+	List_Free(world.Rigidbody2Ds, true);
 }
 
-bool PhysicsWorld2D_IsFixedUpdate(float timeStep)
+void* PhysicsWorld2D_AddRigidbody2D(PhysicsWorld2D& world, Rigidbody2D& rigidbody2D)
+{
+	Rigidbody2D* rigidbody = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, world.Rigidbody2DCount);
+	*rigidbody = rigidbody2D;
+
+	world.Rigidbody2DCount++;
+
+	BV_ASSERT(world.Rigidbody2DCount < PHYSICS_POOL_SIZE, "PhysicsWorld2D_AddRigidbody2D: Rigidbody2D Pool is full");
+
+	return rigidbody;
+}
+
+bool CollisionBB(Vec2& box1LeftTop, Vec2& box1RightBottom, Vec2& box2LeftTop, Vec2& box2RightBottom)
+{
+	return box1LeftTop.x < box2RightBottom.x && box1RightBottom.x > box2LeftTop.x &&
+		box1LeftTop.y > box2RightBottom.y && box1RightBottom.y < box2LeftTop.y;
+}
+
+bool IsFixedUpdate(float timeStep)
 {
 	s_Data.Time += timeStep;
 
@@ -57,141 +64,69 @@ bool PhysicsWorld2D_IsFixedUpdate(float timeStep)
 	}
 }
 
-void PhysicsWorld2D_AddBoxCollider2D(PhysicsWorld2D& world, BoxCollider2D& boxCollider2D)
+bool Collide(Rigidbody2D& body1, Rigidbody2D& body2, Vec2* normal, float* depth)
 {
-	BoxCollider2D* collider = (BoxCollider2D*)List_Get(world.BoxCollider2Ds, world.BoxCollider2DCount);
-	collider->Pos = boxCollider2D.Pos;
-	//TODO: Implement Rotation support for BoxCollider2D When we need it
-	collider->Angle = boxCollider2D.Angle;
-	collider->HalfWidth = boxCollider2D.HalfWidth;
-	collider->HalfHeight = boxCollider2D.HalfHeight;
-	collider->Entity = boxCollider2D.Entity;
-
-	world.BoxCollider2DCount++;
-
-	BV_ASSERT(world.BoxCollider2DCount < PHYSICS_COLLIDER_POOL_SIZE, "PhysicsWorld2D_AddBoxCollider2D: BoxCollider2D Pool is full");
-}
-
-void PhysicsWorld2D_AddCircleCollider2D(PhysicsWorld2D& world, CircleCollider2D& circleCollider2D)
-{
-	CircleCollider2D* collider = (CircleCollider2D*)List_Get(world.CircleCollider2Ds, world.CircleCollider2DCount);
-	collider->Pos = circleCollider2D.Pos;
-	collider->Radius = circleCollider2D.Radius;
-	collider->Entity = circleCollider2D.Entity;
-
-	world.CircleCollider2DCount++;
-
-	BV_ASSERT(world.CircleCollider2DCount < PHYSICS_COLLIDER_POOL_SIZE, "PhysicsWorld2D_AddCircleCollider2D: CircleCollider2D Pool is full");
-}
-
-bool CollisionBB(Vec2& box1LeftTop, Vec2& box1RightBottom, Vec2& box2LeftTop, Vec2& box2RightBottom)
-{
-	return box1LeftTop.x < box2RightBottom.x && box1RightBottom.x > box2LeftTop.x &&
-		box1LeftTop.y > box2RightBottom.y && box1RightBottom.y < box2LeftTop.y;
-}
-
-bool CollisionCC(float radius1, float radius2, Vec2& distance)
-{
-	float len = (radius1 + radius2);
-	len *= len;
-	return len > Vec2LengthSq(distance);
-}
-
-void PhysicsWorld2D_Update(PhysicsWorld2D& world)
-{
-	// BB Collision
+	if (body1.Shape == Rigidbody2D::ShapeType::Circle && body2.Shape == Rigidbody2D::ShapeType::Circle)
 	{
-		for (size_t i = 0; i < world.BoxCollider2DCount; i++)
+		return Collisions_CC(body1.Position, body1.CircleCollider.Radius, body2.Position, body2.CircleCollider.Radius, normal, depth);
+	}
+	else if (body1.Shape == Rigidbody2D::ShapeType::Box && body2.Shape == Rigidbody2D::ShapeType::Box)
+	{
+		Vec2 box1LeftTop = { body1.Position.x - body1.BoxCollider.Size.x,body1.Position.y + body1.BoxCollider.Size.y };
+		Vec2 box1RightBottom = { body1.Position.x + body1.BoxCollider.Size.x,body1.Position.y - body1.BoxCollider.Size.y };
+
+		Vec2 box2LeftTop = { body2.Position.x - body2.BoxCollider.Size.x,body2.Position.y + body2.BoxCollider.Size.y };
+		Vec2 box2RightBottom = { body2.Position.x + body2.BoxCollider.Size.x,body2.Position.y - body2.BoxCollider.Size.y };
+
+		//TODO: CollisionBB
+		return false;
+	}
+	else if (body1.Shape == Rigidbody2D::ShapeType::Circle && body2.Shape == Rigidbody2D::ShapeType::Box)
+	{
+		Vec2 boxLeftTop = { body1.Position.x - body1.BoxCollider.Size.x,body1.Position.y + body1.BoxCollider.Size.y };
+		Vec2 boxRightBottom = { body1.Position.x + body1.BoxCollider.Size.x,body1.Position.y - body1.BoxCollider.Size.y };
+
+		//TODO: CollisionBC
+		return false;
+	}
+	return false;
+}
+
+void PhysicsWorld2D_Update(PhysicsWorld2D& world, float timeStep)
+{
+	if (!IsFixedUpdate(timeStep))
+		return;
+
+	{
+		//TODO: Implement Rigidbody2D Update
 		{
-			BoxCollider2D* box1 = (BoxCollider2D*)List_Get(world.BoxCollider2Ds, i);
-
-			Vec2 box1LeftTop = { box1->Pos.x - box1->HalfWidth,box1->Pos.y + box1->HalfHeight };
-			Vec2 box1RightBottom = { box1->Pos.x + box1->HalfWidth,box1->Pos.y - box1->HalfHeight };
-
-			for (size_t j = i + 1; j < world.BoxCollider2DCount; j++)
+			for (size_t i = 0; i < world.Rigidbody2DCount; i++)
 			{
-				BoxCollider2D* box2 = (BoxCollider2D*)List_Get(world.BoxCollider2Ds, j);
+				Rigidbody2D* rigidbody = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, i);
 
-				Vec2 box2LeftTop = { box2->Pos.x - box2->HalfWidth,box2->Pos.y + box2->HalfHeight };
-				Vec2 box2RightBottom = { box2->Pos.x + box2->HalfWidth,box2->Pos.y - box2->HalfHeight };
-
-				if (CollisionBB(box1LeftTop, box1RightBottom, box2LeftTop, box2RightBottom))
-				{
-					if (Entity_HasComponent(*box1->Entity, ComponentType_Script))
-					{
-						ScriptComponent* script1 = (ScriptComponent*)Entity_GetComponent(*box1->Entity, ComponentType_Script);
-						script1->OnCollision(*box1->Entity, *box2->Entity);
-					}
-
-					if (Entity_HasComponent(*box2->Entity, ComponentType_Script))
-					{
-						ScriptComponent* script2 = (ScriptComponent*)Entity_GetComponent(*box2->Entity, ComponentType_Script);
-						script2->OnCollision(*box2->Entity, *box1->Entity);
-					}
-				}
+				rigidbody->Position = Vec2Add(rigidbody->Position, rigidbody->Velocity);
+				rigidbody->Velocity = Vec2(0.0f, 0.0f);
 			}
 		}
-	}
 
-	// CC Collision
-	{
-		for (size_t i = 0; i < world.CircleCollider2DCount; i++)
+		// Collide
 		{
-			CircleCollider2D* circle1 = (CircleCollider2D*)List_Get(world.CircleCollider2Ds, i);
-
-			for (size_t j = i + 1; j < world.CircleCollider2DCount; j++)
+			for (size_t i = 0; i < world.Rigidbody2DCount; i++)
 			{
-				CircleCollider2D* circle2 = (CircleCollider2D*)List_Get(world.CircleCollider2Ds, j);
-
-				Vec2 distance = { circle1->Pos.x - circle2->Pos.x,circle1->Pos.y - circle2->Pos.y };
-
-				if (CollisionCC(circle1->Radius, circle2->Radius, distance))
+				for (size_t j = i + 1; j < world.Rigidbody2DCount; j++)
 				{
-					if (Entity_HasComponent(*circle1->Entity, ComponentType_Script))
+					Rigidbody2D* body1 = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, i);
+					Rigidbody2D* body2 = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, j);
+
+					float depth;
+					Vec2 normal;
+					if (Collide(*body1, *body2, &normal, &depth))
 					{
-						ScriptComponent* script1 = (ScriptComponent*)Entity_GetComponent(*circle1->Entity, ComponentType_Script);
-						script1->OnCollision(*circle1->Entity, *circle2->Entity);
-					}
+						world.CollisionCallback(body1->Entity, body2->Entity);
 
-					if (Entity_HasComponent(*circle2->Entity, ComponentType_Script))
-					{
-						ScriptComponent* script2 = (ScriptComponent*)Entity_GetComponent(*circle2->Entity, ComponentType_Script);
-						script2->OnCollision(*circle2->Entity, *circle1->Entity);
-					}
-				}
-			}
-		}
-	}
-
-	// BC Collision
-	{
-		for (size_t i = 0; i < world.BoxCollider2DCount; i++)
-		{
-			BoxCollider2D* box = (BoxCollider2D*)List_Get(world.BoxCollider2Ds, i);
-
-			Vec2 boxLeftTop = { box->Pos.x - box->HalfWidth,box->Pos.y + box->HalfHeight };
-			Vec2 boxRightBottom = { box->Pos.x + box->HalfWidth,box->Pos.y - box->HalfHeight };
-
-			for (size_t j = 0; j < world.CircleCollider2DCount; j++)
-			{
-				CircleCollider2D* circle = (CircleCollider2D*)List_Get(world.CircleCollider2Ds, j);
-
-				// Make Circle like a special Box
-				Vec2 circleLeftTop = { circle->Pos.x - circle->Radius,circle->Pos.y + circle->Radius };
-				Vec2 circleRightBottom = { circle->Pos.x + circle->Radius,circle->Pos.y - circle->Radius };
-
-				if (CollisionBB(boxLeftTop, boxRightBottom, circleLeftTop, circleRightBottom))
-				{
-					if (Entity_HasComponent(*box->Entity, ComponentType_Script))
-					{
-						ScriptComponent* script1 = (ScriptComponent*)Entity_GetComponent(*box->Entity, ComponentType_Script);
-						script1->OnCollision(*box->Entity, *circle->Entity);
-					}
-
-					if (Entity_HasComponent(*circle->Entity, ComponentType_Script))
-					{
-						ScriptComponent* script2 = (ScriptComponent*)Entity_GetComponent(*circle->Entity, ComponentType_Script);
-						script2->OnCollision(*circle->Entity, *box->Entity);
+						//Temp
+						body1->Position = Vec2Add(body1->Position, Vec2MulFloat(normal, -depth / 2.0f));
+						body2->Position = Vec2Sub(body2->Position, Vec2MulFloat(normal, depth / 2.0f));
 					}
 				}
 			}

@@ -28,10 +28,52 @@ Vec2 Vec2MulFloat(const Vec2& vec, float f)
 	return result;
 }
 
+Vec2 Vec2Normalize(const Vec2& vec)
+{
+	Vec2 result;
+	DirectX::XMStoreFloat2(&result, DirectX::XMVector2Normalize(DirectX::XMLoadFloat2(&vec)));
+	return result;
+}
+
 float Vec2LengthSq(const Vec2& vec)
 {
 	float result;
 	DirectX::XMStoreFloat(&result, DirectX::XMVector2LengthSq(DirectX::XMLoadFloat2(&vec)));
+	return result;
+}
+
+float Vec2Length(const Vec2& vec)
+{
+	float result;
+	DirectX::XMStoreFloat(&result, DirectX::XMVector2Length(DirectX::XMLoadFloat2(&vec)));
+	return result;
+}
+
+float Vec2Distance(const Vec2& a, const Vec2& b)
+{
+	float result;
+	DirectX::XMStoreFloat(&result, DirectX::XMVector2Length(DirectX::XMVectorSet(a.x - b.x, a.y - b.y, 0, 0)));
+	return result;
+}
+
+Vec2 Vec2Add(const Vec2& a, const Vec2& b)
+{
+	Vec2 result;
+	DirectX::XMStoreFloat2(&result, DirectX::XMVectorAdd(DirectX::XMLoadFloat2(&a), DirectX::XMLoadFloat2(&b)));
+	return result;
+}
+
+Vec2 Vec2Sub(const Vec2& a, const Vec2& b)
+{
+	Vec2 result;
+	DirectX::XMStoreFloat2(&result, DirectX::XMVectorSubtract(DirectX::XMLoadFloat2(&a), DirectX::XMLoadFloat2(&b)));
+	return result;
+}
+
+Vec2 Vec2Lerp(const Vec2& a, const Vec2& b, float t)
+{
+	Vec2 result;
+	DirectX::XMStoreFloat2(&result, DirectX::XMVectorLerp(DirectX::XMLoadFloat2(&a), DirectX::XMLoadFloat2(&b), t));
 	return result;
 }
 
@@ -61,6 +103,12 @@ Vec3 Vec3Lerp(const Vec3& a, const Vec3& b, float t)
 	Vec3 result;
 	DirectX::XMStoreFloat3(&result, DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&a), DirectX::XMLoadFloat3(&b), t));
 	return result;
+}
+
+Vec2 Vec3ToVec2(const Vec3& vec)
+{
+	Vec2 temp = { vec.x,vec.y };
+	return temp;
 }
 
 float FloatMax(float a, float b)

@@ -97,7 +97,7 @@ void Game_Ininialize(Application* appInst)
 
 	ScriptGlue_Ininialize(scene);
 
-	Scene_Ininialize(scene);
+	Scene_Start(scene);
 }
 
 void Game_Update(float timeStep)

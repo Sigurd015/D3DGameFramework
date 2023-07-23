@@ -8,23 +8,92 @@ void Scene_Create(Scene& out)
 	List_Create(out.Entities);
 }
 
-void Scene_Ininialize(Scene& out)
+void OnCollide(void* entity1, void* entity2)
 {
-	uint32_t size = List_Size(out.Entities);
-	for (size_t i = 0; i < size; i++)
+	Entity* ent1 = (Entity*)entity1;
+	Entity* ent2 = (Entity*)entity2;
+	if (Entity_HasComponent(*ent1, ComponentType_Script))
 	{
-		Entity* temp = (Entity*)List_Get(out.Entities, i);
-		if (Entity_HasComponent(*temp, ComponentType_Script))
+		ent1->Script->OnCollision(*ent1, *ent2);
+	}
+
+	if (Entity_HasComponent(*ent2, ComponentType_Script))
+	{
+		ent2->Script->OnCollision(*ent2, *ent1);
+	}
+}
+
+void Scene_Start(Scene& out)
+{
+	// Initialize all the scripts
+	uint32_t size = List_Size(out.Entities);
+	{
+		for (size_t i = 0; i < size; i++)
 		{
-			temp->Script->OnCreate(*temp);
+			Entity* temp = (Entity*)List_Get(out.Entities, i);
+			if (Entity_HasComponent(*temp, ComponentType_Script))
+			{
+				temp->Script->OnCreate(*temp);
+			}
 		}
 	}
 
-	PhysicsWorld2D_Create(out.PhysicsWorld);
+	// Initialize all the physics
+	PhysicsWorld2D_Create(out.PhysicsWorld, OnCollide);
+	{
+		for (size_t i = 0; i < size; i++)
+		{
+			Entity* temp = (Entity*)List_Get(out.Entities, i);
+			TransformComponent* tc = &temp->Transform;
+
+			if (Entity_HasComponent(*temp, ComponentType_Rigidbody2D))
+			{
+				Rigidbody2DComponent* rb2d = temp->Rigidbody2D;
+
+				Rigidbody2D rigidbody2D;
+				rigidbody2D.Type = rb2d->Type;
+				rigidbody2D.Position = { tc->Translation.x, tc->Translation.y };
+				rigidbody2D.Rotation = tc->Rotation.z;
+				rigidbody2D.FixedRotation = rb2d->FixedRotation;
+				rigidbody2D.Entity = temp;
+
+				if (Entity_HasComponent(*temp, ComponentType_CircleCollider2D))
+				{
+					CircleCollider2DComponent* cc2d = temp->CircleCollider2D;
+
+					CircleCollider2D collider = {
+						{ cc2d->Offset.x, cc2d->Offset.y },
+						cc2d->Radius * tc->Scale.x,// Notice: CircleCollider2D only support uniform scale
+					};
+
+					rigidbody2D.Shape = Rigidbody2D::ShapeType::Circle;
+
+					Rigidbody2D_CreateShape(rigidbody2D, &collider);
+				}
+
+				if (Entity_HasComponent(*temp, ComponentType_BoxCollider2D))
+				{
+					BoxCollider2DComponent* bc2d = temp->BoxCollider2D;
+
+					BoxCollider2D collider = {
+						{ bc2d->Offset.x, bc2d->Offset.y },
+						{ bc2d->Size.x * tc->Scale.x, bc2d->Size.y * tc->Scale.y, }
+					};
+
+					rigidbody2D.Shape = Rigidbody2D::ShapeType::Box;
+
+					Rigidbody2D_CreateShape(rigidbody2D, &collider);
+				}
+
+				rb2d->RuntimeBody = PhysicsWorld2D_AddRigidbody2D(out.PhysicsWorld, rigidbody2D);
+			}
+		}
+	}
 }
 
 void Scene_Destroy(Scene& out)
 {
+	// Destroy all the entities and their components
 	uint32_t size = List_Size(out.Entities);
 	for (size_t i = 0; i < size; i++)
 	{
@@ -115,6 +184,47 @@ Entity* Scene_GetPrimaryCamera(const Scene& out)
 	return nullptr;
 }
 
+void PhysicsVisualiztion(Scene& out)
+{
+	uint32_t size = List_Size(out.Entities);
+	for (size_t i = 0; i < size; i++)
+	{
+		Entity* temp = (Entity*)List_Get(out.Entities, i);
+		TransformComponent* tc = &temp->Transform;
+
+		if (Entity_HasComponent(*temp, ComponentType_CircleCollider2D))
+		{
+			CircleCollider2DComponent* cc2d = temp->CircleCollider2D;
+
+			Vec3 translation = Vec3Add(tc->Translation, Vec3(cc2d->Offset.x, cc2d->Offset.y, 0.001f));
+			float radius = cc2d->Radius * 2.05f;
+			Vec3 scale = Vec3MulVec3(Vec3(radius, radius, radius), tc->Scale);
+
+			Mat transform = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z)
+				* DirectX::XMMatrixTranslation(translation.x, translation.y, translation.z);
+
+			Renderer2D_DrawCircle(transform, Vec4(0, 1, 0, 1), 0.01f);
+		}
+
+		if (Entity_HasComponent(*temp, ComponentType_BoxCollider2D))
+		{
+			BoxCollider2DComponent* bc2d = temp->BoxCollider2D;
+
+			Vec3 bc2dTranslation = Vec3(bc2d->Offset.x, bc2d->Offset.y, 0.001f);
+			Vec3 translation = Vec3Add(tc->Translation, bc2dTranslation);
+			Vec2 size = Vec2MulFloat(bc2d->Size, 2.05f);
+			Vec3 scale = Vec3MulVec3(Vec3(size.x, size.y, 1.0f), tc->Scale);
+
+			Mat transform = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z)
+				* DirectX::XMMatrixTranslation(bc2dTranslation.x, bc2dTranslation.y, bc2dTranslation.z)
+				* DirectX::XMMatrixRotationZ(tc->Rotation.z)
+				* DirectX::XMMatrixTranslation(tc->Translation.x, tc->Translation.y, tc->Translation.z);
+
+			Renderer2D_DrawRect(transform, Vec4(0, 1, 0, 1));
+		}
+	}
+}
+
 void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
 {
 	// Find primary camera
@@ -129,133 +239,87 @@ void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
 		Renderer2D_BeginScene(viewProjection);
 	}
 
-	bool isFixedUpdate = PhysicsWorld2D_IsFixedUpdate(timeStep);
-
 	uint32_t size = List_Size(out.Entities);
-	for (size_t i = 0; i < size; i++)
-	{
-		Entity* temp = (Entity*)List_Get(out.Entities, i);
-		TransformComponent* tc = &temp->Transform;
 
-		// Update scripts
+	// Update scripts
+	{
+		for (size_t i = 0; i < size; i++)
 		{
+			Entity* temp = (Entity*)List_Get(out.Entities, i);
+
 			if (Entity_HasComponent(*temp, ComponentType_Script))
 			{
 				temp->Script->OnUpdate(*temp, timeStep);
 			}
 		}
+	}
 
-		// Update Physics
+	// Update Physics
+	{
+		PhysicsWorld2D_Update(out.PhysicsWorld, timeStep);
 		{
-			if (Entity_HasComponent(*temp, ComponentType_Rigidbody2D))
+			for (size_t i = 0; i < size; i++)
 			{
-				//TODO: Implement Rigidbody2D When we need it
-			}
+				Entity* temp = (Entity*)List_Get(out.Entities, i);
+				TransformComponent* tc = &temp->Transform;
 
-			if (Entity_HasComponent(*temp, ComponentType_CircleCollider2D))
-			{
-				CircleCollider2DComponent* cc2d = temp->CircleCollider2D;
-
-				if (isFixedUpdate)
+				if (Entity_HasComponent(*temp, ComponentType_Rigidbody2D))
 				{
-					CircleCollider2D collider = {
-						{ tc->Translation.x + cc2d->Offset.x, tc->Translation.y + cc2d->Offset.y },
-						cc2d->Radius * tc->Scale.x,// Notice: CircleCollider2D only support uniform scale
-						temp,
-					};
-
-					PhysicsWorld2D_AddCircleCollider2D(out.PhysicsWorld, collider);
-				}
-
-				if (enablePhysicsVisualization)
-				{
-					Vec3 translation = Vec3Add(tc->Translation, Vec3(cc2d->Offset.x, cc2d->Offset.y, 0.001f));
-					float radius = cc2d->Radius * 2.05f;
-					Vec3 scale = Vec3MulVec3(Vec3(radius, radius, radius), tc->Scale);
-
-					Mat transform = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z)
-						* DirectX::XMMatrixTranslation(translation.x, translation.y, translation.z);
-
-					Renderer2D_DrawCircle(transform, Vec4(0, 1, 0, 1), 0.01f);
-				}
-			}
-
-			if (Entity_HasComponent(*temp, ComponentType_BoxCollider2D))
-			{
-				BoxCollider2DComponent* bc2d = temp->BoxCollider2D;
-
-				if (isFixedUpdate)
-				{
-					BoxCollider2D collider = {
-						{ tc->Translation.x + bc2d->Offset.x, tc->Translation.y + bc2d->Offset.y },
-						bc2d->Size.x * tc->Scale.x,
-						bc2d->Size.y * tc->Scale.y,
-						tc->Rotation.z,
-						temp,
-					};
-
-					PhysicsWorld2D_AddBoxCollider2D(out.PhysicsWorld, collider);
-				}
-
-				if (enablePhysicsVisualization)
-				{
-					Vec3 bc2dTranslation = Vec3(bc2d->Offset.x, bc2d->Offset.y, 0.001f);
-					Vec3 translation = Vec3Add(tc->Translation, bc2dTranslation);
-					Vec2 size = Vec2MulFloat(bc2d->Size, 2.05f);
-					Vec3 scale = Vec3MulVec3(Vec3(size.x, size.y, 1.0f), tc->Scale);
-
-					Mat transform = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z)
-						* DirectX::XMMatrixTranslation(bc2dTranslation.x, bc2dTranslation.y, bc2dTranslation.z)
-						* DirectX::XMMatrixRotationZ(tc->Rotation.z)
-						* DirectX::XMMatrixTranslation(tc->Translation.x, tc->Translation.y, tc->Translation.z);
-
-					Renderer2D_DrawRect(transform, Vec4(0, 1, 0, 1));
+					Rigidbody2DComponent* rb2d = temp->Rigidbody2D;
+					Rigidbody2D* rb = (Rigidbody2D*)rb2d->RuntimeBody;
+					tc->Translation = { rb->Position.x, rb->Position.y, tc->Translation.z };
+					tc->Rotation = { tc->Rotation.x, tc->Rotation.y, rb->Rotation };
 				}
 			}
 		}
+	}
 
-		// Rendering
+	// Rendering
+	{
+		for (size_t i = 0; i < size; i++)
 		{
-			if (Entity_HasComponent(*temp, ComponentType_SpriteRenderer))
-			{
-				SpriteRendererComponent* sprite = temp->SpriteRenderer;
+			Entity* temp = (Entity*)List_Get(out.Entities, i);
+			TransformComponent* tc = &temp->Transform;
 
-				if (sprite->Texture)
+			{
+				if (Entity_HasComponent(*temp, ComponentType_SpriteRenderer))
 				{
-					Renderer2D_DrawQuad(
+					SpriteRendererComponent* sprite = temp->SpriteRenderer;
+
+					if (sprite->Texture)
+					{
+						Renderer2D_DrawQuad(
+							TransformComponent_GetTransform(*tc),
+							*sprite->Texture,
+							sprite->UVStart,
+							sprite->UVEnd,
+							sprite->Color,
+							sprite->TilingFactor
+						);
+					}
+					else
+					{
+						Renderer2D_DrawQuad(TransformComponent_GetTransform(*tc), sprite->Color);
+					}
+				}
+
+				if (Entity_HasComponent(*temp, ComponentType_CircleRenderer))
+				{
+					CircleRendererComponent* circle = temp->CircleRenderer;
+
+					Renderer2D_DrawCircle(
 						TransformComponent_GetTransform(*tc),
-						*sprite->Texture,
-						sprite->UVStart,
-						sprite->UVEnd,
-						sprite->Color,
-						sprite->TilingFactor
+						circle->Color,
+						circle->Thickness,
+						circle->Fade
 					);
 				}
-				else
-				{
-					Renderer2D_DrawQuad(TransformComponent_GetTransform(*tc), sprite->Color);
-				}
-			}
-
-			if (Entity_HasComponent(*temp, ComponentType_CircleRenderer))
-			{
-				CircleRendererComponent* circle = temp->CircleRenderer;
-
-				Renderer2D_DrawCircle(
-					TransformComponent_GetTransform(*tc),
-					circle->Color,
-					circle->Thickness,
-					circle->Fade
-				);
 			}
 		}
 	}
 
-	if (isFixedUpdate)
-	{
-		PhysicsWorld2D_Update(out.PhysicsWorld);
-		PhysicsWorld2D_Clear(out.PhysicsWorld);
-	}
+	if (enablePhysicsVisualization)
+		PhysicsVisualiztion(out);
 
 	Renderer2D_EndScene();
 }

@@ -50,6 +50,10 @@ void ScriptGlue_Ininialize(Scene& scene)
 		spriteRenderer->Texture = texture;
 		Entity_AddComponent(*quad, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
+		Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+		*rigidbody2D = {};
+		Entity_AddComponent(*quad, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
 		BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
 		*boxCollider2D = {};
 		Entity_AddComponent(*quad, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
@@ -77,6 +81,10 @@ void ScriptGlue_Ininialize(Scene& scene)
 		spriteRenderer->Texture = texture;
 		Entity_AddComponent(*quad, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
+		Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+		*rigidbody2D = {};
+		Entity_AddComponent(*quad, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
 		BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
 		*boxCollider2D = {};
 		Entity_AddComponent(*quad, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
@@ -94,6 +102,10 @@ void ScriptGlue_Ininialize(Scene& scene)
 		CircleRendererComponent* circleRenderer = (CircleRendererComponent*)malloc(sizeof(CircleRendererComponent));
 		*circleRenderer = {};
 		Entity_AddComponent(*circle, ComponentType::ComponentType_CircleRenderer, circleRenderer);
+
+		Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+		*rigidbody2D = {};
+		Entity_AddComponent(*circle, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
 
 		CircleCollider2DComponent* circleCollider2D = (CircleCollider2DComponent*)malloc(sizeof(CircleCollider2DComponent));
 		*circleCollider2D = {};
@@ -113,6 +125,10 @@ void ScriptGlue_Ininialize(Scene& scene)
 		CircleRendererComponent* circleRenderer = (CircleRendererComponent*)malloc(sizeof(CircleRendererComponent));
 		*circleRenderer = {};
 		Entity_AddComponent(*circle, ComponentType::ComponentType_CircleRenderer, circleRenderer);
+
+		Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+		*rigidbody2D = {};
+		Entity_AddComponent(*circle, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
 
 		CircleCollider2DComponent* circleCollider2D = (CircleCollider2DComponent*)malloc(sizeof(CircleCollider2DComponent));
 		*circleCollider2D = {};

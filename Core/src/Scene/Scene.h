@@ -13,7 +13,7 @@ struct Scene
 };
 
 void Scene_Create(Scene& out);
-void Scene_Ininialize(Scene& out);
+void Scene_Start(Scene& out);
 void Scene_Destroy(Scene& out);
 void Scene_AddEntity(Scene& out, Entity& entity);
 Entity* Scene_GetEntityByName(const Scene& out, const char* name);

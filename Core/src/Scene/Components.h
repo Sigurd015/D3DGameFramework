@@ -2,6 +2,7 @@
 #include "Math/Math.h"
 #include "SceneCamera.h"
 #include "Renderer/Texture.h"
+#include "Physics/Rigidbody.h"
 
 enum ComponentType
 {
@@ -58,21 +59,28 @@ struct SpriteRendererComponent
 // Physics
 struct Rigidbody2DComponent
 {
-	enum class BodyType { Static = 0, Dynamic, Kinematic };
-	BodyType Type = BodyType::Static;
+	Rigidbody2D::BodyType Type = Rigidbody2D::BodyType::Static;
 	bool FixedRotation = false;
+
+	void* RuntimeBody = nullptr;
 };
+
+void Rigidbody2DComponent_AddForce(Rigidbody2DComponent* rb2d, const Vec2& force);
 
 struct BoxCollider2DComponent
 {
 	Vec2 Offset = { 0.0f, 0.0f };
 	Vec2 Size = { 0.5f, 0.5f };
+
+	void* RuntimeShape = nullptr;
 };
 
 struct CircleCollider2DComponent
 {
 	Vec2 Offset = { 0.0f, 0.0f };
 	float Radius = 0.5f;
+
+	void* RuntimeShape = nullptr;
 };
 
 struct TextComponent

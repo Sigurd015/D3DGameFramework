@@ -45,12 +45,18 @@ void Entity_AddComponent(Entity& entity, ComponentType type, void* component)
 	{
 	case ComponentType_Tag:
 	{
-		entity.Tag = *(TagComponent*)component;
+		TagComponent* tag = (TagComponent*)component;
+		entity.Tag.Name = tag->Name;
 		break;
 	}
 	case ComponentType_Transform:
 	{
-		entity.Transform = *(TransformComponent*)component;
+		TransformComponent* transform = (TransformComponent*)component;
+		entity.Transform = {
+			transform->Translation,
+			transform->Rotation,
+			transform->Scale
+		};
 		break;
 	}
 	case ComponentType_Camera:

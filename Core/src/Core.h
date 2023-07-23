@@ -23,6 +23,9 @@
 #include "Scene/Components.h"
 #include "Scene/Entity.h"
 
+//-------Physics--------
+#include "Physics/PhysicsWorld.h"
+
 //-------Input----------
 #include "Input/Keycode.h"
 #include "Input/MouseCode.h"
