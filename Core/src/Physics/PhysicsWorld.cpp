@@ -45,12 +45,6 @@ void* PhysicsWorld2D_AddRigidbody2D(PhysicsWorld2D& world, Rigidbody2D& rigidbod
 	return rigidbody;
 }
 
-bool CollisionBB(Vec2& box1LeftTop, Vec2& box1RightBottom, Vec2& box2LeftTop, Vec2& box2RightBottom)
-{
-	return box1LeftTop.x < box2RightBottom.x && box1RightBottom.x > box2LeftTop.x &&
-		box1LeftTop.y > box2RightBottom.y && box1RightBottom.y < box2LeftTop.y;
-}
-
 bool IsFixedUpdate(float timeStep)
 {
 	s_Data.Time += timeStep;
@@ -68,25 +62,34 @@ bool Collide(Rigidbody2D& body1, Rigidbody2D& body2, Vec2* normal, float* depth)
 {
 	if (body1.Shape == Rigidbody2D::ShapeType::Circle && body2.Shape == Rigidbody2D::ShapeType::Circle)
 	{
-		return Collisions_CC(body1.Position, body1.CircleCollider.Radius, body2.Position, body2.CircleCollider.Radius, normal, depth);
+		return IntersectCircles(body1.Position, body1.CircleCollider.Radius, body2.Position, body2.CircleCollider.Radius, normal, depth);
 	}
 	else if (body1.Shape == Rigidbody2D::ShapeType::Box && body2.Shape == Rigidbody2D::ShapeType::Box)
 	{
-		Vec2 box1LeftTop = { body1.Position.x - body1.BoxCollider.Size.x,body1.Position.y + body1.BoxCollider.Size.y };
-		Vec2 box1RightBottom = { body1.Position.x + body1.BoxCollider.Size.x,body1.Position.y - body1.BoxCollider.Size.y };
+		if (body1.BoxCollider.VerticesNeedUpdate)
+		{
+			Rigidbody2D_ReCalculBoxColliderVertices(body1);
+		}
 
-		Vec2 box2LeftTop = { body2.Position.x - body2.BoxCollider.Size.x,body2.Position.y + body2.BoxCollider.Size.y };
-		Vec2 box2RightBottom = { body2.Position.x + body2.BoxCollider.Size.x,body2.Position.y - body2.BoxCollider.Size.y };
+		if (body2.BoxCollider.VerticesNeedUpdate)
+		{
+			Rigidbody2D_ReCalculBoxColliderVertices(body2);
+		}
 
-		//TODO: CollisionBB
-		return false;
+		return IntersectPolygons(body1.BoxCollider.Vertices, 4, body2.BoxCollider.Vertices, 4, normal, depth);
+	}
+	else if (body1.Shape == Rigidbody2D::ShapeType::Box && body2.Shape == Rigidbody2D::ShapeType::Circle)
+	{
+		if (body1.BoxCollider.VerticesNeedUpdate)
+		{
+			Rigidbody2D_ReCalculBoxColliderVertices(body1);
+		}
+
+		Vec2 circleCenter = Vec2Add(body2.Position, body2.CircleCollider.Offset);
+		return IntersectCirclePolygon(circleCenter, body2.CircleCollider.Radius, body1.BoxCollider.Vertices, 4, normal, depth);
 	}
 	else if (body1.Shape == Rigidbody2D::ShapeType::Circle && body2.Shape == Rigidbody2D::ShapeType::Box)
 	{
-		Vec2 boxLeftTop = { body1.Position.x - body1.BoxCollider.Size.x,body1.Position.y + body1.BoxCollider.Size.y };
-		Vec2 boxRightBottom = { body1.Position.x + body1.BoxCollider.Size.x,body1.Position.y - body1.BoxCollider.Size.y };
-
-		//TODO: CollisionBC
 		return false;
 	}
 	return false;
@@ -94,8 +97,8 @@ bool Collide(Rigidbody2D& body1, Rigidbody2D& body2, Vec2* normal, float* depth)
 
 void PhysicsWorld2D_Update(PhysicsWorld2D& world, float timeStep)
 {
-	if (!IsFixedUpdate(timeStep))
-		return;
+	//if (!IsFixedUpdate(timeStep))
+	//	return;
 
 	{
 		//TODO: Implement Rigidbody2D Update
@@ -104,8 +107,8 @@ void PhysicsWorld2D_Update(PhysicsWorld2D& world, float timeStep)
 			{
 				Rigidbody2D* rigidbody = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, i);
 
-				rigidbody->Position = Vec2Add(rigidbody->Position, rigidbody->Velocity);
-				rigidbody->Velocity = Vec2(0.0f, 0.0f);
+				//rigidbody->Position = Vec2Add(rigidbody->Position, rigidbody->Velocity);
+				//rigidbody->Velocity = Vec2(0.0f, 0.0f);
 			}
 		}
 
@@ -125,8 +128,8 @@ void PhysicsWorld2D_Update(PhysicsWorld2D& world, float timeStep)
 						world.CollisionCallback(body1->Entity, body2->Entity);
 
 						//Temp
-						body1->Position = Vec2Add(body1->Position, Vec2MulFloat(normal, -depth / 2.0f));
-						body2->Position = Vec2Sub(body2->Position, Vec2MulFloat(normal, depth / 2.0f));
+						Rigidbody2D_ApplyForce(body1, Vec2MulFloat(normal, -depth / 2.0f));
+						Rigidbody2D_ApplyForce(body2, Vec2MulFloat(normal, depth / 2.0f));
 					}
 				}
 			}

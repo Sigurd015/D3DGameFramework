@@ -91,12 +91,57 @@ void ScriptGlue_Ininialize(Scene& scene)
 
 		Scene_AddEntity(scene, *quad);
 	}
+	
+	{
+		Entity* quad = (Entity*)malloc(sizeof(Entity));
+		*quad = {};
+		quad->Tag.Name = "Quad-3";
+		quad->Transform.Translation.x = -15.5f;
+		quad->Transform.Scale = { 1.0f,1.0f,1.0f };
+
+		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+		*spriteRenderer = {};
+		spriteRenderer->Texture = texture;
+		Entity_AddComponent(*quad, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+		Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+		*rigidbody2D = {};
+		Entity_AddComponent(*quad, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
+		BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+		*boxCollider2D = {};
+		Entity_AddComponent(*quad, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+		Scene_AddEntity(scene, *quad);
+	}
 
 	{
 		Entity* circle = (Entity*)malloc(sizeof(Entity));
 		*circle = {};
 		circle->Tag.Name = "Circle-1";
 		circle->Transform.Translation.x = 0.0f;
+		circle->Transform.Scale = { 2.5f,2.5f,1.0f };
+
+		CircleRendererComponent* circleRenderer = (CircleRendererComponent*)malloc(sizeof(CircleRendererComponent));
+		*circleRenderer = {};
+		Entity_AddComponent(*circle, ComponentType::ComponentType_CircleRenderer, circleRenderer);
+
+		Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+		*rigidbody2D = {};
+		Entity_AddComponent(*circle, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
+		CircleCollider2DComponent* circleCollider2D = (CircleCollider2DComponent*)malloc(sizeof(CircleCollider2DComponent));
+		*circleCollider2D = {};
+		Entity_AddComponent(*circle, ComponentType::ComponentType_CircleCollider2D, circleCollider2D);
+
+		Scene_AddEntity(scene, *circle);
+	}
+
+	{
+		Entity* circle = (Entity*)malloc(sizeof(Entity));
+		*circle = {};
+		circle->Tag.Name = "Circle-2";
+		circle->Transform.Translation.x = 2.0f;
 		circle->Transform.Scale = { 2.5f,2.5f,1.0f };
 
 		CircleRendererComponent* circleRenderer = (CircleRendererComponent*)malloc(sizeof(CircleRendererComponent));

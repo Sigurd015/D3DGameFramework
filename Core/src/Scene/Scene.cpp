@@ -61,28 +61,15 @@ void Scene_Start(Scene& out)
 				{
 					CircleCollider2DComponent* cc2d = temp->CircleCollider2D;
 
-					CircleCollider2D collider = {
-						{ cc2d->Offset.x, cc2d->Offset.y },
-						cc2d->Radius * tc->Scale.x,// Notice: CircleCollider2D only support uniform scale
-					};
-
-					rigidbody2D.Shape = Rigidbody2D::ShapeType::Circle;
-
-					Rigidbody2D_CreateShape(rigidbody2D, &collider);
+					// Notice: CircleCollider2D only support uniform scale
+					Rigidbody2D_CreateCircleCollider(rigidbody2D, cc2d->Offset, cc2d->Radius * tc->Scale.x);
 				}
 
 				if (Entity_HasComponent(*temp, ComponentType_BoxCollider2D))
 				{
 					BoxCollider2DComponent* bc2d = temp->BoxCollider2D;
 
-					BoxCollider2D collider = {
-						{ bc2d->Offset.x, bc2d->Offset.y },
-						{ bc2d->Size.x * tc->Scale.x, bc2d->Size.y * tc->Scale.y, }
-					};
-
-					rigidbody2D.Shape = Rigidbody2D::ShapeType::Box;
-
-					Rigidbody2D_CreateShape(rigidbody2D, &collider);
+					Rigidbody2D_CreateBoxCollider(rigidbody2D, bc2d->Offset, { bc2d->Size.x * tc->Scale.x, bc2d->Size.y * tc->Scale.y });
 				}
 
 				rb2d->RuntimeBody = PhysicsWorld2D_AddRigidbody2D(out.PhysicsWorld, rigidbody2D);
@@ -268,7 +255,22 @@ void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
 					Rigidbody2DComponent* rb2d = temp->Rigidbody2D;
 					Rigidbody2D* rb = (Rigidbody2D*)rb2d->RuntimeBody;
 					tc->Translation = { rb->Position.x, rb->Position.y, tc->Translation.z };
-					tc->Rotation = { tc->Rotation.x, tc->Rotation.y, rb->Rotation };
+					tc->Rotation.z = rb->Rotation;
+
+					if (Entity_HasComponent(*temp, ComponentType_CircleCollider2D))
+					{
+						CircleCollider2DComponent* cc2d = temp->CircleCollider2D;
+
+						// Notice: CircleCollider2D only support uniform scale
+						Rigidbody2D_CreateCircleCollider(*rb, cc2d->Offset, cc2d->Radius * tc->Scale.x);
+					}
+
+					if (Entity_HasComponent(*temp, ComponentType_BoxCollider2D))
+					{
+						BoxCollider2DComponent* bc2d = temp->BoxCollider2D;
+
+						Rigidbody2D_CreateBoxCollider(*rb, bc2d->Offset, { bc2d->Size.x * tc->Scale.x, bc2d->Size.y * tc->Scale.y });
+					}
 				}
 			}
 		}

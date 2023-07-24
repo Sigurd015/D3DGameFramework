@@ -21,10 +21,30 @@ Vec4 Vec4MulMat(const Vec4& vec, const Mat& mat)
 	return result;
 }
 
+float Vec2Dot(const Vec2& a, const Vec2& b)
+{
+	DirectX::XMVECTOR dotProduct = DirectX::XMVector2Dot(DirectX::XMLoadFloat2(&a), DirectX::XMLoadFloat2(&b));
+	float result;
+	DirectX::XMStoreFloat(&result, dotProduct);
+	return result;
+}
+
+bool Vec2Equal(const Vec2& a, const Vec2& b)
+{
+	return a.x == b.x && a.y == b.y;
+}
+
 Vec2 Vec2MulFloat(const Vec2& vec, float f)
 {
 	Vec2 result;
 	DirectX::XMStoreFloat2(&result, DirectX::XMVectorScale(DirectX::XMLoadFloat2(&vec), f));
+	return result;
+}
+
+Vec2 Vec2MulMat(const Vec2& vec, const Mat& mat)
+{
+	Vec2 result;
+	DirectX::XMStoreFloat2(&result, DirectX::XMVector2Transform(DirectX::XMLoadFloat2(&vec), mat));
 	return result;
 }
 
@@ -51,9 +71,7 @@ float Vec2Length(const Vec2& vec)
 
 float Vec2Distance(const Vec2& a, const Vec2& b)
 {
-	float result;
-	DirectX::XMStoreFloat(&result, DirectX::XMVector2Length(DirectX::XMVectorSet(a.x - b.x, a.y - b.y, 0, 0)));
-	return result;
+	return Vec2Length({ a.x - b.x, a.y - b.y });
 }
 
 Vec2 Vec2Add(const Vec2& a, const Vec2& b)

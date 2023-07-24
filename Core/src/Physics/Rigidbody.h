@@ -21,5 +21,8 @@ struct Rigidbody2D
 	void* Entity = nullptr;
 };
 
-void Rigidbody2D_CreateShape(Rigidbody2D& rigidbody2D, void* shape);
+void Rigidbody2D_CreateBoxCollider(Rigidbody2D& rigidbody2D, const Vec2& offset, const Vec2& size);
+void Rigidbody2D_ReCalculBoxColliderVertices(Rigidbody2D& rigidbody2D);
+void Rigidbody2D_CreateCircleCollider(Rigidbody2D& rigidbody2D, const Vec2& offset, float radius);
 void Rigidbody2D_ApplyForce(void* rigidbody2D, const Vec2& force);
+void Rigidbody2D_ApplyRotation(void* rigidbody2D, float rotation);

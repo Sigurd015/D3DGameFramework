@@ -65,7 +65,8 @@ struct Rigidbody2DComponent
 	void* RuntimeBody = nullptr;
 };
 
-void Rigidbody2DComponent_AddForce(Rigidbody2DComponent* rb2d, const Vec2& force);
+void Rigidbody2DComponent_ApplyForce(Rigidbody2DComponent& rigidbody2D, const Vec2& force);
+void Rigidbody2DComponent_ApplyRotation(Rigidbody2DComponent& rigidbody2D, float rotation);
 
 struct BoxCollider2DComponent
 {

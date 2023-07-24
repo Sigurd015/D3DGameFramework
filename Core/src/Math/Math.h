@@ -9,12 +9,19 @@ typedef DirectX::XMFLOAT4 Vec4;
 typedef DirectX::XMMATRIX Mat;
 typedef DirectX::XMFLOAT4X4 Mat4;
 
+#define Vec2Zero Vec2(0.0f,0.0f) 
+#define Vec3Zero Vec3(0.0f,0.0f,0.0f)
+#define Vec4Zero Vec4(0.0f,0.0f,0.0f,0.0f)
+
 Vec3 Vec4ToVec3(const Vec4& vec);
 
 Vec4 Vec4MulFloat(const Vec4& vec, float f);
 Vec4 Vec4MulMat(const Vec4& vec, const Mat& mat);
 
+float Vec2Dot(const Vec2& a, const Vec2& b);
+bool Vec2Equal(const Vec2& a, const Vec2& b);
 Vec2 Vec2MulFloat(const Vec2& vec, float f);
+Vec2 Vec2MulMat(const Vec2& vec, const Mat& mat);
 Vec2 Vec2Normalize(const Vec2& vec);
 float Vec2Length(const Vec2& vec);
 float Vec2LengthSq(const Vec2& vec);

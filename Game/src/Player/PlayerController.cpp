@@ -19,6 +19,7 @@ void PlayerController_OnCreate(Entity& entity)
 void PlayerController_OnUpdate(Entity& entity, float timeStep)
 {
 	Vec2 position = Vec2(0, 0);
+	float rotation = 0.0f;
 
 	static float speed = 5.0f;
 
@@ -31,7 +32,13 @@ void PlayerController_OnUpdate(Entity& entity, float timeStep)
 	if (Input_GetKey(KeyCode::D))
 		position.x += speed * timeStep;
 
-	Rigidbody2D_ApplyForce(s_Data.Rigidbody2D->RuntimeBody, position);
+	if (Input_GetKey(KeyCode::Z))
+		rotation += DirectX::XMConvertToRadians(90.0f) * timeStep;
+	if (Input_GetKey(KeyCode::C))
+		rotation -= DirectX::XMConvertToRadians(90.0f) * timeStep;
+
+	Rigidbody2DComponent_ApplyRotation(*s_Data.Rigidbody2D, rotation);
+	Rigidbody2DComponent_ApplyForce(*s_Data.Rigidbody2D, position);
 }
 
 void PlayerController_OnDestroy(Entity& entity)

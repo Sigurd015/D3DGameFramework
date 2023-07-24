@@ -15,7 +15,7 @@ struct VertexBufferLayoutEmelent
 	ShaderDataType Type;
 	const char* Name;
 	uint32_t Size = 0;
-	size_t Offset = 0;
+	uint32_t Offset = 0;
 };
 
 struct VertexBufferLayout
