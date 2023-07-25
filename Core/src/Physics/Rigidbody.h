@@ -12,6 +12,17 @@ struct Rigidbody2D
 	float AngularVelocity = 0.0f;
 	bool FixedRotation = false;
 
+	float Density = 1.0f;
+	float Friction = 0.5f;
+	float Restitution = 0.1f;
+	float RestitutionThreshold = 0.5f;
+
+	float Mass = 0.5f;
+	float InvMass;
+
+	Vec2 Force = { 0.0f, 0.0f };
+	float Torque = 0.0f;
+
 	enum ShapeType { Box = 0, Circle };
 	ShapeType Shape = ShapeType::Box;
 
@@ -26,3 +37,5 @@ void Rigidbody2D_ReCalculBoxColliderVertices(Rigidbody2D& rigidbody2D);
 void Rigidbody2D_CreateCircleCollider(Rigidbody2D& rigidbody2D, const Vec2& offset, float radius);
 void Rigidbody2D_ApplyForce(void* rigidbody2D, const Vec2& force);
 void Rigidbody2D_ApplyRotation(void* rigidbody2D, float rotation);
+void Rigidbody2D_MovePosition(Rigidbody2D& rigidbody2D, const Vec2& amount);
+void Rigidbody2D_Step(Rigidbody2D& rigidbody2D, float timeStep);

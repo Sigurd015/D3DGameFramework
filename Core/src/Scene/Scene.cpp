@@ -61,6 +61,11 @@ void Scene_Start(Scene& out)
 				{
 					CircleCollider2DComponent* cc2d = temp->CircleCollider2D;
 
+					rigidbody2D.Density = cc2d->Density;
+					rigidbody2D.Restitution = cc2d->Restitution;
+					rigidbody2D.Friction = cc2d->Friction;
+					rigidbody2D.RestitutionThreshold = cc2d->RestitutionThreshold;
+
 					// Notice: CircleCollider2D only support uniform scale
 					Rigidbody2D_CreateCircleCollider(rigidbody2D, cc2d->Offset, cc2d->Radius * tc->Scale.x);
 				}
@@ -68,6 +73,11 @@ void Scene_Start(Scene& out)
 				if (Entity_HasComponent(*temp, ComponentType_BoxCollider2D))
 				{
 					BoxCollider2DComponent* bc2d = temp->BoxCollider2D;
+
+					rigidbody2D.Density = bc2d->Density;
+					rigidbody2D.Restitution = bc2d->Restitution;
+					rigidbody2D.Friction = bc2d->Friction;
+					rigidbody2D.RestitutionThreshold = bc2d->RestitutionThreshold;
 
 					Rigidbody2D_CreateBoxCollider(rigidbody2D, bc2d->Offset, { bc2d->Size.x * tc->Scale.x, bc2d->Size.y * tc->Scale.y });
 				}
@@ -242,8 +252,9 @@ void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
 	}
 
 	// Update Physics
+	// Notice: Don't support changing the collider size and offset at runtime
 	{
-		PhysicsWorld2D_Update(out.PhysicsWorld, timeStep);
+		PhysicsWorld2D_Update(out.PhysicsWorld, timeStep, 6);
 		{
 			for (size_t i = 0; i < size; i++)
 			{
@@ -256,21 +267,6 @@ void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
 					Rigidbody2D* rb = (Rigidbody2D*)rb2d->RuntimeBody;
 					tc->Translation = { rb->Position.x, rb->Position.y, tc->Translation.z };
 					tc->Rotation.z = rb->Rotation;
-
-					if (Entity_HasComponent(*temp, ComponentType_CircleCollider2D))
-					{
-						CircleCollider2DComponent* cc2d = temp->CircleCollider2D;
-
-						// Notice: CircleCollider2D only support uniform scale
-						Rigidbody2D_CreateCircleCollider(*rb, cc2d->Offset, cc2d->Radius * tc->Scale.x);
-					}
-
-					if (Entity_HasComponent(*temp, ComponentType_BoxCollider2D))
-					{
-						BoxCollider2DComponent* bc2d = temp->BoxCollider2D;
-
-						Rigidbody2D_CreateBoxCollider(*rb, bc2d->Offset, { bc2d->Size.x * tc->Scale.x, bc2d->Size.y * tc->Scale.y });
-					}
 				}
 			}
 		}
@@ -283,39 +279,37 @@ void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
 			Entity* temp = (Entity*)List_Get(out.Entities, i);
 			TransformComponent* tc = &temp->Transform;
 
+			if (Entity_HasComponent(*temp, ComponentType_SpriteRenderer))
 			{
-				if (Entity_HasComponent(*temp, ComponentType_SpriteRenderer))
+				SpriteRendererComponent* sprite = temp->SpriteRenderer;
+
+				if (sprite->Texture)
 				{
-					SpriteRendererComponent* sprite = temp->SpriteRenderer;
-
-					if (sprite->Texture)
-					{
-						Renderer2D_DrawQuad(
-							TransformComponent_GetTransform(*tc),
-							*sprite->Texture,
-							sprite->UVStart,
-							sprite->UVEnd,
-							sprite->Color,
-							sprite->TilingFactor
-						);
-					}
-					else
-					{
-						Renderer2D_DrawQuad(TransformComponent_GetTransform(*tc), sprite->Color);
-					}
-				}
-
-				if (Entity_HasComponent(*temp, ComponentType_CircleRenderer))
-				{
-					CircleRendererComponent* circle = temp->CircleRenderer;
-
-					Renderer2D_DrawCircle(
+					Renderer2D_DrawQuad(
 						TransformComponent_GetTransform(*tc),
-						circle->Color,
-						circle->Thickness,
-						circle->Fade
+						*sprite->Texture,
+						sprite->UVStart,
+						sprite->UVEnd,
+						sprite->Color,
+						sprite->TilingFactor
 					);
 				}
+				else
+				{
+					Renderer2D_DrawQuad(TransformComponent_GetTransform(*tc), sprite->Color);
+				}
+			}
+
+			if (Entity_HasComponent(*temp, ComponentType_CircleRenderer))
+			{
+				CircleRendererComponent* circle = temp->CircleRenderer;
+
+				Renderer2D_DrawCircle(
+					TransformComponent_GetTransform(*tc),
+					circle->Color,
+					circle->Thickness,
+					circle->Fade
+				);
 			}
 		}
 	}

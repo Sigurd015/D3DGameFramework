@@ -18,6 +18,7 @@ void ScriptGlue_Ininialize(Scene& scene)
 		CameraSpecification spec;
 		spec.ProjectionType = ProjectionType::Orthographic;
 		spec.AspectRatio = 16.0f / 9.0f;
+		spec.OrthographicSize = 20.0f;
 		SceneCamera* sceneCamera = (SceneCamera*)malloc(sizeof(SceneCamera));
 		*sceneCamera = {};
 		SceneCamera_Create(*sceneCamera, spec);
@@ -56,15 +57,8 @@ void ScriptGlue_Ininialize(Scene& scene)
 
 		BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
 		*boxCollider2D = {};
+		boxCollider2D->Restitution = 0.5f;
 		Entity_AddComponent(*quad, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
-
-		//ScriptComponent* scriptComponent = (ScriptComponent*)malloc(sizeof(ScriptComponent));
-		//*scriptComponent = {};
-		//scriptComponent->OnCreate = PlayerController_OnCreate;
-		//scriptComponent->OnUpdate = PlayerController_OnUpdate;
-		//scriptComponent->OnDestroy = PlayerController_OnDestroy;
-		//scriptComponent->OnCollision = PlayerController_OnCollision;
-		//Entity_AddComponent(*quad, ComponentType::ComponentType_Script, scriptComponent);
 
 		Scene_AddEntity(scene, *quad);
 	}
@@ -83,19 +77,46 @@ void ScriptGlue_Ininialize(Scene& scene)
 
 		Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
 		*rigidbody2D = {};
+		rigidbody2D->Type = Rigidbody2D::BodyType::Dynamic;
 		Entity_AddComponent(*quad, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
 
 		BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
 		*boxCollider2D = {};
+		boxCollider2D->Restitution = 0.5f;
 		Entity_AddComponent(*quad, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
 
 		Scene_AddEntity(scene, *quad);
 	}
-	
+
 	{
 		Entity* quad = (Entity*)malloc(sizeof(Entity));
 		*quad = {};
-		quad->Tag.Name = "Quad-3";
+		quad->Tag.Name = "Ground";
+		quad->Transform.Translation.y = -15.5f;
+		quad->Transform.Scale = { 100.0f,1.0f,1.0f };
+
+		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+		*spriteRenderer = {};
+		Entity_AddComponent(*quad, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+		Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+		*rigidbody2D = {};
+		rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+		Entity_AddComponent(*quad, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
+		BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+		*boxCollider2D = {};
+		boxCollider2D->Restitution = 0.5f;
+		Entity_AddComponent(*quad, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+		Scene_AddEntity(scene, *quad);
+	}
+
+	{
+		Entity* quad = (Entity*)malloc(sizeof(Entity));
+		*quad = {};
+		//quad->Tag.Name = "Quad-3";
+		quad->Tag.Name = "Player";
 		quad->Transform.Translation.x = -15.5f;
 		quad->Transform.Scale = { 1.0f,1.0f,1.0f };
 
@@ -106,11 +127,21 @@ void ScriptGlue_Ininialize(Scene& scene)
 
 		Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
 		*rigidbody2D = {};
+		rigidbody2D->Type = Rigidbody2D::BodyType::Dynamic;
 		Entity_AddComponent(*quad, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
 
 		BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
 		*boxCollider2D = {};
+		boxCollider2D->Restitution = 0.0f;
 		Entity_AddComponent(*quad, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+		ScriptComponent* scriptComponent = (ScriptComponent*)malloc(sizeof(ScriptComponent));
+		*scriptComponent = {};
+		scriptComponent->OnCreate = PlayerController_OnCreate;
+		scriptComponent->OnUpdate = PlayerController_OnUpdate;
+		scriptComponent->OnDestroy = PlayerController_OnDestroy;
+		scriptComponent->OnCollision = PlayerController_OnCollision;
+		Entity_AddComponent(*quad, ComponentType::ComponentType_Script, scriptComponent);
 
 		Scene_AddEntity(scene, *quad);
 	}
@@ -119,7 +150,7 @@ void ScriptGlue_Ininialize(Scene& scene)
 		Entity* circle = (Entity*)malloc(sizeof(Entity));
 		*circle = {};
 		circle->Tag.Name = "Circle-1";
-		circle->Transform.Translation.x = 0.0f;
+		circle->Transform.Translation.x = -1.0f;
 		circle->Transform.Scale = { 2.5f,2.5f,1.0f };
 
 		CircleRendererComponent* circleRenderer = (CircleRendererComponent*)malloc(sizeof(CircleRendererComponent));
@@ -128,10 +159,12 @@ void ScriptGlue_Ininialize(Scene& scene)
 
 		Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
 		*rigidbody2D = {};
+		rigidbody2D->Type = Rigidbody2D::BodyType::Dynamic;
 		Entity_AddComponent(*circle, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
 
 		CircleCollider2DComponent* circleCollider2D = (CircleCollider2DComponent*)malloc(sizeof(CircleCollider2DComponent));
 		*circleCollider2D = {};
+		circleCollider2D->Restitution = 0.5f;
 		Entity_AddComponent(*circle, ComponentType::ComponentType_CircleCollider2D, circleCollider2D);
 
 		Scene_AddEntity(scene, *circle);
@@ -154,6 +187,7 @@ void ScriptGlue_Ininialize(Scene& scene)
 
 		CircleCollider2DComponent* circleCollider2D = (CircleCollider2DComponent*)malloc(sizeof(CircleCollider2DComponent));
 		*circleCollider2D = {};
+		circleCollider2D->Restitution = 0.5f;
 		Entity_AddComponent(*circle, ComponentType::ComponentType_CircleCollider2D, circleCollider2D);
 
 		Scene_AddEntity(scene, *circle);
@@ -162,8 +196,9 @@ void ScriptGlue_Ininialize(Scene& scene)
 	{
 		Entity* circle = (Entity*)malloc(sizeof(Entity));
 		*circle = {};
-		circle->Tag.Name = "Player";
-		circle->Transform.Translation.x = 3.0f;
+		circle->Tag.Name = "Circle-3";
+		//circle->Tag.Name = "Player";
+		circle->Transform.Translation.x = 5.0f;
 		circle->Transform.Translation.z = -0.1f;
 		circle->Transform.Scale = { 1.0f,1.0f,1.0f };
 
@@ -173,19 +208,21 @@ void ScriptGlue_Ininialize(Scene& scene)
 
 		Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
 		*rigidbody2D = {};
+		rigidbody2D->Type = Rigidbody2D::BodyType::Dynamic;
 		Entity_AddComponent(*circle, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
 
 		CircleCollider2DComponent* circleCollider2D = (CircleCollider2DComponent*)malloc(sizeof(CircleCollider2DComponent));
 		*circleCollider2D = {};
+		circleCollider2D->Restitution = 0.5f;
 		Entity_AddComponent(*circle, ComponentType::ComponentType_CircleCollider2D, circleCollider2D);
 
-		ScriptComponent* scriptComponent = (ScriptComponent*)malloc(sizeof(ScriptComponent));
-		*scriptComponent = {};
-		scriptComponent->OnCreate = PlayerController_OnCreate;
-		scriptComponent->OnUpdate = PlayerController_OnUpdate;
-		scriptComponent->OnDestroy = PlayerController_OnDestroy;
-		scriptComponent->OnCollision = PlayerController_OnCollision;
-		Entity_AddComponent(*circle, ComponentType::ComponentType_Script, scriptComponent);
+		//ScriptComponent* scriptComponent = (ScriptComponent*)malloc(sizeof(ScriptComponent));
+		//*scriptComponent = {};
+		//scriptComponent->OnCreate = PlayerController_OnCreate;
+		//scriptComponent->OnUpdate = PlayerController_OnUpdate;
+		//scriptComponent->OnDestroy = PlayerController_OnDestroy;
+		//scriptComponent->OnCollision = PlayerController_OnCollision;
+		//Entity_AddComponent(*circle, ComponentType::ComponentType_Script, scriptComponent);
 
 		Scene_AddEntity(scene, *circle);
 	}

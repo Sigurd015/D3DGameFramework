@@ -22,6 +22,7 @@ float Vec2Dot(const Vec2& a, const Vec2& b);
 bool Vec2Equal(const Vec2& a, const Vec2& b);
 Vec2 Vec2MulFloat(const Vec2& vec, float f);
 Vec2 Vec2MulMat(const Vec2& vec, const Mat& mat);
+Vec2 Vec2DivFloat(const Vec2& vec, float f);
 Vec2 Vec2Normalize(const Vec2& vec);
 float Vec2Length(const Vec2& vec);
 float Vec2LengthSq(const Vec2& vec);

@@ -17,6 +17,8 @@ struct CircleCollider2D
 	float Radius = 0.0f;
 };
 
-bool IntersectCircles(const Vec2& center1, float radius1, const Vec2& center2, float radius2, Vec2* normal, float* depth);
-bool IntersectPolygons(Vec2* vertices1, uint32_t count1, Vec2* vertices2, uint32_t count2, Vec2* normal, float* depth);
-bool IntersectCirclePolygon(Vec2& circleCenter, float circleRadius, Vec2* vertices, uint32_t count, Vec2* normal, float* depth);
+bool Collisions_IntersectCircles(const Vec2& center1, float radius1, const Vec2& center2, float radius2, Vec2* normal, float* depth);
+bool Collisions_IntersectPolygons(Vec2* vertices1, uint32_t count1, const Vec2& center1, Vec2* vertices2, uint32_t count2, const Vec2& center2,
+	Vec2* normal, float* depth);
+bool Collisions_IntersectCirclePolygon(Vec2& circleCenter, float circleRadius, Vec2* vertices, uint32_t count, const Vec2& polygonCenter,
+	Vec2* normal, float* depth);

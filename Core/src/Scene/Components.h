@@ -73,6 +73,11 @@ struct BoxCollider2DComponent
 	Vec2 Offset = { 0.0f, 0.0f };
 	Vec2 Size = { 0.5f, 0.5f };
 
+	float Density = 1.0f;
+	float Friction = 0.5f;
+	float Restitution = 0.1f;
+	float RestitutionThreshold = 0.5f;
+
 	void* RuntimeShape = nullptr;
 };
 
@@ -80,6 +85,11 @@ struct CircleCollider2DComponent
 {
 	Vec2 Offset = { 0.0f, 0.0f };
 	float Radius = 0.5f;
+
+	float Density = 1.0f;
+	float Friction = 0.5f;
+	float Restitution = 0.0f;
+	float RestitutionThreshold = 0.5f;
 
 	void* RuntimeShape = nullptr;
 };

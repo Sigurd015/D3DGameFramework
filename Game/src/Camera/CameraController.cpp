@@ -9,7 +9,7 @@ struct CameraControllerData
 	CameraComponent* Camera = nullptr;
 
 	float MinOrthographicSize = 5.0f;
-	float MaxOrthographicSize = 20.0f;
+	float MaxOrthographicSize = 50.0f;
 
 	float Distance = -10.0f;
 };

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Collisions.h"
-#include "Renderer/Renderer2D.h"
-bool IntersectCircles(const Vec2& center1, float radius1, const Vec2& center2, float radius2, Vec2* normal, float* depth)
+
+bool Collisions_IntersectCircles(const Vec2& center1, float radius1, const Vec2& center2, float radius2, Vec2* normal, float* depth)
 {
 	*normal = Vec2Zero;
 	*depth = 0;
@@ -36,23 +36,8 @@ void ProjectVertices(Vec2* vertices, uint32_t count, Vec2& axis, float* min, flo
 	}
 }
 
-Vec2 FindArithmeticMean(Vec2* vertices, uint32_t count)
-{
-	float sumX = 0;
-	float sumY = 0;
-
-	for (int i = 0; i < count; i++)
-	{
-		Vec2 v = vertices[i];
-		sumX += v.x;
-		sumY += v.y;
-	}
-
-	Vec2 result = { sumX / (float)count, sumY / (float)count };
-	return result;
-}
-
-bool IntersectPolygons(Vec2* vertices1, uint32_t count1, Vec2* vertices2, uint32_t count2, Vec2* normal, float* depth)
+bool Collisions_IntersectPolygons(Vec2* vertices1, uint32_t count1, const Vec2& center1, Vec2* vertices2, uint32_t count2, const Vec2& center2,
+	Vec2* normal, float* depth)
 {
 	*normal = Vec2Zero;
 	*depth = FLT_MAX;
@@ -115,10 +100,7 @@ bool IntersectPolygons(Vec2* vertices1, uint32_t count1, Vec2* vertices2, uint32
 		}
 	}
 
-	Vec2 centerA = FindArithmeticMean(vertices1, count1);
-	Vec2 centerB = FindArithmeticMean(vertices2, count2);
-
-	Vec2 direction = Vec2Sub(centerB, centerA);
+	Vec2 direction = Vec2Sub(center2, center1);
 
 	if (Vec2Dot(direction, *normal) < 0)
 	{
@@ -134,7 +116,7 @@ void ProjectCircle(Vec2& center, float radius, Vec2& axis, float* min, float* ma
 	Vec2 directionAndRadius = Vec2MulFloat(direction, radius);
 
 	Vec2 p1 = Vec2Add(center, directionAndRadius);
-	Vec2 p2 = Vec2Add(center, directionAndRadius);
+	Vec2 p2 = Vec2Sub(center, directionAndRadius);
 
 	*min = Vec2Dot(p1, axis);
 	*max = Vec2Dot(p2, axis);
@@ -168,7 +150,8 @@ int FindClosestPointOnPolygon(Vec2& circleCenter, Vec2* vertices, uint32_t count
 	return result;
 }
 
-bool IntersectCirclePolygon(Vec2& circleCenter, float circleRadius, Vec2* vertices, uint32_t count, Vec2* normal, float* depth)
+bool Collisions_IntersectCirclePolygon(Vec2& circleCenter, float circleRadius, Vec2* vertices, uint32_t count, const Vec2& polygonCenter,
+	Vec2* normal, float* depth)
 {
 	*normal = Vec2Zero;
 	*depth = FLT_MAX;
@@ -176,16 +159,6 @@ bool IntersectCirclePolygon(Vec2& circleCenter, float circleRadius, Vec2* vertic
 	Vec2 axis = Vec2Zero;
 	float axisDepth = 0;
 	float minA, maxA, minB, maxB;
-
-	//Debug
-	Vec3 translation = Vec3(circleCenter.x, circleCenter.y, 0.001f);
-	float radius = circleRadius * 2.05f;
-	Vec3 scale = Vec3MulVec3(Vec3(radius, radius, radius), Vec3(1.0f, 1.0f, 1.0f));
-
-	Mat transform = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z)
-		* DirectX::XMMatrixTranslation(translation.x, translation.y, translation.z);
-
-	Renderer2D_DrawCircle(transform, Vec4(0, 1, 0, 1), 0.01f);
 
 	for (int i = 0; i < count; i++)
 	{
@@ -234,8 +207,6 @@ bool IntersectCirclePolygon(Vec2& circleCenter, float circleRadius, Vec2* vertic
 		*depth = axisDepth;
 		*normal = axis;
 	}
-
-	Vec2 polygonCenter = FindArithmeticMean(vertices, count);
 
 	Vec2 direction = Vec2Sub(polygonCenter, circleCenter);
 

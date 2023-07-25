@@ -48,6 +48,17 @@ Vec2 Vec2MulMat(const Vec2& vec, const Mat& mat)
 	return result;
 }
 
+Vec2 Vec2DivFloat(const Vec2& vec, float f)
+{
+	if (f != 0.0f)
+	{
+		Vec2 result;
+		DirectX::XMStoreFloat2(&result, DirectX::XMVectorScale(DirectX::XMLoadFloat2(&vec), 1.0f / f));
+		return result;
+	}
+	return Vec2Zero;
+}
+
 Vec2 Vec2Normalize(const Vec2& vec)
 {
 	Vec2 result;

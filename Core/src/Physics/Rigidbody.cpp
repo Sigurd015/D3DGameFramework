@@ -3,9 +3,6 @@
 
 void Rigidbody2D_CreateBoxCollider(Rigidbody2D& rigidbody2D, const Vec2& offset, const Vec2& size)
 {
-	if (Vec2Equal(rigidbody2D.BoxCollider.Size, size) && Vec2Equal(rigidbody2D.BoxCollider.Offset, offset))
-		return;
-
 	rigidbody2D.Shape = Rigidbody2D::ShapeType::Box;
 	rigidbody2D.BoxCollider.Size = size;
 	rigidbody2D.BoxCollider.Offset = offset;
@@ -48,7 +45,8 @@ void Rigidbody2D_ApplyForce(void* rigidbody2D, const Vec2& force)
 {
 	Rigidbody2D* rigidbody = (Rigidbody2D*)rigidbody2D;
 	//Temp
-	rigidbody->Position = Vec2Add(rigidbody->Position, force);
+	//rigidbody->Position = Vec2Add(rigidbody->Position, force);
+	rigidbody->Force = Vec2Add(rigidbody->Force, force);
 	rigidbody->BoxCollider.VerticesNeedUpdate = true;
 }
 
@@ -56,6 +54,34 @@ void Rigidbody2D_ApplyRotation(void* rigidbody2D, float rotation)
 {
 	Rigidbody2D* rigidbody = (Rigidbody2D*)rigidbody2D;
 	//Temp
-	rigidbody->Rotation += rotation;
+	//rigidbody->Rotation += rotation;
+	rigidbody->Torque += rotation;
 	rigidbody->BoxCollider.VerticesNeedUpdate = true;
+}
+
+void Rigidbody2D_MovePosition(Rigidbody2D& rigidbody2D, const Vec2& amount)
+{
+	rigidbody2D.Position = Vec2Add(rigidbody2D.Position, amount);
+	rigidbody2D.BoxCollider.VerticesNeedUpdate = true;
+}
+
+void Rigidbody2D_Step(Rigidbody2D& rigidbody2D, float timeStep)
+{
+	if (rigidbody2D.Type == Rigidbody2D::BodyType::Static)
+		return;
+
+	// Integrate velocity
+	Vec2 gravity = { 0.0f, -9.8f };
+	Vec2 acceleration = Vec2DivFloat(rigidbody2D.Force, rigidbody2D.Mass);
+	rigidbody2D.Velocity = Vec2Add(rigidbody2D.Velocity, Vec2Add(acceleration, Vec2MulFloat(gravity, timeStep)));
+	rigidbody2D.AngularVelocity += rigidbody2D.Torque;
+
+	// Integrate position
+	rigidbody2D.Position = Vec2Add(rigidbody2D.Position, Vec2MulFloat(rigidbody2D.Velocity, timeStep));
+	rigidbody2D.Rotation += rigidbody2D.AngularVelocity * timeStep;
+
+	// Clear forces
+	rigidbody2D.Force = Vec2Zero;
+	rigidbody2D.Torque = 0.0f;
+	rigidbody2D.BoxCollider.VerticesNeedUpdate = true;
 }
