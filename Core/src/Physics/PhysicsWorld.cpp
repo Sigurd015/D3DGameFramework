@@ -70,11 +70,6 @@ bool Collide(Rigidbody2D& body1, Rigidbody2D& body2, Vec2* normal, float* depth)
 
 	if (shape1 == Rigidbody2D::ShapeType::Box)
 	{
-		if (body1.BoxCollider.VerticesNeedUpdate)
-		{
-			Rigidbody2D_ReCalculBoxColliderVertices(body1);
-		}
-
 		Vec2 box1Center = Vec2Add(body1.Position, body1.BoxCollider.Offset);
 
 		if (shape2 == Rigidbody2D::ShapeType::Circle)
@@ -87,11 +82,6 @@ bool Collide(Rigidbody2D& body1, Rigidbody2D& body2, Vec2* normal, float* depth)
 		}
 		else if (shape2 == Rigidbody2D::ShapeType::Box)
 		{
-			if (body2.BoxCollider.VerticesNeedUpdate)
-			{
-				Rigidbody2D_ReCalculBoxColliderVertices(body2);
-			}
-
 			Vec2 box2Center = Vec2Add(body2.Position, body2.BoxCollider.Offset);
 
 			return Collisions_IntersectPolygons(body1.BoxCollider.Vertices, 4, box1Center,
@@ -106,11 +96,6 @@ bool Collide(Rigidbody2D& body1, Rigidbody2D& body2, Vec2* normal, float* depth)
 		}
 		else if (shape2 == Rigidbody2D::ShapeType::Box)
 		{
-			if (body2.BoxCollider.VerticesNeedUpdate)
-			{
-				Rigidbody2D_ReCalculBoxColliderVertices(body2);
-			}
-
 			Vec2 box2Center = Vec2Add(body2.Position, body2.BoxCollider.Offset);
 			Vec2 circleCenter = Vec2Add(body1.Position, body1.CircleCollider.Offset);
 
@@ -147,7 +132,7 @@ void PhysicsWorld2D_Update(PhysicsWorld2D& world, float timeStep, uint32_t itera
 	//if (!IsFixedUpdate(timeStep))
 	//	return;
 
-	for (size_t i = 0; i < iterations; i++)
+	for (size_t currentIterations = 0; currentIterations < iterations; currentIterations++)
 	{
 		//TODO: Implement Rigidbody2D Update
 		{
@@ -169,6 +154,27 @@ void PhysicsWorld2D_Update(PhysicsWorld2D& world, float timeStep, uint32_t itera
 					Rigidbody2D* body2 = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, j);
 
 					if (body1->Type == Rigidbody2D::BodyType::Static && body2->Type == Rigidbody2D::BodyType::Static)
+					{
+						continue;
+					}
+
+					if (body1->UpdateRequired)
+					{
+						if (body1->Shape == Rigidbody2D::ShapeType::Box)
+							Rigidbody2D_ReCalculBoxColliderVerticesAndAABB(*body1);
+						else if (body1->Shape == Rigidbody2D::ShapeType::Circle)
+							Rigidbody2D_ReCalculCircleColliderAABB(*body1);
+					}
+
+					if (body2->UpdateRequired)
+					{
+						if (body2->Shape == Rigidbody2D::ShapeType::Box)
+							Rigidbody2D_ReCalculBoxColliderVerticesAndAABB(*body2);
+						else if (body2->Shape == Rigidbody2D::ShapeType::Circle)
+							Rigidbody2D_ReCalculCircleColliderAABB(*body2);
+					}
+
+					if (!Collisions_IntersectAABB(body1->AABB, body2->AABB))
 					{
 						continue;
 					}

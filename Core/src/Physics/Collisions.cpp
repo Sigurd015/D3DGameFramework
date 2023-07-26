@@ -217,3 +217,14 @@ bool Collisions_IntersectCirclePolygon(Vec2& circleCenter, float circleRadius, V
 
 	return true;
 }
+
+bool Collisions_IntersectAABB(const AABB& aabb1, const AABB& aabb2)
+{
+	if (aabb1.Max.x <= aabb2.Min.x || aabb2.Max.x <= aabb1.Min.x ||
+		aabb1.Max.y <= aabb2.Min.y || aabb2.Max.y <= aabb1.Min.y)
+	{
+		return false;
+	}
+
+	return true;
+}

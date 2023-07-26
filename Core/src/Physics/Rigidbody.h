@@ -23,6 +23,10 @@ struct Rigidbody2D
 	Vec2 Force = { 0.0f, 0.0f };
 	float Torque = 0.0f;
 
+	AABB AABB;
+
+	bool UpdateRequired = true;
+
 	enum ShapeType { Box = 0, Circle };
 	ShapeType Shape = ShapeType::Box;
 
@@ -33,8 +37,9 @@ struct Rigidbody2D
 };
 
 void Rigidbody2D_CreateBoxCollider(Rigidbody2D& rigidbody2D, const Vec2& offset, const Vec2& size);
-void Rigidbody2D_ReCalculBoxColliderVertices(Rigidbody2D& rigidbody2D);
+void Rigidbody2D_ReCalculBoxColliderVerticesAndAABB(Rigidbody2D& rigidbody2D);
 void Rigidbody2D_CreateCircleCollider(Rigidbody2D& rigidbody2D, const Vec2& offset, float radius);
+void Rigidbody2D_ReCalculCircleColliderAABB(Rigidbody2D& rigidbody2D);
 void Rigidbody2D_ApplyForce(void* rigidbody2D, const Vec2& force);
 void Rigidbody2D_ApplyRotation(void* rigidbody2D, float rotation);
 void Rigidbody2D_MovePosition(Rigidbody2D& rigidbody2D, const Vec2& amount);

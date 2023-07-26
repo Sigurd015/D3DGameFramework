@@ -6,10 +6,12 @@ void Rigidbody2D_CreateBoxCollider(Rigidbody2D& rigidbody2D, const Vec2& offset,
 	rigidbody2D.Shape = Rigidbody2D::ShapeType::Box;
 	rigidbody2D.BoxCollider.Size = size;
 	rigidbody2D.BoxCollider.Offset = offset;
-	rigidbody2D.BoxCollider.VerticesNeedUpdate = true;
+	rigidbody2D.UpdateRequired = true;
+
+	rigidbody2D.Mass = (size.x * 2) * (size.y * 2) * rigidbody2D.Density;
 }
 
-void Rigidbody2D_ReCalculBoxColliderVertices(Rigidbody2D& rigidbody2D)
+void Rigidbody2D_ReCalculBoxColliderVerticesAndAABB(Rigidbody2D& rigidbody2D)
 {
 	Vec2 position = Vec2Add(rigidbody2D.Position, rigidbody2D.BoxCollider.Offset);
 	Vec2 boxLeftTop = { position.x - rigidbody2D.BoxCollider.Size.x,position.y + rigidbody2D.BoxCollider.Size.y };
@@ -29,9 +31,29 @@ void Rigidbody2D_ReCalculBoxColliderVertices(Rigidbody2D& rigidbody2D)
 	for (size_t i = 0; i < 4; i++)
 	{
 		rigidbody2D.BoxCollider.Vertices[i] = Vec2MulMat(rigidbody2D.BoxCollider.Vertices[i], finalTransform);
+
+		if (rigidbody2D.BoxCollider.Vertices[i].x < rigidbody2D.AABB.Min.x)
+		{
+			rigidbody2D.AABB.Min.x = rigidbody2D.BoxCollider.Vertices[i].x;
+		}
+
+		if (rigidbody2D.BoxCollider.Vertices[i].x > rigidbody2D.AABB.Max.x)
+		{
+			rigidbody2D.AABB.Max.x = rigidbody2D.BoxCollider.Vertices[i].x;
+		}
+
+		if (rigidbody2D.BoxCollider.Vertices[i].y < rigidbody2D.AABB.Min.y)
+		{
+			rigidbody2D.AABB.Min.y = rigidbody2D.BoxCollider.Vertices[i].y;
+		}
+
+		if (rigidbody2D.BoxCollider.Vertices[i].y > rigidbody2D.AABB.Max.y)
+		{
+			rigidbody2D.AABB.Max.y = rigidbody2D.BoxCollider.Vertices[i].y;
+		}
 	}
 
-	rigidbody2D.BoxCollider.VerticesNeedUpdate = false;
+	rigidbody2D.UpdateRequired = false;
 }
 
 void Rigidbody2D_CreateCircleCollider(Rigidbody2D& rigidbody2D, const Vec2& offset, float radius)
@@ -39,6 +61,18 @@ void Rigidbody2D_CreateCircleCollider(Rigidbody2D& rigidbody2D, const Vec2& offs
 	rigidbody2D.Shape = Rigidbody2D::ShapeType::Circle;
 	rigidbody2D.CircleCollider.Radius = radius;
 	rigidbody2D.CircleCollider.Offset = offset;
+
+	rigidbody2D.Mass = (radius * radius) * 3.14f * rigidbody2D.Density;
+	rigidbody2D.UpdateRequired = true;
+}
+
+void Rigidbody2D_ReCalculCircleColliderAABB(Rigidbody2D& rigidbody2D)
+{
+	Vec2 position = Vec2Add(rigidbody2D.Position, rigidbody2D.CircleCollider.Offset);
+	rigidbody2D.AABB.Min.x = position.x - rigidbody2D.CircleCollider.Radius;
+	rigidbody2D.AABB.Min.y = position.y - rigidbody2D.CircleCollider.Radius;
+	rigidbody2D.AABB.Max.x = position.x + rigidbody2D.CircleCollider.Radius;
+	rigidbody2D.AABB.Max.y = position.y + rigidbody2D.CircleCollider.Radius;
 }
 
 void Rigidbody2D_ApplyForce(void* rigidbody2D, const Vec2& force)
@@ -47,7 +81,7 @@ void Rigidbody2D_ApplyForce(void* rigidbody2D, const Vec2& force)
 	//Temp
 	//rigidbody->Position = Vec2Add(rigidbody->Position, force);
 	rigidbody->Force = Vec2Add(rigidbody->Force, force);
-	rigidbody->BoxCollider.VerticesNeedUpdate = true;
+	rigidbody->UpdateRequired = true;
 }
 
 void Rigidbody2D_ApplyRotation(void* rigidbody2D, float rotation)
@@ -56,13 +90,13 @@ void Rigidbody2D_ApplyRotation(void* rigidbody2D, float rotation)
 	//Temp
 	//rigidbody->Rotation += rotation;
 	rigidbody->Torque += rotation;
-	rigidbody->BoxCollider.VerticesNeedUpdate = true;
+	rigidbody->UpdateRequired = true;
 }
 
 void Rigidbody2D_MovePosition(Rigidbody2D& rigidbody2D, const Vec2& amount)
 {
 	rigidbody2D.Position = Vec2Add(rigidbody2D.Position, amount);
-	rigidbody2D.BoxCollider.VerticesNeedUpdate = true;
+	rigidbody2D.UpdateRequired = true;
 }
 
 void Rigidbody2D_Step(Rigidbody2D& rigidbody2D, float timeStep)
@@ -83,5 +117,5 @@ void Rigidbody2D_Step(Rigidbody2D& rigidbody2D, float timeStep)
 	// Clear forces
 	rigidbody2D.Force = Vec2Zero;
 	rigidbody2D.Torque = 0.0f;
-	rigidbody2D.BoxCollider.VerticesNeedUpdate = true;
+	rigidbody2D.UpdateRequired = true;
 }

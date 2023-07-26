@@ -69,6 +69,7 @@ void CameraController_OnUpdate(Entity& entity, float timeStep)
 
 	Vec3 playerPosition = s_Data.PlayerTransform->Translation;
 	playerPosition.z = s_Data.Distance;
+	//playerPosition.y = s_Data.Transform->Translation.y;
 	s_Data.Transform->Translation = Vec3Lerp(s_Data.Transform->Translation, playerPosition, timeStep);
 }
 

@@ -254,7 +254,7 @@ void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
 	// Update Physics
 	// Notice: Don't support changing the collider size and offset at runtime
 	{
-		PhysicsWorld2D_Update(out.PhysicsWorld, timeStep, 6);
+		PhysicsWorld2D_Update(out.PhysicsWorld, timeStep, 10);
 		{
 			for (size_t i = 0; i < size; i++)
 			{
