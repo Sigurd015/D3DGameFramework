@@ -4,13 +4,14 @@
 #include "Collisions.h"
 #include "Rigidbody.h"
 
-#define PHYSICS_TIME_STEP 1.0f / 30.0f
 #define PHYSICS_POOL_SIZE 1024
 
 struct PhysicsWorld2D
 {
 	List Rigidbody2Ds;
 	uint32_t Rigidbody2DCount = 0;
+	List ContactPairs;
+	uint32_t ContactPairCount = 0;
 
 	void(*CollisionCallback)(void* entity1, void* entity2) = nullptr;
 };

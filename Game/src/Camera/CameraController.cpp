@@ -11,7 +11,8 @@ struct CameraControllerData
 	float MinOrthographicSize = 5.0f;
 	float MaxOrthographicSize = 50.0f;
 
-	float Distance = -10.0f;
+	float DistanceZ = -10.0f;
+	float DistanceY = 5.0f;
 };
 static CameraControllerData s_Data;
 
@@ -36,7 +37,7 @@ void CameraController_OnUpdate(Entity& entity, float timeStep)
 	if (Input_GetKey(KeyCode::R))
 	{
 		if (s_Data.Camera->Camera->Spec.ProjectionType == ProjectionType::Perspective)
-			s_Data.Distance += 0.1f;
+			s_Data.DistanceZ += 0.1f;
 		else
 			SceneCamera_SetOrthographicSize(*s_Data.Camera->Camera,
 				FloatLerp(s_Data.Camera->Camera->Spec.OrthographicSize,
@@ -46,7 +47,7 @@ void CameraController_OnUpdate(Entity& entity, float timeStep)
 	if (Input_GetKey(KeyCode::F))
 	{
 		if (s_Data.Camera->Camera->Spec.ProjectionType == ProjectionType::Perspective)
-			s_Data.Distance -= 0.1f;
+			s_Data.DistanceZ -= 0.1f;
 		else
 			SceneCamera_SetOrthographicSize(*s_Data.Camera->Camera,
 				FloatLerp(s_Data.Camera->Camera->Spec.OrthographicSize,
@@ -68,7 +69,8 @@ void CameraController_OnUpdate(Entity& entity, float timeStep)
 	}
 
 	Vec3 playerPosition = s_Data.PlayerTransform->Translation;
-	playerPosition.z = s_Data.Distance;
+	playerPosition.z = s_Data.DistanceZ;
+	playerPosition.y += s_Data.DistanceY;
 	//playerPosition.y = s_Data.Transform->Translation.y;
 	s_Data.Transform->Translation = Vec3Lerp(s_Data.Transform->Translation, playerPosition, timeStep);
 }

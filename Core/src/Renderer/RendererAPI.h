@@ -4,6 +4,7 @@
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "Pipeline.h"
+#include "RendererContext.h"
 
 void RendererAPI_Initialize();
 void RendererAPI_Shutdown();
@@ -12,3 +13,5 @@ void RendererAPI_SetClearColor(const Vec4& color);
 void RendererAPI_Clear();
 void RendererAPI_DrawIndexed(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, const Pipeline& pipeline, uint32_t indexCount);
 void RendererAPI_DrawLines(const VertexBuffer& vertexBuffer, const Pipeline& pipeline, uint32_t vertexCount);
+void RendererAPI_SetDepthTest(bool enable);
+void RendererAPI_SetBlendingState(BlendMode type);

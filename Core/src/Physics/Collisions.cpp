@@ -1,19 +1,59 @@
 #include "pch.h"
 #include "Collisions.h"
+#include "Renderer/Renderer2D.h"
 
-bool Collisions_IntersectCircles(const Vec2& center1, float radius1, const Vec2& center2, float radius2, Vec2* normal, float* depth)
+void PointSegmentDistance(const Vec2& p, const Vec2& a, const Vec2& b, float* distanceSquared, Vec2* cp)
 {
-	*normal = Vec2Zero;
-	*depth = 0;
+	Vec2 ab = Vec2Sub(b, a);
+	Vec2 ap = Vec2Sub(p, a);
 
+	float proj = Vec2Dot(ap, ab);
+	float abLenSq = Vec2LengthSq(ab);
+	float d = proj / abLenSq;
+
+	if (d <= 0.0f)
+	{
+		*cp = a;
+	}
+	else if (d >= 1.0f)
+	{
+		*cp = b;
+	}
+	else
+	{
+		*cp = Vec2Add(a, Vec2MulFloat(ab, d));
+	}
+
+	*distanceSquared = Vec2DistanceSq(p, *cp);
+}
+
+
+bool Collisions_IntersectCircles(const Vec2& center1, float radius1, const Vec2& center2, float radius2, Vec2* normal, float* depth,
+	Vec2* contactPoint, uint32_t* contactPointCount)
+{
 	float distence = Vec2Distance(center1, center2);
 	float sumRadius = radius1 + radius2;
 
 	if (distence > sumRadius)
 		return false;
 
-	*normal = Vec2Normalize(Vec2Sub(center2, center1));
+	Vec2 dir = Vec2Normalize(Vec2Sub(center2, center1));
+	*normal = dir;
 	*depth = sumRadius - distence;
+
+	*contactPointCount = 1;
+	contactPoint[0] = Vec2Add(center1, Vec2MulFloat(dir, radius1));
+
+	//Debug
+	Vec3 pos = { contactPoint[0].x,contactPoint[0].y,-0.1f };
+	Vec3 rot = { 0,0,0 };
+	Vec3 scale = { 0.5f,0.5f,1.0f };
+
+	Mat trans = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z)
+		* DirectX::XMMatrixRotationQuaternion(DirectX::XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&rot)))
+		* DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+
+	Renderer2D_DrawQuad(trans, { 1.0f,0,0,1.0f });
 
 	return true;
 }
@@ -36,12 +76,75 @@ void ProjectVertices(Vec2* vertices, uint32_t count, Vec2& axis, float* min, flo
 	}
 }
 
-bool Collisions_IntersectPolygons(Vec2* vertices1, uint32_t count1, const Vec2& center1, Vec2* vertices2, uint32_t count2, const Vec2& center2,
-	Vec2* normal, float* depth)
+void FindPolygonsContactPoints(Vec2* vertices1, uint32_t count1, Vec2* vertices2, uint32_t count2,
+	Vec2* contactPoint, uint32_t* contactPointCount)
 {
-	*normal = Vec2Zero;
-	*depth = FLT_MAX;
+	float minDistSq = FLT_MAX;
 
+	for (int i = 0; i < count1; i++)
+	{
+		Vec2 p = vertices1[i];
+
+		for (int j = 0; j < count2; j++)
+		{
+			Vec2 va = vertices2[j];
+			Vec2 vb = vertices2[(j + 1) % count2];
+
+			Vec2 contact = Vec2Zero;
+			float distSq = 0;
+			PointSegmentDistance(p, va, vb, &distSq, &contact);
+
+			if (FloatNearlyEqual(distSq, minDistSq))
+			{
+				if (!Vec2NearlyEqual(contact, contactPoint[0]))
+				{
+					contactPoint[1] = contact;
+					*contactPointCount = 2;
+				}
+			}
+			else if (distSq < minDistSq)
+			{
+				minDistSq = distSq;
+				*contactPointCount = 1;
+				contactPoint[0] = contact;
+			}
+		}
+	}
+
+	for (int i = 0; i < count2; i++)
+	{
+		Vec2 p = vertices2[i];
+
+		for (int j = 0; j < count1; j++)
+		{
+			Vec2 va = vertices1[j];
+			Vec2 vb = vertices1[(j + 1) % count1];
+
+			Vec2 contact = Vec2Zero;
+			float distSq = 0;
+			PointSegmentDistance(p, va, vb, &distSq, &contact);
+
+			if (FloatNearlyEqual(distSq, minDistSq))
+			{
+				if (!Vec2NearlyEqual(contact, contactPoint[0]))
+				{
+					contactPoint[1] = contact;
+					*contactPointCount = 2;
+				}
+			}
+			else if (distSq < minDistSq)
+			{
+				minDistSq = distSq;
+				*contactPointCount = 1;
+				contactPoint[0] = contact;
+			}
+		}
+	}
+}
+
+bool Collisions_IntersectPolygons(Vec2* vertices1, uint32_t count1, const Vec2& center1, Vec2* vertices2, uint32_t count2, const Vec2& center2,
+	Vec2* normal, float* depth, Vec2* contactPoint, uint32_t* contactPointCount)
+{
 	{
 		for (int i = 0; i < count1; i++)
 		{
@@ -102,9 +205,27 @@ bool Collisions_IntersectPolygons(Vec2* vertices1, uint32_t count1, const Vec2& 
 
 	Vec2 direction = Vec2Sub(center2, center1);
 
-	if (Vec2Dot(direction, *normal) < 0)
+	if (Vec2Dot(direction, *normal) < 0.0f)
 	{
 		*normal = Vec2MulFloat(*normal, -1);
+	}
+
+	FindPolygonsContactPoints(vertices1, count1, vertices2, count2, contactPoint, contactPointCount);
+
+	//Debug
+	{
+		for (size_t i = 0; i < *contactPointCount; i++)
+		{
+			Vec3 pos = { contactPoint[i].x,contactPoint[i].y,-0.1f };
+			Vec3 rot = { 0,0,0 };
+			Vec3 scale = { 0.5f,0.5f,1.0f };
+
+			Mat trans = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z)
+				* DirectX::XMMatrixRotationQuaternion(DirectX::XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&rot)))
+				* DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+
+			Renderer2D_DrawQuad(trans, { 1.0f,0,0,1.0f });
+		}
 	}
 
 	return true;
@@ -151,10 +272,10 @@ int FindClosestPointOnPolygon(Vec2& circleCenter, Vec2* vertices, uint32_t count
 }
 
 bool Collisions_IntersectCirclePolygon(Vec2& circleCenter, float circleRadius, Vec2* vertices, uint32_t count, const Vec2& polygonCenter,
-	Vec2* normal, float* depth)
+	Vec2* normal, float* depth, Vec2* contactPoint, uint32_t* contactPointCount)
 {
-	*normal = Vec2Zero;
-	*depth = FLT_MAX;
+	*contactPointCount = 1;
+	float minDistSq = FLT_MAX;
 
 	Vec2 axis = Vec2Zero;
 	float axisDepth = 0;
@@ -183,6 +304,16 @@ bool Collisions_IntersectCirclePolygon(Vec2& circleCenter, float circleRadius, V
 		{
 			*depth = axisDepth;
 			*normal = axis;
+		}
+
+		Vec2 contact = Vec2Zero;
+		float distSq = 0;
+		PointSegmentDistance(circleCenter, va, vb, &distSq, &contact);
+
+		if (distSq < minDistSq)
+		{
+			minDistSq = distSq;
+			contactPoint[0] = contact;
 		}
 	}
 
@@ -214,6 +345,17 @@ bool Collisions_IntersectCirclePolygon(Vec2& circleCenter, float circleRadius, V
 	{
 		*normal = Vec2MulFloat(*normal, -1);
 	}
+
+	//Debug
+	Vec3 pos = { contactPoint[0].x,contactPoint[0].y,-0.1f };
+	Vec3 rot = { 0,0,0 };
+	Vec3 scale = { 0.5f,0.5f,1.0f };
+
+	Mat trans = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z)
+		* DirectX::XMMatrixRotationQuaternion(DirectX::XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&rot)))
+		* DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+
+	Renderer2D_DrawQuad(trans, { 1.0f,0,0,1.0f });
 
 	return true;
 }

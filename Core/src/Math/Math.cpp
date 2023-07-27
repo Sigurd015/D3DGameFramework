@@ -3,8 +3,7 @@
 
 Vec3 Vec4ToVec3(const Vec4& vec)
 {
-	Vec3 temp = { vec.x,vec.y,vec.z };
-	return temp;
+	return { vec.x,vec.y,vec.z };
 }
 
 Vec4 Vec4MulFloat(const Vec4& vec, float f)
@@ -29,6 +28,14 @@ float Vec2Dot(const Vec2& a, const Vec2& b)
 	return result;
 }
 
+float Vec2Cross(const Vec2& a, const Vec2& b)
+{
+	DirectX::XMVECTOR crossProduct = DirectX::XMVector2Cross(DirectX::XMLoadFloat2(&a), DirectX::XMLoadFloat2(&b));
+	float result;
+	DirectX::XMStoreFloat(&result, crossProduct);
+	return result;
+}
+
 bool Vec2Equal(const Vec2& a, const Vec2& b)
 {
 	return a.x == b.x && a.y == b.y;
@@ -45,6 +52,13 @@ Vec2 Vec2MulMat(const Vec2& vec, const Mat& mat)
 {
 	Vec2 result;
 	DirectX::XMStoreFloat2(&result, DirectX::XMVector2Transform(DirectX::XMLoadFloat2(&vec), mat));
+	return result;
+}
+
+Vec2 Vec2MulVec2(const Vec2& a, const Vec2& b)
+{
+	Vec2 result;
+	DirectX::XMStoreFloat2(&result, DirectX::XMVectorMultiply(DirectX::XMLoadFloat2(&a), DirectX::XMLoadFloat2(&b)));
 	return result;
 }
 
@@ -85,6 +99,11 @@ float Vec2Distance(const Vec2& a, const Vec2& b)
 	return Vec2Length({ a.x - b.x, a.y - b.y });
 }
 
+float Vec2DistanceSq(const Vec2& a, const Vec2& b)
+{
+	return Vec2LengthSq({ a.x - b.x, a.y - b.y });
+}
+
 Vec2 Vec2Add(const Vec2& a, const Vec2& b)
 {
 	Vec2 result;
@@ -104,6 +123,11 @@ Vec2 Vec2Lerp(const Vec2& a, const Vec2& b, float t)
 	Vec2 result;
 	DirectX::XMStoreFloat2(&result, DirectX::XMVectorLerp(DirectX::XMLoadFloat2(&a), DirectX::XMLoadFloat2(&b), t));
 	return result;
+}
+
+bool Vec2NearlyEqual(const Vec2& a, const Vec2& b, float smallAmount)
+{
+	return Vec2DistanceSq(a, b) < smallAmount * smallAmount;
 }
 
 Vec3 Vec3Add(const Vec3& a, const Vec3& b)
@@ -136,8 +160,7 @@ Vec3 Vec3Lerp(const Vec3& a, const Vec3& b, float t)
 
 Vec2 Vec3ToVec2(const Vec3& vec)
 {
-	Vec2 temp = { vec.x,vec.y };
-	return temp;
+	return { vec.x,vec.y };
 }
 
 float FloatMax(float a, float b)
@@ -172,4 +195,9 @@ float FloatLerp(float a, float b, float t)
 		return a + t * (b - a);
 	else
 		return 0.0f;
+}
+
+bool FloatNearlyEqual(float a, float b, float smallAmount)
+{
+	return fabs(a - b) < smallAmount;
 }

@@ -78,7 +78,6 @@ void Rigidbody2D_ReCalculCircleColliderAABB(Rigidbody2D& rigidbody2D)
 void Rigidbody2D_ApplyForce(void* rigidbody2D, const Vec2& force)
 {
 	Rigidbody2D* rigidbody = (Rigidbody2D*)rigidbody2D;
-	//Temp
 	//rigidbody->Position = Vec2Add(rigidbody->Position, force);
 	rigidbody->Force = Vec2Add(rigidbody->Force, force);
 	rigidbody->UpdateRequired = true;
@@ -87,7 +86,6 @@ void Rigidbody2D_ApplyForce(void* rigidbody2D, const Vec2& force)
 void Rigidbody2D_ApplyRotation(void* rigidbody2D, float rotation)
 {
 	Rigidbody2D* rigidbody = (Rigidbody2D*)rigidbody2D;
-	//Temp
 	//rigidbody->Rotation += rotation;
 	rigidbody->Torque += rotation;
 	rigidbody->UpdateRequired = true;
@@ -106,9 +104,10 @@ void Rigidbody2D_Step(Rigidbody2D& rigidbody2D, float timeStep)
 
 	// Integrate velocity
 	Vec2 gravity = { 0.0f, -9.8f };
-	Vec2 acceleration = Vec2DivFloat(rigidbody2D.Force, rigidbody2D.Mass);
+	Vec2 acceleration = Vec2DivFloat(Vec2MulFloat(rigidbody2D.Force, timeStep), rigidbody2D.Mass);
+	//Vec2 acceleration = Vec2DivFloat(rigidbody2D.Force, rigidbody2D.Mass);
 	rigidbody2D.Velocity = Vec2Add(rigidbody2D.Velocity, Vec2Add(acceleration, Vec2MulFloat(gravity, timeStep)));
-	rigidbody2D.AngularVelocity += rigidbody2D.Torque;
+	rigidbody2D.AngularVelocity += rigidbody2D.Torque * timeStep;
 
 	// Integrate position
 	rigidbody2D.Position = Vec2Add(rigidbody2D.Position, Vec2MulFloat(rigidbody2D.Velocity, timeStep));

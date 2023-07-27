@@ -8,6 +8,7 @@ enum ComponentType
 {
 	ComponentType_Tag = 0,
 	ComponentType_Transform,
+	ComponentType_RectTransform,
 	ComponentType_Camera,
 	ComponentType_SpriteRenderer,
 	ComponentType_CircleRenderer,
@@ -32,6 +33,17 @@ struct TransformComponent
 };
 
 Mat TransformComponent_GetTransform(const TransformComponent& transform);
+
+struct RectTransformComponent
+{
+	Vec2 StandardScreenSize = { 1920.0f, 1080.0f };
+	// Center is left bottom
+	Vec2 Position = { 0.0f, 0.0f };
+	Vec2 Size = { 1.0f, 1.0f };
+	Vec2 Scale = { 1.0f, 1.0f };
+};
+
+void RectTransformComponent_GetPositionAndSize(const RectTransformComponent& rectTransform, Vec2* pos, Vec2* size);
 
 struct CameraComponent
 {

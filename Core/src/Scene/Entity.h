@@ -10,6 +10,7 @@ struct Entity
 
 	TagComponent Tag;
 	TransformComponent Transform;
+	RectTransformComponent* RectTransform = nullptr;
 	SpriteRendererComponent* SpriteRenderer = nullptr;
 	CameraComponent* Camera = nullptr;
 	CircleRendererComponent* CircleRenderer = nullptr;

@@ -9,12 +9,14 @@ void ScriptGlue_Ininialize(Scene& scene)
 	Texture2D* texture = (Texture2D*)malloc(sizeof(Texture2D));
 	Texture2D_Create(*texture, "assets/textures/Container_Diffuse.png");
 
-	{
-		Entity* camera = (Entity*)malloc(sizeof(Entity));
-		*camera = {};
-		camera->Tag.Name = "Main-Camera";
-		camera->Transform.Translation = { 0.0f, 0.0f, -10.0f };
+	Texture2D* itemSlotTex = (Texture2D*)malloc(sizeof(Texture2D));
+	Texture2D_Create(*itemSlotTex, "assets/textures/ItemSlot.png");
 
+	Entity* camera = (Entity*)malloc(sizeof(Entity));
+	*camera = {};
+	camera->Tag.Name = "Main-Camera";
+	camera->Transform.Translation = { 0.0f, 0.0f, -10.0f };
+	{
 		CameraSpecification spec;
 		spec.ProjectionType = ProjectionType::Orthographic;
 		spec.AspectRatio = 16.0f / 9.0f;
@@ -37,6 +39,66 @@ void ScriptGlue_Ininialize(Scene& scene)
 		Entity_AddComponent(*camera, ComponentType::ComponentType_Script, scriptComponent);
 
 		Scene_AddEntity(scene, *camera);
+	}
+
+	{
+		Entity* hpBar = (Entity*)malloc(sizeof(Entity));
+		*hpBar = {};
+		hpBar->Tag.Name = "HPBar";
+
+		RectTransformComponent* rectTransform = (RectTransformComponent*)malloc(sizeof(RectTransformComponent));
+		*rectTransform = {};
+		rectTransform->StandardScreenSize = { 1920.0f,1080.0f };
+		rectTransform->Position = { 200.0f, 980.0f };
+		rectTransform->Size = { 500.0f, 50.0f };
+		Entity_AddComponent(*hpBar, ComponentType::ComponentType_RectTransform, rectTransform);
+
+		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+		*spriteRenderer = {};
+		spriteRenderer->Color = { 207.0f, 94.0f, 94.0f,0.8f };
+		Entity_AddComponent(*hpBar, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+		Scene_AddEntity(scene, *hpBar);
+	}
+
+	{
+		Entity* vigorBar = (Entity*)malloc(sizeof(Entity));
+		*vigorBar = {};
+		vigorBar->Tag.Name = "VigorBar";
+
+		RectTransformComponent* rectTransform = (RectTransformComponent*)malloc(sizeof(RectTransformComponent));
+		*rectTransform = {};
+		rectTransform->StandardScreenSize = { 1920.0f,1080.0f };
+		rectTransform->Position = { 200.0f, 940.0f };
+		rectTransform->Size = { 500.0f, 50.0f };
+		Entity_AddComponent(*vigorBar, ComponentType::ComponentType_RectTransform, rectTransform);
+
+		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+		*spriteRenderer = {};
+		Entity_AddComponent(*vigorBar, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+		Scene_AddEntity(scene, *vigorBar);
+	}
+
+	{
+		Entity* itemSlot = (Entity*)malloc(sizeof(Entity));
+		*itemSlot = {};
+		itemSlot->Tag.Name = "ItemSlot";
+
+		RectTransformComponent* rectTransform = (RectTransformComponent*)malloc(sizeof(RectTransformComponent));
+		*rectTransform = {};
+		rectTransform->StandardScreenSize = { 1920.0f,1080.0f };
+		rectTransform->Position = { 100.0f, 940.0f };
+		rectTransform->Size = { 150.0f, 150.0f };
+		Entity_AddComponent(*itemSlot, ComponentType::ComponentType_RectTransform, rectTransform);
+
+		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+		*spriteRenderer = {};
+		spriteRenderer->Texture = itemSlotTex;
+		spriteRenderer->Color = { 1.0f,1.0f,1.0f,0.8f };
+		Entity_AddComponent(*itemSlot, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+		Scene_AddEntity(scene, *itemSlot);
 	}
 
 	{

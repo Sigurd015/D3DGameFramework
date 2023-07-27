@@ -95,6 +95,12 @@ void Scene_Destroy(Scene& out)
 	for (size_t i = 0; i < size; i++)
 	{
 		Entity* temp = (Entity*)List_Get(out.Entities, i);
+
+		if (Entity_HasComponent(*temp, ComponentType_RectTransform))
+		{
+			free(temp->RectTransform);
+		}
+
 		if (Entity_HasComponent(*temp, ComponentType_Script))
 		{
 			temp->Script->OnDestroy(*temp);
@@ -277,39 +283,71 @@ void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
 		for (size_t i = 0; i < size; i++)
 		{
 			Entity* temp = (Entity*)List_Get(out.Entities, i);
-			TransformComponent* tc = &temp->Transform;
+			bool IsUI = Entity_HasComponent(*temp, ComponentType_RectTransform);
 
-			if (Entity_HasComponent(*temp, ComponentType_SpriteRenderer))
+			if (!IsUI)
 			{
-				SpriteRendererComponent* sprite = temp->SpriteRenderer;
-
-				if (sprite->Texture)
+				TransformComponent* tc = &temp->Transform;
+				if (Entity_HasComponent(*temp, ComponentType_SpriteRenderer))
 				{
-					Renderer2D_DrawQuad(
+					SpriteRendererComponent* sprite = temp->SpriteRenderer;
+
+					if (sprite->Texture)
+					{
+						Renderer2D_DrawQuad(
+							TransformComponent_GetTransform(*tc),
+							*sprite->Texture,
+							sprite->UVStart,
+							sprite->UVEnd,
+							sprite->Color,
+							sprite->TilingFactor
+						);
+					}
+					else
+					{
+						Renderer2D_DrawQuad(TransformComponent_GetTransform(*tc), sprite->Color);
+					}
+				}
+
+				if (Entity_HasComponent(*temp, ComponentType_CircleRenderer))
+				{
+					CircleRendererComponent* circle = temp->CircleRenderer;
+
+					Renderer2D_DrawCircle(
 						TransformComponent_GetTransform(*tc),
-						*sprite->Texture,
-						sprite->UVStart,
-						sprite->UVEnd,
-						sprite->Color,
-						sprite->TilingFactor
+						circle->Color,
+						circle->Thickness,
+						circle->Fade
 					);
 				}
-				else
-				{
-					Renderer2D_DrawQuad(TransformComponent_GetTransform(*tc), sprite->Color);
-				}
 			}
-
-			if (Entity_HasComponent(*temp, ComponentType_CircleRenderer))
+			else
 			{
-				CircleRendererComponent* circle = temp->CircleRenderer;
+				RectTransformComponent* rect = temp->RectTransform;
+				Vec2 position, size;
+				RectTransformComponent_GetPositionAndSize(*rect, &position, &size);
 
-				Renderer2D_DrawCircle(
-					TransformComponent_GetTransform(*tc),
-					circle->Color,
-					circle->Thickness,
-					circle->Fade
-				);
+				if (Entity_HasComponent(*temp, ComponentType_SpriteRenderer))
+				{
+					SpriteRendererComponent* sprite = temp->SpriteRenderer;
+
+					if (sprite->Texture)
+					{
+						Renderer2D_DrawUI(
+							position,
+							size,
+							*sprite->Texture,
+							sprite->UVStart,
+							sprite->UVEnd,
+							sprite->Color,
+							sprite->TilingFactor
+						);
+					}
+					else
+					{
+						Renderer2D_DrawUI(position, size, sprite->Color);
+					}
+				}
 			}
 		}
 	}

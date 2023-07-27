@@ -7,6 +7,7 @@ bool Entity_HasComponent(Entity& entity, ComponentType type)
 	{
 	case ComponentType_Tag:		          return true;
 	case ComponentType_Transform:	      return true;
+	case ComponentType_RectTransform:	  return entity.RectTransform!=nullptr;
 	case ComponentType_Camera:	          return entity.Camera != nullptr;
 	case ComponentType_SpriteRenderer:	  return entity.SpriteRenderer != nullptr;
 	case ComponentType_CircleRenderer:	  return entity.CircleRenderer != nullptr;
@@ -26,6 +27,7 @@ void* Entity_GetComponent(Entity& entity, ComponentType type)
 	{
 	case ComponentType_Tag:		          return &entity.Tag;
 	case ComponentType_Transform:	      return &entity.Transform;
+	case ComponentType_RectTransform:	  return entity.RectTransform;
 	case ComponentType_Camera:	          return entity.Camera;
 	case ComponentType_SpriteRenderer:	  return entity.SpriteRenderer;
 	case ComponentType_CircleRenderer:	  return entity.CircleRenderer;
@@ -57,6 +59,12 @@ void Entity_AddComponent(Entity& entity, ComponentType type, void* component)
 			transform->Rotation,
 			transform->Scale
 		};
+		break;
+	}
+	case ComponentType_RectTransform:
+	{
+		BV_ASSERT(!entity.RectTransform, "Entity already has component!");
+		entity.RectTransform = (RectTransformComponent*)component;
 		break;
 	}
 	case ComponentType_Camera:
@@ -117,6 +125,10 @@ void Entity_RemoveComponent(Entity* entity, ComponentType type)
 	case ComponentType_Tag:
 		return;
 	case ComponentType_Transform:
+		return;
+	case ComponentType_RectTransform:
+		free(entity->RectTransform);
+		entity->RectTransform = nullptr;
 		return;
 	case ComponentType_Camera:
 		if (entity->Camera->Camera)

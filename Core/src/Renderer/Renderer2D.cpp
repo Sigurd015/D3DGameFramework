@@ -79,6 +79,13 @@ struct Renderer2DData
 	TextVertex* TextVertexBufferBase = nullptr;
 	TextVertex* TextVertexBufferPtr = nullptr;
 
+	Pipeline UIPipeline;
+	VertexBuffer UIVertexBuffer;
+	IndexBuffer UIIndexBuffer;
+	uint32_t UIIndexCount = 0;
+	QuadVertex* UIVertexBufferBase = nullptr;
+	QuadVertex* UIVertexBufferPtr = nullptr;
+
 	Texture2D* Textures[32];// 0 is white texture
 	Texture2D WhiteTexture;
 	uint32_t TextureSlotIndex = 1;
@@ -237,6 +244,48 @@ void Renderer2D_Initialize()
 		s_Data.TextVertexBufferBase = new TextVertex[s_Data.MaxVertices];
 	}
 
+	// UI
+	{
+		VertexBufferLayoutEmelent layoutEmelent[5] = {
+		   { ShaderDataType::Float3, "a_Position"     },
+		   { ShaderDataType::Float4, "a_Color"        },
+		   { ShaderDataType::Float2, "a_TexCoord"     },
+		   { ShaderDataType::Int,    "a_TexIndex"     },
+		   { ShaderDataType::Float,  "a_TilingFactor" },
+		};
+		VertexBufferLayout layout = { layoutEmelent, 5 };
+		VertexBufferLayout_CalculateOffsetsAndStride(layout);
+		VertexBuffer_Create(s_Data.UIVertexBuffer, s_Data.MaxVertices * sizeof(TextVertex));
+		VertexBuffer_SetLayout(s_Data.UIVertexBuffer, layout);
+
+		uint32_t* indices = new uint32_t[s_Data.MaxIndices];
+		uint32_t offset = 0;
+		for (uint32_t i = 0; i < s_Data.MaxIndices; i += 6)
+		{
+			indices[i + 0] = offset + 2;
+			indices[i + 1] = offset + 1;
+			indices[i + 2] = offset + 0;
+
+			indices[i + 3] = offset + 0;
+			indices[i + 4] = offset + 3;
+			indices[i + 5] = offset + 2;
+
+			offset += 4;
+		}
+		IndexBuffer_Create(s_Data.UIIndexBuffer, indices, s_Data.MaxIndices);
+		delete[] indices;
+
+		Shader shader;
+		Shader_Create(shader, "Renderer2D_UI");
+
+		PipelineSpecification spec;
+		spec.Layout = &layout;
+		spec.Shader = &shader;
+		Pipeline_Create(s_Data.UIPipeline, spec);
+
+		s_Data.UIVertexBufferBase = new QuadVertex[s_Data.MaxVertices];
+	}
+
 	// Set WhiteTexture slots to 0
 	TextureSpecification spec;
 	spec.Width = 1;
@@ -257,15 +306,18 @@ void Renderer2D_Shutdown()
 	VertexBuffer_Release(s_Data.CircleVertexBuffer);
 	VertexBuffer_Release(s_Data.LineVertexBuffer);
 	VertexBuffer_Release(s_Data.TextVertexBuffer);
+	VertexBuffer_Release(s_Data.UIVertexBuffer);
 
 	IndexBuffer_Release(s_Data.QuadIndexBuffer);
 	IndexBuffer_Release(s_Data.CircleIndexBuffer);
 	IndexBuffer_Release(s_Data.TextIndexBuffer);
+	IndexBuffer_Release(s_Data.UIIndexBuffer);
 
 	Pipeline_Release(s_Data.QuadPipeline);
 	Pipeline_Release(s_Data.CirclePipeline);
 	Pipeline_Release(s_Data.LinePipeline);
 	Pipeline_Release(s_Data.TextPipeline);
+	Pipeline_Release(s_Data.UIPipeline);
 
 	ConstantBuffer_Release(s_Data.CameraConstantBuffer);
 
@@ -273,6 +325,7 @@ void Renderer2D_Shutdown()
 	delete[] s_Data.CircleVertexBufferBase;
 	delete[] s_Data.LineVertexBufferBase;
 	delete[] s_Data.TextVertexBufferBase;
+	delete[] s_Data.UIVertexBufferBase;
 }
 
 void StartBatch()
@@ -288,6 +341,9 @@ void StartBatch()
 
 	s_Data.TextIndexCount = 0;
 	s_Data.TextVertexBufferPtr = s_Data.TextVertexBufferBase;
+
+	s_Data.UIIndexCount = 0;
+	s_Data.UIVertexBufferPtr = s_Data.UIVertexBufferBase;
 
 	s_Data.TextureSlotIndex = 1;
 }
@@ -347,6 +403,21 @@ void Flush()
 
 		RendererAPI_DrawIndexed(s_Data.TextVertexBuffer, s_Data.TextIndexBuffer, s_Data.TextPipeline, s_Data.TextIndexCount);
 	}
+
+	RendererAPI_SetDepthTest(false);
+	RendererAPI_SetBlendingState(BlendMode_Alpha);
+	if (s_Data.UIIndexCount)
+	{
+		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.UIVertexBufferPtr - (uint8_t*)s_Data.UIVertexBufferBase);
+		VertexBuffer_SetData(s_Data.UIVertexBuffer, s_Data.UIVertexBufferBase, dataSize);
+
+		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
+			Texture2D_Bind(*s_Data.Textures[i], i);
+
+		RendererAPI_DrawIndexed(s_Data.UIVertexBuffer, s_Data.UIIndexBuffer, s_Data.UIPipeline, s_Data.UIIndexCount);
+	}
+	RendererAPI_SetDepthTest(true);
+	RendererAPI_SetBlendingState(BlendMode_Disabled);
 }
 
 void Renderer2D_EndScene()
@@ -410,7 +481,7 @@ float GetTextureID(Texture2D& texture)
 	return texIndex;
 }
 
-void Renderer2D_DrawQuad(const Mat& transform, Texture2D& texture, Vec2 uv0, Vec2 uv1, const Vec4& tintColor, float tilingFactor)
+void Renderer2D_DrawQuad(const Mat& transform, Texture2D& texture, const Vec2& uv0, const Vec2& uv1, const Vec4& tintColor, float tilingFactor)
 {
 	if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
 		NextBatch();
@@ -473,4 +544,36 @@ void Renderer2D_DrawRect(const Mat& transform, const Vec4& color)
 	Renderer2D_DrawLine(lineVertices[1], lineVertices[2], color);
 	Renderer2D_DrawLine(lineVertices[2], lineVertices[3], color);
 	Renderer2D_DrawLine(lineVertices[3], lineVertices[0], color);
+}
+
+void SetUIVertex(const Vec2& pos, const Vec2& size,
+	const Vec4& color, const Vec2* texCoord, float texIndex, float tilingFactor)
+{
+	Vec2 Vertices[] = { { pos.x, pos.y }, { pos.x + size.x, pos.y }, { pos.x + size.x, pos.y + size.y }, { pos.x, pos.y + size.y } };
+
+	for (size_t i = 0; i < 4; i++)
+	{
+		s_Data.UIVertexBufferPtr->Position = { Vertices[i].x, Vertices[i].y, 0.0f };
+		s_Data.UIVertexBufferPtr->Color = color;
+		s_Data.UIVertexBufferPtr->TexCoord = texCoord[i];
+		s_Data.UIVertexBufferPtr->TexIndex = texIndex;
+		s_Data.UIVertexBufferPtr->TilingFactor = tilingFactor;
+		s_Data.UIVertexBufferPtr++;
+	}
+	s_Data.UIIndexCount += 6;
+}
+
+void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, const Vec4& color)
+{
+	const float texIndex = 0.0f; // White Texture
+	const float tilingFactor = 1.0f;
+
+	SetUIVertex(pos, size, color, s_Data.QuadTexCoord, texIndex, tilingFactor);
+}
+
+void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, Texture2D& texture, const Vec2& uv0, const Vec2& uv1, const Vec4& tintColor, float tilingFactor)
+{
+	Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
+
+	SetUIVertex(pos, size, tintColor, textureCoords, GetTextureID(texture), tilingFactor);
 }

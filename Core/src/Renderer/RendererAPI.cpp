@@ -108,3 +108,14 @@ void RendererAPI_DrawLines(const VertexBuffer& vertexBuffer, const Pipeline& pip
 	s_RendererAPIState.DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 	s_RendererAPIState.DeviceContext->Draw(vertexCount, 0);
 }
+
+void RendererAPI_SetDepthTest(bool enable)
+{
+	s_RendererAPIState.DeviceContext->OMSetDepthStencilState(RendererContext_GetDepthStencilState(enable), 0);
+}
+
+void RendererAPI_SetBlendingState(BlendMode type)
+{
+	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	s_RendererAPIState.DeviceContext->OMSetBlendState(RendererContext_GetBlendState(type), blendFactor, 0xffffffff);
+}
