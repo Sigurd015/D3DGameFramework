@@ -36,14 +36,13 @@ Mat TransformComponent_GetTransform(const TransformComponent& transform);
 
 struct RectTransformComponent
 {
-	Vec2 StandardScreenSize = { 1920.0f, 1080.0f };
-	// Center is left bottom
+	// Position is left bottom, [0,0] is left bottom, [1,1] is right top
 	Vec2 Position = { 0.0f, 0.0f };
 	Vec2 Size = { 1.0f, 1.0f };
 	Vec2 Scale = { 1.0f, 1.0f };
 };
 
-void RectTransformComponent_GetPositionAndSize(const RectTransformComponent& rectTransform, Vec2* pos, Vec2* size);
+void RectTransformComponent_GetPositionAndSize(const RectTransformComponent& rectTransform, const Vec2& currentViewPortSize, Vec2* pos, Vec2* size);
 
 struct CameraComponent
 {

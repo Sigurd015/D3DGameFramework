@@ -8,13 +8,15 @@ Mat TransformComponent_GetTransform(const TransformComponent& transform)
 		* DirectX::XMMatrixTranslation(transform.Translation.x, transform.Translation.y, transform.Translation.z);
 }
 
-void RectTransformComponent_GetPositionAndSize(const RectTransformComponent& rectTransform, Vec2* pos, Vec2* size)
+void RectTransformComponent_GetPositionAndSize(const RectTransformComponent& rectTransform, const Vec2& currentViewPortSize, Vec2* pos, Vec2* size)
 {
+	const Vec2 standardScreenSize = { 1920.0f,1080.0f };
+	Vec2 scale = { currentViewPortSize.x / standardScreenSize.x,currentViewPortSize.y / standardScreenSize.y };
 	// From [0,1] to ndc [-1,1]
-	pos->x = rectTransform.Position.x / rectTransform.StandardScreenSize.x * 2.0f - 1.0f;
-	pos->y = rectTransform.Position.y / rectTransform.StandardScreenSize.y * 2.0f - 1.0f;
-	size->x = rectTransform.Size.x / rectTransform.StandardScreenSize.x * rectTransform.Scale.x;
-	size->y = rectTransform.Size.y / rectTransform.StandardScreenSize.y * rectTransform.Scale.y;
+	pos->x = (rectTransform.Position.x / standardScreenSize.x) * 2.0f - 1.0f;
+	pos->y = (rectTransform.Position.y / standardScreenSize.y) * 2.0f - 1.0f;
+	size->x = (rectTransform.Size.x / standardScreenSize.x) * rectTransform.Scale.x * scale.x * 2.0f;
+	size->y = (rectTransform.Size.y / standardScreenSize.y) * rectTransform.Scale.y * scale.y * 2.0f;
 }
 
 void Rigidbody2DComponent_ApplyForce(Rigidbody2DComponent& rigidbody2D, const Vec2& force)

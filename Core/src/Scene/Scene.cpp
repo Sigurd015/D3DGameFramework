@@ -325,7 +325,8 @@ void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
 			{
 				RectTransformComponent* rect = temp->RectTransform;
 				Vec2 position, size;
-				RectTransformComponent_GetPositionAndSize(*rect, &position, &size);
+				Vec2 viewPortSize = { (float)out.ViewportWidth,(float)out.ViewportHeight };
+				RectTransformComponent_GetPositionAndSize(*rect, viewPortSize, &position, &size);
 
 				if (Entity_HasComponent(*temp, ComponentType_SpriteRenderer))
 				{

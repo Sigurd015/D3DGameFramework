@@ -108,6 +108,7 @@ struct Renderer2DData
 	};
 	CameraData SceneBuffer;
 	ConstantBuffer CameraConstantBuffer;
+	ConstantBuffer IdentityConstantBuffer;
 };
 static Renderer2DData s_Data;
 
@@ -275,8 +276,9 @@ void Renderer2D_Initialize()
 		IndexBuffer_Create(s_Data.UIIndexBuffer, indices, s_Data.MaxIndices);
 		delete[] indices;
 
+		// Using the same shader as quads, but binding a identity viewProjection matrix,
 		Shader shader;
-		Shader_Create(shader, "Renderer2D_UI");
+		Shader_Create(shader, "Renderer2D_Quad");
 
 		PipelineSpecification spec;
 		spec.Layout = &layout;
@@ -298,6 +300,7 @@ void Renderer2D_Initialize()
 	s_Data.Textures[0] = &s_Data.WhiteTexture;
 
 	ConstantBuffer_Create(s_Data.CameraConstantBuffer, sizeof(Renderer2DData::CameraData), CBBingSlot::CAMERA);
+	ConstantBuffer_Create(s_Data.IdentityConstantBuffer, sizeof(Renderer2DData::CameraData), CBBingSlot::CAMERA);
 }
 
 void Renderer2D_Shutdown()
@@ -320,6 +323,7 @@ void Renderer2D_Shutdown()
 	Pipeline_Release(s_Data.UIPipeline);
 
 	ConstantBuffer_Release(s_Data.CameraConstantBuffer);
+	ConstantBuffer_Release(s_Data.IdentityConstantBuffer);
 
 	delete[] s_Data.QuadVertexBufferBase;
 	delete[] s_Data.CircleVertexBufferBase;
@@ -352,12 +356,16 @@ void Renderer2D_BeginScene(const Mat& viewProjection)
 {
 	s_Data.SceneBuffer.ViewProjection = DirectX::XMMatrixTranspose(viewProjection);
 
+	Mat identity = DirectX::XMMatrixIdentity();
+
 	ConstantBuffer_SetData(s_Data.CameraConstantBuffer, &s_Data.SceneBuffer);
+	ConstantBuffer_SetData(s_Data.IdentityConstantBuffer, &identity);
 
 	Pipeline_SetConstantBuffer(s_Data.QuadPipeline, s_Data.CameraConstantBuffer);
 	Pipeline_SetConstantBuffer(s_Data.CirclePipeline, s_Data.CameraConstantBuffer);
 	Pipeline_SetConstantBuffer(s_Data.LinePipeline, s_Data.CameraConstantBuffer);
 	Pipeline_SetConstantBuffer(s_Data.TextPipeline, s_Data.CameraConstantBuffer);
+	Pipeline_SetConstantBuffer(s_Data.UIPipeline, s_Data.IdentityConstantBuffer);
 
 	StartBatch();
 }
@@ -404,7 +412,7 @@ void Flush()
 		RendererAPI_DrawIndexed(s_Data.TextVertexBuffer, s_Data.TextIndexBuffer, s_Data.TextPipeline, s_Data.TextIndexCount);
 	}
 
-	RendererAPI_SetDepthTest(false);
+	//RendererAPI_SetDepthTest(false);
 	RendererAPI_SetBlendingState(BlendMode_Alpha);
 	if (s_Data.UIIndexCount)
 	{
@@ -416,7 +424,7 @@ void Flush()
 
 		RendererAPI_DrawIndexed(s_Data.UIVertexBuffer, s_Data.UIIndexBuffer, s_Data.UIPipeline, s_Data.UIIndexCount);
 	}
-	RendererAPI_SetDepthTest(true);
+	//RendererAPI_SetDepthTest(true);
 	RendererAPI_SetBlendingState(BlendMode_Disabled);
 }
 

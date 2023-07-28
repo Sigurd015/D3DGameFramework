@@ -2,6 +2,7 @@
 #include "Core.h"
 #include "Player/PlayerController.h"
 #include "Camera/CameraController.h"
+#include "UI/UIController.h"
 
 void ScriptGlue_Ininialize(Scene& scene)
 {
@@ -41,55 +42,137 @@ void ScriptGlue_Ininialize(Scene& scene)
 		Scene_AddEntity(scene, *camera);
 	}
 
+	Entity* uiManager = (Entity*)malloc(sizeof(Entity));
+	*uiManager = {};
+	uiManager->Tag.Name = "UIManager";
 	{
-		Entity* hpBar = (Entity*)malloc(sizeof(Entity));
-		*hpBar = {};
-		hpBar->Tag.Name = "HPBar";
+		ScriptComponent* scriptComponent = (ScriptComponent*)malloc(sizeof(ScriptComponent));
+		*scriptComponent = {};
+		scriptComponent->OnCreate = UIController_OnCreate;
+		scriptComponent->OnUpdate = UIController_OnUpdate;
+		scriptComponent->OnDestroy = UIController_OnDestroy;
+		scriptComponent->OnCollision = UIController_OnCollision;
+		Entity_AddComponent(*uiManager, ComponentType::ComponentType_Script, scriptComponent);
 
+		Scene_AddEntity(scene, *uiManager);
+	}
+
+	Entity* hpBarFront = (Entity*)malloc(sizeof(Entity));
+	*hpBarFront = {};
+	hpBarFront->Tag.Name = "HPBarFront";
+	{
 		RectTransformComponent* rectTransform = (RectTransformComponent*)malloc(sizeof(RectTransformComponent));
 		*rectTransform = {};
-		rectTransform->StandardScreenSize = { 1920.0f,1080.0f };
-		rectTransform->Position = { 200.0f, 980.0f };
-		rectTransform->Size = { 500.0f, 50.0f };
-		Entity_AddComponent(*hpBar, ComponentType::ComponentType_RectTransform, rectTransform);
+		rectTransform->Position = { 150.0f, 990.0f };
+		rectTransform->Size = { 500.0f, 25.0f };
+		Entity_AddComponent(*hpBarFront, ComponentType::ComponentType_RectTransform, rectTransform);
 
 		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
 		*spriteRenderer = {};
-		spriteRenderer->Color = { 207.0f, 94.0f, 94.0f,0.8f };
-		Entity_AddComponent(*hpBar, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+		spriteRenderer->Color = { 191.0f / 255.0f, 50.0f / 255.0f, 50.0f / 255.0f,0.8f };
+		Entity_AddComponent(*hpBarFront, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
-		Scene_AddEntity(scene, *hpBar);
+		Scene_AddEntity(scene, *hpBarFront);
 	}
 
+	Entity* hpBarBack = (Entity*)malloc(sizeof(Entity));
+	*hpBarBack = {};
+	hpBarBack->Tag.Name = "HPBarBack";
 	{
-		Entity* vigorBar = (Entity*)malloc(sizeof(Entity));
-		*vigorBar = {};
-		vigorBar->Tag.Name = "VigorBar";
-
 		RectTransformComponent* rectTransform = (RectTransformComponent*)malloc(sizeof(RectTransformComponent));
 		*rectTransform = {};
-		rectTransform->StandardScreenSize = { 1920.0f,1080.0f };
-		rectTransform->Position = { 200.0f, 940.0f };
-		rectTransform->Size = { 500.0f, 50.0f };
-		Entity_AddComponent(*vigorBar, ComponentType::ComponentType_RectTransform, rectTransform);
+		rectTransform->Position = { 150.0f, 990.0f };
+		rectTransform->Size = { 500.0f, 25.0f };
+		Entity_AddComponent(*hpBarBack, ComponentType::ComponentType_RectTransform, rectTransform);
 
 		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
 		*spriteRenderer = {};
-		Entity_AddComponent(*vigorBar, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+		spriteRenderer->Color = { 235.0f / 255.0f, 94.0f / 255.0f, 94.0f / 255.0f,0.8f };
+		Entity_AddComponent(*hpBarBack, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
-		Scene_AddEntity(scene, *vigorBar);
+		Scene_AddEntity(scene, *hpBarBack);
 	}
 
+	Entity* hpBarBackground = (Entity*)malloc(sizeof(Entity));
+	*hpBarBackground = {};
+	hpBarBackground->Tag.Name = "HPBarBackground";
 	{
-		Entity* itemSlot = (Entity*)malloc(sizeof(Entity));
-		*itemSlot = {};
-		itemSlot->Tag.Name = "ItemSlot";
-
 		RectTransformComponent* rectTransform = (RectTransformComponent*)malloc(sizeof(RectTransformComponent));
 		*rectTransform = {};
-		rectTransform->StandardScreenSize = { 1920.0f,1080.0f };
-		rectTransform->Position = { 100.0f, 940.0f };
-		rectTransform->Size = { 150.0f, 150.0f };
+		rectTransform->Position = { 150.0f, 990.0f };
+		rectTransform->Size = { 500.0f, 25.0f };
+		Entity_AddComponent(*hpBarBackground, ComponentType::ComponentType_RectTransform, rectTransform);
+
+		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+		*spriteRenderer = {};
+		spriteRenderer->Color = { 64.0f / 255.0f, 60.0f / 255.0f, 60.0f / 255.0f,0.8f };
+		Entity_AddComponent(*hpBarBackground, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+		Scene_AddEntity(scene, *hpBarBackground);
+	}
+
+	Entity* vigorBarFront = (Entity*)malloc(sizeof(Entity));
+	*vigorBarFront = {};
+	vigorBarFront->Tag.Name = "VigorBarFront";
+	{
+		RectTransformComponent* rectTransform = (RectTransformComponent*)malloc(sizeof(RectTransformComponent));
+		*rectTransform = {};
+		rectTransform->Position = { 150.0f, 960.0f };
+		rectTransform->Size = { 500.0f, 25.0f };
+		Entity_AddComponent(*vigorBarFront, ComponentType::ComponentType_RectTransform, rectTransform);
+
+		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+		*spriteRenderer = {};
+		spriteRenderer->Color = { 20.0f / 255.0f, 210.0f / 255.0f, 20.0f / 255.0f,0.8f };
+		Entity_AddComponent(*vigorBarFront, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+		Scene_AddEntity(scene, *vigorBarFront);
+	}
+
+	Entity* vigorBarBack = (Entity*)malloc(sizeof(Entity));
+	*vigorBarBack = {};
+	vigorBarBack->Tag.Name = "VigorBarBack";
+	{
+		RectTransformComponent* rectTransform = (RectTransformComponent*)malloc(sizeof(RectTransformComponent));
+		*rectTransform = {};
+		rectTransform->Position = { 150.0f, 960.0f };
+		rectTransform->Size = { 500.0f, 25.0f };
+		Entity_AddComponent(*vigorBarBack, ComponentType::ComponentType_RectTransform, rectTransform);
+
+		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+		*spriteRenderer = {};
+		spriteRenderer->Color = { 100.0f / 255.0f, 175.0f / 255.0f, 100.0f / 255.0f,0.8f };
+		Entity_AddComponent(*vigorBarBack, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+		Scene_AddEntity(scene, *vigorBarBack);
+	}
+
+	Entity* vigorBarBackground = (Entity*)malloc(sizeof(Entity));
+	*vigorBarBackground = {};
+	vigorBarBackground->Tag.Name = "VigorBarBackground";
+	{
+		RectTransformComponent* rectTransform = (RectTransformComponent*)malloc(sizeof(RectTransformComponent));
+		*rectTransform = {};
+		rectTransform->Position = { 150.0f, 960.0f };
+		rectTransform->Size = { 500.0f, 25.0f };
+		Entity_AddComponent(*vigorBarBackground, ComponentType::ComponentType_RectTransform, rectTransform);
+
+		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+		*spriteRenderer = {};
+		spriteRenderer->Color = { 64.0f / 255.0f, 60.0f / 255.0f, 60.0f / 255.0f,0.8f };
+		Entity_AddComponent(*vigorBarBackground, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+		Scene_AddEntity(scene, *vigorBarBackground);
+	}
+
+	Entity* itemSlot = (Entity*)malloc(sizeof(Entity));
+	*itemSlot = {};
+	itemSlot->Tag.Name = "ItemSlot";
+	{
+		RectTransformComponent* rectTransform = (RectTransformComponent*)malloc(sizeof(RectTransformComponent));
+		*rectTransform = {};
+		rectTransform->Position = { 50.0f, 950.0f };
+		rectTransform->Size = { 75.0f, 75.0f };
 		Entity_AddComponent(*itemSlot, ComponentType::ComponentType_RectTransform, rectTransform);
 
 		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
