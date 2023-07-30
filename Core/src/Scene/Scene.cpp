@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "Entity.h"
 #include "Renderer/Renderer2D.h"
+#include "Renderer/RendererAPI.h"
 
 void Scene_Create(Scene& out)
 {
@@ -23,7 +24,7 @@ void OnCollide(void* entity1, void* entity2)
 	}
 }
 
-void Scene_Start(Scene& out)
+void Scene_Ininialize(Scene& out)
 {
 	// Initialize all the scripts
 	uint32_t size = List_Size(out.Entities);
@@ -65,6 +66,7 @@ void Scene_Start(Scene& out)
 					rigidbody2D.Restitution = cc2d->Restitution;
 					rigidbody2D.Friction = cc2d->Friction;
 					rigidbody2D.RestitutionThreshold = cc2d->RestitutionThreshold;
+					rigidbody2D.IsTrigger = cc2d->IsTrigger;
 
 					// Notice: CircleCollider2D only support uniform scale
 					Rigidbody2D_CreateCircleCollider(rigidbody2D, cc2d->Offset, cc2d->Radius * tc->Scale.x);
@@ -78,6 +80,7 @@ void Scene_Start(Scene& out)
 					rigidbody2D.Restitution = bc2d->Restitution;
 					rigidbody2D.Friction = bc2d->Friction;
 					rigidbody2D.RestitutionThreshold = bc2d->RestitutionThreshold;
+					rigidbody2D.IsTrigger = bc2d->IsTrigger;
 
 					Rigidbody2D_CreateBoxCollider(rigidbody2D, bc2d->Offset, { bc2d->Size.x * tc->Scale.x, bc2d->Size.y * tc->Scale.y });
 				}
@@ -152,7 +155,6 @@ void Scene_Destroy(Scene& out)
 	}
 
 	List_Free(out.Entities, true);
-
 	PhysicsWorld2D_Destory(out.PhysicsWorld);
 }
 
@@ -194,37 +196,42 @@ void PhysicsVisualiztion(Scene& out)
 	{
 		Entity* temp = (Entity*)List_Get(out.Entities, i);
 		TransformComponent* tc = &temp->Transform;
-
-		if (Entity_HasComponent(*temp, ComponentType_CircleCollider2D))
+		if (Entity_HasComponent(*temp, ComponentType_Rigidbody2D))
 		{
-			CircleCollider2DComponent* cc2d = temp->CircleCollider2D;
+			Rigidbody2DComponent* rb2d = temp->Rigidbody2D;
+			Rigidbody2D* rb = (Rigidbody2D*)rb2d->RuntimeBody;
+			if (Entity_HasComponent(*temp, ComponentType_CircleCollider2D))
+			{
+				CircleCollider2DComponent* cc2d = temp->CircleCollider2D;
 
-			Vec3 translation = Vec3Add(tc->Translation, Vec3(cc2d->Offset.x, cc2d->Offset.y, 0.001f));
-			float radius = cc2d->Radius * 2.05f;
-			Vec3 scale = Vec3MulVec3(Vec3(radius, radius, radius), tc->Scale);
+				Vec3 translation = Vec3Add(tc->Translation, Vec3(cc2d->Offset.x, cc2d->Offset.y, 0.001f));
+				float radius = cc2d->Radius * 2.05f;
+				Vec3 scale = Vec3MulVec3(Vec3(radius, radius, radius), tc->Scale);
 
-			Mat transform = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z)
-				* DirectX::XMMatrixTranslation(translation.x, translation.y, translation.z);
+				Mat transform = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z)
+					* DirectX::XMMatrixTranslation(translation.x, translation.y, translation.z);
 
-			Renderer2D_DrawCircle(transform, Vec4(0, 1, 0, 1), 0.01f);
+				Renderer2D_DrawCircle(transform, Vec4(0, 1, 0, 1), 0.01f);
+			}
+
+			if (Entity_HasComponent(*temp, ComponentType_BoxCollider2D))
+			{
+				BoxCollider2DComponent* bc2d = temp->BoxCollider2D;
+
+				Vec3 bc2dTranslation = Vec3(bc2d->Offset.x, bc2d->Offset.y, 0.001f);
+				Vec3 translation = Vec3Add(tc->Translation, bc2dTranslation);
+				Vec2 size = Vec2MulFloat(bc2d->Size, 2.05f);
+				Vec3 scale = Vec3MulVec3(Vec3(size.x, size.y, 1.0f), tc->Scale);
+
+				Mat transform = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z)
+					* DirectX::XMMatrixTranslation(bc2dTranslation.x, bc2dTranslation.y, bc2dTranslation.z)
+					* DirectX::XMMatrixRotationZ(tc->Rotation.z)
+					* DirectX::XMMatrixTranslation(tc->Translation.x, tc->Translation.y, tc->Translation.z);
+
+				Renderer2D_DrawRect(transform, Vec4(0, 1, 0, 1));
+			}
 		}
 
-		if (Entity_HasComponent(*temp, ComponentType_BoxCollider2D))
-		{
-			BoxCollider2DComponent* bc2d = temp->BoxCollider2D;
-
-			Vec3 bc2dTranslation = Vec3(bc2d->Offset.x, bc2d->Offset.y, 0.001f);
-			Vec3 translation = Vec3Add(tc->Translation, bc2dTranslation);
-			Vec2 size = Vec2MulFloat(bc2d->Size, 2.05f);
-			Vec3 scale = Vec3MulVec3(Vec3(size.x, size.y, 1.0f), tc->Scale);
-
-			Mat transform = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z)
-				* DirectX::XMMatrixTranslation(bc2dTranslation.x, bc2dTranslation.y, bc2dTranslation.z)
-				* DirectX::XMMatrixRotationZ(tc->Rotation.z)
-				* DirectX::XMMatrixTranslation(tc->Translation.x, tc->Translation.y, tc->Translation.z);
-
-			Renderer2D_DrawRect(transform, Vec4(0, 1, 0, 1));
-		}
 	}
 }
 
@@ -258,7 +265,7 @@ void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
 	}
 
 	// Update Physics
-	// Notice: Don't support changing the collider size and offset at runtime
+	// Notice: Not support changing collider size and offset at runtime
 	{
 		PhysicsWorld2D_Update(out.PhysicsWorld, timeStep, 10);
 		{
@@ -271,8 +278,17 @@ void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
 				{
 					Rigidbody2DComponent* rb2d = temp->Rigidbody2D;
 					Rigidbody2D* rb = (Rigidbody2D*)rb2d->RuntimeBody;
-					tc->Translation = { rb->Position.x, rb->Position.y, tc->Translation.z };
-					tc->Rotation.z = rb->Rotation;
+					if (!rb->IsTrigger)
+					{
+						tc->Translation = { rb->Position.x, rb->Position.y, tc->Translation.z };
+						tc->Rotation.z = rb->Rotation;
+					}
+					else
+					{
+						rb->Position = { tc->Translation.x, tc->Translation.y };
+						rb->Rotation = tc->Rotation.z;
+						rb->UpdateRequired = true;
+					}
 				}
 			}
 		}
@@ -324,9 +340,9 @@ void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
 			else
 			{
 				RectTransformComponent* rect = temp->RectTransform;
-				Vec2 position, size;
+				Vec2 position, size, ndcPos;
 				Vec2 viewPortSize = { (float)out.ViewportWidth,(float)out.ViewportHeight };
-				RectTransformComponent_GetPositionAndSize(*rect, viewPortSize, &position, &size);
+				RectTransformComponent_GetPositionAndSize(*rect, viewPortSize, &ndcPos, &position, &size);
 
 				if (Entity_HasComponent(*temp, ComponentType_SpriteRenderer))
 				{
@@ -335,7 +351,7 @@ void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
 					if (sprite->Texture)
 					{
 						Renderer2D_DrawUI(
-							position,
+							ndcPos,
 							size,
 							*sprite->Texture,
 							sprite->UVStart,
@@ -346,8 +362,14 @@ void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
 					}
 					else
 					{
-						Renderer2D_DrawUI(position, size, sprite->Color);
+						Renderer2D_DrawUI(ndcPos, size, sprite->Color);
 					}
+				}
+
+				if (Entity_HasComponent(*temp, ComponentType_Text))
+				{
+					TextComponent* text = temp->Text;
+					Renderer2D_DrawText(text->TextString, text->FontName, position, text->Color, text->FontSize);
 				}
 			}
 		}

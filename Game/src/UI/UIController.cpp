@@ -1,4 +1,6 @@
 #include "UIController.h"
+#include "../Player/PlayerController.h"
+#define BACKBAR_FOLLOW_COUNT_TIME 1.0f
 
 struct UIControllerData
 {
@@ -6,10 +8,12 @@ struct UIControllerData
 
 	RectTransformComponent* HPBarFrontRectTrans;
 	RectTransformComponent* HPBarBackRectTrans;
+	float LastHPBarFrontWidth = BarMaxWidth;
 	float HPBarBackFollowCountTime = 0.0;
 
 	RectTransformComponent* VigorBarFrontRectTrans;
 	RectTransformComponent* VigorBarBackRectTrans;
+	float LastVigorBarFrontWidth = BarMaxWidth;
 	float VigorBarBackFollowCountTime = 0.0;
 };
 static UIControllerData s_Data;
@@ -49,32 +53,50 @@ void UIController_OnCreate(Entity& entity)
 
 void UIController_OnUpdate(Entity& entity, float timeStep)
 {
-	if (Input_GetKeyDown(KeyCode::O))
 	{
-		s_Data.HPBarFrontRectTrans->Size.x -= 100.0f;
-		s_Data.HPBarBackFollowCountTime = 0.0f;
+		float targetHPBarFrontWidth = PlayerController_GetHpPercent() * s_Data.BarMaxWidth;
+		s_Data.HPBarFrontRectTrans->Size.x = targetHPBarFrontWidth;
+		if (s_Data.LastHPBarFrontWidth > targetHPBarFrontWidth)
+		{
+			s_Data.HPBarBackFollowCountTime = 0.0f;
+		}
+		else if (targetHPBarFrontWidth > s_Data.HPBarBackRectTrans->Size.x)
+		{
+			s_Data.HPBarBackRectTrans->Size.x = targetHPBarFrontWidth;
+		}
 
-		s_Data.VigorBarFrontRectTrans->Size.x -= 100.0f;
-		s_Data.VigorBarBackFollowCountTime = 0.0f;
+		if (s_Data.HPBarBackFollowCountTime < BACKBAR_FOLLOW_COUNT_TIME)
+		{
+			s_Data.HPBarBackFollowCountTime += timeStep;
+		}
+		else
+		{
+			s_Data.HPBarBackRectTrans->Size.x = FloatLerp(s_Data.HPBarBackRectTrans->Size.x, s_Data.HPBarFrontRectTrans->Size.x, timeStep);
+		}
+		s_Data.LastHPBarFrontWidth = targetHPBarFrontWidth;
 	}
-	if (Input_GetKeyDown(KeyCode::P))
+	
 	{
-		s_Data.HPBarFrontRectTrans->Size.x = FloatMin(s_Data.HPBarFrontRectTrans->Size.x + 100.0f, s_Data.BarMaxWidth);
-		s_Data.HPBarBackRectTrans->Size.x = s_Data.HPBarFrontRectTrans->Size.x;
+		float targetVigorBarFrontWidth = PlayerController_GetVigorPercent() * s_Data.BarMaxWidth;
+		s_Data.VigorBarFrontRectTrans->Size.x = targetVigorBarFrontWidth;
+		if (s_Data.LastVigorBarFrontWidth > targetVigorBarFrontWidth)
+		{
+			s_Data.VigorBarBackFollowCountTime = 0.0f;
+		}
+		else if (targetVigorBarFrontWidth > s_Data.VigorBarBackRectTrans->Size.x)
+		{
+			s_Data.VigorBarBackRectTrans->Size.x = targetVigorBarFrontWidth;
+		}
 
-		s_Data.VigorBarFrontRectTrans->Size.x = FloatMin(s_Data.VigorBarFrontRectTrans->Size.x + 100.0f, s_Data.BarMaxWidth);
-		s_Data.VigorBarBackRectTrans->Size.x = s_Data.VigorBarFrontRectTrans->Size.x;
-	}
-
-	s_Data.HPBarBackFollowCountTime += timeStep;
-
-	s_Data.VigorBarBackFollowCountTime += timeStep;
-
-	if (s_Data.HPBarBackFollowCountTime > 1.0f)
-	{
-		s_Data.HPBarBackRectTrans->Size.x = FloatLerp(s_Data.HPBarBackRectTrans->Size.x, s_Data.HPBarFrontRectTrans->Size.x, timeStep);
-
-		s_Data.VigorBarBackRectTrans->Size.x = FloatLerp(s_Data.VigorBarBackRectTrans->Size.x, s_Data.VigorBarFrontRectTrans->Size.x, timeStep);
+		if (s_Data.VigorBarBackFollowCountTime < BACKBAR_FOLLOW_COUNT_TIME)
+		{
+			s_Data.VigorBarBackFollowCountTime += timeStep;
+		}
+		else
+		{
+			s_Data.VigorBarBackRectTrans->Size.x = FloatLerp(s_Data.VigorBarBackRectTrans->Size.x, s_Data.VigorBarFrontRectTrans->Size.x, timeStep);
+		}
+		s_Data.LastVigorBarFrontWidth = targetVigorBarFrontWidth;
 	}
 }
 

@@ -5,11 +5,18 @@
 #include "Renderer2D.h"
 #include "RendererContext.h"
 
+#include <d2d1.h>
+#include <dwrite.h>
+
 struct RendererAPIState
 {
 	IDXGISwapChain* SwapChain;
 	ID3D11Device* Device;
 	ID3D11DeviceContext* DeviceContext;
+
+	ID2D1Factory* D2DFactory;
+	IDWriteFactory* DWriteFactory;
+	ID2D1RenderTarget* D2DRenderTarget;
 
 	Vec4 ClearColor = { 0,0,0,0 };
 	ID3D11RenderTargetView* RenderTargetView;
@@ -46,16 +53,33 @@ void SetBuffer(uint32_t width, uint32_t height)
 	viewPort.TopLeftX = 0;
 	viewPort.TopLeftY = 0;
 	s_RendererAPIState.DeviceContext->RSSetViewports(1, &viewPort);
+
+	// D2D
+	{
+		IDXGISurface* backBuffer;
+		s_RendererAPIState.SwapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer));
+
+		FLOAT dpiX;
+		FLOAT dpiY;
+		s_RendererAPIState.D2DFactory->GetDesktopDpi(&dpiX, &dpiY);
+		D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT,
+			D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED), dpiX, dpiY);
+		s_RendererAPIState.D2DFactory->CreateDxgiSurfaceRenderTarget(backBuffer, &props, &s_RendererAPIState.D2DRenderTarget);
+	}
 }
 
 void RendererAPI_Initialize()
 {
 	s_RendererAPIState.SwapChain = RendererContext_GetSwapChain();
+	s_RendererAPIState.SwapChain = RendererContext_GetSwapChain();
 	s_RendererAPIState.Device = RendererContext_GetDevice();
 	s_RendererAPIState.DeviceContext = RendererContext_GetDeviceContext();
 
-	SetBuffer(Window_GetWidth(), Window_GetHeight());
+	BV_CHECK_DX_RESULT(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &s_RendererAPIState.D2DFactory));
+	BV_CHECK_DX_RESULT(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory),
+		reinterpret_cast<IUnknown**>(&s_RendererAPIState.DWriteFactory)));
 
+	SetBuffer(Window_GetWidth(), Window_GetHeight());
 	Renderer2D_Initialize();
 }
 
@@ -68,6 +92,10 @@ void RendererAPI_Shutdown()
 	s_RendererAPIState.SwapChain->Release();
 	s_RendererAPIState.DeviceContext->Release();
 	s_RendererAPIState.Device->Release();
+
+	s_RendererAPIState.D2DFactory->Release();
+	s_RendererAPIState.DWriteFactory->Release();
+	s_RendererAPIState.D2DRenderTarget->Release();
 }
 
 void RendererAPI_SetViewport(uint32_t width, uint32_t height)
@@ -118,4 +146,29 @@ void RendererAPI_SetBlendingState(BlendMode type)
 {
 	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	s_RendererAPIState.DeviceContext->OMSetBlendState(RendererContext_GetBlendState(type), blendFactor, 0xffffffff);
+}
+
+void RendererAPI_DrawText(const WCHAR* str, const WCHAR* fontFamilyName, const Vec2& pos, const Vec4& color, float fontSize)
+{
+	IDWriteTextFormat* writeTextFormat;
+	BV_CHECK_DX_RESULT(s_RendererAPIState.DWriteFactory->CreateTextFormat(fontFamilyName, nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
+		fontSize, L"", &writeTextFormat));
+	writeTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
+	writeTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+
+	D2D1_SIZE_F TargetSize = s_RendererAPIState.D2DRenderTarget->GetSize();
+
+	IDWriteTextLayout* textLayout;
+	s_RendererAPIState.DWriteFactory->CreateTextLayout(str, wcslen(str), writeTextFormat, TargetSize.width, TargetSize.height, &textLayout);
+
+	D2D1_POINT_2F pounts;
+	pounts.x = fabs(pos.x) * TargetSize.width;
+	pounts.y = pos.y * TargetSize.height;
+
+	ID2D1SolidColorBrush* solidBrush;
+	s_RendererAPIState.D2DRenderTarget->CreateSolidColorBrush(D2D1::ColorF(color.x, color.y, color.z, color.w), &solidBrush);
+
+	s_RendererAPIState.D2DRenderTarget->BeginDraw();
+	s_RendererAPIState.D2DRenderTarget->DrawTextLayout(pounts, textLayout, solidBrush);
+	s_RendererAPIState.D2DRenderTarget->EndDraw();
 }

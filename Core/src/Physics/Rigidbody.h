@@ -11,6 +11,7 @@ struct Rigidbody2D
 	Vec2 Velocity = { 0.0f, 0.0f };
 	float AngularVelocity = 0.0f;
 	bool FixedRotation = false;
+	bool IsTrigger = false;
 
 	float Density = 1.0f;
 	float Friction = 0.5f;

@@ -25,6 +25,8 @@ project "Core"
 	{
 		"d3d11.lib",
 		"D3DCompiler.lib",
+		"d2d1.lib",
+		"dwrite.lib",
 	}
 
 	filter "system:windows"

@@ -113,14 +113,20 @@ bool Collide(Rigidbody2D& body1, Rigidbody2D& body2, Vec2* normal, float* depth,
 void ResolveCollision(Rigidbody2D& body1, Rigidbody2D& body2, Vec2& normal, float depth,
 	Vec2* contactPoint, uint32_t contactPointCount)
 {
-	// Temp
-	//float 	InvInertia = 1.0f;
+	//// Temp
+	//float 	InvInertia = 0.1f;
 
 	//BV_ASSERT(contactPointCount <= 2, "Max contact point count is 2");
 
 	//float e = FloatMin(body1.Restitution, body2.Restitution);
 
-	//float f = (body1.Friction + body2.Friction) * 0.5f;
+	//float StaticFriction = 0.4f;
+	//float DynamicFriction = 0.6f;
+
+	////float sf = (body1.StaticFriction + body2.StaticFriction) * 0.5f;
+	////float df = (body1.DynamicFriction + body2.DynamicFriction) * 0.5f;
+	//float sf = (StaticFriction + StaticFriction) * 0.5f;
+	//float df = (DynamicFriction + DynamicFriction) * 0.5f;
 
 	//Vec2 impulseList[2] = { Vec2Zero,Vec2Zero };
 	//Vec2 raList[2] = { Vec2Zero,Vec2Zero };
@@ -186,7 +192,7 @@ void ResolveCollision(Rigidbody2D& body1, Rigidbody2D& body2, Vec2& normal, floa
 	//	Vec2 rb = rbList[i];
 
 	//	body1.Velocity = Vec2Add(body1.Velocity, Vec2MulFloat(impulse, -body1.InvMass));
-	//	//body1.AngularVelocity += Vec2Cross(ra, impulse) * -body1.InvInertia;
+	//	/*body1.AngularVelocity += Vec2Cross(ra, impulse) * -body1.InvInertia;*/
 	//	body1.AngularVelocity += Vec2Cross(ra, impulse) * -InvInertia;
 	//	body2.Velocity = Vec2Add(body2.Velocity, Vec2MulFloat(impulse, body2.InvMass));
 	//	//body2.AngularVelocity += Vec2Cross(rb, impulse) * body2.InvInertia;
@@ -195,11 +201,14 @@ void ResolveCollision(Rigidbody2D& body1, Rigidbody2D& body2, Vec2& normal, floa
 
 	//for (size_t i = 0; i < contactPointCount; i++)
 	//{
-	//	Vec2 ra = raList[i];
-	//	Vec2 rb = rbList[i];
+	//	Vec2 ra = Vec2Sub(contactPoint[i], body1.Position);
+	//	Vec2 rb = Vec2Sub(contactPoint[i], body2.Position);
 
-	//	Vec2 raPerp = raPerpList[i];
-	//	Vec2 rbPerp = rbPerpList[i];
+	//	raList[i] = ra;
+	//	rbList[i] = rb;
+
+	//	Vec2 raPerp = { -ra.y, ra.x };
+	//	Vec2 rbPerp = { -rb.y, rb.x };
 
 	//	Vec2 angularLinearVelocityA = Vec2MulFloat(raPerp, body1.AngularVelocity);
 	//	Vec2 angularLinearVelocityB = Vec2MulFloat(rbPerp, body2.AngularVelocity);
@@ -237,13 +246,13 @@ void ResolveCollision(Rigidbody2D& body1, Rigidbody2D& body2, Vec2& normal, floa
 	//	Vec2 frictionImpulse;
 	//	float j = jList[i];
 
-	//	if (fabs(jt) <= j * f)
+	//	if (fabs(jt) <= j * sf)
 	//	{
 	//		frictionImpulse = Vec2MulFloat(tangent, jt);
 	//	}
 	//	else
 	//	{
-	//		frictionImpulse = Vec2MulFloat(Vec2MulFloat(tangent, -j), f);
+	//		frictionImpulse = Vec2MulFloat(Vec2MulFloat(tangent, -j), df);
 	//	}
 
 	//	frictionImpulseList[i] = frictionImpulse;
@@ -338,13 +347,18 @@ void NarrowPhase(PhysicsWorld2D& world)
 		uint32_t contactPointCount = 0;
 		if (Collide(*body1, *body2, &normal, &depth, contactPoint, &contactPointCount))
 		{
-			world.CollisionCallback(body1->Entity, body2->Entity);
+			if (body1->IsTrigger || body2->IsTrigger)
+			{
+				world.CollisionCallback(body1->Entity, body2->Entity);
 
-			if (body1->Type == Rigidbody2D::BodyType::Static)
+				continue;
+			}
+
+			if (body1->Type == Rigidbody2D::BodyType::Static || body1->Type == Rigidbody2D::BodyType::Kinematic)
 			{
 				Rigidbody2D_MovePosition(*body2, Vec2MulFloat(normal, depth / 2.0f));
 			}
-			else if (body2->Type == Rigidbody2D::BodyType::Static)
+			else if (body2->Type == Rigidbody2D::BodyType::Static || body2->Type == Rigidbody2D::BodyType::Kinematic)
 			{
 				Rigidbody2D_MovePosition(*body1, Vec2MulFloat(normal, -depth));
 			}

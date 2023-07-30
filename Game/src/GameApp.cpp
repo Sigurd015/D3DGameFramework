@@ -4,142 +4,73 @@
 
 #include <stdio.h>
 
-SceneCamera camera;
-Texture2D texture;
-Scene scene;
+enum GameMode
+{
+	STARTUP_TITLE = 0, TITLE_MENU, PLAY_SCENE
+};
+
+struct GameData
+{
+	Scene PlayScene;
+	Scene TitleScene;
+
+	GameMode Mode = STARTUP_TITLE;
+};
+static GameData s_Data;
+
+struct StatrtUpTitleData
+{
+
+};
+
+void DrawStartUpTitle()
+{
+	RendererAPI_SetClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
+	RendererAPI_Clear();
+
+
+}
 
 void Game_Ininialize(Application* appInst)
 {
-	APP_LOG_INFO("Test Msg");
-	APP_LOG_INFO("Test Msg");
-	APP_LOG_INFO("Test Msg");
+	APP_LOG_ERROR("ERROR");
+	APP_LOG_WARN("WARN");
+	APP_LOG_INFO("INFO");
 
-	{
-		List list;
-		List_Create(list);
-
-		for (uint32_t i = 0; i < 1500; i++)
-		{
-			int* newInt = (int*)malloc(sizeof(int));
-			*newInt = i;
-			List_Add(list, newInt);
-		}
-
-		for (uint32_t i = 0; i < List_Size(list); i++)
-		{
-			char tempChar[256];
-			sprintf_s(tempChar, 256, "%d", *(int*)List_Get(list, i));
-			APP_LOG_INFO(tempChar);
-		}
-
-		List_Clear(list, true);
-
-		for (uint32_t i = 0; i < 800; i++)
-		{
-			int* newInt = (int*)malloc(sizeof(int));
-			*newInt = i;
-			List_Add(list, newInt);
-		}
-
-		for (uint32_t i = 0; i < List_Size(list); i++)
-		{
-			char tempChar[256];
-			sprintf_s(tempChar, 256, "%d", *(int*)List_Get(list, i));
-			APP_LOG_INFO(tempChar);
-		}
-
-		List_Free(list, true);
-	}
-
-	{
-		List list;
-		List_Create(list);
-
-		for (uint32_t i = 0; i < 1500; i++)
-		{
-			char tempChar[256];
-			sprintf_s(tempChar, 256, "the number is %d", i);
-			char* newString = strdup(tempChar);
-			List_Add(list, newString);
-		}
-
-		for (uint32_t i = 0; i < List_Size(list); i++)
-		{
-			APP_LOG_INFO((char*)List_Get(list, i));
-		}
-
-		List_Clear(list, true);
-
-		for (uint32_t i = 0; i < 800; i++)
-		{
-			char tempChar[256];
-			sprintf_s(tempChar, 256, "the number is %d", i);
-			char* newString = strdup(tempChar);
-			List_Add(list, newString);
-		}
-
-		for (uint32_t i = 0; i < List_Size(list); i++)
-		{
-			APP_LOG_INFO((char*)List_Get(list, i));
-		}
-
-		List_Free(list, true);
-	}
-
-	CameraSpecification spec;
-	spec.ProjectionType = ProjectionType::Orthographic;
-	spec.AspectRatio = 16.0f / 9.0f;
-	SceneCamera_Create(camera, spec);
-
-	Texture2D_Create(texture, "assets/textures/Checkerboard.png");
-
-	Scene_Create(scene);
-
-	ScriptGlue_Ininialize(scene);
-
-	Scene_Start(scene);
+	Scene_Create(s_Data.PlayScene);
+	ScriptGlue_CreatePlayScene(s_Data.PlayScene);
+	Scene_Ininialize(s_Data.PlayScene);
+	ScriptGlue_CreateTitleScene(s_Data.TitleScene);
+	Scene_Ininialize(s_Data.TitleScene);
 }
 
 void Game_Update(float timeStep)
 {
+	switch (s_Data.Mode)
+	{
+	case STARTUP_TITLE:
+	{
+		break;
+	}
+	}
+
 	const Vec4 color = { 0.3f, 0.3f, 0.3f, 1.0f };
 
-	//if (Input_IsKeyPressed(KeyCode::A))
-	//	color.x = 1.0f;
-	//if (Input_IsKeyPressed(KeyCode::S))
-	//	color.y = 1.0f;
-	//if (Input_IsKeyPressed(KeyCode::D))
-	//	color.z = 1.0f;
-	//if (Input_IsKeyPressed(KeyCode::W))
-	//	color.w = 1.0f;
-
-	Scene_OnViewportResize(scene, Window_GetWidth(), Window_GetHeight());
+	Scene_OnViewportResize(s_Data.PlayScene, Window_GetWidth(), Window_GetHeight());
 
 	RendererAPI_SetClearColor(color);
 	RendererAPI_Clear();
 
 #ifndef BV_DIST
-	Scene_OnUpdate(scene, timeStep, true);
+	Scene_OnUpdate(s_Data.PlayScene, timeStep, true);
 #else
-	Scene_OnUpdate(scene, timeStep);
+	Scene_OnUpdate(s_Data.PlayScene, timeStep);
 #endif
-
-	//Mat view = DirectX::XMMatrixIdentity();
-	//Mat model = DirectX::XMMatrixIdentity();
-	//Mat viewProj = view * camera.Projection;
-	//Vec2 UVStart = { 0.0f, 0.0f };
-	//Vec2 UVEnd = { 1.0f,1.0f };
-	//Renderer2D_BeginScene(viewProj);
-	////Renderer2D_DrawQuad(model);
-	//Renderer2D_DrawQuad(model, texture, UVStart, UVEnd);
-	////Renderer2D_DrawCircle(model);
-	//Renderer2D_DrawRect(model);
-	//Renderer2D_EndScene();
 }
 
 void Game_Shutdown(Application* appInst)
 {
-	Scene_Destroy(scene);
+	Scene_Destroy(s_Data.PlayScene);
 }
 
 void CreateApplication(Application* appInst, ApplicationCommandLineArgs args)

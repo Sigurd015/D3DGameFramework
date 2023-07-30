@@ -347,16 +347,21 @@ bool Collisions_IntersectCirclePolygon(Vec2& circleCenter, float circleRadius, V
 	}
 
 	//Debug
-	Vec3 pos = { contactPoint[0].x,contactPoint[0].y,-0.1f };
-	Vec3 rot = { 0,0,0 };
-	Vec3 scale = { 0.5f,0.5f,1.0f };
+	{
+		for (size_t i = 0; i < *contactPointCount; i++)
+		{
+			Vec3 pos = { contactPoint[i].x,contactPoint[i].y,-0.1f };
+			Vec3 rot = { 0,0,0 };
+			Vec3 scale = { 0.5f,0.5f,1.0f };
 
-	Mat trans = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z)
-		* DirectX::XMMatrixRotationQuaternion(DirectX::XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&rot)))
-		* DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+			Mat trans = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z)
+				* DirectX::XMMatrixRotationQuaternion(DirectX::XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&rot)))
+				* DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
 
-	Renderer2D_DrawQuad(trans, { 1.0f,0,0,1.0f });
-
+			Renderer2D_DrawQuad(trans, { 1.0f,0,0,1.0f });
+		}
+	}
+	
 	return true;
 }
 

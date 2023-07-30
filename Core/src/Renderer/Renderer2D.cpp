@@ -44,6 +44,15 @@ struct TextVertex
 	Vec2 TexCoord;
 };
 
+struct TextRenderCommand
+{
+	Vec2 Position;
+	Vec4 Color;
+	float FontSize;
+	const WCHAR* FontFamilyName;
+	const WCHAR* Text;
+};
+
 struct Renderer2DData
 {
 	static const uint32_t MaxQuads = 10000;
@@ -72,13 +81,6 @@ struct Renderer2DData
 	LineVertex* LineVertexBufferPtr = nullptr;
 	float LineWidth = 2.0f;
 
-	Pipeline TextPipeline;
-	VertexBuffer TextVertexBuffer;
-	IndexBuffer TextIndexBuffer;
-	uint32_t TextIndexCount = 0;
-	TextVertex* TextVertexBufferBase = nullptr;
-	TextVertex* TextVertexBufferPtr = nullptr;
-
 	Pipeline UIPipeline;
 	VertexBuffer UIVertexBuffer;
 	IndexBuffer UIIndexBuffer;
@@ -86,10 +88,12 @@ struct Renderer2DData
 	QuadVertex* UIVertexBufferBase = nullptr;
 	QuadVertex* UIVertexBufferPtr = nullptr;
 
+	List TextRenderCommands;
+	uint32_t TextRenderCommandCount = 0;
+
 	Texture2D* Textures[32];// 0 is white texture
 	Texture2D WhiteTexture;
 	uint32_t TextureSlotIndex = 1;
-	Texture2D FontAtlasTexture;
 
 	Vec4 QuadVertexPositions[4] =
 	{ { -0.5f, -0.5f, 0.0f, 1.0f },
@@ -205,46 +209,6 @@ void Renderer2D_Initialize()
 		s_Data.LineVertexBufferBase = new LineVertex[s_Data.MaxVertices];
 	}
 
-	// Text
-	{
-		VertexBufferLayoutEmelent layoutEmelent[3] = {
-		  { ShaderDataType::Float3, "a_Position"     },
-		  { ShaderDataType::Float4, "a_Color"        },
-		  { ShaderDataType::Float2, "a_TexCoord"     },
-		};
-		VertexBufferLayout layout = { layoutEmelent, 3 };
-		VertexBufferLayout_CalculateOffsetsAndStride(layout);
-		VertexBuffer_Create(s_Data.TextVertexBuffer, s_Data.MaxVertices * sizeof(TextVertex));
-		VertexBuffer_SetLayout(s_Data.TextVertexBuffer, layout);
-
-		uint32_t* indices = new uint32_t[s_Data.MaxIndices];
-		uint32_t offset = 0;
-		for (uint32_t i = 0; i < s_Data.MaxIndices; i += 6)
-		{
-			indices[i + 0] = offset + 0;
-			indices[i + 1] = offset + 1;
-			indices[i + 2] = offset + 2;
-
-			indices[i + 3] = offset + 2;
-			indices[i + 4] = offset + 3;
-			indices[i + 5] = offset + 0;
-
-			offset += 4;
-		}
-		IndexBuffer_Create(s_Data.TextIndexBuffer, indices, s_Data.MaxIndices);
-		delete[] indices;
-
-		Shader shader;
-		Shader_Create(shader, "Renderer2D_Text");
-
-		PipelineSpecification spec;
-		spec.Layout = &layout;
-		spec.Shader = &shader;
-		Pipeline_Create(s_Data.TextPipeline, spec);
-
-		s_Data.TextVertexBufferBase = new TextVertex[s_Data.MaxVertices];
-	}
-
 	// UI
 	{
 		VertexBufferLayoutEmelent layoutEmelent[5] = {
@@ -301,6 +265,16 @@ void Renderer2D_Initialize()
 
 	ConstantBuffer_Create(s_Data.CameraConstantBuffer, sizeof(Renderer2DData::CameraData), CBBingSlot::CAMERA);
 	ConstantBuffer_Create(s_Data.IdentityConstantBuffer, sizeof(Renderer2DData::CameraData), CBBingSlot::CAMERA);
+
+	List_Create(s_Data.TextRenderCommands, COMMAND_BUFFER_SIZE);
+	{
+		for (size_t i = 0; i < COMMAND_BUFFER_SIZE; i++)
+		{
+			TextRenderCommand* command = (TextRenderCommand*)malloc(sizeof(TextRenderCommand));
+			*command = {};
+			List_Add(s_Data.TextRenderCommands, command);
+		}
+	}
 }
 
 void Renderer2D_Shutdown()
@@ -308,27 +282,25 @@ void Renderer2D_Shutdown()
 	VertexBuffer_Release(s_Data.QuadVertexBuffer);
 	VertexBuffer_Release(s_Data.CircleVertexBuffer);
 	VertexBuffer_Release(s_Data.LineVertexBuffer);
-	VertexBuffer_Release(s_Data.TextVertexBuffer);
 	VertexBuffer_Release(s_Data.UIVertexBuffer);
 
 	IndexBuffer_Release(s_Data.QuadIndexBuffer);
 	IndexBuffer_Release(s_Data.CircleIndexBuffer);
-	IndexBuffer_Release(s_Data.TextIndexBuffer);
 	IndexBuffer_Release(s_Data.UIIndexBuffer);
 
 	Pipeline_Release(s_Data.QuadPipeline);
 	Pipeline_Release(s_Data.CirclePipeline);
 	Pipeline_Release(s_Data.LinePipeline);
-	Pipeline_Release(s_Data.TextPipeline);
 	Pipeline_Release(s_Data.UIPipeline);
 
 	ConstantBuffer_Release(s_Data.CameraConstantBuffer);
 	ConstantBuffer_Release(s_Data.IdentityConstantBuffer);
 
+	List_Free(s_Data.TextRenderCommands, true);
+
 	delete[] s_Data.QuadVertexBufferBase;
 	delete[] s_Data.CircleVertexBufferBase;
 	delete[] s_Data.LineVertexBufferBase;
-	delete[] s_Data.TextVertexBufferBase;
 	delete[] s_Data.UIVertexBufferBase;
 }
 
@@ -343,11 +315,10 @@ void StartBatch()
 	s_Data.LineVertexCount = 0;
 	s_Data.LineVertexBufferPtr = s_Data.LineVertexBufferBase;
 
-	s_Data.TextIndexCount = 0;
-	s_Data.TextVertexBufferPtr = s_Data.TextVertexBufferBase;
-
 	s_Data.UIIndexCount = 0;
 	s_Data.UIVertexBufferPtr = s_Data.UIVertexBufferBase;
+
+	s_Data.TextRenderCommandCount = 0;
 
 	s_Data.TextureSlotIndex = 1;
 }
@@ -364,7 +335,6 @@ void Renderer2D_BeginScene(const Mat& viewProjection)
 	Pipeline_SetConstantBuffer(s_Data.QuadPipeline, s_Data.CameraConstantBuffer);
 	Pipeline_SetConstantBuffer(s_Data.CirclePipeline, s_Data.CameraConstantBuffer);
 	Pipeline_SetConstantBuffer(s_Data.LinePipeline, s_Data.CameraConstantBuffer);
-	Pipeline_SetConstantBuffer(s_Data.TextPipeline, s_Data.CameraConstantBuffer);
 	Pipeline_SetConstantBuffer(s_Data.UIPipeline, s_Data.IdentityConstantBuffer);
 
 	StartBatch();
@@ -401,17 +371,6 @@ void Flush()
 		RendererAPI_DrawLines(s_Data.LineVertexBuffer, s_Data.LinePipeline, s_Data.LineVertexCount);
 	}
 
-	if (s_Data.TextIndexCount)
-	{
-		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.TextVertexBufferPtr - (uint8_t*)s_Data.TextVertexBufferBase);
-		VertexBuffer_SetData(s_Data.TextVertexBuffer, s_Data.TextVertexBufferBase, dataSize);
-
-		// Bind textures
-		Texture2D_Bind(s_Data.FontAtlasTexture, 0);
-
-		RendererAPI_DrawIndexed(s_Data.TextVertexBuffer, s_Data.TextIndexBuffer, s_Data.TextPipeline, s_Data.TextIndexCount);
-	}
-
 	//RendererAPI_SetDepthTest(false);
 	RendererAPI_SetBlendingState(BlendMode_Alpha);
 	if (s_Data.UIIndexCount)
@@ -426,6 +385,22 @@ void Flush()
 	}
 	//RendererAPI_SetDepthTest(true);
 	RendererAPI_SetBlendingState(BlendMode_Disabled);
+
+	// Rendering Text after all d3d11 draw calls, to make sure text is always on top (beacuse text is rendered by d2d)
+	if (s_Data.TextRenderCommandCount)
+	{
+		for (size_t i = 0; i < s_Data.TextRenderCommandCount; i++)
+		{
+			TextRenderCommand* temp = (TextRenderCommand*)List_Get(s_Data.TextRenderCommands, i);
+			RendererAPI_DrawText(
+				temp->Text,
+				temp->FontFamilyName,
+				temp->Position,
+				temp->Color,
+				temp->FontSize
+			);
+		}
+	}
 }
 
 void Renderer2D_EndScene()
@@ -584,4 +559,17 @@ void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, Texture2D& texture, co
 	Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
 
 	SetUIVertex(pos, size, tintColor, textureCoords, GetTextureID(texture), tilingFactor);
+}
+
+void Renderer2D_DrawText(const WCHAR* str, const WCHAR* fontFamilyName, const Vec2& pos, const Vec4& color, float fontSize)
+{
+	TextRenderCommand* command = (TextRenderCommand*)List_Get(s_Data.TextRenderCommands, s_Data.TextRenderCommandCount);
+	command->Text = str;
+	command->FontFamilyName = fontFamilyName;
+	command->Position = pos;
+	command->Color = color;
+	command->FontSize = fontSize;
+	s_Data.TextRenderCommandCount++;
+
+	BV_ASSERT(s_Data.TextRenderCommandCount < COMMAND_BUFFER_SIZE, "Renderer2D_DrawText: command buffer overflow");
 }

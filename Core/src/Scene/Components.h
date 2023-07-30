@@ -42,7 +42,8 @@ struct RectTransformComponent
 	Vec2 Scale = { 1.0f, 1.0f };
 };
 
-void RectTransformComponent_GetPositionAndSize(const RectTransformComponent& rectTransform, const Vec2& currentViewPortSize, Vec2* pos, Vec2* size);
+void RectTransformComponent_GetPositionAndSize(const RectTransformComponent& rectTransform, const Vec2& currentViewPortSize,
+	Vec2* ndcPos, Vec2* pos, Vec2* size);
 
 struct CameraComponent
 {
@@ -89,6 +90,8 @@ struct BoxCollider2DComponent
 	float Restitution = 0.1f;
 	float RestitutionThreshold = 0.5f;
 
+	bool IsTrigger = false;
+
 	void* RuntimeShape = nullptr;
 };
 
@@ -102,16 +105,17 @@ struct CircleCollider2DComponent
 	float Restitution = 0.0f;
 	float RestitutionThreshold = 0.5f;
 
+	bool IsTrigger = false;
+
 	void* RuntimeShape = nullptr;
 };
 
 struct TextComponent
 {
-	char* TextString;
-	//Ref<Font> FontAsset = Font::GetDefault();
+	WCHAR* TextString;
+	WCHAR* FontName = L"Arial";
 	Vec4 Color{ 1.0f,1.0f,1.0f,1.0f };
-	float Kerning = 0.0f;
-	float LineSpacing = 0.0f;
+	float FontSize = 100.0f;
 };
 
 // Forward declarations
