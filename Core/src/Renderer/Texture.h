@@ -36,3 +36,5 @@ void Texture2D_SetData(Texture2D& out, void* data, uint32_t size);
 void Texture2D_Bind(const Texture2D& out, uint32_t slot);
 bool Texture2D_IsSame(const Texture2D& out, const Texture2D& other);
 void Texture2D_Release(Texture2D& out);
+uint32_t Texture2D_GetWidth(const Texture2D& out);
+uint32_t Texture2D_GetHeight(const Texture2D& out);

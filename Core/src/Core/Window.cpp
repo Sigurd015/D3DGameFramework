@@ -73,9 +73,6 @@ void Window_Create(const WindowProps* props)
 	if (s_WindowState.Props.Resizable)
 		style |= WS_THICKFRAME;
 
-	if (s_WindowState.Props.MaximizedOnStart)
-		style |= WS_MAXIMIZE;
-
 	RECT rect = { 0, 0, s_WindowState.Props.Width, s_WindowState.Props.Height };
 	AdjustWindowRect(&rect, style, false);
 
@@ -111,6 +108,29 @@ void Window_Update()
 void Window_Shutdown()
 {
 	DestroyWindow(s_WindowState.WndHandle);
+}
+
+void Window_SetFullScreen()
+{
+	DEVMODE devMode = { 0 };
+
+	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
+		CORE_LOG_ERROR("EnumDisplaySettings - Failed");
+
+	devMode.dmPelsWidth = s_WindowState.Props.Width;
+	devMode.dmPelsHeight = s_WindowState.Props.Height;
+	devMode.dmFields |= DM_PELSWIDTH | DM_PELSHEIGHT;
+
+	if (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
+		CORE_LOG_ERROR("ChangeDisplaySettings - Failed");
+
+	SetWindowLongPtr(s_WindowState.WndHandle, GWL_STYLE, WS_POPUP);
+	SetWindowLongPtr(s_WindowState.WndHandle, GWL_EXSTYLE, NULL);
+	SetWindowPos(s_WindowState.WndHandle, NULL, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_FRAMECHANGED);
+
+	SetCursor(NULL);
+
+	ShowWindow(s_WindowState.WndHandle, SW_SHOW);
 }
 
 uint32_t Window_GetWidth()

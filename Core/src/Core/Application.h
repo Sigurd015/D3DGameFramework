@@ -18,7 +18,7 @@ struct ApplicationSpecification
 	bool Resizable = false;
 	bool Maximizable = false;
 	bool Minimizable = false;
-	bool MaximizedOnStart = false;
+	bool FullScreen = false;
 	bool VSync = true;
 
 	ApplicationCommandLineArgs CommandLineArgs;

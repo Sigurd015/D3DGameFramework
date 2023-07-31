@@ -162,7 +162,7 @@ void RendererAPI_DrawText(const WCHAR* str, const WCHAR* fontFamilyName, const V
 	s_RendererAPIState.DWriteFactory->CreateTextLayout(str, wcslen(str), writeTextFormat, TargetSize.width, TargetSize.height, &textLayout);
 
 	D2D1_POINT_2F pounts;
-	pounts.x = fabs(pos.x) * TargetSize.width;
+	pounts.x = pos.x * TargetSize.width;
 	pounts.y = pos.y * TargetSize.height;
 
 	ID2D1SolidColorBrush* solidBrush;

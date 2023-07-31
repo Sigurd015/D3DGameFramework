@@ -47,7 +47,6 @@ void Application_Ininialize(Application* appInst)
 		appInst->Spec.Resizable,
 		appInst->Spec.Maximizable,
 		appInst->Spec.Minimizable,
-		appInst->Spec.MaximizedOnStart,
 		Application_Resize,
 		Application_Close,
 	};
@@ -55,6 +54,11 @@ void Application_Ininialize(Application* appInst)
 	Window_Create(&props);
 
 	RendererAPI_Initialize();
+
+	if (appInst->Spec.FullScreen)
+	{
+		Window_SetFullScreen();
+	}
 
 	s_AppState.AppInst->Ininialize(s_AppState.AppInst);
 }

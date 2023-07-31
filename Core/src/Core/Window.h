@@ -10,7 +10,6 @@ struct WindowProps
 	bool Resizable = false;
 	bool Maximizable = false;
 	bool Minimizable = false;
-	bool MaximizedOnStart = false;
 
 	void (*WindowResize)(float width, float height);
 	void (*WindowClose)();
@@ -19,6 +18,7 @@ struct WindowProps
 void Window_Create(const WindowProps* props);
 void Window_Update();
 void Window_Shutdown();
+void Window_SetFullScreen();
 uint32_t Window_GetWidth();
 uint32_t Window_GetHeight();
 void Window_SetWindowTitle(const char* title);

@@ -116,6 +116,16 @@ bool Texture2D_IsSame(const Texture2D& out, const Texture2D& other)
 	return resource1 == resource2;
 }
 
+uint32_t Texture2D_GetWidth(const Texture2D& out)
+{
+	return out.Spec.Width;
+}
+
+uint32_t Texture2D_GetHeight(const Texture2D& out)
+{
+	return out.Spec.Height;
+}
+
 void Texture2D_Release(Texture2D& out)
 {
 	if (out.Texture)

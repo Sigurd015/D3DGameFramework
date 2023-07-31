@@ -1,18 +1,17 @@
-#include "ScriptGlue.h"
+#pragma once
 #include "Core.h"
 #include "Player/PlayerController.h"
 #include "Camera/CameraController.h"
 #include "UI/UIController.h"
 
+// Hardcoded scene
 void ScriptGlue_CreatePlayScene(Scene& scene)
 {
-	// Hardcoded scene
 	Texture2D* texture = (Texture2D*)malloc(sizeof(Texture2D));
 	Texture2D_Create(*texture, "assets/textures/Container_Diffuse.png");
 
 	Texture2D* itemSlotTex = (Texture2D*)malloc(sizeof(Texture2D));
 	Texture2D_Create(*itemSlotTex, "assets/textures/ItemSlot.png");
-
 
 	Texture2D* settingsIcon = (Texture2D*)malloc(sizeof(Texture2D));
 	Texture2D_Create(*settingsIcon, "assets/textures/SettingsIcon.png");
