@@ -46,3 +46,8 @@ float FloatMin(float a, float b);
 float FloatClamp(float value, float min, float max);
 float FloatLerp(float a, float b, float t);
 bool FloatNearlyEqual(float a, float b, float smallAmount = 0.0005f);
+
+const char* ToString(const Vec2& vec);
+const char* ToString(const Vec3& vec);
+const char* ToString(const Vec4& vec);
+const char* ToString(float f);

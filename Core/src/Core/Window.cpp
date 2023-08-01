@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Window.h"
 #include "Renderer/RendererContext.h"
 
@@ -124,9 +124,11 @@ void Window_SetFullScreen()
 	if (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
 		CORE_LOG_ERROR("ChangeDisplaySettings - Failed");
 
+	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
 	SetWindowLongPtr(s_WindowState.WndHandle, GWL_STYLE, WS_POPUP);
-	SetWindowLongPtr(s_WindowState.WndHandle, GWL_EXSTYLE, NULL);
-	SetWindowPos(s_WindowState.WndHandle, NULL, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOSIZE | SWP_FRAMECHANGED);
+	SetWindowPos(s_WindowState.WndHandle, HWND_TOP, 0, 0, screenWidth, screenHeight, SWP_FRAMECHANGED);
 
 	SetCursor(NULL);
 

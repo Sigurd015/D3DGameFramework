@@ -5,7 +5,8 @@
 
 struct SpriteAnimatorSpecification
 {
-	char* TexturePath;
+	uint32_t TextureWidth;
+	uint32_t TextureHeight;
 
 	uint32_t ElementWidth;
 	uint32_t ElementHeight;
@@ -14,7 +15,7 @@ struct SpriteAnimatorSpecification
 	uint32_t ElementsPerRow;
 	uint32_t ElementsPerColumn;
 
-	bool Flip;
+	Vec2 StartElement = { 0,0 };
 };
 
 struct SpriteElement
@@ -25,7 +26,6 @@ struct SpriteElement
 
 struct SpriteAnimator
 {
-	Texture2D Sprite;
 	List Elements;
 };
 

@@ -69,7 +69,6 @@ struct Renderer2DData
 
 	Pipeline CirclePipeline;
 	VertexBuffer CircleVertexBuffer;
-	IndexBuffer CircleIndexBuffer;
 	uint32_t CircleIndexCount = 0;
 	CircleVertex* CircleVertexBufferBase = nullptr;
 	CircleVertex* CircleVertexBufferPtr = nullptr;
@@ -83,7 +82,6 @@ struct Renderer2DData
 
 	Pipeline UIPipeline;
 	VertexBuffer UIVertexBuffer;
-	IndexBuffer UIIndexBuffer;
 	uint32_t UIIndexCount = 0;
 	QuadVertex* UIVertexBufferBase = nullptr;
 	QuadVertex* UIVertexBufferPtr = nullptr;
@@ -174,8 +172,6 @@ void Renderer2D_Initialize()
 		VertexBuffer_Create(s_Data.CircleVertexBuffer, s_Data.MaxVertices * sizeof(CircleVertex));
 		VertexBuffer_SetLayout(s_Data.CircleVertexBuffer, layout);
 
-		s_Data.CircleIndexBuffer = s_Data.QuadIndexBuffer;
-
 		Shader shader;
 		Shader_Create(shader, "Renderer2D_Circle");
 
@@ -223,23 +219,6 @@ void Renderer2D_Initialize()
 		VertexBuffer_Create(s_Data.UIVertexBuffer, s_Data.MaxVertices * sizeof(TextVertex));
 		VertexBuffer_SetLayout(s_Data.UIVertexBuffer, layout);
 
-		uint32_t* indices = new uint32_t[s_Data.MaxIndices];
-		uint32_t offset = 0;
-		for (uint32_t i = 0; i < s_Data.MaxIndices; i += 6)
-		{
-			indices[i + 0] = offset + 2;
-			indices[i + 1] = offset + 1;
-			indices[i + 2] = offset + 0;
-
-			indices[i + 3] = offset + 0;
-			indices[i + 4] = offset + 3;
-			indices[i + 5] = offset + 2;
-
-			offset += 4;
-		}
-		IndexBuffer_Create(s_Data.UIIndexBuffer, indices, s_Data.MaxIndices);
-		delete[] indices;
-
 		// Using the same shader as quads, but binding a identity viewProjection matrix,
 		Shader shader;
 		Shader_Create(shader, "Renderer2D_Quad");
@@ -285,8 +264,6 @@ void Renderer2D_Shutdown()
 	VertexBuffer_Release(s_Data.UIVertexBuffer);
 
 	IndexBuffer_Release(s_Data.QuadIndexBuffer);
-	IndexBuffer_Release(s_Data.CircleIndexBuffer);
-	IndexBuffer_Release(s_Data.UIIndexBuffer);
 
 	Pipeline_Release(s_Data.QuadPipeline);
 	Pipeline_Release(s_Data.CirclePipeline);
@@ -360,7 +337,7 @@ void Flush()
 		VertexBuffer_SetData(s_Data.CircleVertexBuffer, s_Data.CircleVertexBufferBase, dataSize);
 
 		// Use quad QuadIndexBuffer
-		RendererAPI_DrawIndexed(s_Data.CircleVertexBuffer, s_Data.CircleIndexBuffer, s_Data.CirclePipeline, s_Data.CircleIndexCount);
+		RendererAPI_DrawIndexed(s_Data.CircleVertexBuffer, s_Data.QuadIndexBuffer, s_Data.CirclePipeline, s_Data.CircleIndexCount);
 	}
 
 	if (s_Data.LineVertexCount)
@@ -381,7 +358,7 @@ void Flush()
 		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
 			Texture2D_Bind(*s_Data.Textures[i], i);
 
-		RendererAPI_DrawIndexed(s_Data.UIVertexBuffer, s_Data.UIIndexBuffer, s_Data.UIPipeline, s_Data.UIIndexCount);
+		RendererAPI_DrawIndexed(s_Data.UIVertexBuffer, s_Data.QuadIndexBuffer, s_Data.UIPipeline, s_Data.UIIndexCount);
 	}
 	//RendererAPI_SetDepthTest(true);
 	RendererAPI_SetBlendingState(BlendMode_Disabled);
