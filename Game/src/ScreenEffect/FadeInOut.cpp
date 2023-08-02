@@ -3,22 +3,22 @@
 
 struct FadeInOutData
 {
-	RectTransformComponent CanvasRect;
-	SpriteRendererComponent CanvasSprite;
+	RectTransformComponent CanvasRect = {
+		{ 0.0f,0.0f },
+		{ 1920.0f, 1080.0f },
+	};
+	SpriteRendererComponent CanvasSprite = {
+		{ 0.5f, 0.5f, 0.5f, 1.0f },
+	};
 
-	FadeInOutMode CurrentMode;
-	float FadeRate = 0.1f;
+	FadeInOutMode CurrentMode = FADE_NONE;
+	float FadeRate = 0.02f;
 };
 static FadeInOutData s_Data;
 
 void FadeInOut_Initialize()
 {
-	s_Data.CanvasRect.Position = { 0,0 };
-	s_Data.CanvasRect.Size = { 1920.0f,1080.0f };
-	s_Data.CanvasSprite.Color = { 0.5f, 0.5f, 0.5f, 1.0f };
-
-	s_Data.CurrentMode = FADE_NONE;
-	s_Data.FadeRate = 0.02f;
+	s_Data = {};
 }
 
 void FadeInOut_Reset(FadeInOutMode mode)

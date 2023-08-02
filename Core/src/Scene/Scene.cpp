@@ -189,6 +189,21 @@ Entity* Scene_GetPrimaryCamera(const Scene& out)
 	return nullptr;
 }
 
+void Scene_SetEntityEnabled(Entity& entity, bool enabled)
+{
+	entity.Enabled = enabled;
+	//TODO: Maybe call script OnEnable/OnDisable
+	//      and then set rigidbody2d enabled
+	if (enabled)
+	{
+
+	}
+	else
+	{
+
+	}
+}
+
 void PhysicsVisualiztion(Scene& out)
 {
 	uint32_t size = List_Size(out.Entities);
@@ -257,7 +272,7 @@ void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
 		{
 			Entity* temp = (Entity*)List_Get(out.Entities, i);
 
-			if (Entity_HasComponent(*temp, ComponentType_Script))
+			if (Entity_HasComponent(*temp, ComponentType_Script) && temp->Enabled)
 			{
 				temp->Script->OnUpdate(*temp, timeStep);
 			}
@@ -272,6 +287,10 @@ void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
 			for (size_t i = 0; i < size; i++)
 			{
 				Entity* temp = (Entity*)List_Get(out.Entities, i);
+
+				if (!temp->Enabled)
+					continue;
+
 				TransformComponent* tc = &temp->Transform;
 
 				if (Entity_HasComponent(*temp, ComponentType_Rigidbody2D))
@@ -299,6 +318,10 @@ void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
 		for (size_t i = 0; i < size; i++)
 		{
 			Entity* temp = (Entity*)List_Get(out.Entities, i);
+
+			if (!temp->Enabled)
+				continue;
+
 			bool IsUI = Entity_HasComponent(*temp, ComponentType_RectTransform);
 
 			if (!IsUI)

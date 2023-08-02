@@ -19,9 +19,11 @@ void SpriteAnimator_Create(SpriteAnimator& animtor, const SpriteAnimatorSpecific
 			float elementWidth = (float)(j * spec.ElementWidth);
 			float elementHeight = (float)(i * spec.ElementHeight);
 
-			element->UVStart = { elementWidth / (float)spec.TextureWidth, elementHeight / (float)spec.TextureHeight };
-			element->UVEnd = { (float)(elementWidth + spec.ElementWidth) / (float)spec.TextureWidth,
-				(float)(elementHeight + spec.ElementHeight) / (float)spec.TextureHeight, };
+			// Notice: Looks like the UVs need to be flipped vertically.
+			// DirectXTK CreateWICTextureFromFile not flipping the UVs. Same like stb_image.
+
+			element->UVStart = { elementWidth / (float)spec.TextureWidth, (float)(elementHeight + spec.ElementHeight) / (float)spec.TextureHeight };
+			element->UVEnd = { (float)(elementWidth + spec.ElementWidth) / (float)spec.TextureWidth,elementHeight / (float)spec.TextureHeight, };
 
 			List_Add(animtor.Elements, element);
 			index++;
@@ -34,9 +36,21 @@ void SpriteAnimator_Destroy(SpriteAnimator& animtor)
 	List_Free(animtor.Elements, true);
 }
 
-SpriteElement* SpriteAnimator_GetElement(const SpriteAnimator& animtor, uint32_t index)
+void SpriteAnimator_Reset(SpriteAnimator& animtor, float maxFrameTime)
 {
-	BV_ASSERT(index < List_Size(animtor.Elements), "SpriteAnimator_GetElement : Index out of range");
+	animtor.CurrentElement = 0;
+	animtor.Time = 0.0f;
+	animtor.FrameTime = maxFrameTime;
+}
 
+SpriteElement* SpriteAnimator_GetElement(SpriteAnimator& animtor, float timeStep)
+{
+	if (animtor.Time > animtor.FrameTime)
+	{
+		animtor.Time = 0.0f;
+		animtor.CurrentElement = (animtor.CurrentElement + 1) % List_Size(animtor.Elements);
+	}
+	uint32_t index = animtor.CurrentElement;
+	animtor.Time += timeStep;
 	return (SpriteElement*)List_Get(animtor.Elements, index);
 }

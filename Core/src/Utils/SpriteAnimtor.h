@@ -16,6 +16,10 @@ struct SpriteAnimatorSpecification
 	uint32_t ElementsPerColumn;
 
 	Vec2 StartElement = { 0,0 };
+
+	uint32_t CurrentElement = 0;
+	float FrameTime;
+	float Time;
 };
 
 struct SpriteElement
@@ -27,8 +31,12 @@ struct SpriteElement
 struct SpriteAnimator
 {
 	List Elements;
+	uint32_t CurrentElement = 0;
+	float FrameTime;
+	float Time;
 };
 
 void SpriteAnimator_Create(SpriteAnimator& animtor, const SpriteAnimatorSpecification& spec);
 void SpriteAnimator_Destroy(SpriteAnimator& animtor);
-SpriteElement* SpriteAnimator_GetElement(const SpriteAnimator& animtor, uint32_t index);
+void SpriteAnimator_Reset(SpriteAnimator& animtor, float maxFrameTime);
+SpriteElement* SpriteAnimator_GetElement(SpriteAnimator& animtor, float timeStep);

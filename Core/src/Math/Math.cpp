@@ -229,3 +229,10 @@ const char* ToString(float f)
 	sprintf_s(tempChar, 256, "{number : %f}", f);
 	return tempChar;
 }
+
+const char* ToString(uint32_t i)
+{
+	char tempChar[256];
+	sprintf_s(tempChar, 256, "{number : %d}", i);
+	return tempChar;
+}

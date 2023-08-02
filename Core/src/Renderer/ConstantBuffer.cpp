@@ -15,14 +15,14 @@ void ConstantBuffer_Create(ConstantBuffer& out, uint32_t size, uint32_t bindSlot
 	buffer.MiscFlags = 0;
 	buffer.ByteWidth = size;
 	buffer.StructureByteStride = 0;
-	BV_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateBuffer(&buffer, nullptr, &out.Buffer));
+	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateBuffer(&buffer, nullptr, &out.Buffer));
 }
 
 void ConstantBuffer_SetData(ConstantBuffer& out, void* data)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	BV_CHECK_DX_RESULT(RendererContext_GetDeviceContext()->Map(out.Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+	CORE_CHECK_DX_RESULT(RendererContext_GetDeviceContext()->Map(out.Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
 	memcpy(mappedResource.pData, data, out.Size);
 	RendererContext_GetDeviceContext()->Unmap(out.Buffer, 0);
 }

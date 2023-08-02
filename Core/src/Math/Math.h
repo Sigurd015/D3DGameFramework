@@ -51,3 +51,4 @@ const char* ToString(const Vec2& vec);
 const char* ToString(const Vec3& vec);
 const char* ToString(const Vec4& vec);
 const char* ToString(float f);
+const char* ToString(uint32_t i);

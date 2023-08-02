@@ -17,7 +17,7 @@ void IndexBuffer_Create(IndexBuffer& out, void* indices, uint32_t count)
 	bufferDesc.CPUAccessFlags = 0;
 	bufferDesc.MiscFlags = 0;
 	bufferDesc.StructureByteStride = 0;
-	BV_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateBuffer(&bufferDesc, &resourceData, &out.Buffer));
+	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateBuffer(&bufferDesc, &resourceData, &out.Buffer));
 }
 
 void IndexBuffer_Bind(const IndexBuffer& out)

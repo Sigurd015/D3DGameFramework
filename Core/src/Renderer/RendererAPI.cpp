@@ -27,8 +27,8 @@ static RendererAPIState s_RendererAPIState;
 void SetBuffer(uint32_t width, uint32_t height)
 {
 	ID3D11Texture2D* backBuffer;
-	BV_CHECK_DX_RESULT(s_RendererAPIState.SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBuffer));
-	BV_CHECK_DX_RESULT(s_RendererAPIState.Device->CreateRenderTargetView(backBuffer, nullptr, &s_RendererAPIState.RenderTargetView));
+	CORE_CHECK_DX_RESULT(s_RendererAPIState.SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBuffer));
+	CORE_CHECK_DX_RESULT(s_RendererAPIState.Device->CreateRenderTargetView(backBuffer, nullptr, &s_RendererAPIState.RenderTargetView));
 
 	ID3D11Texture2D* depthTexture;
 	D3D11_TEXTURE2D_DESC depthStencilDesc = {};
@@ -41,8 +41,8 @@ void SetBuffer(uint32_t width, uint32_t height)
 	depthStencilDesc.SampleDesc.Quality = 0;
 	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
 	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	BV_CHECK_DX_RESULT(s_RendererAPIState.Device->CreateTexture2D(&depthStencilDesc, nullptr, &depthTexture));
-	BV_CHECK_DX_RESULT(s_RendererAPIState.Device->CreateDepthStencilView(depthTexture, nullptr, &s_RendererAPIState.DepthStencilView));
+	CORE_CHECK_DX_RESULT(s_RendererAPIState.Device->CreateTexture2D(&depthStencilDesc, nullptr, &depthTexture));
+	CORE_CHECK_DX_RESULT(s_RendererAPIState.Device->CreateDepthStencilView(depthTexture, nullptr, &s_RendererAPIState.DepthStencilView));
 	s_RendererAPIState.DeviceContext->OMSetRenderTargets(1, &s_RendererAPIState.RenderTargetView, s_RendererAPIState.DepthStencilView);
 
 	D3D11_VIEWPORT viewPort{};
@@ -75,8 +75,8 @@ void RendererAPI_Initialize()
 	s_RendererAPIState.Device = RendererContext_GetDevice();
 	s_RendererAPIState.DeviceContext = RendererContext_GetDeviceContext();
 
-	BV_CHECK_DX_RESULT(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &s_RendererAPIState.D2DFactory));
-	BV_CHECK_DX_RESULT(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory),
+	CORE_CHECK_DX_RESULT(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &s_RendererAPIState.D2DFactory));
+	CORE_CHECK_DX_RESULT(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory),
 		reinterpret_cast<IUnknown**>(&s_RendererAPIState.DWriteFactory)));
 
 	SetBuffer(Window_GetWidth(), Window_GetHeight());
@@ -151,7 +151,7 @@ void RendererAPI_SetBlendingState(BlendMode type)
 void RendererAPI_DrawText(const WCHAR* str, const WCHAR* fontFamilyName, const Vec2& pos, const Vec4& color, float fontSize)
 {
 	IDWriteTextFormat* writeTextFormat;
-	BV_CHECK_DX_RESULT(s_RendererAPIState.DWriteFactory->CreateTextFormat(fontFamilyName, nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
+	CORE_CHECK_DX_RESULT(s_RendererAPIState.DWriteFactory->CreateTextFormat(fontFamilyName, nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
 		fontSize, L"", &writeTextFormat));
 	writeTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
 	writeTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);

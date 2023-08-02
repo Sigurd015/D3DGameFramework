@@ -37,7 +37,7 @@ ID3D11DepthStencilState* CreateDepthStencilState(bool enable)
 	}
 
 	depthTestingDesc.DepthFunc = D3D11_COMPARISON_LESS;
-	BV_CHECK_DX_RESULT(s_RendererContextState.Device->CreateDepthStencilState(&depthTestingDesc, &depthStencilState));
+	CORE_CHECK_DX_RESULT(s_RendererContextState.Device->CreateDepthStencilState(&depthTestingDesc, &depthStencilState));
 
 	return depthStencilState;
 }
@@ -102,7 +102,7 @@ ID3D11BlendState* CreateBlendState(BlendMode type)
 	}
 	}
 
-	BV_CHECK_DX_RESULT(s_RendererContextState.Device->CreateBlendState(&blendDesc, &blendState));
+	CORE_CHECK_DX_RESULT(s_RendererContextState.Device->CreateBlendState(&blendDesc, &blendState));
 
 	return blendState;
 }
@@ -128,7 +128,7 @@ void RendererContext_Initialize(HWND* windowHandle)
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 	swapChainDesc.Flags = 0;
 
-	BV_CHECK_DX_RESULT(D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_BGRA_SUPPORT, nullptr, 0, D3D11_SDK_VERSION, &swapChainDesc,
+	CORE_CHECK_DX_RESULT(D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_BGRA_SUPPORT, nullptr, 0, D3D11_SDK_VERSION, &swapChainDesc,
 		&s_RendererContextState.SwapChain, &s_RendererContextState.Device, nullptr, &s_RendererContextState.DeviceContext));
 
 	s_RendererContextState.NoDepthTestStencilState = CreateDepthStencilState(false);
@@ -185,7 +185,7 @@ ID3D11BlendState* RendererContext_GetBlendState(BlendMode type)
 		return s_RendererContextState.BlendStateSubtractive;
 	}
 
-	BV_ASSERT(false, "Unknown blend mode type");
+	CORE_ASSERT(false, "Unknown blend mode type");
 
 	return nullptr;
 }

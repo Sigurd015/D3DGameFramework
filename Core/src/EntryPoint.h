@@ -17,7 +17,7 @@ int Main(int argc, char** argv)
 	return 0;
 }
 
-#ifdef BV_DIST
+#ifdef CORE_DIST
 #include <Windows.h>
 
 int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow)

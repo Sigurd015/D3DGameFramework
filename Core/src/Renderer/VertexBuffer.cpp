@@ -17,7 +17,7 @@ static uint32_t ShaderDataTypeSize(ShaderDataType type)
 	case ShaderDataType::Int4:     return 4 * 4;
 	case ShaderDataType::Bool:     return 1;
 	}
-	BV_ASSERT(false, "Unknown ShaderDataType!");
+	CORE_ASSERT(false, "Unknown ShaderDataType!");
 	return 0;
 }
 
@@ -43,14 +43,14 @@ void VertexBuffer_Create(VertexBuffer& out, uint32_t size)
 	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	bufferDesc.MiscFlags = 0;
 	bufferDesc.StructureByteStride = out.Stride;
-	BV_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateBuffer(&bufferDesc, nullptr, &out.Buffer));
+	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateBuffer(&bufferDesc, nullptr, &out.Buffer));
 }
 
 void VertexBuffer_SetData(VertexBuffer& out, void* data, uint32_t size)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	BV_CHECK_DX_RESULT(RendererContext_GetDeviceContext()->Map(out.Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+	CORE_CHECK_DX_RESULT(RendererContext_GetDeviceContext()->Map(out.Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
 	memcpy(mappedResource.pData, data, size);
 	RendererContext_GetDeviceContext()->Unmap(out.Buffer, 0);
 }

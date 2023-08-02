@@ -30,7 +30,7 @@ void SceneCamera_Create(SceneCamera& out, const CameraSpecification& spec)
 
 void SceneCamera_SetViewportSize(SceneCamera& out, uint32_t width, uint32_t height)
 {
-	BV_ASSERT(width > 0 && height > 0, "CameraViewPortSize - Invalid size");
+	CORE_ASSERT(width > 0 && height > 0, "CameraViewPortSize - Invalid size");
 	out.Spec.AspectRatio = (float)width / (float)height;
 	RecalculateProjection(out);
 }

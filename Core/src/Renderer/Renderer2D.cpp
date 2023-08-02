@@ -219,7 +219,8 @@ void Renderer2D_Initialize()
 		VertexBuffer_Create(s_Data.UIVertexBuffer, s_Data.MaxVertices * sizeof(TextVertex));
 		VertexBuffer_SetLayout(s_Data.UIVertexBuffer, layout);
 
-		// Using the same shader as quads, but binding a identity viewProjection matrix,
+		// Using the same shader as quads, but binding a identity viewProjection matrix.
+		// Because UI position is already in screen space.
 		Shader shader;
 		Shader_Create(shader, "Renderer2D_Quad");
 
@@ -548,5 +549,5 @@ void Renderer2D_DrawText(const WCHAR* str, const WCHAR* fontFamilyName, const Ve
 	command->FontSize = fontSize;
 	s_Data.TextRenderCommandCount++;
 
-	BV_ASSERT(s_Data.TextRenderCommandCount < COMMAND_BUFFER_SIZE, "Renderer2D_DrawText: command buffer overflow");
+	CORE_ASSERT(s_Data.TextRenderCommandCount < COMMAND_BUFFER_SIZE, "Renderer2D_DrawText: command buffer overflow");
 }

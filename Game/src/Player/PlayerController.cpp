@@ -13,17 +13,19 @@ struct PlayerControllerData
 	TransformComponent* Transform = nullptr;
 	Rigidbody2DComponent* Rigidbody2D = nullptr;
 
-	PlayerStats Stats;
+	PlayerStats Stats = {};
 };
 static PlayerControllerData s_Data;
 
 void PlayerController_OnCreate(Entity& entity)
 {
+	s_Data = {};
+
 	s_Data.Transform = (TransformComponent*)Entity_GetComponent(entity, ComponentType_Transform);
-	BV_ASSERT(s_Data.Transform, "Entity does not have TransformComponent!");
+	CORE_ASSERT(s_Data.Transform, "Entity does not have TransformComponent!");
 
 	s_Data.Rigidbody2D = (Rigidbody2DComponent*)Entity_GetComponent(entity, ComponentType_Rigidbody2D);
-	BV_ASSERT(s_Data.Rigidbody2D, "Entity does not have Rigidbody2DComponent!");
+	CORE_ASSERT(s_Data.Rigidbody2D, "Entity does not have Rigidbody2DComponent!");
 }
 
 void PlayerController_OnUpdate(Entity& entity, float timeStep)

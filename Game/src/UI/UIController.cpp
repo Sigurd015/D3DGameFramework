@@ -20,19 +20,21 @@ static UIControllerData s_Data;
 
 void UIController_OnCreate(Entity& entity)
 {
+	s_Data = {};
+
 	//HP Bar
 	{
 		Entity* Front = Scene_GetEntityByName(*entity.Scene, "HPBarFront");
 		Entity* Back = Scene_GetEntityByName(*entity.Scene, "HPBarBack");
 
-		BV_ASSERT(Front, "Cannot find HPBarFront entity!");
-		BV_ASSERT(Back, "Cannot find HPBarBack entity!");
+		CORE_ASSERT(Front, "Cannot find HPBarFront entity!");
+		CORE_ASSERT(Back, "Cannot find HPBarBack entity!");
 
 		s_Data.HPBarFrontRectTrans = (RectTransformComponent*)Entity_GetComponent(*Front, ComponentType_RectTransform);
 		s_Data.HPBarBackRectTrans = (RectTransformComponent*)Entity_GetComponent(*Back, ComponentType_RectTransform);
 
-		BV_ASSERT(s_Data.HPBarFrontRectTrans, "Entity does not have RectTransformComponent!");
-		BV_ASSERT(s_Data.HPBarBackRectTrans, "Entity does not have RectTransformComponent!");
+		CORE_ASSERT(s_Data.HPBarFrontRectTrans, "Entity does not have RectTransformComponent!");
+		CORE_ASSERT(s_Data.HPBarBackRectTrans, "Entity does not have RectTransformComponent!");
 	}
 
 	//Vigor Bar
@@ -40,14 +42,14 @@ void UIController_OnCreate(Entity& entity)
 		Entity* Front = Scene_GetEntityByName(*entity.Scene, "VigorBarFront");
 		Entity* Back = Scene_GetEntityByName(*entity.Scene, "VigorBarBack");
 
-		BV_ASSERT(Front, "Cannot find VigorBarFront entity!");
-		BV_ASSERT(Back, "Cannot find VigorBarBack entity!");
+		CORE_ASSERT(Front, "Cannot find VigorBarFront entity!");
+		CORE_ASSERT(Back, "Cannot find VigorBarBack entity!");
 
 		s_Data.VigorBarFrontRectTrans = (RectTransformComponent*)Entity_GetComponent(*Front, ComponentType_RectTransform);
 		s_Data.VigorBarBackRectTrans = (RectTransformComponent*)Entity_GetComponent(*Back, ComponentType_RectTransform);
 
-		BV_ASSERT(s_Data.VigorBarFrontRectTrans, "Entity does not have RectTransformComponent!");
-		BV_ASSERT(s_Data.VigorBarBackRectTrans, "Entity does not have RectTransformComponent!");
+		CORE_ASSERT(s_Data.VigorBarFrontRectTrans, "Entity does not have RectTransformComponent!");
+		CORE_ASSERT(s_Data.VigorBarBackRectTrans, "Entity does not have RectTransformComponent!");
 	}
 }
 
@@ -75,7 +77,7 @@ void UIController_OnUpdate(Entity& entity, float timeStep)
 		}
 		s_Data.LastHPBarFrontWidth = targetHPBarFrontWidth;
 	}
-	
+
 	{
 		float targetVigorBarFrontWidth = PlayerController_GetVigorPercent() * s_Data.BarMaxWidth;
 		s_Data.VigorBarFrontRectTrans->Size.x = targetVigorBarFrontWidth;

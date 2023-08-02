@@ -4,8 +4,8 @@
 
 void CheckD3DError(HRESULT result);
 
-#ifdef BV_DEBUG
-#define BV_CHECK_DX_RESULT(x) { HRESULT __hr = x;CheckD3DError(__hr);}
+#ifdef CORE_DEBUG
+#define CORE_CHECK_DX_RESULT(x) { HRESULT __hr = x;CheckD3DError(__hr);}
 #else
-#define BV_CHECK_DX_RESULT(x) x
+#define CORE_CHECK_DX_RESULT(x) x
 #endif

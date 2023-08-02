@@ -33,7 +33,7 @@ project "Core"
 		systemversion "latest"
 		
 	filter "configurations:Debug"
-		defines "BV_DEBUG"
+		defines "CORE_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
@@ -43,7 +43,7 @@ project "Core"
 		}
 
 	filter "configurations:Release"
-		defines "BV_RELEASE"	
+		defines "CORE_RELEASE"	
 		runtime "Release"
 		optimize "on"
 
@@ -53,7 +53,7 @@ project "Core"
 		}
 
 	filter "configurations:Dist"
-		defines "BV_DIST"
+		defines "CORE_DIST"
 		runtime "Release"
 		optimize "on"
 

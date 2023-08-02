@@ -18,18 +18,20 @@ static CameraControllerData s_Data;
 
 void CameraController_OnCreate(Entity& entity)
 {
+	s_Data = {};
+
 	Entity* Player = Scene_GetEntityByName(*entity.Scene, "Player");
-	BV_ASSERT(Player, "Cannot find Player entity!");
+	CORE_ASSERT(Player, "Cannot find Player entity!");
 
 	if (Player)
 		s_Data.PlayerTransform = (TransformComponent*)Entity_GetComponent(*Player, ComponentType_Transform);
-	BV_ASSERT(s_Data.PlayerTransform, "Entity does not have TransformComponent!");
+	CORE_ASSERT(s_Data.PlayerTransform, "Entity does not have TransformComponent!");
 
 	s_Data.Transform = (TransformComponent*)Entity_GetComponent(entity, ComponentType_Transform);
-	BV_ASSERT(s_Data.Transform, "Entity does not have TransformComponent!");
+	CORE_ASSERT(s_Data.Transform, "Entity does not have TransformComponent!");
 
 	s_Data.Camera = (CameraComponent*)Entity_GetComponent(entity, ComponentType_Camera);
-	BV_ASSERT(s_Data.Camera, "Entity does not have CameraComponent!");
+	CORE_ASSERT(s_Data.Camera, "Entity does not have CameraComponent!");
 }
 
 void CameraController_OnUpdate(Entity& entity, float timeStep)

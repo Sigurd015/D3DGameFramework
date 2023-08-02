@@ -17,7 +17,7 @@ static DXGI_FORMAT ShaderDataTypeToDX11BaseType(ShaderDataType type)
 	case ShaderDataType::Int3:     return DXGI_FORMAT_R32G32B32_SINT;
 	case ShaderDataType::Int4:     return DXGI_FORMAT_R32G32B32A32_SINT;
 	}
-	BV_ASSERT(false, "Unknown ShaderDataType!");
+	CORE_ASSERT(false, "Unknown ShaderDataType!");
 	return DXGI_FORMAT_UNKNOWN;
 }
 
@@ -35,7 +35,7 @@ void Pipeline_Create(Pipeline& out, const PipelineSpecification& spec)
 			0,(UINT)out.Layout.Elements[i].Offset ,D3D11_INPUT_PER_VERTEX_DATA ,0 };
 	}
 
-	BV_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateInputLayout(
+	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateInputLayout(
 		tempList, (UINT)out.Layout.ElementCount, out.Shader.VertexShaderBlob->GetBufferPointer(),
 		out.Shader.VertexShaderBlob->GetBufferSize(), &out.InputLayout));
 

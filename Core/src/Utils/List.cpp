@@ -8,7 +8,7 @@ void List_Create(List& out, uint32_t capacity)
 	out.Capacity = capacity;
 	out.Data = (void**)malloc(out.Capacity * sizeof(void*));
 
-	BV_ASSERT(out.Data != nullptr, "List_Create: Memory allocation failed");
+	CORE_ASSERT(out.Data != nullptr, "List_Create: Memory allocation failed");
 
 	out.Index = 0;
 }
@@ -38,7 +38,7 @@ void List_Add(List& out, void* data)
 		out.Capacity *= 2;
 		out.Data = (void**)realloc(out.Data, out.Capacity * sizeof(void*));
 
-		BV_ASSERT(out.Data != nullptr, "List_Add: Memory allocation failed");
+		CORE_ASSERT(out.Data != nullptr, "List_Add: Memory allocation failed");
 	}
 
 	out.Data[out.Index] = data;

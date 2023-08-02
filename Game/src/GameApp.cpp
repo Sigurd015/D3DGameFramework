@@ -19,17 +19,20 @@ static GameData s_Data;
 
 void Game_Ininialize(Application* appInst)
 {
+	Scene_Create(s_Data.TitleScene);
+	ScriptGlue_CreateTitleScene(s_Data.TitleScene);
+	Scene_Ininialize(s_Data.TitleScene);
+
 	Scene_Create(s_Data.PlayScene);
 	ScriptGlue_CreatePlayScene(s_Data.PlayScene);
 	Scene_Ininialize(s_Data.PlayScene);
-	ScriptGlue_CreateTitleScene(s_Data.TitleScene);
-	Scene_Ininialize(s_Data.TitleScene);
 
 	FadeInOut_Initialize();
 	StartUp_Initialize();
 	Loading_Initialize();
 	Loading_SetDepature(STARTUP_TITLE);
-	Game_SetMode(LOADING_SCENE);
+	//TODO: Set back to LOADING_SCENE when testing is done
+	Game_SetMode(TITLE_MENU);
 }
 
 void Game_Update(float timeStep)
@@ -63,11 +66,11 @@ void Game_Update(float timeStep)
 		RendererAPI_SetClearColor({ 0.3f,0.3f,0.3f,1.0f });
 		RendererAPI_Clear();
 
-		Scene_OnViewportResize(s_Data.PlayScene, Window_GetWidth(), Window_GetHeight());
-#ifndef BV_DIST
-		Scene_OnUpdate(s_Data.PlayScene, timeStep, true);
+		Scene_OnViewportResize(s_Data.TitleScene, Window_GetWidth(), Window_GetHeight());
+#ifndef CORE_DIST
+		Scene_OnUpdate(s_Data.TitleScene, timeStep, true);
 #else
-		Scene_OnUpdate(s_Data.PlayScene, timeStep);
+		Scene_OnUpdate(s_Data.TitleScene, timeStep);
 #endif
 		break;
 	}
@@ -77,7 +80,7 @@ void Game_Update(float timeStep)
 		RendererAPI_Clear();
 
 		Scene_OnViewportResize(s_Data.PlayScene, Window_GetWidth(), Window_GetHeight());
-#ifndef BV_DIST
+#ifndef CORE_DIST
 		Scene_OnUpdate(s_Data.PlayScene, timeStep, true);
 #else
 		Scene_OnUpdate(s_Data.PlayScene, timeStep);

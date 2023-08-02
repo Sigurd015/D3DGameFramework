@@ -5,7 +5,7 @@ FILE* LogFile = nullptr;
 
 void Log_Initialize()
 {
-#ifdef BV_DIST
+#ifdef CORE_DIST
 	LogFile = fopen("log.txt", "w");
 #endif 
 }
@@ -56,7 +56,7 @@ void Log_OutputToFile(Log_Level level, const char* type, const char* message)
 
 void Log_Core_Output(Log_Level level, const char* message)
 {
-#ifdef BV_DIST
+#ifdef CORE_DIST
 	Log_OutputToFile(level, "[CORE]", message);
 #else
 	Log_Output(level, "[CORE]", message);
@@ -65,7 +65,7 @@ void Log_Core_Output(Log_Level level, const char* message)
 
 void Log_APP_Output(Log_Level level, const char* message)
 {
-#ifdef BV_DIST
+#ifdef CORE_DIST
 	Log_OutputToFile(level, "[APP]", message);
 #else
 	Log_Output(level, "[APP]", message);

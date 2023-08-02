@@ -6,6 +6,7 @@ struct Scene;
 
 struct Entity
 {
+	bool Enabled = true;
 	Scene* Scene = nullptr;
 
 	TagComponent Tag;

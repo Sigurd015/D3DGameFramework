@@ -20,7 +20,7 @@ void CreateTexture(D3D11_USAGE usage, int cpuAccess, uint32_t width, uint32_t he
 	textureDesc.CPUAccessFlags = cpuAccess;
 	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 	textureDesc.MiscFlags = 0;
-	BV_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateTexture2D(&textureDesc, pInitialData, ppTexture2D));
+	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateTexture2D(&textureDesc, pInitialData, ppTexture2D));
 }
 
 void CreateShaderView(DXGI_FORMAT format, ID3D11Resource* pResource, ID3D11ShaderResourceView** ppSRView)
@@ -30,7 +30,7 @@ void CreateShaderView(DXGI_FORMAT format, ID3D11Resource* pResource, ID3D11Shade
 	resourceView.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	resourceView.Texture2D.MostDetailedMip = 0;
 	resourceView.Texture2D.MipLevels = 1;
-	BV_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateShaderResourceView(pResource, &resourceView, ppSRView));
+	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateShaderResourceView(pResource, &resourceView, ppSRView));
 }
 
 void CreateSamplerState(ID3D11SamplerState** ppSamplerState)
@@ -40,7 +40,7 @@ void CreateSamplerState(ID3D11SamplerState** ppSamplerState)
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	BV_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateSamplerState(&samplerDesc, ppSamplerState));
+	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateSamplerState(&samplerDesc, ppSamplerState));
 }
 
 void Texture2D_Create(Texture2D& out, const char* path)
@@ -53,7 +53,7 @@ void Texture2D_Create(Texture2D& out, const char* path)
 	size_t convertedChars = 0;
 	mbstowcs_s(&convertedChars, wcstring, newsize, path, _TRUNCATE);
 
-	BV_CHECK_DX_RESULT(DirectX::CreateWICTextureFromFile(RendererContext_GetDevice(), wcstring, reinterpret_cast<ID3D11Resource**>(&out.Texture), &out.TextureView));
+	CORE_CHECK_DX_RESULT(DirectX::CreateWICTextureFromFile(RendererContext_GetDevice(), wcstring, reinterpret_cast<ID3D11Resource**>(&out.Texture), &out.TextureView));
 
 	delete[]wcstring;
 
@@ -79,7 +79,7 @@ void Texture2D_SetData(Texture2D& out, void* data, uint32_t size)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	BV_CHECK_DX_RESULT(RendererContext_GetDeviceContext()->Map(out.Texture, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+	CORE_CHECK_DX_RESULT(RendererContext_GetDeviceContext()->Map(out.Texture, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
 
 	if (out.Spec.Format == ImageFormat::RGB8)
 	{

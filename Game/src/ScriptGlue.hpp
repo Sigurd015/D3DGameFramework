@@ -2,11 +2,94 @@
 #include "Core.h"
 #include "Player/PlayerController.h"
 #include "Camera/CameraController.h"
+#include "UI/TitleMenuController.h"
 #include "UI/UIController.h"
 
 // Hardcoded scene
+void ScriptGlue_CreateTitleScene(Scene& scene)
+{
+	//Textures
+	Texture2D* backgroundTex = (Texture2D*)malloc(sizeof(Texture2D));
+	Texture2D_Create(*backgroundTex, "assets/textures/title.png");
+
+	//Main Camera
+	{
+		Entity* camera = (Entity*)malloc(sizeof(Entity));
+		*camera = {};
+		camera->Tag.Name = "MainCamera";
+		camera->Transform.Translation = { 0.0f, 0.0f, -10.0f };
+
+		CameraSpecification spec;
+		spec.ProjectionType = ProjectionType::Orthographic;
+		spec.AspectRatio = 16.0f / 9.0f;
+		spec.OrthographicSize = 50.0f;
+		SceneCamera* sceneCamera = (SceneCamera*)malloc(sizeof(SceneCamera));
+		*sceneCamera = {};
+		SceneCamera_Create(*sceneCamera, spec);
+
+		CameraComponent* cameraComponent = (CameraComponent*)malloc(sizeof(CameraComponent));
+		*cameraComponent = {};
+		cameraComponent->Camera = sceneCamera;
+		Entity_AddComponent(*camera, ComponentType::ComponentType_Camera, cameraComponent);
+
+		Scene_AddEntity(scene, *camera);
+	}
+
+	//Background and Title menu manager
+	{
+		Entity* background = (Entity*)malloc(sizeof(Entity));
+		*background = {};
+		background->Tag.Name = "Background";
+
+		RectTransformComponent* rectTransform = (RectTransformComponent*)malloc(sizeof(RectTransformComponent));
+		*rectTransform = {};
+		rectTransform->Position = { 0.0f, 0.0f };
+		rectTransform->Size = { 1920.0f, 1080.0f };
+		Entity_AddComponent(*background, ComponentType::ComponentType_RectTransform, rectTransform);
+
+		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+		*spriteRenderer = {};
+		spriteRenderer->Texture = backgroundTex;
+		spriteRenderer->Color = { 1.0f, 1.0f, 1.0f, 1.0f };
+		spriteRenderer->UVStart = { 0,1.0f };
+		spriteRenderer->UVEnd = { 1.0f,0 };
+		Entity_AddComponent(*background, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+		ScriptComponent* scriptComponent = (ScriptComponent*)malloc(sizeof(ScriptComponent));
+		*scriptComponent = {};
+		scriptComponent->OnCreate = TitleMenuController_OnCreate;
+		scriptComponent->OnUpdate = TitleMenuController_OnUpdate;
+		scriptComponent->OnDestroy = TitleMenuController_OnDestroy;
+		scriptComponent->OnCollision = TitleMenuController_OnCollision;
+		Entity_AddComponent(*background, ComponentType::ComponentType_Script, scriptComponent);
+
+		Scene_AddEntity(scene, *background);
+	}
+
+	//Selection
+	{
+		Entity* selection = (Entity*)malloc(sizeof(Entity));
+		*selection = {};
+		selection->Tag.Name = "Selection";
+
+		RectTransformComponent* rectTransform = (RectTransformComponent*)malloc(sizeof(RectTransformComponent));
+		*rectTransform = {};
+		rectTransform->Position = { 790.0f, 330.0f };
+		rectTransform->Size = { 300.0f, 70.0f };
+		Entity_AddComponent(*selection, ComponentType::ComponentType_RectTransform, rectTransform);
+
+		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+		*spriteRenderer = {};
+		spriteRenderer->Color = { 0.4f, 0.4f, 0.4f, 0.5f };
+		Entity_AddComponent(*selection, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+		Scene_AddEntity(scene, *selection);
+	}
+}
+
 void ScriptGlue_CreatePlayScene(Scene& scene)
 {
+	//Textures
 	Texture2D* texture = (Texture2D*)malloc(sizeof(Texture2D));
 	Texture2D_Create(*texture, "assets/textures/Container_Diffuse.png");
 
@@ -22,6 +105,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		*camera = {};
 		camera->Tag.Name = "MainCamera";
 		camera->Transform.Translation = { 0.0f, 0.0f, -10.0f };
+
 		CameraSpecification spec;
 		spec.ProjectionType = ProjectionType::Orthographic;
 		spec.AspectRatio = 16.0f / 9.0f;
@@ -494,5 +578,3 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 	}
 }
 
-void ScriptGlue_CreateTitleScene(Scene& scene)
-{}

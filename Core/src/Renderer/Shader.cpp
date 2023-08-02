@@ -14,13 +14,13 @@ void Shader_Create(Shader& out, const char* name)
 	char pixelShaderName[256];
 	sprintf_s(pixelShaderName, 256, "assets/shaders/cache/%s_p.cso", name);
 
-	BV_CHECK_DX_RESULT(D3DReadFileToBlob(CA2T(vertexShaderName), &out.VertexShaderBlob));
-	BV_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateVertexShader(out.VertexShaderBlob->GetBufferPointer(),
+	CORE_CHECK_DX_RESULT(D3DReadFileToBlob(CA2T(vertexShaderName), &out.VertexShaderBlob));
+	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateVertexShader(out.VertexShaderBlob->GetBufferPointer(),
 		out.VertexShaderBlob->GetBufferSize(), nullptr, &out.VertexShader));
 
 	ID3DBlob* blob;
-	BV_CHECK_DX_RESULT(D3DReadFileToBlob(CA2T(pixelShaderName), &blob));
-	BV_CHECK_DX_RESULT(RendererContext_GetDevice()->CreatePixelShader(blob->GetBufferPointer(),
+	CORE_CHECK_DX_RESULT(D3DReadFileToBlob(CA2T(pixelShaderName), &blob));
+	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreatePixelShader(blob->GetBufferPointer(),
 		blob->GetBufferSize(), nullptr, &out.PixelShader));
 
 	blob->Release();
