@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+// Forward declarations
 struct Application;
 
 struct ApplicationCommandLineArgs

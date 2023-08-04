@@ -36,7 +36,8 @@ Mat TransformComponent_GetTransform(const TransformComponent& transform);
 
 struct RectTransformComponent
 {
-	// Position is left bottom, [0,0] is left bottom, [1,1] is right top
+	//Notice: Position is left bottom, [0,0] is left bottom, [1,1] is right top
+	//but for Text, [0,0] is left top, [1,1] is right bottom (Text handled by D2D)
 	Vec2 Position = { 0.0f, 0.0f };
 	Vec2 Size = { 1.0f, 1.0f };
 	Vec2 Scale = { 1.0f, 1.0f };

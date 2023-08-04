@@ -1,7 +1,8 @@
 #include "TitleMenuController.h"
+#include "../ScreenEffect/Loading.h"
 
 #define CREDITS_TEXT_COUNT 5
-#define CREDITS_TEXT_START_POS_Y 1280.0f
+#define CREDITS_TEXT_START_POS_Y 1180.0f
 #define CREDITS_TEXT_OFFSET_Y 100.0f
 
 #define CREDITS_FONT_NAME L"Arial"
@@ -27,9 +28,11 @@ enum MenuState
 struct TitleMenuControllerData
 {
 	SpriteRendererComponent* BackgroundSprite = nullptr;
-	Texture2D* BackgroundTexture = nullptr;
+	Texture2D* MenuBGTexture = nullptr;
+	Texture2D* SettingsBGTexture = nullptr;
 	Entity* SelectionEntity = nullptr;
 	RectTransformComponent* SelectionRectTrans = nullptr;
+	SpriteRendererComponent* SelectionSprite = nullptr;
 
 	MenuNode* CurrentNode = nullptr;
 
@@ -63,12 +66,16 @@ void ExitGame()
 
 void StartGame()
 {
-
+	Loading_Reset();
+	Loading_SetDepature(PLAY_SCENE);
+	Game_SetMode(LOADING_SCENE);
 }
 
 void Settings()
 {
-
+	s_Data.BackgroundSprite->Texture = s_Data.SettingsBGTexture;
+	s_Data.BackgroundSprite->Color = { 1.0f,1.0f,1.0f,1.0f };
+	s_Data.State = SETTINGS;
 }
 
 void Credits()
@@ -88,7 +95,7 @@ void ResetToIdle()
 {
 	s_Data.State = IDLE;
 	Scene_SetEntityEnabled(*s_Data.SelectionEntity, true);
-	s_Data.BackgroundSprite->Texture = s_Data.BackgroundTexture;
+	s_Data.BackgroundSprite->Texture = s_Data.MenuBGTexture;
 	s_Data.BackgroundSprite->Color = { 1.0f,1.0f,1.0f,1.0f };
 }
 
@@ -106,13 +113,16 @@ void TitleMenuController_OnCreate(Entity& entity)
 		s_Data.CurrentNode = &s_Data.StartGameNode;
 	}
 
+	s_Data.SettingsBGTexture = (Texture2D*)malloc(sizeof(Texture2D));
+	Texture2D_Create(*s_Data.SettingsBGTexture, "assets/textures/settings.png");
+
 	//Background
 	{
 		s_Data.BackgroundSprite = (SpriteRendererComponent*)Entity_GetComponent(entity, ComponentType_SpriteRenderer);
 
 		CORE_ASSERT(s_Data.BackgroundSprite, "Entity does not have RectTransformComponent!");
 
-		s_Data.BackgroundTexture = s_Data.BackgroundSprite->Texture;
+		s_Data.MenuBGTexture = s_Data.BackgroundSprite->Texture;
 	}
 
 	//Selection
@@ -124,6 +134,10 @@ void TitleMenuController_OnCreate(Entity& entity)
 		s_Data.SelectionRectTrans = (RectTransformComponent*)Entity_GetComponent(*s_Data.SelectionEntity, ComponentType_RectTransform);
 
 		CORE_ASSERT(s_Data.SelectionRectTrans, "Entity does not have RectTransformComponent!");
+
+		s_Data.SelectionSprite = (SpriteRendererComponent*)Entity_GetComponent(*s_Data.SelectionEntity, ComponentType_SpriteRenderer);
+
+		CORE_ASSERT(s_Data.SelectionSprite, "Entity does not have RectTransformComponent!");
 	}
 }
 
@@ -155,6 +169,21 @@ void TitleMenuController_OnUpdate(Entity& entity, float timeStep)
 	}
 	case ::SETTINGS:
 	{
+		if (Input_GetKeyDown(KeyCode::Enter))
+		{
+			s_Data.CurrentNode->OnEnter();
+		}
+
+		if (Input_GetKeyDown(KeyCode::UpArrow))
+		{
+			s_Data.CurrentNode = s_Data.CurrentNode->Prev;
+		}
+		else if (Input_GetKeyDown(KeyCode::DownArrow))
+		{
+			s_Data.CurrentNode = s_Data.CurrentNode->Next;
+		}
+
+		s_Data.SelectionRectTrans->Position.y = s_Data.CurrentNode->yPos;
 		break;
 	}
 	case ::CREDITS:
@@ -170,6 +199,10 @@ void TitleMenuController_OnUpdate(Entity& entity, float timeStep)
 
 			s_Data.CreditsYPos[i] -= s_Data.CreditsSpeed * timeStep;
 		}
+
+		if (s_Data.CreditsYPos[CREDITS_TEXT_COUNT - 1] < -100.0f)
+			ResetToIdle();
+
 		break;
 	}
 	}

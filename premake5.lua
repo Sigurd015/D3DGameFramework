@@ -1,4 +1,4 @@
-workspace "BloodVeil"
+workspace "Gunslayer"
 	architecture "x86_64"
 	startproject "Game"
 
