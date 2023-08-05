@@ -8,11 +8,10 @@ struct CameraControllerData
 	TransformComponent* Transform = nullptr;
 	CameraComponent* Camera = nullptr;
 
-	float MinOrthographicSize = 5.0f;
-	float MaxOrthographicSize = 50.0f;
-
-	float DistanceZ = -10.0f;
-	float DistanceY = 5.0f;
+#ifndef CORE_DIST
+	TransformComponent* DebugCameraTransform = nullptr;
+	CameraComponent* DebugCameraCamera = nullptr;
+#endif
 };
 static CameraControllerData s_Data;
 
@@ -32,49 +31,59 @@ void CameraController_OnCreate(Entity& entity)
 
 	s_Data.Camera = (CameraComponent*)Entity_GetComponent(entity, ComponentType_Camera);
 	CORE_ASSERT(s_Data.Camera, "Entity does not have CameraComponent!");
+
+#ifndef CORE_DIST
+	{
+		Entity* debugCamera = Scene_GetEntityByName(*entity.Scene, "DebugCamera");
+		CORE_ASSERT(debugCamera, "Cannot find DebugCamera entity!");
+
+		s_Data.DebugCameraTransform = (TransformComponent*)Entity_GetComponent(*debugCamera, ComponentType_Transform);
+		CORE_ASSERT(s_Data.DebugCameraTransform, "Entity does not have TransformComponent!");
+
+		s_Data.DebugCameraCamera = (CameraComponent*)Entity_GetComponent(*debugCamera, ComponentType_Camera);
+		CORE_ASSERT(s_Data.DebugCameraCamera, "Entity does not have CameraComponent!");
+	}
+#endif
 }
 
 void CameraController_OnUpdate(Entity& entity, float timeStep)
 {
-	if (Input_GetKey(KeyCode::R))
+	s_Data.Transform->Translation = s_Data.PlayerTransform->Translation;
+
+#ifndef CORE_DIST
 	{
-		if (s_Data.Camera->Camera->Spec.ProjectionType == ProjectionType::Perspective)
-			s_Data.DistanceZ += 0.1f;
-		else
-			SceneCamera_SetOrthographicSize(*s_Data.Camera->Camera,
-				FloatLerp(s_Data.Camera->Camera->Spec.OrthographicSize,
-					FloatMin(s_Data.Camera->Camera->Spec.OrthographicSize - 5.0f, s_Data.MaxOrthographicSize), timeStep));
+		if (Input_GetKeyDown(KeyCode::I))
+		{
+			s_Data.Camera->Primary = !s_Data.Camera->Primary;
+			s_Data.DebugCameraCamera->Primary = !s_Data.DebugCameraCamera->Primary;
+		}
+
+		if (s_Data.DebugCameraCamera->Primary)
+		{
+			Vec3 pos = s_Data.DebugCameraTransform->Translation;
+			static float speed = 25.0f;
+
+			if (Input_GetKey(KeyCode::UpArrow))
+				pos.y += speed * timeStep;
+			else if (Input_GetKey(KeyCode::DownArrow))
+				pos.y -= speed * timeStep;
+			if (Input_GetKey(KeyCode::LeftArrow))
+				pos.x -= speed * timeStep;
+			else if (Input_GetKey(KeyCode::RightArrow))
+				pos.x += speed * timeStep;
+
+			if (Input_GetKey(KeyCode::NumpadAdd))
+				pos.z += speed * timeStep;
+			else if (Input_GetKey(KeyCode::NumpadSubtract))
+				pos.z -= speed * timeStep;
+
+			s_Data.DebugCameraTransform->Translation = pos;
+		}
 	}
+#endif
 
-	if (Input_GetKey(KeyCode::F))
-	{
-		if (s_Data.Camera->Camera->Spec.ProjectionType == ProjectionType::Perspective)
-			s_Data.DistanceZ -= 0.1f;
-		else
-			SceneCamera_SetOrthographicSize(*s_Data.Camera->Camera,
-				FloatLerp(s_Data.Camera->Camera->Spec.OrthographicSize,
-					FloatMax(s_Data.Camera->Camera->Spec.OrthographicSize + 5.0f, s_Data.MinOrthographicSize), timeStep));
-	}
 
-	if (Input_GetKey(KeyCode::Q))
-		s_Data.Transform->Rotation.z += DirectX::XMConvertToRadians(1.0f);
 
-	if (Input_GetKey(KeyCode::E))
-		s_Data.Transform->Rotation.z -= DirectX::XMConvertToRadians(1.0f);
-
-	if (Input_GetKeyDown(KeyCode::T))
-	{
-		if (s_Data.Camera->Camera->Spec.ProjectionType == ProjectionType::Perspective)
-			SceneCamera_SetProjectionType(*s_Data.Camera->Camera, ProjectionType::Orthographic);
-		else
-			SceneCamera_SetProjectionType(*s_Data.Camera->Camera, ProjectionType::Perspective);
-	}
-
-	Vec3 playerPosition = s_Data.PlayerTransform->Translation;
-	playerPosition.z = s_Data.DistanceZ;
-	playerPosition.y += s_Data.DistanceY;
-	//playerPosition.y = s_Data.Transform->Translation.y;
-	s_Data.Transform->Translation = Vec3Lerp(s_Data.Transform->Translation, playerPosition, timeStep);
 }
 
 void CameraController_OnDestroy(Entity& entity)

@@ -19,11 +19,9 @@ void SpriteAnimator_Create(SpriteAnimator& animtor, const SpriteAnimatorSpecific
 			float elementWidth = (float)(j * spec.ElementWidth);
 			float elementHeight = (float)(i * spec.ElementHeight);
 
-			// Notice: Looks like the UVs need to be flipped vertically.
-			// DirectXTK CreateWICTextureFromFile not flipping the UVs. Same like stb_image.
-
-			element->UVStart = { elementWidth / (float)spec.TextureWidth, (float)(elementHeight + spec.ElementHeight) / (float)spec.TextureHeight };
-			element->UVEnd = { (float)(elementWidth + spec.ElementWidth) / (float)spec.TextureWidth,elementHeight / (float)spec.TextureHeight, };
+			element->UVStart = { elementWidth / (float)spec.TextureWidth,elementHeight / (float)spec.TextureHeight };
+			element->UVEnd = { (float)(elementWidth + spec.ElementWidth) / (float)spec.TextureWidth,
+				(float)(elementHeight + spec.ElementHeight) / (float)spec.TextureHeight };
 
 			List_Add(animtor.Elements, element);
 			index++;

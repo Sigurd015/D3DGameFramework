@@ -337,9 +337,9 @@ void NarrowPhase(PhysicsWorld2D& world)
 {
 	for (size_t i = 0; i < world.ContactPairCount; i++)
 	{
-		ContactPair contactPair = *(ContactPair*)List_Get(world.ContactPairs, i);
-		Rigidbody2D* body1 = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, contactPair.Body1);
-		Rigidbody2D* body2 = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, contactPair.Body2);
+		ContactPair* contactPair = (ContactPair*)List_Get(world.ContactPairs, i);
+		Rigidbody2D* body1 = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, contactPair->Body1);
+		Rigidbody2D* body2 = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, contactPair->Body2);
 
 		float depth = FLT_MAX;
 		Vec2 normal = Vec2Zero;

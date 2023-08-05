@@ -8,6 +8,7 @@ project "Game"
 	files
 	{
 		"src/**.h",
+		"src/**.hpp",
 		"src/**.cpp",
 		"assets/shaders/**.hlsl"
 	}

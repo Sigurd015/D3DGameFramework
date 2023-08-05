@@ -447,7 +447,11 @@ void Renderer2D_DrawQuad(const Mat& transform, Texture2D& texture, const Vec2& u
 	if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
 		NextBatch();
 
-	Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
+	// Notice: DirectXTK CreateWICTextureFromFile not flipping the image, like stbi_set_flip_vertically_on_load, so we need to flip the uv
+
+	//Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
+	//TODO: Fix this
+	Vec2 textureCoords[] = { uv1, { uv0.x, uv1.y }, uv0, { uv1.x, uv0.y } };
 	SetQuadVertex(transform, tintColor, textureCoords, GetTextureID(texture), tilingFactor);
 }
 
@@ -534,7 +538,10 @@ void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, const Vec4& color)
 
 void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, Texture2D& texture, const Vec2& uv0, const Vec2& uv1, const Vec4& tintColor, float tilingFactor)
 {
-	Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
+	// Notice: DirectXTK CreateWICTextureFromFile not flipping the image, like stbi_set_flip_vertically_on_load, so we need to flip the uv
+	
+	//Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
+	Vec2 textureCoords[] = { uv0, { uv0.x, uv1.y }, uv1, { uv1.x, uv0.y } };
 
 	SetUIVertex(pos, size, tintColor, textureCoords, GetTextureID(texture), tilingFactor);
 }

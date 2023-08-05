@@ -32,7 +32,7 @@ void Game_Ininialize(Application* appInst)
 	Loading_Initialize();
 	Loading_SetDepature(STARTUP_TITLE);
 	//TODO: Set back to LOADING_SCENE when testing is done
-	Game_SetMode(TITLE_MENU);
+	Game_SetMode(PLAY_SCENE);
 }
 
 void Game_Update(float timeStep)
@@ -67,11 +67,7 @@ void Game_Update(float timeStep)
 		RendererAPI_Clear();
 
 		Scene_OnViewportResize(s_Data.TitleScene, Window_GetWidth(), Window_GetHeight());
-#ifndef CORE_DIST
-		Scene_OnUpdate(s_Data.TitleScene, timeStep, true);
-#else
 		Scene_OnUpdate(s_Data.TitleScene, timeStep);
-#endif
 		break;
 	}
 	case PLAY_SCENE:
@@ -80,11 +76,7 @@ void Game_Update(float timeStep)
 		RendererAPI_Clear();
 
 		Scene_OnViewportResize(s_Data.PlayScene, Window_GetWidth(), Window_GetHeight());
-#ifndef CORE_DIST
-		Scene_OnUpdate(s_Data.PlayScene, timeStep, true);
-#else
 		Scene_OnUpdate(s_Data.PlayScene, timeStep);
-#endif
 		break;
 	}
 	}
@@ -123,7 +115,7 @@ void CreateApplication(Application* appInst, ApplicationCommandLineArgs args)
 				appInst->Spec.FullScreen = false;
 				break;
 			}
-		}		
+		}
 	}
 	else
 	{

@@ -250,7 +250,7 @@ void PhysicsVisualiztion(Scene& out)
 	}
 }
 
-void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
+void Scene_OnUpdate(Scene& out, float timeStep)
 {
 	// Find primary camera
 	{
@@ -297,17 +297,8 @@ void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
 				{
 					Rigidbody2DComponent* rb2d = temp->Rigidbody2D;
 					Rigidbody2D* rb = (Rigidbody2D*)rb2d->RuntimeBody;
-					if (!rb->IsTrigger)
-					{
-						tc->Translation = { rb->Position.x, rb->Position.y, tc->Translation.z };
-						tc->Rotation.z = rb->Rotation;
-					}
-					else
-					{
-						rb->Position = { tc->Translation.x, tc->Translation.y };
-						rb->Rotation = tc->Rotation.z;
-						rb->UpdateRequired = true;
-					}
+					tc->Translation = { rb->Position.x, rb->Position.y, tc->Translation.z };
+					tc->Rotation.z = rb->Rotation;
 				}
 			}
 		}
@@ -398,8 +389,9 @@ void Scene_OnUpdate(Scene& out, float timeStep, bool enablePhysicsVisualization)
 		}
 	}
 
-	if (enablePhysicsVisualization)
-		PhysicsVisualiztion(out);
+#ifndef CORE_DIST
+	PhysicsVisualiztion(out);
+#endif
 
 	Renderer2D_EndScene();
 }

@@ -44,7 +44,7 @@ bool Collisions_IntersectCircles(const Vec2& center1, float radius1, const Vec2&
 	*contactPointCount = 1;
 	contactPoint[0] = Vec2Add(center1, Vec2MulFloat(dir, radius1));
 
-	//Debug
+#ifndef CORE_DIST
 	Vec3 pos = { contactPoint[0].x,contactPoint[0].y,-0.1f };
 	Vec3 rot = { 0,0,0 };
 	Vec3 scale = { 0.5f,0.5f,1.0f };
@@ -54,6 +54,7 @@ bool Collisions_IntersectCircles(const Vec2& center1, float radius1, const Vec2&
 		* DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
 
 	Renderer2D_DrawQuad(trans, { 1.0f,0,0,1.0f });
+#endif 
 
 	return true;
 }
@@ -212,7 +213,7 @@ bool Collisions_IntersectPolygons(Vec2* vertices1, uint32_t count1, const Vec2& 
 
 	FindPolygonsContactPoints(vertices1, count1, vertices2, count2, contactPoint, contactPointCount);
 
-	//Debug
+#ifndef CORE_DIST
 	{
 		for (size_t i = 0; i < *contactPointCount; i++)
 		{
@@ -227,6 +228,7 @@ bool Collisions_IntersectPolygons(Vec2* vertices1, uint32_t count1, const Vec2& 
 			Renderer2D_DrawQuad(trans, { 1.0f,0,0,1.0f });
 		}
 	}
+#endif 
 
 	return true;
 }
@@ -346,7 +348,8 @@ bool Collisions_IntersectCirclePolygon(Vec2& circleCenter, float circleRadius, V
 		*normal = Vec2MulFloat(*normal, -1);
 	}
 
-	//Debug
+
+#ifndef CORE_DIST
 	{
 		for (size_t i = 0; i < *contactPointCount; i++)
 		{
@@ -361,7 +364,8 @@ bool Collisions_IntersectCirclePolygon(Vec2& circleCenter, float circleRadius, V
 			Renderer2D_DrawQuad(trans, { 1.0f,0,0,1.0f });
 		}
 	}
-	
+#endif 
+
 	return true;
 }
 
