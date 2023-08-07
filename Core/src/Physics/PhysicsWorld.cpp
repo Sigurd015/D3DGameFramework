@@ -39,14 +39,10 @@ void PhysicsWorld2D_Create(PhysicsWorld2D& world, void(*CollisionCallback)(void*
 	world.ContactPairCount = 0;
 }
 
-void PhysicsWorld2D_Clear(PhysicsWorld2D& world)
-{
-	world.Rigidbody2DCount = 0;
-}
-
 void PhysicsWorld2D_Destory(PhysicsWorld2D& world)
 {
 	List_Free(world.Rigidbody2Ds, true);
+	List_Free(world.ContactPairs, true);
 }
 
 void* PhysicsWorld2D_AddRigidbody2D(PhysicsWorld2D& world, Rigidbody2D& rigidbody2D)
@@ -113,7 +109,7 @@ bool Collide(Rigidbody2D& body1, Rigidbody2D& body2, Vec2* normal, float* depth,
 void ResolveCollision(Rigidbody2D& body1, Rigidbody2D& body2, Vec2& normal, float depth,
 	Vec2* contactPoint, uint32_t contactPointCount)
 {
-	//// Temp
+	// With rotation and friction version, but not working correctly
 	//float 	InvInertia = 0.1f;
 
 	//BV_ASSERT(contactPointCount <= 2, "Max contact point count is 2");
@@ -296,10 +292,20 @@ void BroadPhase(PhysicsWorld2D& world)
 	for (size_t i = 0; i < world.Rigidbody2DCount; i++)
 	{
 		Rigidbody2D* body1 = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, i);
+		if (!body1->Enabled)
+		{
+			continue;
+		}
+
 		for (size_t j = i + 1; j < world.Rigidbody2DCount; j++)
 		{
 			Rigidbody2D* body2 = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, j);
 			if (body1->Type == Rigidbody2D::BodyType::Static && body2->Type == Rigidbody2D::BodyType::Static)
+			{
+				continue;
+			}
+
+			if (!body2->Enabled)
 			{
 				continue;
 			}
@@ -332,6 +338,24 @@ void BroadPhase(PhysicsWorld2D& world)
 		}
 	}
 }
+#ifndef CORE_DIST
+#include "Renderer/Renderer2D.h"
+void ContactPointVisualiztion(const Vec2* contactPoint, uint32_t contactPointCount)
+{
+	for (size_t i = 0; i < contactPointCount; i++)
+	{
+		Vec3 pos = { contactPoint[i].x,contactPoint[i].y,-0.1f };
+		Vec3 rot = { 0,0,0 };
+		Vec3 scale = { 0.5f,0.5f,1.0f };
+
+		Mat trans = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z)
+			* DirectX::XMMatrixRotationQuaternion(DirectX::XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&rot)))
+			* DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+
+		Renderer2D_DrawQuad(trans, { 1.0f,0,0,1.0f });
+	}
+}
+#endif 
 
 void NarrowPhase(PhysicsWorld2D& world)
 {
@@ -347,6 +371,11 @@ void NarrowPhase(PhysicsWorld2D& world)
 		uint32_t contactPointCount = 0;
 		if (Collide(*body1, *body2, &normal, &depth, contactPoint, &contactPointCount))
 		{
+
+#ifndef CORE_DIST
+			ContactPointVisualiztion(contactPoint, contactPointCount);
+#endif 
+
 			if (body1->IsTrigger || body2->IsTrigger)
 			{
 				world.CollisionCallback(body1->Entity, body2->Entity);
@@ -354,18 +383,18 @@ void NarrowPhase(PhysicsWorld2D& world)
 				continue;
 			}
 
-			if (body1->Type == Rigidbody2D::BodyType::Static || body1->Type == Rigidbody2D::BodyType::Kinematic)
+			if (body1->Type == Rigidbody2D::BodyType::Static)
 			{
-				Rigidbody2D_MovePosition(*body2, Vec2MulFloat(normal, depth / 2.0f));
+				Rigidbody2D_MovePosition(body2, Vec2MulFloat(normal, depth / 2.0f));
 			}
-			else if (body2->Type == Rigidbody2D::BodyType::Static || body2->Type == Rigidbody2D::BodyType::Kinematic)
+			else if (body2->Type == Rigidbody2D::BodyType::Static)
 			{
-				Rigidbody2D_MovePosition(*body1, Vec2MulFloat(normal, -depth));
+				Rigidbody2D_MovePosition(body1, Vec2MulFloat(normal, -depth));
 			}
 			else
 			{
-				Rigidbody2D_MovePosition(*body1, Vec2MulFloat(normal, -depth / 2.0f));
-				Rigidbody2D_MovePosition(*body2, Vec2MulFloat(normal, depth / 2.0f));
+				Rigidbody2D_MovePosition(body1, Vec2MulFloat(normal, -depth / 2.0f));
+				Rigidbody2D_MovePosition(body2, Vec2MulFloat(normal, depth / 2.0f));
 			}
 
 			ResolveCollision(*body1, *body2, normal, depth, contactPoint, contactPointCount);

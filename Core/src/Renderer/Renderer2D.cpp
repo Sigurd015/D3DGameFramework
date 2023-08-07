@@ -450,7 +450,7 @@ void Renderer2D_DrawQuad(const Mat& transform, Texture2D& texture, const Vec2& u
 	// Notice: DirectXTK CreateWICTextureFromFile not flipping the image, like stbi_set_flip_vertically_on_load, so we need to flip the uv
 
 	//Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
-	//TODO: Fix this
+	//TODO: Fix this (this should be the same as DrawUI does)
 	Vec2 textureCoords[] = { uv1, { uv0.x, uv1.y }, uv0, { uv1.x, uv0.y } };
 	SetQuadVertex(transform, tintColor, textureCoords, GetTextureID(texture), tilingFactor);
 }

@@ -57,6 +57,7 @@ void Scene_Ininialize(Scene& out)
 				rigidbody2D.Rotation = tc->Rotation.z;
 				rigidbody2D.FixedRotation = rb2d->FixedRotation;
 				rigidbody2D.Entity = temp;
+				rigidbody2D.Enabled = temp->Enabled;
 
 				if (Entity_HasComponent(*temp, ComponentType_CircleCollider2D))
 				{
@@ -107,7 +108,8 @@ void Scene_Destroy(Scene& out)
 		if (Entity_HasComponent(*temp, ComponentType_Script))
 		{
 			temp->Script->OnDestroy(*temp);
-			free(temp->Script);
+			//TODO: same issue as Texture2D
+			//free(temp->Script);
 		}
 
 		if (Entity_HasComponent(*temp, ComponentType_Camera))
@@ -194,17 +196,15 @@ void Scene_SetEntityEnabled(Entity& entity, bool enabled)
 	entity.Enabled = enabled;
 	//TODO: Maybe call script OnEnable/OnDisable
 	//      and then set rigidbody2d enabled
-	if (enabled)
+	if (Entity_HasComponent(entity, ComponentType_Rigidbody2D))
 	{
-
-	}
-	else
-	{
-
+		Rigidbody2D* rigidbody2D = (Rigidbody2D*)entity.Rigidbody2D->RuntimeBody;
+		rigidbody2D->Enabled = enabled;
 	}
 }
 
-void PhysicsVisualiztion(Scene& out)
+#ifndef CORE_DIST
+void ColliderVisualiztion(const Scene& out)
 {
 	uint32_t size = List_Size(out.Entities);
 	for (size_t i = 0; i < size; i++)
@@ -249,6 +249,7 @@ void PhysicsVisualiztion(Scene& out)
 
 	}
 }
+#endif
 
 void Scene_OnUpdate(Scene& out, float timeStep)
 {
@@ -390,7 +391,7 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 	}
 
 #ifndef CORE_DIST
-	PhysicsVisualiztion(out);
+	ColliderVisualiztion(out);
 #endif
 
 	Renderer2D_EndScene();

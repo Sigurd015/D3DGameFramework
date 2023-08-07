@@ -38,19 +38,19 @@ void PlayerController_OnUpdate(Entity& entity, float timeStep)
 		s_Data.Stats.Hp = FloatClamp(s_Data.Stats.Hp - 30.0f, 0.0f, s_Data.Stats.MaxHp);
 	}
 
-	Vec2 force = Vec2(0, 0);
-	static float speed = 5.0f;
+	Vec2 movement = Vec2(0, 0);
+	static float speed = 25.0f;
 
 	if (Input_GetKey(KeyCode::W))
-		force.y += speed;
+		movement.y += speed;
 	if (Input_GetKey(KeyCode::S))
-		force.y -= speed;
+		movement.y -= speed;
 	if (Input_GetKey(KeyCode::A))
-		force.x -= speed;
+		movement.x -= speed;
 	if (Input_GetKey(KeyCode::D))
-		force.x += speed;
+		movement.x += speed;
 
-	Rigidbody2DComponent_ApplyForce(*s_Data.Rigidbody2D, Vec2MulFloat(force, timeStep));
+	Rigidbody2DComponent_MovePosition(*s_Data.Rigidbody2D, Vec2MulFloat(movement, timeStep));
 }
 
 void PlayerController_OnDestroy(Entity& entity)

@@ -96,7 +96,7 @@ void Game_SetMode(GameMode mode)
 
 void CreateApplication(Application* appInst, ApplicationCommandLineArgs args)
 {
-	appInst->Spec.Name = "Bloodveil";
+	appInst->Spec.Name = "Gunslayer";
 	appInst->Spec.Width = 1920;
 	appInst->Spec.Height = 1080;
 	appInst->Spec.Resizable = false;

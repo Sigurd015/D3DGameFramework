@@ -74,12 +74,14 @@ struct Rigidbody2DComponent
 {
 	Rigidbody2D::BodyType Type = Rigidbody2D::BodyType::Static;
 	bool FixedRotation = false;
+	float GravityScale = 1.0f;
 
 	void* RuntimeBody = nullptr;
 };
 
 void Rigidbody2DComponent_ApplyForce(Rigidbody2DComponent& rigidbody2D, const Vec2& force);
 void Rigidbody2DComponent_ApplyRotation(Rigidbody2DComponent& rigidbody2D, float rotation);
+void Rigidbody2DComponent_MovePosition(Rigidbody2DComponent& rigidbody2D, const Vec2& position);
 
 struct BoxCollider2DComponent
 {

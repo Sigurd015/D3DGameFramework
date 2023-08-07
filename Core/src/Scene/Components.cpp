@@ -36,3 +36,10 @@ void Rigidbody2DComponent_ApplyRotation(Rigidbody2DComponent& rigidbody2D, float
 	if (rotation != 0.0f)
 		Rigidbody2D_ApplyRotation(rigidbody2D.RuntimeBody, rotation);
 }
+
+void Rigidbody2DComponent_MovePosition(Rigidbody2DComponent& rigidbody2D, const Vec2& position)
+{
+	if (Vec2Equal(position, Vec2Zero))
+		return;
+	Rigidbody2D_MovePosition(rigidbody2D.RuntimeBody, position);
+}

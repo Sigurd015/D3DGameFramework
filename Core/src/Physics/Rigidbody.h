@@ -6,12 +6,14 @@ struct Rigidbody2D
 {
 	enum BodyType { Static = 0, Dynamic, Kinematic };
 	BodyType Type = BodyType::Static;
+	bool Enabled = true;
 	Vec2 Position = { 0.0f, 0.0f };
 	float Rotation = 0.0f;
 	Vec2 Velocity = { 0.0f, 0.0f };
 	float AngularVelocity = 0.0f;
 	bool FixedRotation = false;
 	bool IsTrigger = false;
+	float GravityScale = 1.0f;
 
 	float Density = 1.0f;
 	float Friction = 0.5f;
@@ -43,5 +45,5 @@ void Rigidbody2D_CreateCircleCollider(Rigidbody2D& rigidbody2D, const Vec2& offs
 void Rigidbody2D_ReCalculCircleColliderAABB(Rigidbody2D& rigidbody2D);
 void Rigidbody2D_ApplyForce(void* rigidbody2D, const Vec2& force);
 void Rigidbody2D_ApplyRotation(void* rigidbody2D, float rotation);
-void Rigidbody2D_MovePosition(Rigidbody2D& rigidbody2D, const Vec2& amount);
+void Rigidbody2D_MovePosition(void* rigidbody2D, const Vec2& amount);
 void Rigidbody2D_Step(Rigidbody2D& rigidbody2D, float timeStep);

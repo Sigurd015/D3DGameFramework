@@ -4,6 +4,8 @@
 #include "Camera/CameraController.h"
 #include "UI/TitleMenuController.h"
 #include "UI/UIController.h"
+#include "Map/FieldController.h"
+#include "Map/FieldTrigger.h"
 
 // Hardcoded scene
 void ScriptGlue_CreateTitleScene(Scene& scene)
@@ -142,6 +144,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		Scene_AddEntity(scene, *camera);
 	}
 
+#ifndef CORE_DIST
 	{
 		Entity* camera = (Entity*)malloc(sizeof(Entity));
 		*camera = {};
@@ -169,6 +172,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 		Scene_AddEntity(scene, *camera);
 	}
+#endif
 
 	{
 		Entity* player = (Entity*)malloc(sizeof(Entity));
@@ -187,7 +191,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		*boxCollider2D = {};
 		boxCollider2D->Restitution = 0.0f;
 		boxCollider2D->Offset = { 0,0 };
-		boxCollider2D->Size = { 0.5f,0.1f };
+		boxCollider2D->Size = { 0.3f,0.1f };
 		Entity_AddComponent(*player, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
 
 		ScriptComponent* scriptComponent = (ScriptComponent*)malloc(sizeof(ScriptComponent));
@@ -273,207 +277,930 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		}
 	}
 
+	//Map
 	{
-		Entity* wall = (Entity*)malloc(sizeof(Entity));
-		*wall = {};
-		wall->Tag.Name = "wall-1";
-		wall->Transform.Translation = { 15.0f,0,0 };
-		wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
-		wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+		ScriptComponent* fieldTrigger = (ScriptComponent*)malloc(sizeof(ScriptComponent));
+		*fieldTrigger = {};
+		fieldTrigger->OnCreate = FieldTrigger_OnCreate;
+		fieldTrigger->OnUpdate = FieldTrigger_OnUpdate;
+		fieldTrigger->OnDestroy = FieldTrigger_OnDestroy;
+		fieldTrigger->OnCollision = FieldTrigger_OnCollision;
 
-		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
-		*spriteRenderer = {};
-		spriteRenderer->Texture = wallTex5;
-		spriteRenderer->Color = { 1.0f,1.0f,1.0f,1.0f };
-		Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+		{
+			Entity* fieldManager = (Entity*)malloc(sizeof(Entity));
+			*fieldManager = {};
+			fieldManager->Tag.Name = "FieldManager";
+			ScriptComponent* scriptComponent = (ScriptComponent*)malloc(sizeof(ScriptComponent));
+			*scriptComponent = {};
+			scriptComponent->OnCreate = FieldController_OnCreate;
+			scriptComponent->OnUpdate = FieldController_OnUpdate;
+			scriptComponent->OnDestroy = FieldController_OnDestroy;
+			scriptComponent->OnCollision = FieldController_OnCollision;
+			Entity_AddComponent(*fieldManager, ComponentType::ComponentType_Script, scriptComponent);
 
-		Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
-		*rigidbody2D = {};
-		rigidbody2D->Type = Rigidbody2D::BodyType::Static;
-		Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+			Scene_AddEntity(scene, *fieldManager);
+		}
 
-		BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
-		*boxCollider2D = {};
-		boxCollider2D->Restitution = 0.0f;
-		boxCollider2D->Size = { 3.5f,0.1f };
-		Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+		//Left
+		{
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "left-wall-1";
+				wall->Transform.Translation = { 15.0f,30.0f,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
 
-		Scene_AddEntity(scene, *wall);
-	}
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex5;
+				spriteRenderer->Color = { 1.0f,1.0f,1.0f,1.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
-	{
-		Entity* wall = (Entity*)malloc(sizeof(Entity));
-		*wall = {};
-		wall->Tag.Name = "wall-2";
-		wall->Transform.Translation = { 5.0f,0,0 };
-		wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
-		wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+				*rigidbody2D = {};
+				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
 
-		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
-		*spriteRenderer = {};
-		spriteRenderer->Texture = wallTex2;
-		Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+				*boxCollider2D = {};
+				boxCollider2D->Restitution = 0.0f;
+				boxCollider2D->Size = { 1.5f,0.1f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
 
-		Scene_AddEntity(scene, *wall);
-	}
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "left-wall-2";
+				wall->Transform.Translation = { 5.0f,30.0f,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
 
-	{
-		Entity* wall = (Entity*)malloc(sizeof(Entity));
-		*wall = {};
-		wall->Tag.Name = "wall-3";
-		wall->Transform.Translation = { -5.0f,0,0 };
-		wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
-		wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
-		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
-		*spriteRenderer = {};
-		spriteRenderer->Texture = wallTex2;
-		Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "left-wall-3";
+				wall->Transform.Translation = { -5.0f,30.0f,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
 
-		Scene_AddEntity(scene, *wall);
-	}
+				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+				*rigidbody2D = {};
+				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
 
-	{
-		Entity* wall = (Entity*)malloc(sizeof(Entity));
-		*wall = {};
-		wall->Tag.Name = "wall-4";
-		wall->Transform.Translation = { -15.0f,0,0 };
-		wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
-		wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+				*boxCollider2D = {};
+				boxCollider2D->Restitution = 0.0f;
+				boxCollider2D->Offset = { 0.0f,2.0f };
+				boxCollider2D->Size = { 0.5f,0.1f };
+				boxCollider2D->IsTrigger = true;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
 
-		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
-		*spriteRenderer = {};
-		spriteRenderer->Texture = wallTex2;
-		Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Script, fieldTrigger);
 
-		Scene_AddEntity(scene, *wall);
-	}
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "left-wall-4";
+				wall->Transform.Translation = { -15.0f,30.0f,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
 
-	{
-		Entity* wall = (Entity*)malloc(sizeof(Entity));
-		*wall = {};
-		wall->Tag.Name = "wall-5";
-		wall->Transform.Translation = { 25.0f,0,0 };
-		wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
-		wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
-		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
-		*spriteRenderer = {};
-		spriteRenderer->Texture = wallTex2;
-		Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+				*rigidbody2D = {};
+				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
 
-		Scene_AddEntity(scene, *wall);
-	}
+				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+				*boxCollider2D = {};
+				boxCollider2D->Restitution = 0.0f;
+				boxCollider2D->Size = { 0.5f,0.1f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
 
-	{
-		Entity* wall = (Entity*)malloc(sizeof(Entity));
-		*wall = {};
-		wall->Tag.Name = "wall-6";
-		wall->Transform.Translation = { 35.0f,0,0 };
-		wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
-		wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "left-wall-5";
+				wall->Transform.Translation = { 25.0f,30.0f,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
 
-		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
-		*spriteRenderer = {};
-		spriteRenderer->Texture = wallTex2;
-		Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
-		Scene_AddEntity(scene, *wall);
-	}
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "left-wall-6";
+				wall->Transform.Translation = { 35.0f,30.0f,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
 
-	{
-		Entity* wall = (Entity*)malloc(sizeof(Entity));
-		*wall = {};
-		wall->Tag.Name = "wall-7";
-		wall->Transform.Translation = { 45.0f,0,0 };
-		wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
-		wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
-		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
-		*spriteRenderer = {};
-		spriteRenderer->Texture = wallTex2;
-		Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+				*rigidbody2D = {};
+				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
 
-		Scene_AddEntity(scene, *wall);
-	}
+				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+				*boxCollider2D = {};
+				boxCollider2D->Restitution = 0.0f;
+				boxCollider2D->Size = { 0.5f,0.1f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
 
-	{
-		Entity* wall = (Entity*)malloc(sizeof(Entity));
-		*wall = {};
-		wall->Tag.Name = "wall-8";
-		wall->Transform.Translation = { 50.0f,-5.0f,0 };
-		wall->Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
-		wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "left-wall-7";
+				wall->Transform.Translation = { 45.0f,30.0f,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
 
-		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
-		*spriteRenderer = {};
-		spriteRenderer->Texture = wallTex2;
-		spriteRenderer->UVStart = { 1.0f,1.0f };
-		spriteRenderer->UVEnd = { 0.0f,0.0f };
-		Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
-		Scene_AddEntity(scene, *wall);
-	}
-	{
-		Entity* wall = (Entity*)malloc(sizeof(Entity));
-		*wall = {};
-		wall->Tag.Name = "wall-9";
-		wall->Transform.Translation = { 50.0f,-15.0f,0 };
-		wall->Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
-		wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+				*rigidbody2D = {};
+				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
 
-		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
-		*spriteRenderer = {};
-		spriteRenderer->Texture = wallTex2;
-		spriteRenderer->UVStart = { 1.0f,1.0f };
-		spriteRenderer->UVEnd = { 0.0f,0.0f };
-		Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+				*boxCollider2D = {};
+				boxCollider2D->Restitution = 0.0f;
+				boxCollider2D->Size = { 0.5f,0.1f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
 
-		Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
-		*rigidbody2D = {};
-		rigidbody2D->Type = Rigidbody2D::BodyType::Static;
-		Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "left-wall-8";
+				wall->Transform.Translation = { 50.0f,25.0f,0 };
+				wall->Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
 
-		BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
-		*boxCollider2D = {};
-		boxCollider2D->Restitution = 0.0f;
-		boxCollider2D->Size = { 1.5f,0.1f };
-		Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->UVStart = { 1.0f,1.0f };
+				spriteRenderer->UVEnd = { 0.0f,0.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
-		Scene_AddEntity(scene, *wall);
-	}
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "left-wall-9";
+				wall->Transform.Translation = { 50.0f,15.0f,0 };
+				wall->Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
 
-	{
-		Entity* wall = (Entity*)malloc(sizeof(Entity));
-		*wall = {};
-		wall->Tag.Name = "wall-10";
-		wall->Transform.Translation = { 50.0f,-25.0f,0 };
-		wall->Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
-		wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->UVStart = { 1.0f,1.0f };
+				spriteRenderer->UVEnd = { 0.0f,0.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
-		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
-		*spriteRenderer = {};
-		spriteRenderer->Texture = wallTex2;
-		spriteRenderer->UVStart = { 1.0f,1.0f };
-		spriteRenderer->UVEnd = { 0.0f,0.0f };
-		Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+				*rigidbody2D = {};
+				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
 
-		Scene_AddEntity(scene, *wall);
-	}
+				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+				*boxCollider2D = {};
+				boxCollider2D->Restitution = 0.0f;
+				boxCollider2D->Size = { 1.5f,0.1f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
 
-	{
-		Entity* quad = (Entity*)malloc(sizeof(Entity));
-		*quad = {};
-		quad->Tag.Name = "Ground1";
-		quad->Transform.Translation = { 15.0f,0,5.0f };
-		quad->Transform.Scale = { 100.0f,500.0f,1.0f };
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "left-wall-10";
+				wall->Transform.Translation = { 50.0f,5.0f,0 };
+				wall->Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
 
-		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
-		*spriteRenderer = {};
-		spriteRenderer->Color = { 0.5f,0.5f,0.5f,1.0f };
-		Entity_AddComponent(*quad, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->UVStart = { 1.0f,1.0f };
+				spriteRenderer->UVEnd = { 0.0f,0.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
-		Scene_AddEntity(scene, *quad);
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "left-wall-11";
+				wall->Transform.Translation = { -20.0f,25.0f,0 };
+				wall->Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->UVStart = { 0.0f,0.0f };
+				spriteRenderer->UVEnd = { 1.0f,1.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "left-wall-12";
+				wall->Transform.Translation = { -20.0f,15.0f,0 };
+				wall->Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->UVStart = { 0.0f,0.0f };
+				spriteRenderer->UVEnd = { 1.0f,1.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+				*rigidbody2D = {};
+				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
+				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+				*boxCollider2D = {};
+				boxCollider2D->Restitution = 0.0f;
+				boxCollider2D->Size = { 1.5f,0.1f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "left-wall-13";
+				wall->Transform.Translation = { -20.0f,5.0f,0 };
+				wall->Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->UVStart = { 0.0f,0.0f };
+				spriteRenderer->UVEnd = { 1.0f,1.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "left-wall-14";
+				wall->Transform.Translation = { 15.0f,0.0f,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+				wall->Enabled = false;
+
+				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+				*rigidbody2D = {};
+				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
+				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+				*boxCollider2D = {};
+				boxCollider2D->Restitution = 0.0f;
+				boxCollider2D->Size = { 3.5f,0.1f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+				Scene_AddEntity(scene, *wall);
+			}
+		}
+
+		//Right
+		{
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "right-wall-1";
+				wall->Transform.Translation = { 15.0f,0,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex5;
+				spriteRenderer->Color = { 1.0f,1.0f,1.0f,1.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+				*rigidbody2D = {};
+				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
+				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+				*boxCollider2D = {};
+				boxCollider2D->Restitution = 0.0f;
+				boxCollider2D->Size = { 1.5f,0.1f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "right-wall-2";
+				wall->Transform.Translation = { 5.0f,0,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "right-wall-3";
+				wall->Transform.Translation = { -5.0f,0,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+				*rigidbody2D = {};
+				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
+				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+				*boxCollider2D = {};
+				boxCollider2D->Restitution = 0.0f;
+				boxCollider2D->Size = { 0.5f,0.1f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "right-wall-4";
+				wall->Transform.Translation = { -15.0f,0,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+				*rigidbody2D = {};
+				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
+				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+				*boxCollider2D = {};
+				boxCollider2D->Restitution = 0.0f;
+				boxCollider2D->Size = { 0.5f,0.1f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "right-wall-5";
+				wall->Transform.Translation = { 25.0f,0,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "right-wall-6";
+				wall->Transform.Translation = { 35.0f,0,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+				*rigidbody2D = {};
+				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
+				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+				*boxCollider2D = {};
+				boxCollider2D->Restitution = 0.0f;
+				boxCollider2D->Offset = { 0.0f,2.0f };
+				boxCollider2D->Size = { 0.5f,0.1f };
+				boxCollider2D->IsTrigger = true;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Script, fieldTrigger);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "right-wall-7";
+				wall->Transform.Translation = { 45.0f,0,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+				*rigidbody2D = {};
+				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
+				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+				*boxCollider2D = {};
+				boxCollider2D->Restitution = 0.0f;
+				boxCollider2D->Size = { 0.5f,0.1f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "right-wall-8";
+				wall->Transform.Translation = { 50.0f,-5.0f,0 };
+				wall->Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->UVStart = { 1.0f,1.0f };
+				spriteRenderer->UVEnd = { 0.0f,0.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "right-wall-9";
+				wall->Transform.Translation = { 50.0f,-15.0f,0 };
+				wall->Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->UVStart = { 1.0f,1.0f };
+				spriteRenderer->UVEnd = { 0.0f,0.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+				*rigidbody2D = {};
+				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
+				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+				*boxCollider2D = {};
+				boxCollider2D->Restitution = 0.0f;
+				boxCollider2D->Size = { 1.5f,0.1f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "right-wall-10";
+				wall->Transform.Translation = { 50.0f,-25.0f,0 };
+				wall->Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->UVStart = { 1.0f,1.0f };
+				spriteRenderer->UVEnd = { 0.0f,0.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "right-wall-11";
+				wall->Transform.Translation = { -20.0f,-5.0f,0 };
+				wall->Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->UVStart = { 0.0f,0.0f };
+				spriteRenderer->UVEnd = { 1.0f,1.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "right-wall-12";
+				wall->Transform.Translation = { -20.0f,-15.0f,0 };
+				wall->Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->UVStart = { 0.0f,0.0f };
+				spriteRenderer->UVEnd = { 1.0f,1.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+				*rigidbody2D = {};
+				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
+				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+				*boxCollider2D = {};
+				boxCollider2D->Restitution = 0.0f;
+				boxCollider2D->Size = { 1.5f,0.1f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "right-wall-13";
+				wall->Transform.Translation = { -20.0f,-25.0f,0 };
+				wall->Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->UVStart = { 0.0f,0.0f };
+				spriteRenderer->UVEnd = { 1.0f,1.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "right-wall-14";
+				wall->Transform.Translation = { 15.0f,-30.0f,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+				*rigidbody2D = {};
+				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
+				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+				*boxCollider2D = {};
+				boxCollider2D->Restitution = 0.0f;
+				boxCollider2D->Size = { 3.5f,0.1f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+				Scene_AddEntity(scene, *wall);
+			}
+		}
+
+		// End
+		{
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "end-wall-1";
+				wall->Transform.Translation = { 15.0f,60.0f,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex5;
+				spriteRenderer->Color = { 1.0f,1.0f,1.0f,1.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+				*rigidbody2D = {};
+				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
+				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+				*boxCollider2D = {};
+				boxCollider2D->Restitution = 0.0f;
+				boxCollider2D->Size = { 3.5f,0.1f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "end-wall-2";
+				wall->Transform.Translation = { 5.0f,60.0f,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "end-wall-3";
+				wall->Transform.Translation = { -5.0f,60.0f,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "end-wall-4";
+				wall->Transform.Translation = { -15.0f,60.0f,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "end-wall-5";
+				wall->Transform.Translation = { 25.0f,60.0f,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "end-wall-6";
+				wall->Transform.Translation = { 35.0f,60.0f,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "end-wall-7";
+				wall->Transform.Translation = { 45.0f,60.0f,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "end-wall-8";
+				wall->Transform.Translation = { 50.0f,55.0f,0 };
+				wall->Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->UVStart = { 1.0f,1.0f };
+				spriteRenderer->UVEnd = { 0.0f,0.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "end-wall-9";
+				wall->Transform.Translation = { 50.0f,45.0f,0 };
+				wall->Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->UVStart = { 1.0f,1.0f };
+				spriteRenderer->UVEnd = { 0.0f,0.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+				*rigidbody2D = {};
+				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
+				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+				*boxCollider2D = {};
+				boxCollider2D->Restitution = 0.0f;
+				boxCollider2D->Size = { 1.5f,0.1f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "end-wall-10";
+				wall->Transform.Translation = { 50.0f,35.0f,0 };
+				wall->Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->UVStart = { 1.0f,1.0f };
+				spriteRenderer->UVEnd = { 0.0f,0.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "end-wall-11";
+				wall->Transform.Translation = { -20.0f,55.0f,0 };
+				wall->Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->UVStart = { 0.0f,0.0f };
+				spriteRenderer->UVEnd = { 1.0f,1.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "end-wall-12";
+				wall->Transform.Translation = { -20.0f,45.0f,0 };
+				wall->Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->UVStart = { 0.0f,0.0f };
+				spriteRenderer->UVEnd = { 1.0f,1.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+				*rigidbody2D = {};
+				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
+				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+				*boxCollider2D = {};
+				boxCollider2D->Restitution = 0.0f;
+				boxCollider2D->Size = { 1.5f,0.1f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "end-wall-13";
+				wall->Transform.Translation = { -20.0f,35.0f,0 };
+				wall->Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+				*spriteRenderer = {};
+				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->UVStart = { 0.0f,0.0f };
+				spriteRenderer->UVEnd = { 1.0f,1.0f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+				Scene_AddEntity(scene, *wall);
+			}
+			{
+				Entity* wall = (Entity*)malloc(sizeof(Entity));
+				*wall = {};
+				wall->Tag.Name = "end-wall-14";
+				wall->Transform.Translation = { 15.0f,30.0f,0 };
+				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+				wall->Enabled = false;
+
+				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+				*rigidbody2D = {};
+				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
+				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+				*boxCollider2D = {};
+				boxCollider2D->Restitution = 0.0f;
+				boxCollider2D->Size = { 3.5f,0.1f };
+				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+				Scene_AddEntity(scene, *wall);
+			}
+		}
+
+		{
+			Entity* quad = (Entity*)malloc(sizeof(Entity));
+			*quad = {};
+			quad->Tag.Name = "Ground";
+			quad->Transform.Translation = { 15.0f,0,5.0f };
+			quad->Transform.Scale = { 100.0f,500.0f,1.0f };
+
+			SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+			*spriteRenderer = {};
+			spriteRenderer->Color = { 0.2f,0.2f,0.2f,1.0f };
+			Entity_AddComponent(*quad, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+			Scene_AddEntity(scene, *quad);
+		}
 	}
 }
 

@@ -61,7 +61,7 @@ void CameraController_OnUpdate(Entity& entity, float timeStep)
 		if (s_Data.DebugCameraCamera->Primary)
 		{
 			Vec3 pos = s_Data.DebugCameraTransform->Translation;
-			static float speed = 25.0f;
+			static float speed = 45.0f;
 
 			if (Input_GetKey(KeyCode::UpArrow))
 				pos.y += speed * timeStep;
