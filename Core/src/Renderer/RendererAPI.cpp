@@ -144,7 +144,7 @@ void RendererAPI_SetDepthTest(bool enable)
 
 void RendererAPI_SetBlendingState(BlendMode type)
 {
-	float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	static float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	s_RendererAPIState.DeviceContext->OMSetBlendState(RendererContext_GetBlendState(type), blendFactor, 0xffffffff);
 }
 

@@ -246,6 +246,14 @@ void Renderer2D_Initialize()
 	ConstantBuffer_Create(s_Data.CameraConstantBuffer, sizeof(Renderer2DData::CameraData), CBBingSlot::CAMERA);
 	ConstantBuffer_Create(s_Data.IdentityConstantBuffer, sizeof(Renderer2DData::CameraData), CBBingSlot::CAMERA);
 
+	static Mat identity = DirectX::XMMatrixIdentity();
+	ConstantBuffer_SetData(s_Data.IdentityConstantBuffer, &identity);
+	Pipeline_SetConstantBuffer(s_Data.UIPipeline, s_Data.IdentityConstantBuffer);
+
+	Pipeline_SetConstantBuffer(s_Data.QuadPipeline, s_Data.CameraConstantBuffer);
+	Pipeline_SetConstantBuffer(s_Data.CirclePipeline, s_Data.CameraConstantBuffer);
+	Pipeline_SetConstantBuffer(s_Data.LinePipeline, s_Data.CameraConstantBuffer);
+
 	List_Create(s_Data.TextRenderCommands, COMMAND_BUFFER_SIZE);
 	{
 		for (size_t i = 0; i < COMMAND_BUFFER_SIZE; i++)
@@ -305,16 +313,8 @@ void Renderer2D_BeginScene(const Mat& viewProjection)
 {
 	s_Data.SceneBuffer.ViewProjection = DirectX::XMMatrixTranspose(viewProjection);
 
-	Mat identity = DirectX::XMMatrixIdentity();
-
 	ConstantBuffer_SetData(s_Data.CameraConstantBuffer, &s_Data.SceneBuffer);
-	ConstantBuffer_SetData(s_Data.IdentityConstantBuffer, &identity);
-
-	Pipeline_SetConstantBuffer(s_Data.QuadPipeline, s_Data.CameraConstantBuffer);
-	Pipeline_SetConstantBuffer(s_Data.CirclePipeline, s_Data.CameraConstantBuffer);
-	Pipeline_SetConstantBuffer(s_Data.LinePipeline, s_Data.CameraConstantBuffer);
-	Pipeline_SetConstantBuffer(s_Data.UIPipeline, s_Data.IdentityConstantBuffer);
-
+	
 	StartBatch();
 }
 
@@ -447,11 +447,7 @@ void Renderer2D_DrawQuad(const Mat& transform, Texture2D& texture, const Vec2& u
 	if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
 		NextBatch();
 
-	// Notice: DirectXTK CreateWICTextureFromFile not flipping the image, like stbi_set_flip_vertically_on_load, so we need to flip the uv
-
-	//Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
-	//TODO: Fix this (this should be the same as DrawUI does)
-	Vec2 textureCoords[] = { uv1, { uv0.x, uv1.y }, uv0, { uv1.x, uv0.y } };
+	Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
 	SetQuadVertex(transform, tintColor, textureCoords, GetTextureID(texture), tilingFactor);
 }
 
@@ -538,11 +534,7 @@ void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, const Vec4& color)
 
 void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, Texture2D& texture, const Vec2& uv0, const Vec2& uv1, const Vec4& tintColor, float tilingFactor)
 {
-	// Notice: DirectXTK CreateWICTextureFromFile not flipping the image, like stbi_set_flip_vertically_on_load, so we need to flip the uv
-	
-	//Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
-	Vec2 textureCoords[] = { uv0, { uv0.x, uv1.y }, uv1, { uv1.x, uv0.y } };
-
+	Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
 	SetUIVertex(pos, size, tintColor, textureCoords, GetTextureID(texture), tilingFactor);
 }
 

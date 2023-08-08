@@ -15,7 +15,5 @@ void FieldTrigger_OnCollision(Entity& entity, Entity& other)
 	if (!strcmp(other.Tag.Name, "Player"))
 	{
 		FieldController_GenMap();
-
-		Scene_SetEntityEnabled(entity, false);
 	}
 }

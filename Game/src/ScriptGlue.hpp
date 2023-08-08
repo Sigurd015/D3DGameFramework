@@ -107,6 +107,18 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 	Texture2D* wallTex5 = (Texture2D*)malloc(sizeof(Texture2D));
 	Texture2D_Create(*wallTex5, "assets/textures/5.png");
 
+	Texture2D* floor = (Texture2D*)malloc(sizeof(Texture2D));
+	Texture2D_Create(*floor, "assets/textures/floor.png");
+
+	Texture2D* roof = (Texture2D*)malloc(sizeof(Texture2D));
+	Texture2D_Create(*roof, "assets/textures/roof.png");
+
+	Texture2D* shotgunSprite = (Texture2D*)malloc(sizeof(Texture2D));
+	Texture2D_Create(*shotgunSprite, "assets/textures/weapon/shotgun/spritesheet.png");
+
+	Texture2D* sightIconSprite = (Texture2D*)malloc(sizeof(Texture2D));
+	Texture2D_Create(*sightIconSprite, "assets/textures/sightIcon.png");
+
 	//Main Camera
 	{
 		Entity* camera = (Entity*)malloc(sizeof(Entity));
@@ -174,6 +186,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 	}
 #endif
 
+	//Player
 	{
 		Entity* player = (Entity*)malloc(sizeof(Entity));
 		*player = {};
@@ -221,14 +234,47 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 			Scene_AddEntity(scene, *uiManager);
 		}
+		{
+			Entity* weapon = (Entity*)malloc(sizeof(Entity));
+			*weapon = {};
+			weapon->Tag.Name = "Weapon";
+			RectTransformComponent* rectTransform = (RectTransformComponent*)malloc(sizeof(RectTransformComponent));
+			*rectTransform = {};
+			rectTransform->Position = { 695.0f, 0.0f };
+			rectTransform->Size = { 500.0f, 500.0f };
+			Entity_AddComponent(*weapon, ComponentType::ComponentType_RectTransform, rectTransform);
 
+			SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+			*spriteRenderer = {};
+			spriteRenderer->Texture = shotgunSprite;
+			Entity_AddComponent(*weapon, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+			Scene_AddEntity(scene, *weapon);
+		}
+		{
+			Entity* sightIcon = (Entity*)malloc(sizeof(Entity));
+			*sightIcon = {};
+			sightIcon->Tag.Name = "SightIcon";
+			RectTransformComponent* rectTransform = (RectTransformComponent*)malloc(sizeof(RectTransformComponent));
+			*rectTransform = {};
+			rectTransform->Position = { 935.0f, 515.0f };
+			rectTransform->Size = { 50.0f, 50.0f };
+			Entity_AddComponent(*sightIcon, ComponentType::ComponentType_RectTransform, rectTransform);
+
+			SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+			*spriteRenderer = {};
+			spriteRenderer->Texture = sightIconSprite;
+			Entity_AddComponent(*sightIcon, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+			Scene_AddEntity(scene, *sightIcon);
+		}
 		{
 			Entity* hpBarFront = (Entity*)malloc(sizeof(Entity));
 			*hpBarFront = {};
 			hpBarFront->Tag.Name = "HPBarFront";
 			RectTransformComponent* rectTransform = (RectTransformComponent*)malloc(sizeof(RectTransformComponent));
 			*rectTransform = {};
-			rectTransform->Position = { 150.0f, 990.0f };
+			rectTransform->Position = { 100.0f, 990.0f };
 			rectTransform->Size = { 500.0f, 25.0f };
 			Entity_AddComponent(*hpBarFront, ComponentType::ComponentType_RectTransform, rectTransform);
 
@@ -239,14 +285,13 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 			Scene_AddEntity(scene, *hpBarFront);
 		}
-
 		{
 			Entity* hpBarBack = (Entity*)malloc(sizeof(Entity));
 			*hpBarBack = {};
 			hpBarBack->Tag.Name = "HPBarBack";
 			RectTransformComponent* rectTransform = (RectTransformComponent*)malloc(sizeof(RectTransformComponent));
 			*rectTransform = {};
-			rectTransform->Position = { 150.0f, 990.0f };
+			rectTransform->Position = { 100.0f, 990.0f };
 			rectTransform->Size = { 500.0f, 25.0f };
 			Entity_AddComponent(*hpBarBack, ComponentType::ComponentType_RectTransform, rectTransform);
 
@@ -257,14 +302,13 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 			Scene_AddEntity(scene, *hpBarBack);
 		}
-
 		{
 			Entity* hpBarBackground = (Entity*)malloc(sizeof(Entity));
 			*hpBarBackground = {};
 			hpBarBackground->Tag.Name = "HPBarBackground";
 			RectTransformComponent* rectTransform = (RectTransformComponent*)malloc(sizeof(RectTransformComponent));
 			*rectTransform = {};
-			rectTransform->Position = { 150.0f, 990.0f };
+			rectTransform->Position = { 100.0f, 990.0f };
 			rectTransform->Size = { 500.0f, 25.0f };
 			Entity_AddComponent(*hpBarBackground, ComponentType::ComponentType_RectTransform, rectTransform);
 
@@ -301,6 +345,28 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			Scene_AddEntity(scene, *fieldManager);
 		}
 
+		{
+			Entity* wall = (Entity*)malloc(sizeof(Entity));
+			*wall = {};
+			wall->Tag.Name = "back-wall";
+			wall->Transform.Translation = { 15.0f,-30.0f,0 };
+			wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+			wall->Transform.Scale = { 10.0f,10.0f,1.0f };
+
+			Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+			*rigidbody2D = {};
+			rigidbody2D->Type = Rigidbody2D::BodyType::Static;
+			Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
+			BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+			*boxCollider2D = {};
+			boxCollider2D->Restitution = 0.0f;
+			boxCollider2D->Size = { 3.5f,0.1f };
+			Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+			Scene_AddEntity(scene, *wall);
+		}
+
 		//Left
 		{
 			{
@@ -313,7 +379,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
 				*spriteRenderer = {};
-				spriteRenderer->Texture = wallTex5;
+				spriteRenderer->Texture = wallTex4;
 				spriteRenderer->Color = { 1.0f,1.0f,1.0f,1.0f };
 				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
@@ -340,7 +406,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
 				*spriteRenderer = {};
-				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->Texture = wallTex3;
 				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
 				Scene_AddEntity(scene, *wall);
@@ -349,7 +415,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity* wall = (Entity*)malloc(sizeof(Entity));
 				*wall = {};
 				wall->Tag.Name = "left-wall-3";
-				wall->Transform.Translation = { -5.0f,30.0f,0 };
+				wall->Transform.Translation = { -5.0f,31.5f,0 };
 				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
 				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
 
@@ -380,7 +446,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
 				*spriteRenderer = {};
-				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->Texture = wallTex3;
 				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
 				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
@@ -406,7 +472,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
 				*spriteRenderer = {};
-				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->Texture = wallTex3;
 				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
 				Scene_AddEntity(scene, *wall);
@@ -421,7 +487,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
 				*spriteRenderer = {};
-				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->Texture = wallTex3;
 				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
 				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
@@ -447,7 +513,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
 				*spriteRenderer = {};
-				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->Texture = wallTex3;
 				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
 				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
@@ -473,7 +539,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
 				*spriteRenderer = {};
-				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->Texture = wallTex3;
 				spriteRenderer->UVStart = { 1.0f,1.0f };
 				spriteRenderer->UVEnd = { 0.0f,0.0f };
 				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
@@ -490,7 +556,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
 				*spriteRenderer = {};
-				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->Texture = wallTex3;
 				spriteRenderer->UVStart = { 1.0f,1.0f };
 				spriteRenderer->UVEnd = { 0.0f,0.0f };
 				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
@@ -518,7 +584,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
 				*spriteRenderer = {};
-				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->Texture = wallTex3;
 				spriteRenderer->UVStart = { 1.0f,1.0f };
 				spriteRenderer->UVEnd = { 0.0f,0.0f };
 				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
@@ -535,7 +601,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
 				*spriteRenderer = {};
-				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->Texture = wallTex3;
 				spriteRenderer->UVStart = { 0.0f,0.0f };
 				spriteRenderer->UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
@@ -552,7 +618,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
 				*spriteRenderer = {};
-				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->Texture = wallTex3;
 				spriteRenderer->UVStart = { 0.0f,0.0f };
 				spriteRenderer->UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
@@ -580,32 +646,10 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 				SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
 				*spriteRenderer = {};
-				spriteRenderer->Texture = wallTex2;
+				spriteRenderer->Texture = wallTex3;
 				spriteRenderer->UVStart = { 0.0f,0.0f };
 				spriteRenderer->UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
-
-				Scene_AddEntity(scene, *wall);
-			}
-			{
-				Entity* wall = (Entity*)malloc(sizeof(Entity));
-				*wall = {};
-				wall->Tag.Name = "left-wall-14";
-				wall->Transform.Translation = { 15.0f,0.0f,0 };
-				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
-				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
-				wall->Enabled = false;
-
-				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
-				*rigidbody2D = {};
-				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
-				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
-
-				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
-				*boxCollider2D = {};
-				boxCollider2D->Restitution = 0.0f;
-				boxCollider2D->Size = { 3.5f,0.1f };
-				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
 
 				Scene_AddEntity(scene, *wall);
 			}
@@ -726,7 +770,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity* wall = (Entity*)malloc(sizeof(Entity));
 				*wall = {};
 				wall->Tag.Name = "right-wall-6";
-				wall->Transform.Translation = { 35.0f,0,0 };
+				wall->Transform.Translation = { 35.0f,1.5f,0 };
 				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
 				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
 
@@ -894,27 +938,6 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				spriteRenderer->UVStart = { 0.0f,0.0f };
 				spriteRenderer->UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(*wall, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
-
-				Scene_AddEntity(scene, *wall);
-			}
-			{
-				Entity* wall = (Entity*)malloc(sizeof(Entity));
-				*wall = {};
-				wall->Tag.Name = "right-wall-14";
-				wall->Transform.Translation = { 15.0f,-30.0f,0 };
-				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
-				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
-
-				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
-				*rigidbody2D = {};
-				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
-				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
-
-				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
-				*boxCollider2D = {};
-				boxCollider2D->Restitution = 0.0f;
-				boxCollider2D->Size = { 3.5f,0.1f };
-				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
 
 				Scene_AddEntity(scene, *wall);
 			}
@@ -1163,40 +1186,34 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 				Scene_AddEntity(scene, *wall);
 			}
-			{
-				Entity* wall = (Entity*)malloc(sizeof(Entity));
-				*wall = {};
-				wall->Tag.Name = "end-wall-14";
-				wall->Transform.Translation = { 15.0f,30.0f,0 };
-				wall->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
-				wall->Transform.Scale = { 10.0f,10.0f,1.0f };
-				wall->Enabled = false;
-
-				Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
-				*rigidbody2D = {};
-				rigidbody2D->Type = Rigidbody2D::BodyType::Static;
-				Entity_AddComponent(*wall, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
-
-				BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
-				*boxCollider2D = {};
-				boxCollider2D->Restitution = 0.0f;
-				boxCollider2D->Size = { 3.5f,0.1f };
-				Entity_AddComponent(*wall, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
-
-				Scene_AddEntity(scene, *wall);
-			}
 		}
-
 		{
 			Entity* quad = (Entity*)malloc(sizeof(Entity));
 			*quad = {};
-			quad->Tag.Name = "Ground";
+			quad->Tag.Name = "Floor";
 			quad->Transform.Translation = { 15.0f,0,5.0f };
-			quad->Transform.Scale = { 100.0f,500.0f,1.0f };
+			quad->Transform.Scale = { 100.0f,100.0f,1.0f };
 
 			SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
 			*spriteRenderer = {};
-			spriteRenderer->Color = { 0.2f,0.2f,0.2f,1.0f };
+			spriteRenderer->Texture = floor;
+			spriteRenderer->TilingFactor = 5.0f;
+			Entity_AddComponent(*quad, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+			Scene_AddEntity(scene, *quad);
+		}
+		{
+			Entity* quad = (Entity*)malloc(sizeof(Entity));
+			*quad = {};
+			quad->Tag.Name = "Roof";
+			quad->Transform.Translation = { 15.0f,0,-5.0f };
+			quad->Transform.Rotation = { 0,DirectX::XMConvertToRadians(180.0f),0 };
+			quad->Transform.Scale = { 100.0f,100.0f,1.0f };
+
+			SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+			*spriteRenderer = {};
+			spriteRenderer->Texture = roof;
+			spriteRenderer->TilingFactor = 5.0f;
 			Entity_AddComponent(*quad, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
 			Scene_AddEntity(scene, *quad);

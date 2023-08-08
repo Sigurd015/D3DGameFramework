@@ -7,12 +7,6 @@ struct ContactPair
 	uint32_t Body2 = 0;
 };
 
-struct PhysicsWorldData
-{
-	float Time;
-};
-static PhysicsWorldData s_Data;
-
 void PhysicsWorld2D_Create(PhysicsWorld2D& world, void(*CollisionCallback)(void* entity1, void* entity2))
 {
 	world.CollisionCallback = CollisionCallback;

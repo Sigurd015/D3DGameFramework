@@ -5,6 +5,7 @@
 #include "ScreenEffect/Loading.h"
 #include "GameMode.h"
 #include "ScreenEffect/FadeInOut.h"
+#include "KeyMap/KeyMap.h"
 
 #include <ctype.h>
 
@@ -26,6 +27,8 @@ void Game_Ininialize(Application* appInst)
 	Scene_Create(s_Data.PlayScene);
 	ScriptGlue_CreatePlayScene(s_Data.PlayScene);
 	Scene_Ininialize(s_Data.PlayScene);
+
+	KeyMap_Init();
 
 	FadeInOut_Initialize();
 	StartUp_Initialize();

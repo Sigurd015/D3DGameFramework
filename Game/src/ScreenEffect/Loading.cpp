@@ -2,6 +2,8 @@
 #include "Loading.h"
 #include "../GameMode.h"
 
+#define LOADING_FRAME_SPEED 0.15f
+
 struct StartUpData
 {
 	RectTransformComponent CanvasRect = {
@@ -14,10 +16,10 @@ struct StartUpData
 
 	Texture2D LoadingTexture;
 	SpriteAnimator SpriteAnimator;
-	float SpriteAnimatorSpeed = 0.15f;
+	SpriteTimer SpriteTimer;
 
 	float CurrentTime = 0.0f;
-	float MaxTime = 2.5f;
+	float MaxTime = 5.0f;
 
 	GameMode Depature = STARTUP_TITLE;
 };
@@ -33,22 +35,24 @@ void Loading_Initialize()
 	SpriteAnimatorSpecification spec;
 	spec.TextureWidth = Texture2D_GetWidth(s_Data.LoadingTexture);
 	spec.TextureHeight = Texture2D_GetHeight(s_Data.LoadingTexture);
-	spec.ElementsCount = 17;
+	spec.ElementsCount = 4;
 	spec.ElementsPerColumn = 4;
-	spec.ElementsPerRow = 5;
-	spec.ElementWidth = 64;
-	spec.ElementHeight = 64;
+	spec.ElementsPerRow = 1;
+	spec.ElementWidth = 78;
+	spec.ElementHeight = 78;
 	spec.StartElement = { 0,0 };
 
 	SpriteAnimator_Create(s_Data.SpriteAnimator, spec);
+	SpriteTimer_Create(s_Data.SpriteTimer, spec.ElementsCount, LOADING_FRAME_SPEED);
 
 	Loading_Reset();
 }
 
-void Loading_Reset()
+void Loading_Reset(float maxTime)
 {
+	SpriteTimer_Reset(s_Data.SpriteTimer);
 	s_Data.CurrentTime = 0.0f;
-	SpriteAnimator_Reset(s_Data.SpriteAnimator, s_Data.SpriteAnimatorSpeed);
+	s_Data.MaxTime = maxTime;
 }
 
 void Loading_Draw(float timeStep)
@@ -58,11 +62,12 @@ void Loading_Draw(float timeStep)
 		Game_SetMode(s_Data.Depature);
 	}
 
+	SpriteTimer_Update(s_Data.SpriteTimer, timeStep);
 	Vec2 position, size, ndcPos;
 	Vec2 viewPortSize = { (float)Window_GetWidth(),(float)Window_GetHeight() };
 	RectTransformComponent_GetPositionAndSize(s_Data.CanvasRect, viewPortSize, &ndcPos, &position, &size);
 
-	SpriteElement* spriteElement = SpriteAnimator_GetElement(s_Data.SpriteAnimator, timeStep);
+	SpriteElement* spriteElement = SpriteAnimator_GetElement(s_Data.SpriteAnimator, SpriteTimer_GetFrame(s_Data.SpriteTimer));
 	s_Data.CanvasSprite.UVStart = spriteElement->UVStart;
 	s_Data.CanvasSprite.UVEnd = spriteElement->UVEnd;
 

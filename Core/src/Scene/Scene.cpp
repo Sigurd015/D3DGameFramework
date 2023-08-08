@@ -211,6 +211,10 @@ void ColliderVisualiztion(const Scene& out)
 	{
 		Entity* temp = (Entity*)List_Get(out.Entities, i);
 		TransformComponent* tc = &temp->Transform;
+
+		if(!temp->Enabled)
+			continue;
+
 		if (Entity_HasComponent(*temp, ComponentType_Rigidbody2D))
 		{
 			Rigidbody2DComponent* rb2d = temp->Rigidbody2D;

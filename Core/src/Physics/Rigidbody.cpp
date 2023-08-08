@@ -101,18 +101,17 @@ void Rigidbody2D_Step(Rigidbody2D& rigidbody2D, float timeStep)
 	if (rigidbody2D.Type == Rigidbody2D::BodyType::Static || rigidbody2D.IsTrigger)
 		return;
 
-	Vec2 gravity = { 0.0f, -9.8f };
-	gravity.y *= rigidbody2D.GravityScale;
-	gravity = Vec2MulFloat(gravity, timeStep);
-
 	// Integrate velocity
 	Vec2 acceleration = Vec2DivFloat(rigidbody2D.Force, rigidbody2D.Mass);
-	acceleration = Vec2MulFloat(acceleration, timeStep);
+	rigidbody2D.Velocity = Vec2Add(rigidbody2D.Velocity, Vec2MulFloat(acceleration, timeStep));
 	rigidbody2D.AngularVelocity += rigidbody2D.Torque * timeStep;
 
 	if (rigidbody2D.Type == Rigidbody2D::BodyType::Dynamic)
 	{
-		rigidbody2D.Velocity = Vec2Add(rigidbody2D.Velocity, Vec2Add(gravity, acceleration));
+		Vec2 gravity = { 0.0f, -9.8f };
+		gravity.y *= rigidbody2D.GravityScale;
+		gravity = Vec2MulFloat(gravity, timeStep);
+		rigidbody2D.Velocity = Vec2Add(rigidbody2D.Velocity, gravity);
 	}
 
 	// Integrate position

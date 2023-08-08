@@ -34,21 +34,8 @@ void SpriteAnimator_Destroy(SpriteAnimator& animtor)
 	List_Free(animtor.Elements, true);
 }
 
-void SpriteAnimator_Reset(SpriteAnimator& animtor, float maxFrameTime)
+SpriteElement* SpriteAnimator_GetElement(SpriteAnimator& animtor, uint32_t index)
 {
-	animtor.CurrentElement = 0;
-	animtor.Time = 0.0f;
-	animtor.FrameTime = maxFrameTime;
-}
-
-SpriteElement* SpriteAnimator_GetElement(SpriteAnimator& animtor, float timeStep)
-{
-	if (animtor.Time > animtor.FrameTime)
-	{
-		animtor.Time = 0.0f;
-		animtor.CurrentElement = (animtor.CurrentElement + 1) % List_Size(animtor.Elements);
-	}
-	uint32_t index = animtor.CurrentElement;
-	animtor.Time += timeStep;
+	CORE_ASSERT(index < List_Size(animtor.Elements), "Index out of range");
 	return (SpriteElement*)List_Get(animtor.Elements, index);
 }

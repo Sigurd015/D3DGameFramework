@@ -6,9 +6,9 @@ struct CameraControllerData
 {
 	TransformComponent* PlayerTransform = nullptr;
 	TransformComponent* Transform = nullptr;
-	CameraComponent* Camera = nullptr;
 
 #ifndef CORE_DIST
+	CameraComponent* Camera = nullptr;
 	TransformComponent* DebugCameraTransform = nullptr;
 	CameraComponent* DebugCameraCamera = nullptr;
 #endif
@@ -29,11 +29,11 @@ void CameraController_OnCreate(Entity& entity)
 	s_Data.Transform = (TransformComponent*)Entity_GetComponent(entity, ComponentType_Transform);
 	CORE_ASSERT(s_Data.Transform, "Entity does not have TransformComponent!");
 
-	s_Data.Camera = (CameraComponent*)Entity_GetComponent(entity, ComponentType_Camera);
-	CORE_ASSERT(s_Data.Camera, "Entity does not have CameraComponent!");
-
 #ifndef CORE_DIST
 	{
+		s_Data.Camera = (CameraComponent*)Entity_GetComponent(entity, ComponentType_Camera);
+		CORE_ASSERT(s_Data.Camera, "Entity does not have CameraComponent!");
+
 		Entity* debugCamera = Scene_GetEntityByName(*entity.Scene, "DebugCamera");
 		CORE_ASSERT(debugCamera, "Cannot find DebugCamera entity!");
 
@@ -81,9 +81,6 @@ void CameraController_OnUpdate(Entity& entity, float timeStep)
 		}
 	}
 #endif
-
-
-
 }
 
 void CameraController_OnDestroy(Entity& entity)

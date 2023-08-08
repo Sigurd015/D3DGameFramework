@@ -1,4 +1,6 @@
 #include "PlayerController.h"
+#include "../KeyMap/KeyMap.h"
+#include "../UI/UIController.h"
 
 struct PlayerStats
 {
@@ -6,12 +8,18 @@ struct PlayerStats
 	float Hp = 300.0f;
 };
 
+
+
 struct PlayerControllerData
 {
 	TransformComponent* Transform = nullptr;
 	Rigidbody2DComponent* Rigidbody2D = nullptr;
 
-	PlayerStats Stats = {};
+	bool CanShoot = true;
+	float ShootCooldown = 1.0f;
+	float ShootCooldownTimer = 0.0f;
+
+	PlayerStats Stats;
 };
 static PlayerControllerData s_Data;
 
@@ -28,29 +36,65 @@ void PlayerController_OnCreate(Entity& entity)
 
 void PlayerController_OnUpdate(Entity& entity, float timeStep)
 {
-	if (Input_GetKeyDown(KeyCode::O))
+	//Debug
 	{
-		s_Data.Stats.Hp = FloatClamp(s_Data.Stats.Hp + 30.0f, 0.0f, s_Data.Stats.MaxHp);
+		if (Input_GetKeyDown(KeyCode::Numpad0))
+		{
+			s_Data.Stats.Hp = FloatClamp(s_Data.Stats.Hp + 30.0f, 0.0f, s_Data.Stats.MaxHp);
 
+		}
+		if (Input_GetKeyDown(KeyCode::Numpad1))
+		{
+			s_Data.Stats.Hp = FloatClamp(s_Data.Stats.Hp - 30.0f, 0.0f, s_Data.Stats.MaxHp);
+		}
+		if (Input_GetKeyDown(KeyCode::Numpad2))
+		{
+			UIController_PlayHitIcon();
+		}
 	}
-	if (Input_GetKeyDown(KeyCode::P))
+
+	//Movement
 	{
-		s_Data.Stats.Hp = FloatClamp(s_Data.Stats.Hp - 30.0f, 0.0f, s_Data.Stats.MaxHp);
+		Vec2 movement = Vec2(0, 0);
+		static float speed = 25.0f;
+
+		if (Input_GetKey(KeyMap_GetKey(MOVE_FORWARD)))
+			movement.y += speed;
+		if (Input_GetKey(KeyMap_GetKey(MOVE_BACKWARD)))
+			movement.y -= speed;
+		if (Input_GetKey(KeyMap_GetKey(MOVE_LEFT)))
+			movement.x -= speed;
+		if (Input_GetKey(KeyMap_GetKey(MOVE_RIGHT)))
+			movement.x += speed;
+
+		Rigidbody2DComponent_MovePosition(*s_Data.Rigidbody2D, Vec2MulFloat(movement, timeStep));
 	}
 
-	Vec2 movement = Vec2(0, 0);
-	static float speed = 25.0f;
+	//Shooting
+	{
+		if (Input_GetKeyDown(KeyMap_GetKey(SHOOT)))
+		{
+			if (s_Data.CanShoot)
+			{
+				s_Data.CanShoot = false;
+				UIController_PlayShootAnimation();
+				//TODO: Raycast and damage enemies
+			}
+		}
 
-	if (Input_GetKey(KeyCode::W))
-		movement.y += speed;
-	if (Input_GetKey(KeyCode::S))
-		movement.y -= speed;
-	if (Input_GetKey(KeyCode::A))
-		movement.x -= speed;
-	if (Input_GetKey(KeyCode::D))
-		movement.x += speed;
-
-	Rigidbody2DComponent_MovePosition(*s_Data.Rigidbody2D, Vec2MulFloat(movement, timeStep));
+		if (!s_Data.CanShoot)
+		{
+			if (s_Data.ShootCooldownTimer >= s_Data.ShootCooldown)
+			{
+				s_Data.CanShoot = true;
+				s_Data.ShootCooldownTimer = 0.0f;
+			}
+			else
+			{
+				s_Data.ShootCooldownTimer += timeStep;
+			}
+		}		
+	}
 }
 
 void PlayerController_OnDestroy(Entity& entity)

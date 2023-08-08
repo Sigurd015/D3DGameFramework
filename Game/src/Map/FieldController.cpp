@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#define ENTITY_COUNT_PER_FILED_ELEMENT 14
+#define ENTITY_COUNT_PER_FILED_ELEMENT 13
 #define FIELD_OFFSET_Y 60.0f
 
 enum FieldElementType
@@ -22,6 +22,15 @@ struct FieldControllerData
 
 	Entity* EndEntity[ENTITY_COUNT_PER_FILED_ELEMENT];
 	TransformComponent* EndTrans[ENTITY_COUNT_PER_FILED_ELEMENT];
+
+	Entity* BackWallEntity = nullptr;
+	Rigidbody2DComponent* BackWallRigidbody = nullptr;
+
+	Entity* FloorEntity = nullptr;
+	TransformComponent* FloorTrans = nullptr;
+
+	Entity* RoofEntity = nullptr;
+	TransformComponent* RoofTrans = nullptr;
 
 	FieldElementType CurrentType = FieldElementType::RIGHT;
 };
@@ -68,6 +77,27 @@ void FieldController_OnCreate(Entity& entity)
 				s_Data.EndEntity[i]->Enabled = false;
 			}
 		}
+
+		// Back Wall
+		{
+			s_Data.BackWallEntity = Scene_GetEntityByName(*entity.Scene, "back-wall");
+			CORE_ASSERT(s_Data.BackWallEntity, "Cannot find map entity!");
+			s_Data.BackWallRigidbody = (Rigidbody2DComponent*)Entity_GetComponent(*s_Data.BackWallEntity, ComponentType_Rigidbody2D);
+		}
+
+		//Floor
+		{
+			s_Data.FloorEntity = Scene_GetEntityByName(*entity.Scene, "Floor");
+			CORE_ASSERT(s_Data.FloorEntity, "Cannot find map entity!");
+			s_Data.FloorTrans = (TransformComponent*)Entity_GetComponent(*s_Data.FloorEntity, ComponentType_Transform);
+		}
+
+		//Roof
+		{
+			s_Data.RoofEntity = Scene_GetEntityByName(*entity.Scene, "Roof");
+			CORE_ASSERT(s_Data.RoofEntity, "Cannot find map entity!");
+			s_Data.RoofTrans = (TransformComponent*)Entity_GetComponent(*s_Data.RoofEntity, ComponentType_Transform);
+		}
 	}
 }
 
@@ -87,11 +117,11 @@ void FieldController_GenMap()
 	case FieldElementType::LEFT:
 	{
 		s_Data.CurrentType = FieldElementType::RIGHT;
+		Vec2 movement = { 0, FIELD_OFFSET_Y };
 		for (size_t i = 0; i < ENTITY_COUNT_PER_FILED_ELEMENT; i++)
 		{
 			if (Entity_HasComponent(*s_Data.LeftEntity[i], ComponentType_Rigidbody2D))
 			{
-				Vec2 movement = { 0, FIELD_OFFSET_Y };
 				Rigidbody2DComponent* rigidbody = (Rigidbody2DComponent*)Entity_GetComponent(*s_Data.LeftEntity[i], ComponentType_Rigidbody2D);
 				Rigidbody2DComponent_MovePosition(*rigidbody, movement);
 			}
@@ -99,21 +129,20 @@ void FieldController_GenMap()
 			{
 				s_Data.LeftTrans[i]->Translation.y += FIELD_OFFSET_Y;
 			}
-
-			Scene_SetEntityEnabled(*s_Data.LeftEntity[i], true);
 		}
-		Scene_SetEntityEnabled(*s_Data.LeftEntity[ENTITY_COUNT_PER_FILED_ELEMENT - 1], false);
-		Scene_SetEntityEnabled(*s_Data.RightEntity[ENTITY_COUNT_PER_FILED_ELEMENT - 1], true);
+		Rigidbody2DComponent_MovePosition(*s_Data.BackWallRigidbody, Vec2DivFloat(movement, 2.0f));
+		s_Data.FloorTrans->Translation.y += FIELD_OFFSET_Y / 2.0f;
+		s_Data.RoofTrans->Translation.y += FIELD_OFFSET_Y / 2.0f;
 		break;
 	}
 	case FieldElementType::RIGHT:
 	{
 		s_Data.CurrentType = FieldElementType::LEFT;
+		Vec2 movement = { 0, FIELD_OFFSET_Y };
 		for (size_t i = 0; i < ENTITY_COUNT_PER_FILED_ELEMENT; i++)
 		{
 			if (Entity_HasComponent(*s_Data.RightEntity[i], ComponentType_Rigidbody2D))
 			{
-				Vec2 movement = { 0, FIELD_OFFSET_Y };
 				Rigidbody2DComponent* rigidbody = (Rigidbody2DComponent*)Entity_GetComponent(*s_Data.RightEntity[i], ComponentType_Rigidbody2D);
 				Rigidbody2DComponent_MovePosition(*rigidbody, movement);
 			}
@@ -121,11 +150,10 @@ void FieldController_GenMap()
 			{
 				s_Data.RightTrans[i]->Translation.y += FIELD_OFFSET_Y;
 			}
-
-			Scene_SetEntityEnabled(*s_Data.RightEntity[i], true);
 		}
-		Scene_SetEntityEnabled(*s_Data.LeftEntity[ENTITY_COUNT_PER_FILED_ELEMENT - 1], true);
-		Scene_SetEntityEnabled(*s_Data.RightEntity[ENTITY_COUNT_PER_FILED_ELEMENT - 1], false);
+		Rigidbody2DComponent_MovePosition(*s_Data.BackWallRigidbody, Vec2DivFloat(movement, 2.0f));
+		s_Data.FloorTrans->Translation.y += FIELD_OFFSET_Y / 2.0f;
+		s_Data.RoofTrans->Translation.y += FIELD_OFFSET_Y / 2.0f;
 		break;
 	}
 	}

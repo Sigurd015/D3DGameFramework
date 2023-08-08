@@ -13,12 +13,15 @@ project "Core"
 	{
 		"src/**.h",
 		"src/**.cpp",
+		"vendor/stb_image/**.h",
+		"vendor/stb_image/**.cpp",
 	}
 
 	includedirs
 	{
 		"src",
 		"%{IncludeDir.DirectXTK}",
+		"%{IncludeDir.stb_image}",
 	}
 
 	links
@@ -28,6 +31,9 @@ project "Core"
 		"d2d1.lib",
 		"dwrite.lib",
 	}
+
+	filter "files:vendor/stb_image/**.cpp or vendor/ImGuizmo/**.cpp"
+	flags { "NoPCH" }
 
 	filter "system:windows"
 		systemversion "latest"
@@ -51,6 +57,7 @@ project "Core"
 		{
 			"%{Library.DirectXTK_Release}"
 		}
+
 
 	filter "configurations:Dist"
 		defines "CORE_DIST"
