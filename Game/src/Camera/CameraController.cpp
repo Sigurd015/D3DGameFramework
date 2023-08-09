@@ -11,6 +11,7 @@ struct CameraControllerData
 	CameraComponent* Camera = nullptr;
 	TransformComponent* DebugCameraTransform = nullptr;
 	CameraComponent* DebugCameraCamera = nullptr;
+	bool AutoFollow = false;
 #endif
 };
 static CameraControllerData s_Data;
@@ -58,37 +59,50 @@ void CameraController_OnUpdate(Entity& entity, float timeStep)
 			s_Data.DebugCameraCamera->Primary = !s_Data.DebugCameraCamera->Primary;
 		}
 
-		if (s_Data.DebugCameraCamera->Primary)
+		if (Input_GetKeyDown(KeyCode::O))
 		{
-			Vec3 pos = s_Data.DebugCameraTransform->Translation;
-			static float speed = 45.0f;
+			s_Data.AutoFollow = !s_Data.AutoFollow;
+		}
 
-			if (Input_GetKey(KeyCode::UpArrow))
-				pos.y += speed * timeStep;
-			else if (Input_GetKey(KeyCode::DownArrow))
-				pos.y -= speed * timeStep;
-			if (Input_GetKey(KeyCode::LeftArrow))
-				pos.x -= speed * timeStep;
-			else if (Input_GetKey(KeyCode::RightArrow))
-				pos.x += speed * timeStep;
+		if (s_Data.AutoFollow)
+		{
+			Vec3 pos = s_Data.PlayerTransform->Translation;
+			pos.z = s_Data.DebugCameraTransform->Translation.z;
+			s_Data.DebugCameraTransform->Translation = Vec3Lerp(s_Data.DebugCameraTransform->Translation, pos, timeStep);
+		}
+		else
+		{
+			if (s_Data.DebugCameraCamera->Primary)
+			{
+				Vec3 pos = s_Data.DebugCameraTransform->Translation;
+				static float speed = 45.0f;
 
-			if (Input_GetKey(KeyCode::NumpadAdd))
-				pos.z += speed * timeStep;
-			else if (Input_GetKey(KeyCode::NumpadSubtract))
-				pos.z -= speed * timeStep;
+				if (Input_GetKey(KeyCode::UpArrow))
+					pos.y += speed * timeStep;
+				else if (Input_GetKey(KeyCode::DownArrow))
+					pos.y -= speed * timeStep;
+				if (Input_GetKey(KeyCode::LeftArrow))
+					pos.x -= speed * timeStep;
+				else if (Input_GetKey(KeyCode::RightArrow))
+					pos.x += speed * timeStep;
 
-			s_Data.DebugCameraTransform->Translation = pos;
+				if (Input_GetKey(KeyCode::NumpadAdd))
+					pos.z += speed * timeStep;
+				else if (Input_GetKey(KeyCode::NumpadSubtract))
+					pos.z -= speed * timeStep;
+
+				s_Data.DebugCameraTransform->Translation = pos;
+			}
 		}
 	}
 #endif
 }
 
 void CameraController_OnDestroy(Entity& entity)
-{
-
-}
+{}
 
 void CameraController_OnCollision(Entity& entity, Entity& other)
-{
+{}
 
-}
+void CameraController_OnRaycastHit(Entity& entity, Entity& other)
+{}

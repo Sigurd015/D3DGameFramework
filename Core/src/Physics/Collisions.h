@@ -28,3 +28,4 @@ bool Collisions_IntersectPolygons(Vec2* vertices1, uint32_t count1, const Vec2& 
 bool Collisions_IntersectCirclePolygon(Vec2& circleCenter, float circleRadius, Vec2* vertices, uint32_t count, const Vec2& polygonCenter,
 	Vec2* normal, float* depth, Vec2* contactPoint, uint32_t* contactPointCount);
 bool Collisions_IntersectAABB(const AABB& aabb1, const AABB& aabb2);
+bool Collisions_RayCast(const Vec2& rayOrigin, const Vec2& rayDirection, const AABB& aabb);

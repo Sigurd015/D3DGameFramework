@@ -21,3 +21,4 @@ Entity* Scene_GetPrimaryCamera(const Scene& out);
 void Scene_SetEntityEnabled(Entity& entity, bool enabled);
 void Scene_OnUpdate(Scene& out, float timeStep);
 void Scene_OnViewportResize(Scene& out, uint32_t width, uint32_t height);
+bool Scene_Raycast(Scene& out, Entity& entity, const Vec2& rayDirection, const char* mask, float maxDistance);

@@ -1,6 +1,7 @@
 #pragma once
 #include "Core.h"
 #include "Player/PlayerController.h"
+#include "Map/EnemyController.h"
 #include "Camera/CameraController.h"
 #include "UI/TitleMenuController.h"
 #include "UI/UIController.h"
@@ -63,6 +64,7 @@ void ScriptGlue_CreateTitleScene(Scene& scene)
 		scriptComponent->OnUpdate = TitleMenuController_OnUpdate;
 		scriptComponent->OnDestroy = TitleMenuController_OnDestroy;
 		scriptComponent->OnCollision = TitleMenuController_OnCollision;
+		scriptComponent->OnRaycastHit = TitleMenuController_OnRaycastHit;
 		Entity_AddComponent(*background, ComponentType::ComponentType_Script, scriptComponent);
 
 		Scene_AddEntity(scene, *background);
@@ -151,6 +153,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		scriptComponent->OnUpdate = CameraController_OnUpdate;
 		scriptComponent->OnDestroy = CameraController_OnDestroy;
 		scriptComponent->OnCollision = CameraController_OnCollision;
+		scriptComponent->OnRaycastHit = CameraController_OnRaycastHit;
 		Entity_AddComponent(*camera, ComponentType::ComponentType_Script, scriptComponent);
 
 		Scene_AddEntity(scene, *camera);
@@ -213,7 +216,42 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		scriptComponent->OnUpdate = PlayerController_OnUpdate;
 		scriptComponent->OnDestroy = PlayerController_OnDestroy;
 		scriptComponent->OnCollision = PlayerController_OnCollision;
+		scriptComponent->OnRaycastHit = PlayerController_OnRaycastHit;
 		Entity_AddComponent(*player, ComponentType::ComponentType_Script, scriptComponent);
+
+		Scene_AddEntity(scene, *player);
+	}
+
+	ScriptComponent* enemyController = (ScriptComponent*)malloc(sizeof(ScriptComponent));
+	*enemyController = {};
+	enemyController->OnCreate = EnemyController_OnCreate;
+	enemyController->OnUpdate = EnemyController_OnUpdate;
+	enemyController->OnDestroy = EnemyController_OnDestroy;
+	enemyController->OnCollision = EnemyController_OnCollision;
+	enemyController->OnRaycastHit = EnemyController_OnRaycastHit;
+
+	//Debug Enemy
+	{
+		Entity* player = (Entity*)malloc(sizeof(Entity));
+		*player = {};
+		player->Tag.Name = "Enemy";
+		player->Transform.Translation = { 45.0f, 0.0f, 0 };
+		player->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
+		player->Transform.Scale = { 10.0f, 10.0f, 1.0f };
+
+		Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+		*rigidbody2D = {};
+		rigidbody2D->Type = Rigidbody2D::BodyType::Kinematic;
+		Entity_AddComponent(*player, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
+		BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+		*boxCollider2D = {};
+		boxCollider2D->Restitution = 0.0f;
+		boxCollider2D->Offset = { 0,0 };
+		boxCollider2D->Size = { 0.3f,0.1f };
+		Entity_AddComponent(*player, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+		Entity_AddComponent(*player, ComponentType::ComponentType_Script, enemyController);
 
 		Scene_AddEntity(scene, *player);
 	}
@@ -230,6 +268,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			scriptComponent->OnUpdate = UIController_OnUpdate;
 			scriptComponent->OnDestroy = UIController_OnDestroy;
 			scriptComponent->OnCollision = UIController_OnCollision;
+			scriptComponent->OnRaycastHit = UIController_OnRaycastHit;
 			Entity_AddComponent(*uiManager, ComponentType::ComponentType_Script, scriptComponent);
 
 			Scene_AddEntity(scene, *uiManager);
@@ -329,6 +368,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		fieldTrigger->OnUpdate = FieldTrigger_OnUpdate;
 		fieldTrigger->OnDestroy = FieldTrigger_OnDestroy;
 		fieldTrigger->OnCollision = FieldTrigger_OnCollision;
+		fieldTrigger->OnRaycastHit = FieldTrigger_OnRaycastHit;
 
 		{
 			Entity* fieldManager = (Entity*)malloc(sizeof(Entity));
@@ -340,6 +380,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			scriptComponent->OnUpdate = FieldController_OnUpdate;
 			scriptComponent->OnDestroy = FieldController_OnDestroy;
 			scriptComponent->OnCollision = FieldController_OnCollision;
+			scriptComponent->OnRaycastHit = FieldController_OnRaycastHit;
 			Entity_AddComponent(*fieldManager, ComponentType::ComponentType_Script, scriptComponent);
 
 			Scene_AddEntity(scene, *fieldManager);

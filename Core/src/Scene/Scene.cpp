@@ -212,7 +212,7 @@ void ColliderVisualiztion(const Scene& out)
 		Entity* temp = (Entity*)List_Get(out.Entities, i);
 		TransformComponent* tc = &temp->Transform;
 
-		if(!temp->Enabled)
+		if (!temp->Enabled)
 			continue;
 
 		if (Entity_HasComponent(*temp, ComponentType_Rigidbody2D))
@@ -417,4 +417,26 @@ void Scene_OnViewportResize(Scene& out, uint32_t width, uint32_t height)
 			if (!temp->Camera->FixedAspectRatio)
 				SceneCamera_SetViewportSize(*temp->Camera->Camera, width, height);
 	}
+}
+
+bool LayerMask(void* entity, const char* mask)
+{
+	Entity* ent = (Entity*)entity;
+	return strstr(ent->Tag.Name, mask) != NULL;
+}
+
+bool Scene_Raycast(Scene& out, Entity& entity, const Vec2& rayDirection, const char* mask, float maxDistance)
+{
+	void* ent = PhysicsWorld2D_Raycast(out.PhysicsWorld, Vec3ToVec2(entity.Transform.Translation), rayDirection, mask, LayerMask, maxDistance);
+
+	if (ent != nullptr)
+	{
+		Entity* temp = (Entity*)ent;
+		if (Entity_HasComponent(*temp, ComponentType_Script))
+		{
+			temp->Script->OnRaycastHit(*temp, entity);
+		}
+		return true;
+	}
+	return false;
 }

@@ -130,4 +130,5 @@ struct ScriptComponent
 	void (*OnUpdate)(Entity& entity, float timeStep);
 	void (*OnDestroy)(Entity& entity);
 	void (*OnCollision)(Entity& entity, Entity& other);
+	void (*OnRaycastHit)(Entity& entity, Entity& other);
 };

@@ -110,6 +110,9 @@ void FieldController_OnDestroy(Entity& entity)
 void FieldController_OnCollision(Entity& entity, Entity& other)
 {}
 
+void FieldController_OnRaycastHit(Entity& entity, Entity& other)
+{}
+
 void FieldController_GenMap()
 {
 	switch (s_Data.CurrentType)

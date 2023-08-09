@@ -349,6 +349,13 @@ void ContactPointVisualiztion(const Vec2* contactPoint, uint32_t contactPointCou
 		Renderer2D_DrawQuad(trans, { 1.0f,0,0,1.0f });
 	}
 }
+
+void RayVisualiztion(const Vec2& rayOrigin, const Vec2& rayDirection, float maxDistance = 100.0f)
+{
+	Vec3 p0 = { rayOrigin.x,rayOrigin.y,0.0f };
+	Vec3 p1 = { rayOrigin.x + rayDirection.x * maxDistance ,rayOrigin.y + rayDirection.y * maxDistance,0.0f };
+	Renderer2D_DrawLine(p0, p1, { 1.0f,0,0,1.0f });
+}
 #endif 
 
 void NarrowPhase(PhysicsWorld2D& world)
@@ -417,4 +424,42 @@ void PhysicsWorld2D_Update(PhysicsWorld2D& world, float timeStep, uint32_t itera
 			NarrowPhase(world);
 		}
 	}
+}
+
+void* PhysicsWorld2D_Raycast(PhysicsWorld2D& world, const Vec2& rayOrigin, const Vec2& rayDirection, const char* mask,
+	bool(*LayerMaskCallback)(void* entity, const char* mask), float maxDistance)
+{
+	for (size_t i = 0; i < world.Rigidbody2DCount; i++)
+	{
+		Rigidbody2D* rigidbody = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, i);
+
+		if (!rigidbody->Enabled)
+		{
+			continue;
+		}
+
+		if (!LayerMaskCallback(rigidbody->Entity, mask))
+		{
+			continue;
+		}
+
+		if (rigidbody->UpdateRequired)
+		{
+			if (rigidbody->Shape == Rigidbody2D::ShapeType::Box)
+				Rigidbody2D_ReCalculBoxColliderVerticesAndAABB(*rigidbody);
+			else if (rigidbody->Shape == Rigidbody2D::ShapeType::Circle)
+				Rigidbody2D_ReCalculCircleColliderAABB(*rigidbody);
+		}
+
+		if (Collisions_RayCast(rayOrigin, rayDirection, rigidbody->AABB))
+		{
+
+#ifndef CORE_DIST
+			RayVisualiztion(rayOrigin, rayDirection, maxDistance);
+#endif 
+
+			return rigidbody->Entity;
+		}
+	}
+	return nullptr;
 }

@@ -78,13 +78,17 @@ void PlayerController_OnUpdate(Entity& entity, float timeStep)
 			{
 				s_Data.CanShoot = false;
 				UIController_PlayShootAnimation();
-				//TODO: Raycast and damage enemies
+				Vec2 direction = { 0.0f,1.0f };
+				if (Scene_Raycast(*entity.Scene, entity, direction, "Enemy", 100.0f))
+				{
+					UIController_PlayHitIcon();
+				}
 			}
 		}
 
 		if (!s_Data.CanShoot)
 		{
-			if (s_Data.ShootCooldownTimer >= s_Data.ShootCooldown)
+			if (s_Data.ShootCooldownTimer > s_Data.ShootCooldown)
 			{
 				s_Data.CanShoot = true;
 				s_Data.ShootCooldownTimer = 0.0f;
@@ -93,7 +97,7 @@ void PlayerController_OnUpdate(Entity& entity, float timeStep)
 			{
 				s_Data.ShootCooldownTimer += timeStep;
 			}
-		}		
+		}
 	}
 }
 
@@ -105,6 +109,9 @@ void PlayerController_OnCollision(Entity& entity, Entity& other)
 	APP_LOG_INFO("OnCollision - ");
 	APP_LOG_INFO(other.Tag.Name);
 }
+
+void PlayerController_OnRaycastHit(Entity& entity, Entity& other)
+{}
 
 float PlayerController_GetHpPercent()
 {

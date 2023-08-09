@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Collisions.h"
 
 void PointSegmentDistance(const Vec2& p, const Vec2& a, const Vec2& b, float* distanceSquared, Vec2* cp)
@@ -330,4 +330,37 @@ bool Collisions_IntersectAABB(const AABB& aabb1, const AABB& aabb2)
 	}
 
 	return true;
+}
+
+bool Collisions_RayCast(const Vec2& rayOrigin, const Vec2& rayDirection, const AABB& aabb)
+{
+	Vec2 aabbCenter = Vec2MulFloat(Vec2Add(aabb.Min, aabb.Max), 0.5f);
+	Vec2 aabbHalfExtents = Vec2MulFloat(Vec2Sub(aabb.Max, aabb.Min), 0.5f);
+
+	//float ty1 = (aabb.Min.y - rayOrigin.y) / rayDirection.y;
+	//float ty2 = (aabb.Max.y - rayOrigin.y) / rayDirection.y;
+
+	float   tx1 = (aabb.Min.x - rayOrigin.x) / rayDirection.x;
+	float 	tx2 = (aabb.Max.x - rayOrigin.x) / rayDirection.x;
+	float 	ty1 = (aabb.Min.y - rayOrigin.y) / rayDirection.y;
+	float 	ty2 = (aabb.Max.y - rayOrigin.y) / rayDirection.y;
+
+	//float tmin = FloatMin(ty1, ty2);
+	//float tmax = FloatMax(ty1, ty2);
+	float tmax = FLT_MAX;
+	float tmin = 0.0f;
+	tmin = FloatMax(FloatMax(FloatMin(tx1, tx2), FloatMin(ty1, ty2)), tmin);
+	tmax = FloatMin(FloatMin(FloatMax(tx1, tx2), FloatMax(ty1, ty2)), tmax);
+
+	if (tmin <= tmax)
+	{
+		float intersectionY = rayOrigin.y + tmin * rayDirection.y;
+
+		if (intersectionY >= aabb.Min.y && intersectionY <= aabb.Max.y)
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
