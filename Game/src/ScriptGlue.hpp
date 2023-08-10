@@ -109,17 +109,29 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 	Texture2D* wallTex5 = (Texture2D*)malloc(sizeof(Texture2D));
 	Texture2D_Create(*wallTex5, "assets/textures/5.png");
 
-	Texture2D* floor = (Texture2D*)malloc(sizeof(Texture2D));
-	Texture2D_Create(*floor, "assets/textures/floor.png");
+	Texture2D* floorTex = (Texture2D*)malloc(sizeof(Texture2D));
+	Texture2D_Create(*floorTex, "assets/textures/floor.png");
 
-	Texture2D* roof = (Texture2D*)malloc(sizeof(Texture2D));
-	Texture2D_Create(*roof, "assets/textures/roof.png");
+	Texture2D* roofTex = (Texture2D*)malloc(sizeof(Texture2D));
+	Texture2D_Create(*roofTex, "assets/textures/roof.png");
 
 	Texture2D* shotgunSprite = (Texture2D*)malloc(sizeof(Texture2D));
 	Texture2D_Create(*shotgunSprite, "assets/textures/weapon/shotgun/spritesheet.png");
 
 	Texture2D* sightIconSprite = (Texture2D*)malloc(sizeof(Texture2D));
 	Texture2D_Create(*sightIconSprite, "assets/textures/sightIcon.png");
+
+	Texture2D* cacoDemonWalkSprite = (Texture2D*)malloc(sizeof(Texture2D));
+	Texture2D_Create(*cacoDemonWalkSprite, "assets/textures/npc/caco_demon/walk/spritesheet.png");
+
+	Texture2D* cacoDemonAttackSprite = (Texture2D*)malloc(sizeof(Texture2D));
+	Texture2D_Create(*cacoDemonAttackSprite, "assets/textures/npc/caco_demon/attack/spritesheet.png");
+
+	Texture2D* cacoDemonDeathSprite = (Texture2D*)malloc(sizeof(Texture2D));
+	Texture2D_Create(*cacoDemonDeathSprite, "assets/textures/npc/caco_demon/death/spritesheet.png");
+
+	Texture2D* cacoDemonPainSprite = (Texture2D*)malloc(sizeof(Texture2D));
+	Texture2D_Create(*cacoDemonPainSprite, "assets/textures/npc/caco_demon/pain/spritesheet.png");
 
 	//Main Camera
 	{
@@ -194,9 +206,9 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		Entity* player = (Entity*)malloc(sizeof(Entity));
 		*player = {};
 		player->Tag.Name = "Player";
-		player->Transform.Translation = { 45.0f, -15.0f, 0 };
+		player->Transform.Translation = { 45.0f, -15.0f, 1.0f };
 		player->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
-		player->Transform.Scale = { 10.0f, 10.0f, 1.0f };
+		player->Transform.Scale = { 1.0f, 1.0f, 1.0f };
 
 		Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
 		*rigidbody2D = {};
@@ -207,7 +219,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		*boxCollider2D = {};
 		boxCollider2D->Restitution = 0.0f;
 		boxCollider2D->Offset = { 0,0 };
-		boxCollider2D->Size = { 0.3f,0.1f };
+		boxCollider2D->Size = { 3.0f,1.0f };
 		Entity_AddComponent(*player, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
 
 		ScriptComponent* scriptComponent = (ScriptComponent*)malloc(sizeof(ScriptComponent));
@@ -222,38 +234,95 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		Scene_AddEntity(scene, *player);
 	}
 
-	ScriptComponent* enemyController = (ScriptComponent*)malloc(sizeof(ScriptComponent));
-	*enemyController = {};
-	enemyController->OnCreate = EnemyController_OnCreate;
-	enemyController->OnUpdate = EnemyController_OnUpdate;
-	enemyController->OnDestroy = EnemyController_OnDestroy;
-	enemyController->OnCollision = EnemyController_OnCollision;
-	enemyController->OnRaycastHit = EnemyController_OnRaycastHit;
-
-	//Debug Enemy
+	//Enemy
 	{
-		Entity* player = (Entity*)malloc(sizeof(Entity));
-		*player = {};
-		player->Tag.Name = "Enemy";
-		player->Transform.Translation = { 45.0f, 0.0f, 0 };
-		player->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
-		player->Transform.Scale = { 10.0f, 10.0f, 1.0f };
+		Entity* enemy = (Entity*)malloc(sizeof(Entity));
+		*enemy = {};
+		enemy->Tag.Name = "Enemy-1";
+		enemy->Transform.Translation = { 45.0f, -5.0f, 1.5f };
+		enemy->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
+		enemy->Transform.Scale = { 5.0f, 5.0f, 1.0f };
+
+		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+		*spriteRenderer = {};
+		Entity_AddComponent(*enemy, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
 		Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
 		*rigidbody2D = {};
 		rigidbody2D->Type = Rigidbody2D::BodyType::Kinematic;
-		Entity_AddComponent(*player, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+		Entity_AddComponent(*enemy, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
 
 		BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
 		*boxCollider2D = {};
 		boxCollider2D->Restitution = 0.0f;
 		boxCollider2D->Offset = { 0,0 };
-		boxCollider2D->Size = { 0.3f,0.1f };
-		Entity_AddComponent(*player, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+		boxCollider2D->Size = { 0.6f,0.2f };
+		Entity_AddComponent(*enemy, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
 
-		Entity_AddComponent(*player, ComponentType::ComponentType_Script, enemyController);
+		ScriptComponent* enemyController = (ScriptComponent*)malloc(sizeof(ScriptComponent));
+		*enemyController = {};
+		enemyController->OnCreate = EnemyController_OnCreate;
+		enemyController->OnUpdate = EnemyController_OnUpdate;
+		enemyController->OnDestroy = EnemyController_OnDestroy;
+		enemyController->OnCollision = EnemyController_OnCollision;
+		enemyController->OnRaycastHit = EnemyController_OnRaycastHit;
 
-		Scene_AddEntity(scene, *player);
+		EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+		*enemyData = {};
+		enemyData->WalkSpriteSheet = cacoDemonWalkSprite;
+		enemyData->AttackSpriteSheet = cacoDemonAttackSprite;
+		enemyData->DeathSpriteSheet = cacoDemonDeathSprite;
+		enemyData->PainSpriteSheet = cacoDemonPainSprite;
+		enemyController->RuntimeData = enemyData;
+
+		Entity_AddComponent(*enemy, ComponentType::ComponentType_Script, enemyController);
+
+		Scene_AddEntity(scene, *enemy);
+	}
+
+	{
+		Entity* enemy = (Entity*)malloc(sizeof(Entity));
+		*enemy = {};
+		enemy->Tag.Name = "Enemy-2";
+		enemy->Transform.Translation = { 35.0f, -5.0f, 1.5f };
+		enemy->Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
+		enemy->Transform.Scale = { 5.0f, 5.0f, 1.0f };
+
+		SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+		*spriteRenderer = {};
+		Entity_AddComponent(*enemy, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
+
+		Rigidbody2DComponent* rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+		*rigidbody2D = {};
+		rigidbody2D->Type = Rigidbody2D::BodyType::Kinematic;
+		Entity_AddComponent(*enemy, ComponentType::ComponentType_Rigidbody2D, rigidbody2D);
+
+		BoxCollider2DComponent* boxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+		*boxCollider2D = {};
+		boxCollider2D->Restitution = 0.0f;
+		boxCollider2D->Offset = { 0,0 };
+		boxCollider2D->Size = { 0.6f,0.2f };
+		Entity_AddComponent(*enemy, ComponentType::ComponentType_BoxCollider2D, boxCollider2D);
+
+		ScriptComponent* enemyController = (ScriptComponent*)malloc(sizeof(ScriptComponent));
+		*enemyController = {};
+		enemyController->OnCreate = EnemyController_OnCreate;
+		enemyController->OnUpdate = EnemyController_OnUpdate;
+		enemyController->OnDestroy = EnemyController_OnDestroy;
+		enemyController->OnCollision = EnemyController_OnCollision;
+		enemyController->OnRaycastHit = EnemyController_OnRaycastHit;
+
+		EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+		*enemyData = {};
+		enemyData->WalkSpriteSheet = cacoDemonWalkSprite;
+		enemyData->AttackSpriteSheet = cacoDemonAttackSprite;
+		enemyData->DeathSpriteSheet = cacoDemonDeathSprite;
+		enemyData->PainSpriteSheet = cacoDemonPainSprite;
+		enemyController->RuntimeData = enemyData;
+
+		Entity_AddComponent(*enemy, ComponentType::ComponentType_Script, enemyController);
+
+		Scene_AddEntity(scene, *enemy);
 	}
 
 	//UI
@@ -1237,7 +1306,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 			SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
 			*spriteRenderer = {};
-			spriteRenderer->Texture = floor;
+			spriteRenderer->Texture = floorTex;
 			spriteRenderer->TilingFactor = 5.0f;
 			Entity_AddComponent(*quad, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 
@@ -1253,7 +1322,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 			SpriteRendererComponent* spriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
 			*spriteRenderer = {};
-			spriteRenderer->Texture = roof;
+			spriteRenderer->Texture = roofTex;
 			spriteRenderer->TilingFactor = 5.0f;
 			Entity_AddComponent(*quad, ComponentType::ComponentType_SpriteRenderer, spriteRenderer);
 

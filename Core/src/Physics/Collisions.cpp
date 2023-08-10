@@ -332,34 +332,61 @@ bool Collisions_IntersectAABB(const AABB& aabb1, const AABB& aabb2)
 	return true;
 }
 
-bool Collisions_RayCast(const Vec2& rayOrigin, const Vec2& rayDirection, const AABB& aabb)
+bool Collisions_RayCastCircles(const Vec2& rayOrigin, const Vec2& rayDirection, const Vec2& center, float radius, float* distance)
 {
-	Vec2 aabbCenter = Vec2MulFloat(Vec2Add(aabb.Min, aabb.Max), 0.5f);
-	Vec2 aabbHalfExtents = Vec2MulFloat(Vec2Sub(aabb.Max, aabb.Min), 0.5f);
+	Vec2 s = Vec2Sub(rayOrigin, center);
+	float b = Vec2Dot(s, rayDirection);
+	float c = Vec2Dot(s, s) - radius * radius;
+	float d = b * b - c;
 
-	//float ty1 = (aabb.Min.y - rayOrigin.y) / rayDirection.y;
-	//float ty2 = (aabb.Max.y - rayOrigin.y) / rayDirection.y;
+	if (d < 0.0f)
+		return false;
 
-	float   tx1 = (aabb.Min.x - rayOrigin.x) / rayDirection.x;
-	float 	tx2 = (aabb.Max.x - rayOrigin.x) / rayDirection.x;
-	float 	ty1 = (aabb.Min.y - rayOrigin.y) / rayDirection.y;
-	float 	ty2 = (aabb.Max.y - rayOrigin.y) / rayDirection.y;
+	d = sqrtf(d);
+	*distance = FloatMax(-b - d, 0.0f);
 
-	//float tmin = FloatMin(ty1, ty2);
-	//float tmax = FloatMax(ty1, ty2);
-	float tmax = FLT_MAX;
-	float tmin = 0.0f;
-	tmin = FloatMax(FloatMax(FloatMin(tx1, tx2), FloatMin(ty1, ty2)), tmin);
-	tmax = FloatMin(FloatMin(FloatMax(tx1, tx2), FloatMax(ty1, ty2)), tmax);
+	return true;
+}
 
-	if (tmin <= tmax)
+bool Collisions_RayCastPolygons(const Vec2& rayOrigin, const Vec2& rayDirection, Vec2* vertices, uint32_t count, const Vec2& center, float* distance)
+{
+	float minDistance = FLT_MAX;
+	for (int i = 0; i < count; ++i)
 	{
-		float intersectionY = rayOrigin.y + tmin * rayDirection.y;
+		Vec2 edgeStart = vertices[i];
+		Vec2 edgeEnd = vertices[(i + 1) % count];
 
-		if (intersectionY >= aabb.Min.y && intersectionY <= aabb.Max.y)
+		Vec2 edge = Vec2Sub(edgeEnd, edgeStart);
+		Vec2 normal = Vec2(-edge.y, edge.x);
+
+		float denom = Vec2Dot(normal, rayDirection);
+
+		if (denom == 0.0f)
 		{
-			return true;
+			continue;
 		}
+
+		float t = Vec2Dot(Vec2Sub(edgeStart, rayOrigin), normal) / denom;
+
+		if (t >= 0.0f)
+		{
+			Vec2 intersectionPoint = Vec2Add(rayOrigin, Vec2MulFloat(rayDirection, t));
+
+			float dot = Vec2Dot(Vec2Sub(intersectionPoint, edgeStart), edge);
+			if (dot >= 0.0f && dot <= Vec2Dot(edge, edge))
+			{
+				if (t < minDistance)
+				{
+					minDistance = t;
+				}
+			}
+		}
+	}
+
+	if (minDistance < FLT_MAX)
+	{
+		*distance = minDistance;
+		return true;
 	}
 
 	return false;

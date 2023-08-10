@@ -126,9 +126,12 @@ struct Entity;
 
 struct ScriptComponent
 {
-	void (*OnCreate)(Entity& entity);
-	void (*OnUpdate)(Entity& entity, float timeStep);
-	void (*OnDestroy)(Entity& entity);
-	void (*OnCollision)(Entity& entity, Entity& other);
-	void (*OnRaycastHit)(Entity& entity, Entity& other);
+	void (*OnCreate)(Entity& entity, void* runtimeData);
+	void (*OnUpdate)(Entity& entity, float timeStep, void* runtimeData);
+	void (*OnDestroy)(Entity& entity, void* runtimeData);
+	void (*OnCollision)(Entity& entity, Entity& other, void* runtimeData);
+	void (*OnRaycastHit)(Entity& entity, Entity& other, void* runtimeData);
+
+	// For ScriptComponent that used by multiple entities, this is the runtime data for each entity
+	void* RuntimeData = nullptr;
 };

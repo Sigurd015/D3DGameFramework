@@ -23,7 +23,7 @@ struct PlayerControllerData
 };
 static PlayerControllerData s_Data;
 
-void PlayerController_OnCreate(Entity& entity)
+void PlayerController_OnCreate(Entity& entity, void* runtimeData)
 {
 	s_Data = {};
 
@@ -34,7 +34,7 @@ void PlayerController_OnCreate(Entity& entity)
 	CORE_ASSERT(s_Data.Rigidbody2D, "Entity does not have Rigidbody2DComponent!");
 }
 
-void PlayerController_OnUpdate(Entity& entity, float timeStep)
+void PlayerController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
 {
 	//Debug
 	{
@@ -79,7 +79,7 @@ void PlayerController_OnUpdate(Entity& entity, float timeStep)
 				s_Data.CanShoot = false;
 				UIController_PlayShootAnimation();
 				Vec2 direction = { 0.0f,1.0f };
-				if (Scene_Raycast(*entity.Scene, entity, direction, "Enemy", 100.0f))
+				if (Scene_Raycast(*entity.Scene, entity, direction, "Enemy"))
 				{
 					UIController_PlayHitIcon();
 				}
@@ -101,16 +101,16 @@ void PlayerController_OnUpdate(Entity& entity, float timeStep)
 	}
 }
 
-void PlayerController_OnDestroy(Entity& entity)
+void PlayerController_OnDestroy(Entity& entity, void* runtimeData)
 {}
 
-void PlayerController_OnCollision(Entity& entity, Entity& other)
+void PlayerController_OnCollision(Entity& entity, Entity& other, void* runtimeData)
 {
 	APP_LOG_INFO("OnCollision - ");
 	APP_LOG_INFO(other.Tag.Name);
 }
 
-void PlayerController_OnRaycastHit(Entity& entity, Entity& other)
+void PlayerController_OnRaycastHit(Entity& entity, Entity& other, void* runtimeData)
 {}
 
 float PlayerController_GetHpPercent()

@@ -28,7 +28,7 @@ struct UIControllerData
 };
 static UIControllerData s_Data;
 
-void UIController_OnCreate(Entity& entity)
+void UIController_OnCreate(Entity& entity, void* runtimeData)
 {
 	s_Data = {};
 
@@ -100,7 +100,7 @@ void UIController_OnCreate(Entity& entity)
 	}
 }
 
-void UIController_OnUpdate(Entity& entity, float timeStep)
+void UIController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
 {
 	//HP Bar
 	{
@@ -154,7 +154,7 @@ void UIController_OnUpdate(Entity& entity, float timeStep)
 			SpriteTimer_Update(s_Data.WeaponSpriteTimer, timeStep);
 			uint32_t currentFrame = SpriteTimer_GetFrame(s_Data.WeaponSpriteTimer);
 
-			SpriteElement* spriteElement = SpriteAnimator_GetElement(s_Data.WeaponSpriteAnimator, SpriteTimer_GetFrame(s_Data.WeaponSpriteTimer));
+			SpriteElement* spriteElement = SpriteAnimator_GetElement(s_Data.WeaponSpriteAnimator, currentFrame);
 			s_Data.WeaponSpriteRenderer->UVStart = spriteElement->UVStart;
 			s_Data.WeaponSpriteRenderer->UVEnd = spriteElement->UVEnd;
 
@@ -171,13 +171,13 @@ void UIController_OnUpdate(Entity& entity, float timeStep)
 	}
 }
 
-void UIController_OnDestroy(Entity& entity)
+void UIController_OnDestroy(Entity& entity, void* runtimeData)
 {}
 
-void UIController_OnCollision(Entity& entity, Entity& other)
+void UIController_OnCollision(Entity& entity, Entity& other, void* runtimeData)
 {}
 
-void UIController_OnRaycastHit(Entity& entity, Entity& other)
+void UIController_OnRaycastHit(Entity& entity, Entity& other, void* runtimeData)
 {}
 
 void UIController_PlayShootAnimation()

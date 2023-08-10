@@ -15,12 +15,12 @@ void OnCollide(void* entity1, void* entity2)
 	Entity* ent2 = (Entity*)entity2;
 	if (Entity_HasComponent(*ent1, ComponentType_Script))
 	{
-		ent1->Script->OnCollision(*ent1, *ent2);
+		ent1->Script->OnCollision(*ent1, *ent2, ent1->Script->RuntimeData);
 	}
 
 	if (Entity_HasComponent(*ent2, ComponentType_Script))
 	{
-		ent2->Script->OnCollision(*ent2, *ent1);
+		ent2->Script->OnCollision(*ent2, *ent1, ent2->Script->RuntimeData);
 	}
 }
 
@@ -34,7 +34,7 @@ void Scene_Ininialize(Scene& out)
 			Entity* temp = (Entity*)List_Get(out.Entities, i);
 			if (Entity_HasComponent(*temp, ComponentType_Script))
 			{
-				temp->Script->OnCreate(*temp);
+				temp->Script->OnCreate(*temp, temp->Script->RuntimeData);
 			}
 		}
 	}
@@ -102,57 +102,40 @@ void Scene_Destroy(Scene& out)
 
 		if (Entity_HasComponent(*temp, ComponentType_RectTransform))
 		{
-			free(temp->RectTransform);
+			Entity_RemoveComponent(*temp, ComponentType_RectTransform);
 		}
-
 		if (Entity_HasComponent(*temp, ComponentType_Script))
-		{
-			temp->Script->OnDestroy(*temp);
-			//TODO: same issue as Texture2D
-			//free(temp->Script);
+		{		
+			temp->Script->OnDestroy(*temp, temp->Script->RuntimeData);
+			Entity_RemoveComponent(*temp, ComponentType_Script);
 		}
-
 		if (Entity_HasComponent(*temp, ComponentType_Camera))
 		{
-			if (temp->Camera->Camera)
-				free(temp->Camera->Camera);
-			free(temp->Camera);
+			Entity_RemoveComponent(*temp, ComponentType_Camera);
 		}
-
 		if (Entity_HasComponent(*temp, ComponentType_SpriteRenderer))
 		{
-			if (temp->SpriteRenderer->Texture)
-			{
-				Texture2D_Release(*temp->SpriteRenderer->Texture);
-				//TODO: Data has been freed by other entity(That using same texture), so we can't free it again
-				// Maybe we should make a reference counter feature
-				//free(temp->SpriteRenderer->Texture);
-			}
-			free(temp->SpriteRenderer);
+			Entity_RemoveComponent(*temp, ComponentType_SpriteRenderer);
 		}
-
 		if (Entity_HasComponent(*temp, ComponentType_CircleRenderer))
 		{
-			free(temp->CircleRenderer);
+			Entity_RemoveComponent(*temp, ComponentType_CircleRenderer);
 		}
-
 		if (Entity_HasComponent(*temp, ComponentType_Rigidbody2D))
 		{
-			free(temp->Rigidbody2D);
+			Entity_RemoveComponent(*temp, ComponentType_Rigidbody2D);
 		}
 		if (Entity_HasComponent(*temp, ComponentType_BoxCollider2D))
 		{
-			free(temp->BoxCollider2D);
+			Entity_RemoveComponent(*temp, ComponentType_BoxCollider2D);
 		}
-
 		if (Entity_HasComponent(*temp, ComponentType_CircleCollider2D))
 		{
-			free(temp->CircleCollider2D);
+			Entity_RemoveComponent(*temp, ComponentType_CircleCollider2D);
 		}
-
 		if (Entity_HasComponent(*temp, ComponentType_Text))
 		{
-			free(temp->Text);
+			Entity_RemoveComponent(*temp, ComponentType_Text);
 		}
 	}
 
@@ -279,7 +262,7 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 
 			if (Entity_HasComponent(*temp, ComponentType_Script) && temp->Enabled)
 			{
-				temp->Script->OnUpdate(*temp, timeStep);
+				temp->Script->OnUpdate(*temp, timeStep, temp->Script->RuntimeData);
 			}
 		}
 	}
@@ -425,16 +408,19 @@ bool LayerMask(void* entity, const char* mask)
 	return strstr(ent->Tag.Name, mask) != NULL;
 }
 
-bool Scene_Raycast(Scene& out, Entity& entity, const Vec2& rayDirection, const char* mask, float maxDistance)
+bool Scene_Raycast(Scene& out, Entity& entity, const Vec2& rayDirection, const char* mask)
 {
-	void* ent = PhysicsWorld2D_Raycast(out.PhysicsWorld, Vec3ToVec2(entity.Transform.Translation), rayDirection, mask, LayerMask, maxDistance);
+	Vec2 rayOrigin = Vec3ToVec2(entity.Transform.Translation);
+	//TODO: Make a better way to do this(1.5f is the offset make the ray dont hit the entity itself)
+	rayOrigin.y += 1.5f;
+	void* ent = PhysicsWorld2D_Raycast(out.PhysicsWorld, rayOrigin, rayDirection);
 
-	if (ent != nullptr)
+	if (ent != nullptr && LayerMask(ent, mask))
 	{
 		Entity* temp = (Entity*)ent;
 		if (Entity_HasComponent(*temp, ComponentType_Script))
 		{
-			temp->Script->OnRaycastHit(*temp, entity);
+			temp->Script->OnRaycastHit(*temp, entity, temp->Script->RuntimeData);
 		}
 		return true;
 	}

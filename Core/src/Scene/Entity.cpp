@@ -7,7 +7,7 @@ bool Entity_HasComponent(Entity& entity, ComponentType type)
 	{
 	case ComponentType_Tag:		          return true;
 	case ComponentType_Transform:	      return true;
-	case ComponentType_RectTransform:	  return entity.RectTransform!=nullptr;
+	case ComponentType_RectTransform:	  return entity.RectTransform != nullptr;
 	case ComponentType_Camera:	          return entity.Camera != nullptr;
 	case ComponentType_SpriteRenderer:	  return entity.SpriteRenderer != nullptr;
 	case ComponentType_CircleRenderer:	  return entity.CircleRenderer != nullptr;
@@ -118,7 +118,8 @@ void Entity_AddComponent(Entity& entity, ComponentType type, void* component)
 	}
 }
 
-void Entity_RemoveComponent(Entity* entity, ComponentType type)
+
+void Entity_RemoveComponent(Entity& entity, ComponentType type)
 {
 	switch (type)
 	{
@@ -127,44 +128,55 @@ void Entity_RemoveComponent(Entity* entity, ComponentType type)
 	case ComponentType_Transform:
 		return;
 	case ComponentType_RectTransform:
-		free(entity->RectTransform);
-		entity->RectTransform = nullptr;
+		free(entity.RectTransform);
+		entity.RectTransform = nullptr;
 		return;
 	case ComponentType_Camera:
-		if (entity->Camera->Camera)
-			free(entity->Camera->Camera);
-		free(entity->Camera);
-		entity->Camera = nullptr;
+		if (entity.Camera->Camera)
+			free(entity.Camera->Camera);
+		free(entity.Camera);
+		entity.Camera = nullptr;
 		return;
 	case ComponentType_SpriteRenderer:
-		if (entity->SpriteRenderer->Texture)
-			Texture2D_Release(*entity->SpriteRenderer->Texture);
-		free(entity->SpriteRenderer);
-		entity->SpriteRenderer = nullptr;
+		if (entity.SpriteRenderer->Texture)
+		{
+			Texture2D_Release(*entity.SpriteRenderer->Texture);
+			//TODO: Data has been freed by other entity(That using same texture), so we can't free it again
+			// Maybe we should make a reference counter feature
+			//free(entity->SpriteRenderer->Texture);
+		}
+		free(entity.SpriteRenderer);
+		entity.SpriteRenderer = nullptr;
 		return;
 	case ComponentType_CircleRenderer:
-		free(entity->CircleRenderer);
-		entity->CircleRenderer = nullptr;
+		free(entity.CircleRenderer);
+		entity.CircleRenderer = nullptr;
 		return;
 	case ComponentType_Rigidbody2D:
-		free(entity->Rigidbody2D);
-		entity->Rigidbody2D = nullptr;
+		free(entity.Rigidbody2D);
+		entity.Rigidbody2D = nullptr;
 		return;
 	case ComponentType_BoxCollider2D:
-		free(entity->BoxCollider2D);
-		entity->BoxCollider2D = nullptr;
+		free(entity.BoxCollider2D);
+		entity.BoxCollider2D = nullptr;
 		return;
 	case ComponentType_CircleCollider2D:
-		free(entity->CircleCollider2D);
-		entity->CircleCollider2D = nullptr;
+		free(entity.CircleCollider2D);
+		entity.CircleCollider2D = nullptr;
 		return;
 	case ComponentType_Text:
-		free(entity->Text);
-		entity->Text = nullptr;
+		free(entity.Text);
+		entity.Text = nullptr;
 		return;
-	case ComponentType_Script:
-		free(entity->Script);
-		entity->Script = nullptr;
+	case ComponentType_Script:		
+		if (entity.Script->RuntimeData != nullptr)
+		{
+			free(entity.Script->RuntimeData);
+			entity.Script->RuntimeData = nullptr;
+		}
+		//TODO: same issue as Texture2D
+		//free(entity.Script);
+		entity.Script = nullptr;
 		return;
 	}
 	CORE_ASSERT(false, "Unknown ComponentType!");

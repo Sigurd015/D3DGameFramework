@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "PhysicsWorld.h"
 
 struct ContactPair
@@ -426,19 +426,15 @@ void PhysicsWorld2D_Update(PhysicsWorld2D& world, float timeStep, uint32_t itera
 	}
 }
 
-void* PhysicsWorld2D_Raycast(PhysicsWorld2D& world, const Vec2& rayOrigin, const Vec2& rayDirection, const char* mask,
-	bool(*LayerMaskCallback)(void* entity, const char* mask), float maxDistance)
+void* PhysicsWorld2D_Raycast(PhysicsWorld2D& world, const Vec2& rayOrigin, const Vec2& rayDirection)
 {
+	float minDistance = FLT_MAX;
+	void* result = nullptr;
 	for (size_t i = 0; i < world.Rigidbody2DCount; i++)
 	{
 		Rigidbody2D* rigidbody = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, i);
 
 		if (!rigidbody->Enabled)
-		{
-			continue;
-		}
-
-		if (!LayerMaskCallback(rigidbody->Entity, mask))
 		{
 			continue;
 		}
@@ -451,15 +447,42 @@ void* PhysicsWorld2D_Raycast(PhysicsWorld2D& world, const Vec2& rayOrigin, const
 				Rigidbody2D_ReCalculCircleColliderAABB(*rigidbody);
 		}
 
-		if (Collisions_RayCast(rayOrigin, rayDirection, rigidbody->AABB))
+		float distance = 0.0f;
+		if (rigidbody->Shape == Rigidbody2D::ShapeType::Box)
 		{
-
-#ifndef CORE_DIST
-			RayVisualiztion(rayOrigin, rayDirection, maxDistance);
-#endif 
-
-			return rigidbody->Entity;
+			Vec2 boxCenter = Vec2Add(rigidbody->Position, rigidbody->BoxCollider.Offset);
+			if (Collisions_RayCastPolygons(rayOrigin, rayDirection, rigidbody->BoxCollider.Vertices, 4, boxCenter, &distance))
+			{
+				if (distance != 0.0f)
+				{
+					if (distance < minDistance)
+					{
+						minDistance = distance;
+						result = rigidbody->Entity;
+					}
+				}
+			}
+		}
+		else if (rigidbody->Shape == Rigidbody2D::ShapeType::Circle)
+		{
+			Vec2 circleCenter = Vec2Add(rigidbody->Position, rigidbody->CircleCollider.Offset);
+			if (Collisions_RayCastCircles(rayOrigin, rayDirection, circleCenter, rigidbody->CircleCollider.Radius, &distance))
+			{
+				if (distance != 0.0f)
+				{
+					if (distance < minDistance)
+					{
+						minDistance = distance;
+						result = rigidbody->Entity;
+					}
+				}
+			}
 		}
 	}
-	return nullptr;
+
+#ifndef CORE_DIST
+	RayVisualiztion(rayOrigin, rayDirection, minDistance);
+#endif 
+
+	return result;
 }

@@ -16,7 +16,7 @@ struct CameraControllerData
 };
 static CameraControllerData s_Data;
 
-void CameraController_OnCreate(Entity& entity)
+void CameraController_OnCreate(Entity& entity, void* runtimeData)
 {
 	s_Data = {};
 
@@ -47,7 +47,7 @@ void CameraController_OnCreate(Entity& entity)
 #endif
 }
 
-void CameraController_OnUpdate(Entity& entity, float timeStep)
+void CameraController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
 {
 	s_Data.Transform->Translation = s_Data.PlayerTransform->Translation;
 
@@ -98,11 +98,11 @@ void CameraController_OnUpdate(Entity& entity, float timeStep)
 #endif
 }
 
-void CameraController_OnDestroy(Entity& entity)
+void CameraController_OnDestroy(Entity& entity, void* runtimeData)
 {}
 
-void CameraController_OnCollision(Entity& entity, Entity& other)
+void CameraController_OnCollision(Entity& entity, Entity& other, void* runtimeData)
 {}
 
-void CameraController_OnRaycastHit(Entity& entity, Entity& other)
+void CameraController_OnRaycastHit(Entity& entity, Entity& other, void* runtimeData)
 {}

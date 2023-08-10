@@ -99,7 +99,7 @@ void ResetToIdle()
 	s_Data.BackgroundSprite->Color = { 1.0f,1.0f,1.0f,1.0f };
 }
 
-void TitleMenuController_OnCreate(Entity& entity)
+void TitleMenuController_OnCreate(Entity& entity, void* runtimeData)
 {
 	s_Data = {};
 
@@ -141,7 +141,7 @@ void TitleMenuController_OnCreate(Entity& entity)
 	}
 }
 
-void TitleMenuController_OnUpdate(Entity& entity, float timeStep)
+void TitleMenuController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
 {
 	if (Input_GetKeyDown(KeyCode::Esc))
 		ResetToIdle();
@@ -208,11 +208,11 @@ void TitleMenuController_OnUpdate(Entity& entity, float timeStep)
 	}
 }
 
-void TitleMenuController_OnDestroy(Entity& entity)
+void TitleMenuController_OnDestroy(Entity& entity, void* runtimeData)
 {}
 
-void TitleMenuController_OnCollision(Entity& entity, Entity& other)
+void TitleMenuController_OnCollision(Entity& entity, Entity& other, void* runtimeData)
 {}
 
-void TitleMenuController_OnRaycastHit(Entity& entity, Entity& other)
+void TitleMenuController_OnRaycastHit(Entity& entity, Entity& other, void* runtimeData)
 {}
