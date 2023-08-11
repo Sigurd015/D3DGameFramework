@@ -14,19 +14,17 @@ void PhysicsWorld2D_Create(PhysicsWorld2D& world, void(*CollisionCallback)(void*
 	List_Create(world.Rigidbody2Ds, PHYSICS_POOL_SIZE);
 	List_Create(world.ContactPairs, PHYSICS_POOL_SIZE);
 	{
+		Rigidbody2D rigidbody2D;
 		for (size_t i = 0; i < PHYSICS_POOL_SIZE; i++)
 		{
-			Rigidbody2D* rigidbody2D = (Rigidbody2D*)malloc(sizeof(Rigidbody2D));
-			*rigidbody2D = {};
-			List_Add(world.Rigidbody2Ds, rigidbody2D);
+			List_Add(world.Rigidbody2Ds, sizeof(Rigidbody2D), &rigidbody2D);
 		}
 	}
 	{
+		ContactPair contactPair;
 		for (size_t i = 0; i < PHYSICS_POOL_SIZE; i++)
 		{
-			ContactPair* contactPair = (ContactPair*)malloc(sizeof(ContactPair));
-			*contactPair = {};
-			List_Add(world.ContactPairs, contactPair);
+			List_Add(world.ContactPairs, sizeof(ContactPair), &contactPair);
 		}
 	}
 	world.Rigidbody2DCount = 0;
@@ -426,10 +424,11 @@ void PhysicsWorld2D_Update(PhysicsWorld2D& world, float timeStep, uint32_t itera
 	}
 }
 
-void* PhysicsWorld2D_Raycast(PhysicsWorld2D& world, const Vec2& rayOrigin, const Vec2& rayDirection)
+void* PhysicsWorld2D_Raycast(PhysicsWorld2D& world, const Vec2& rayOrigin, const Vec2& rayDirection, float* minDistance)
 {
-	float minDistance = FLT_MAX;
 	void* result = nullptr;
+	*minDistance = FLT_MAX;
+
 	for (size_t i = 0; i < world.Rigidbody2DCount; i++)
 	{
 		Rigidbody2D* rigidbody = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, i);
@@ -455,9 +454,9 @@ void* PhysicsWorld2D_Raycast(PhysicsWorld2D& world, const Vec2& rayOrigin, const
 			{
 				if (distance != 0.0f)
 				{
-					if (distance < minDistance)
+					if (distance < *minDistance)
 					{
-						minDistance = distance;
+						*minDistance = distance;
 						result = rigidbody->Entity;
 					}
 				}
@@ -470,9 +469,9 @@ void* PhysicsWorld2D_Raycast(PhysicsWorld2D& world, const Vec2& rayOrigin, const
 			{
 				if (distance != 0.0f)
 				{
-					if (distance < minDistance)
+					if (distance < *minDistance)
 					{
-						minDistance = distance;
+						*minDistance = distance;
 						result = rigidbody->Entity;
 					}
 				}
@@ -481,7 +480,7 @@ void* PhysicsWorld2D_Raycast(PhysicsWorld2D& world, const Vec2& rayOrigin, const
 	}
 
 #ifndef CORE_DIST
-	RayVisualiztion(rayOrigin, rayDirection, minDistance);
+	RayVisualiztion(rayOrigin, rayDirection, *minDistance);
 #endif 
 
 	return result;

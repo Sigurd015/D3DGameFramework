@@ -2,10 +2,8 @@
 #include "StartUp.h"
 #include "../GameMode.h"
 
-#define ENGINE_LOGO_START_FRAME_TIME 1.0f
-#define ENGINE_LOGO_END_FRAME_TIME 3.0f
-#define STUDIO_LOGO_START_FRAME_TIME 6.0f
-#define STUDIO_LOGO_END_FRAME_TIME 8.0f
+#define STUDIO_LOGO_START_FRAME_TIME 1.0f
+#define STUDIO_LOGO_END_FRAME_TIME 3.0f
 #define FADE_IN_OUT_FRAME_TIME 2.0f
 
 #define FONT_NAME L"Arial"
@@ -41,17 +39,6 @@ void StartUp_Draw(float timeStep)
 	RectTransformComponent_GetPositionAndSize(s_Data.Canvas, viewPortSize, &ndcPos, &position, &size);
 
 	WCHAR* text = L"";
-
-	if (s_Data.CurrentFrameTime < ENGINE_LOGO_START_FRAME_TIME + FADE_IN_OUT_FRAME_TIME)
-	{
-		s_Data.Color.w = FloatLerp(s_Data.Color.w, 1.0f, timeStep);
-		text = L"Made with Hanabi Engine";
-	}
-	else if (s_Data.CurrentFrameTime < ENGINE_LOGO_END_FRAME_TIME + FADE_IN_OUT_FRAME_TIME)
-	{
-		s_Data.Color.w = FloatLerp(s_Data.Color.w, 0.0f, timeStep);
-		text = L"Made with Hanabi Engine";
-	}
 
 	if (s_Data.CurrentFrameTime > STUDIO_LOGO_START_FRAME_TIME)
 	{

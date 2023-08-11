@@ -11,7 +11,7 @@ Mat TransformComponent_GetTransform(const TransformComponent& transform)
 void RectTransformComponent_GetPositionAndSize(const RectTransformComponent& rectTransform, const Vec2& currentViewPortSize,
 	Vec2* ndcPos, Vec2* pos, Vec2* size)
 {
-	const Vec2 standardScreenSize = { 1920.0f,1080.0f };
+	const static Vec2 standardScreenSize = { 1920.0f,1080.0f };
 	Vec2 scale = { currentViewPortSize.x / standardScreenSize.x,currentViewPortSize.y / standardScreenSize.y };
 
 	pos->x = rectTransform.Position.x / standardScreenSize.x;

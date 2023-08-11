@@ -31,6 +31,21 @@ void List_Set(List& out, uint32_t index, void* data)
 	out.Data[index] = data;
 }
 
+void List_Add(List& out, uint32_t size, void* data)
+{
+	if (out.Index + 1 > out.Capacity)
+	{
+		out.Capacity *= 2;
+		out.Data = (void**)realloc(out.Data, out.Capacity * sizeof(void*));
+
+		CORE_ASSERT(out.Data != nullptr, "List_Add: Memory allocation failed");
+	}
+
+	out.Data[out.Index] = (void*)malloc(size);
+	memcpy(out.Data[out.Index], data, size);
+	out.Index++;
+}
+
 void List_Add(List& out, void* data)
 {
 	if (out.Index + 1 > out.Capacity)

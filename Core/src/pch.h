@@ -8,5 +8,6 @@
 #include "Core/Base.h"
 #include "Math/Math.h"
 #include "Utils/List.h"
+#include "Utils/RefPtr.h"
 
 #include <Windows.h>

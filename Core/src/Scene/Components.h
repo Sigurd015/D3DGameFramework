@@ -48,7 +48,7 @@ void RectTransformComponent_GetPositionAndSize(const RectTransformComponent& rec
 
 struct CameraComponent
 {
-	SceneCamera* Camera;
+	SceneCamera Camera;
 	bool Primary = true;
 	bool FixedAspectRatio = false;
 };
@@ -131,6 +131,8 @@ struct ScriptComponent
 	void (*OnDestroy)(Entity& entity, void* runtimeData);
 	void (*OnCollision)(Entity& entity, Entity& other, void* runtimeData);
 	void (*OnRaycastHit)(Entity& entity, Entity& other, void* runtimeData);
+	void (*OnEnable)(Entity& entity, void* runtimeData);
+	void (*OnDisable)(Entity& entity, void* runtimeData);
 
 	// For ScriptComponent that used by multiple entities, this is the runtime data for each entity
 	void* RuntimeData = nullptr;

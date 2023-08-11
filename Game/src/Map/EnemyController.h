@@ -6,9 +6,28 @@ enum EnemyType
 	CACO_DEMON, CYBER_DEMON, SOLDIER
 };
 
+enum EnemyState
+{
+	ENEMY_IDLE, ENEMY_WALK, ENEMY_ATTACK, ENEMY_PAIN, ENEMY_DEATH
+};
+
+struct EnemyStats
+{
+	float MaxHP = 0.0f;
+	float HP = 0.0f;
+};
+
 struct EnemyData
 {
 	EnemyType Type;
+	EnemyState State = ENEMY_IDLE;
+	bool CanAttack = true;
+	float AttackTimer = 0.0f;
+	float AttackCooldown = 0.0f;
+	EnemyStats Stats;
+
+	TransformComponent* PlayerTransform = nullptr;
+	TransformComponent* Transform = nullptr;
 
 	Rigidbody2DComponent* Rigidbody = nullptr;
 	SpriteRendererComponent* SpriteRenderer = nullptr;
@@ -22,7 +41,6 @@ struct EnemyData
 	SpriteAnimator AttackSpriteAnimator;
 	SpriteTimer AttackSpriteTimer;
 	uint32_t AttackSpriteMaxAnimationFrames;
-	bool CanAttack = false;
 
 	Texture2D* DeathSpriteSheet = nullptr;
 	SpriteAnimator DeathSpriteAnimator;
@@ -33,7 +51,6 @@ struct EnemyData
 	SpriteAnimator PainSpriteAnimator;
 	SpriteTimer PainSpriteTimer;
 	uint32_t PainSpriteMaxAnimationFrames;
-	bool IsHited = false;
 
 	Texture2D* IdleSpriteSheet = nullptr;
 	Vec2 IdleUVStart;
@@ -45,3 +62,5 @@ void EnemyController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
 void EnemyController_OnDestroy(Entity& entity, void* runtimeData);
 void EnemyController_OnCollision(Entity& entity, Entity& other, void* runtimeData);
 void EnemyController_OnRaycastHit(Entity& entity, Entity& other, void* runtimeData);
+void EnemyController_OnEnable(Entity& entity, void* runtimeData);
+void EnemyController_OnDisable(Entity& entity, void* runtimeData);

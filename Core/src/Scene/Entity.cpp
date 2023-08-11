@@ -64,60 +64,68 @@ void Entity_AddComponent(Entity& entity, ComponentType type, void* component)
 	case ComponentType_RectTransform:
 	{
 		CORE_ASSERT(!entity.RectTransform, "Entity already has component!");
-		entity.RectTransform = (RectTransformComponent*)component;
+		entity.RectTransform = (RectTransformComponent*)malloc(sizeof(RectTransformComponent));
+		memcpy(entity.RectTransform, component, sizeof(RectTransformComponent));
 		break;
 	}
 	case ComponentType_Camera:
 	{
 		CORE_ASSERT(!entity.Camera, "Entity already has component!");
-		entity.Camera = (CameraComponent*)component;
+		entity.Camera = (CameraComponent*)malloc(sizeof(CameraComponent));
+		memcpy(entity.Camera, component, sizeof(CameraComponent));
 		break;
 	}
 	case ComponentType_SpriteRenderer:
 	{
 		CORE_ASSERT(!entity.SpriteRenderer, "Entity already has component!");
-		entity.SpriteRenderer = (SpriteRendererComponent*)component;
+		entity.SpriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
+		memcpy(entity.SpriteRenderer, component, sizeof(SpriteRendererComponent));
 		break;
 	}
 	case ComponentType_CircleRenderer:
 	{
 		CORE_ASSERT(!entity.CircleRenderer, "Entity already has component!");
-		entity.CircleRenderer = (CircleRendererComponent*)component;
+		entity.CircleRenderer = (CircleRendererComponent*)malloc(sizeof(CircleRendererComponent));
+		memcpy(entity.CircleRenderer, component, sizeof(CircleRendererComponent));
 		break;
 	}
 	case ComponentType_Rigidbody2D:
 	{
 		CORE_ASSERT(!entity.Rigidbody2D, "Entity already has component!");
-		entity.Rigidbody2D = (Rigidbody2DComponent*)component;
+		entity.Rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
+		memcpy(entity.Rigidbody2D, component, sizeof(Rigidbody2DComponent));
 		break;
 	}
 	case ComponentType_BoxCollider2D:
 	{
 		CORE_ASSERT(!entity.BoxCollider2D, "Entity already has component!");
-		entity.BoxCollider2D = (BoxCollider2DComponent*)component;
+		entity.BoxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
+		memcpy(entity.BoxCollider2D, component, sizeof(BoxCollider2DComponent));
 		break;
 	}
 	case ComponentType_CircleCollider2D:
 	{
 		CORE_ASSERT(!entity.CircleCollider2D, "Entity already has component!");
-		entity.CircleCollider2D = (CircleCollider2DComponent*)component;
+		entity.CircleCollider2D = (CircleCollider2DComponent*)malloc(sizeof(CircleCollider2DComponent));
+		memcpy(entity.CircleCollider2D, component, sizeof(CircleCollider2DComponent));
 		break;
 	}
 	case ComponentType_Text:
 	{
 		CORE_ASSERT(!entity.Text, "Entity already has component!");
-		entity.Text = (TextComponent*)component;
+		entity.Text = (TextComponent*)malloc(sizeof(TextComponent));
+		memcpy(entity.Text, component, sizeof(TextComponent));
 		break;
 	}
 	case ComponentType_Script:
 	{
 		CORE_ASSERT(!entity.Script, "Entity already has component!");
-		entity.Script = (ScriptComponent*)component;
+		entity.Script = (ScriptComponent*)malloc(sizeof(ScriptComponent));
+		memcpy(entity.Script, component, sizeof(ScriptComponent));
 		break;
 	}
 	}
 }
-
 
 void Entity_RemoveComponent(Entity& entity, ComponentType type)
 {
@@ -132,8 +140,6 @@ void Entity_RemoveComponent(Entity& entity, ComponentType type)
 		entity.RectTransform = nullptr;
 		return;
 	case ComponentType_Camera:
-		if (entity.Camera->Camera)
-			free(entity.Camera->Camera);
 		free(entity.Camera);
 		entity.Camera = nullptr;
 		return;
@@ -141,8 +147,8 @@ void Entity_RemoveComponent(Entity& entity, ComponentType type)
 		if (entity.SpriteRenderer->Texture)
 		{
 			Texture2D_Release(*entity.SpriteRenderer->Texture);
-			//TODO: Data has been freed by other entity(That using same texture), so we can't free it again
-			// Maybe we should make a reference counter feature
+			//TODO: This used by multiple entities, so we cant just free it like this, we need to reference count it.
+			//      I will just leave it like this, let the OS clean it up.
 			//free(entity->SpriteRenderer->Texture);
 		}
 		free(entity.SpriteRenderer);
@@ -168,14 +174,13 @@ void Entity_RemoveComponent(Entity& entity, ComponentType type)
 		free(entity.Text);
 		entity.Text = nullptr;
 		return;
-	case ComponentType_Script:		
+	case ComponentType_Script:
 		if (entity.Script->RuntimeData != nullptr)
 		{
 			free(entity.Script->RuntimeData);
 			entity.Script->RuntimeData = nullptr;
 		}
-		//TODO: same issue as Texture2D
-		//free(entity.Script);
+		free(entity.Script);
 		entity.Script = nullptr;
 		return;
 	}

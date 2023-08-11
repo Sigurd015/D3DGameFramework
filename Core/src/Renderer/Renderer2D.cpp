@@ -256,11 +256,10 @@ void Renderer2D_Initialize()
 
 	List_Create(s_Data.TextRenderCommands, COMMAND_BUFFER_SIZE);
 	{
+		TextRenderCommand command;
 		for (size_t i = 0; i < COMMAND_BUFFER_SIZE; i++)
 		{
-			TextRenderCommand* command = (TextRenderCommand*)malloc(sizeof(TextRenderCommand));
-			*command = {};
-			List_Add(s_Data.TextRenderCommands, command);
+			List_Add(s_Data.TextRenderCommands, sizeof(TextRenderCommand), &command);
 		}
 	}
 }
@@ -314,7 +313,7 @@ void Renderer2D_BeginScene(const Mat& viewProjection)
 	s_Data.SceneBuffer.ViewProjection = DirectX::XMMatrixTranspose(viewProjection);
 
 	ConstantBuffer_SetData(s_Data.CameraConstantBuffer, &s_Data.SceneBuffer);
-	
+
 	StartBatch();
 }
 

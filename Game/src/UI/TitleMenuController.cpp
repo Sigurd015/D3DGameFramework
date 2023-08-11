@@ -29,7 +29,7 @@ struct TitleMenuControllerData
 {
 	SpriteRendererComponent* BackgroundSprite = nullptr;
 	Texture2D* MenuBGTexture = nullptr;
-	Texture2D* SettingsBGTexture = nullptr;
+	Texture2D SettingsBGTexture;
 	Entity* SelectionEntity = nullptr;
 	RectTransformComponent* SelectionRectTrans = nullptr;
 	SpriteRendererComponent* SelectionSprite = nullptr;
@@ -73,7 +73,7 @@ void StartGame()
 
 void Settings()
 {
-	s_Data.BackgroundSprite->Texture = s_Data.SettingsBGTexture;
+	s_Data.BackgroundSprite->Texture = &s_Data.SettingsBGTexture;
 	s_Data.BackgroundSprite->Color = { 1.0f,1.0f,1.0f,1.0f };
 	s_Data.State = SETTINGS;
 }
@@ -113,8 +113,7 @@ void TitleMenuController_OnCreate(Entity& entity, void* runtimeData)
 		s_Data.CurrentNode = &s_Data.StartGameNode;
 	}
 
-	s_Data.SettingsBGTexture = (Texture2D*)malloc(sizeof(Texture2D));
-	Texture2D_Create(*s_Data.SettingsBGTexture, "assets/textures/settings.png");
+	Texture2D_Create(s_Data.SettingsBGTexture, "assets/textures/settings.png");
 
 	//Background
 	{
@@ -210,9 +209,11 @@ void TitleMenuController_OnUpdate(Entity& entity, float timeStep, void* runtimeD
 
 void TitleMenuController_OnDestroy(Entity& entity, void* runtimeData)
 {}
-
 void TitleMenuController_OnCollision(Entity& entity, Entity& other, void* runtimeData)
 {}
-
 void TitleMenuController_OnRaycastHit(Entity& entity, Entity& other, void* runtimeData)
+{}
+void TitleMenuController_OnEnable(Entity& entity, void* runtimeData)
+{}
+void TitleMenuController_OnDisable(Entity& entity, void* runtimeData)
 {}

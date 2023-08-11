@@ -2,13 +2,14 @@
 #include "../KeyMap/KeyMap.h"
 #include "../UI/UIController.h"
 
+#define ENEMY_DAMAGE 30.0f
+#define ATTACK_RANGE 100.0f
+
 struct PlayerStats
 {
-	float MaxHp = 300.0f;
-	float Hp = 300.0f;
+	float MaxHp = 100.0f;
+	float Hp = 100.0f;
 };
-
-
 
 struct PlayerControllerData
 {
@@ -79,7 +80,7 @@ void PlayerController_OnUpdate(Entity& entity, float timeStep, void* runtimeData
 				s_Data.CanShoot = false;
 				UIController_PlayShootAnimation();
 				Vec2 direction = { 0.0f,1.0f };
-				if (Scene_Raycast(*entity.Scene, entity, direction, "Enemy"))
+				if (Scene_Raycast(*entity.Scene, entity, direction, "Enemy", ATTACK_RANGE))
 				{
 					UIController_PlayHitIcon();
 				}
@@ -111,6 +112,19 @@ void PlayerController_OnCollision(Entity& entity, Entity& other, void* runtimeDa
 }
 
 void PlayerController_OnRaycastHit(Entity& entity, Entity& other, void* runtimeData)
+{
+	if (strstr(other.Tag.Name, "Enemy") != NULL)
+	{
+		APP_LOG_INFO(other.Tag.Name);
+		APP_LOG_INFO("Player hited by enemy");
+
+		s_Data.Stats.Hp -= ENEMY_DAMAGE;
+	}
+}
+
+void PlayerController_OnEnable(Entity& entity, void* runtimeData)
+{}
+void PlayerController_OnDisable(Entity& entity, void* runtimeData)
 {}
 
 float PlayerController_GetHpPercent()

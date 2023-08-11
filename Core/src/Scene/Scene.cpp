@@ -105,7 +105,7 @@ void Scene_Destroy(Scene& out)
 			Entity_RemoveComponent(*temp, ComponentType_RectTransform);
 		}
 		if (Entity_HasComponent(*temp, ComponentType_Script))
-		{		
+		{
 			temp->Script->OnDestroy(*temp, temp->Script->RuntimeData);
 			Entity_RemoveComponent(*temp, ComponentType_Script);
 		}
@@ -146,7 +146,7 @@ void Scene_Destroy(Scene& out)
 void Scene_AddEntity(Scene& out, Entity& entity)
 {
 	entity.Scene = &out;
-	List_Add(out.Entities, (void*)&entity);
+	List_Add(out.Entities, sizeof(Entity), &entity);
 }
 
 Entity* Scene_GetEntityByName(const Scene& out, const char* name)
@@ -177,12 +177,18 @@ Entity* Scene_GetPrimaryCamera(const Scene& out)
 void Scene_SetEntityEnabled(Entity& entity, bool enabled)
 {
 	entity.Enabled = enabled;
-	//TODO: Maybe call script OnEnable/OnDisable
-	//      and then set rigidbody2d enabled
 	if (Entity_HasComponent(entity, ComponentType_Rigidbody2D))
 	{
 		Rigidbody2D* rigidbody2D = (Rigidbody2D*)entity.Rigidbody2D->RuntimeBody;
 		rigidbody2D->Enabled = enabled;
+	}
+
+	if (Entity_HasComponent(entity, ComponentType_Script))
+	{
+		if (enabled)
+			entity.Script->OnEnable(entity, entity.Script->RuntimeData);
+		else
+			entity.Script->OnDisable(entity, entity.Script->RuntimeData);
 	}
 }
 
@@ -246,7 +252,7 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 		if (!mainCamera)
 			return;
 
-		SceneCamera* camera = mainCamera->Camera->Camera;
+		SceneCamera* camera = &mainCamera->Camera->Camera;
 		TransformComponent* cameraTrans = &mainCamera->Transform;
 		Mat viewProjection = DirectX::XMMatrixInverse(nullptr, TransformComponent_GetTransform(*cameraTrans)) * camera->Projection;
 		Renderer2D_BeginScene(viewProjection);
@@ -398,7 +404,7 @@ void Scene_OnViewportResize(Scene& out, uint32_t width, uint32_t height)
 		Entity* temp = (Entity*)List_Get(out.Entities, i);
 		if (Entity_HasComponent(*temp, ComponentType_Camera))
 			if (!temp->Camera->FixedAspectRatio)
-				SceneCamera_SetViewportSize(*temp->Camera->Camera, width, height);
+				SceneCamera_SetViewportSize(temp->Camera->Camera, width, height);
 	}
 }
 
@@ -408,14 +414,23 @@ bool LayerMask(void* entity, const char* mask)
 	return strstr(ent->Tag.Name, mask) != NULL;
 }
 
-bool Scene_Raycast(Scene& out, Entity& entity, const Vec2& rayDirection, const char* mask)
+bool Scene_Raycast(Scene& out, Entity& entity, const Vec2& rayDirection, const char* mask, float maxDistance)
 {
 	Vec2 rayOrigin = Vec3ToVec2(entity.Transform.Translation);
-	//TODO: Make a better way to do this(1.5f is the offset make the ray dont hit the entity itself)
-	rayOrigin.y += 1.5f;
-	void* ent = PhysicsWorld2D_Raycast(out.PhysicsWorld, rayOrigin, rayDirection);
 
-	if (ent != nullptr && LayerMask(ent, mask))
+	//TODO: Make a better way to do this
+	Rigidbody2D* rigidbody2D = nullptr;
+	if (Entity_HasComponent(entity, ComponentType_Rigidbody2D))
+	{
+		rigidbody2D = (Rigidbody2D*)entity.Rigidbody2D->RuntimeBody;
+		rigidbody2D->Enabled = false;
+	}
+	float distance;
+	void* ent = PhysicsWorld2D_Raycast(out.PhysicsWorld, rayOrigin, rayDirection, &distance);
+	if (rigidbody2D != nullptr)
+		rigidbody2D->Enabled = true;
+
+	if (ent != nullptr && LayerMask(ent, mask) && distance < maxDistance)
 	{
 		Entity* temp = (Entity*)ent;
 		if (Entity_HasComponent(*temp, ComponentType_Script))
