@@ -71,7 +71,6 @@ void SetBuffer(uint32_t width, uint32_t height)
 void RendererAPI_Initialize()
 {
 	s_RendererAPIState.SwapChain = RendererContext_GetSwapChain();
-	s_RendererAPIState.SwapChain = RendererContext_GetSwapChain();
 	s_RendererAPIState.Device = RendererContext_GetDevice();
 	s_RendererAPIState.DeviceContext = RendererContext_GetDeviceContext();
 

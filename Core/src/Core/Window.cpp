@@ -52,9 +52,9 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	}
 }
 
-void Window_Create(const WindowProps* props)
+void Window_Create(const WindowProps& props)
 {
-	s_WindowState.Props = *props;
+	s_WindowState.Props = props;
 	WNDCLASSEX wndClass = { sizeof(WNDCLASSEX), CS_OWNDC,
 			WndProc, 0, 0, GetModuleHandle(nullptr), nullptr,
 			nullptr, nullptr, nullptr, L"DXR", nullptr };

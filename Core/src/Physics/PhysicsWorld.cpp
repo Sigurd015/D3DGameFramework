@@ -66,6 +66,7 @@ bool Collide(Rigidbody2D& body1, Rigidbody2D& body2, Vec2* normal, float* depth,
 		if (shape2 == Rigidbody2D::ShapeType::Circle)
 		{
 			Vec2 circleCenter = Vec2Add(body2.Position, body2.CircleCollider.Offset);
+
 			bool result = Collisions_IntersectCirclePolygon(circleCenter, body2.CircleCollider.Radius,
 				body1.BoxCollider.Vertices, 4, box1Center, normal, depth, contactPoint, contactPointCount);
 			*normal = Vec2MulFloat(*normal, -1);
@@ -81,16 +82,20 @@ bool Collide(Rigidbody2D& body1, Rigidbody2D& body2, Vec2* normal, float* depth,
 	}
 	else if (shape1 == Rigidbody2D::ShapeType::Circle)
 	{
+		Vec2 circle1Center = Vec2Add(body1.Position, body1.CircleCollider.Offset);
+
 		if (shape2 == Rigidbody2D::ShapeType::Circle)
 		{
-			return Collisions_IntersectCircles(body1.Position, body1.CircleCollider.Radius,
-				body2.Position, body2.CircleCollider.Radius, normal, depth, contactPoint, contactPointCount);
+			Vec2 circle2Center = Vec2Add(body2.Position, body2.CircleCollider.Offset);
+
+			return Collisions_IntersectCircles(circle1Center, body1.CircleCollider.Radius,
+				circle2Center, body2.CircleCollider.Radius, normal, depth, contactPoint, contactPointCount);
 		}
 		else if (shape2 == Rigidbody2D::ShapeType::Box)
 		{
 			Vec2 box2Center = Vec2Add(body2.Position, body2.BoxCollider.Offset);
-			Vec2 circleCenter = Vec2Add(body1.Position, body1.CircleCollider.Offset);
-			return Collisions_IntersectCirclePolygon(circleCenter, body1.CircleCollider.Radius,
+			
+			return Collisions_IntersectCirclePolygon(circle1Center, body1.CircleCollider.Radius,
 				body2.BoxCollider.Vertices, 4, box2Center, normal, depth, contactPoint, contactPointCount);
 		}
 	}
@@ -101,165 +106,6 @@ bool Collide(Rigidbody2D& body1, Rigidbody2D& body2, Vec2* normal, float* depth,
 void ResolveCollision(Rigidbody2D& body1, Rigidbody2D& body2, Vec2& normal, float depth,
 	Vec2* contactPoint, uint32_t contactPointCount)
 {
-	// With rotation and friction version, but not working correctly
-	//float 	InvInertia = 0.1f;
-
-	//BV_ASSERT(contactPointCount <= 2, "Max contact point count is 2");
-
-	//float e = FloatMin(body1.Restitution, body2.Restitution);
-
-	//float StaticFriction = 0.4f;
-	//float DynamicFriction = 0.6f;
-
-	////float sf = (body1.StaticFriction + body2.StaticFriction) * 0.5f;
-	////float df = (body1.DynamicFriction + body2.DynamicFriction) * 0.5f;
-	//float sf = (StaticFriction + StaticFriction) * 0.5f;
-	//float df = (DynamicFriction + DynamicFriction) * 0.5f;
-
-	//Vec2 impulseList[2] = { Vec2Zero,Vec2Zero };
-	//Vec2 raList[2] = { Vec2Zero,Vec2Zero };
-	//Vec2 rbList[2] = { Vec2Zero,Vec2Zero };
-	//Vec2 raPerpList[2] = { Vec2Zero,Vec2Zero };
-	//Vec2 rbPerpList[2] = { Vec2Zero,Vec2Zero };
-	//Vec2 frictionImpulseList[2] = { Vec2Zero,Vec2Zero };
-	//float jList[2] = { 0.0f, 0.0f };
-
-	//for (size_t i = 0; i < contactPointCount; i++)
-	//{
-	//	Vec2 ra = Vec2Sub(contactPoint[i], body1.Position);
-	//	Vec2 rb = Vec2Sub(contactPoint[i], body2.Position);
-
-	//	raList[i] = ra;
-	//	rbList[i] = rb;
-
-	//	Vec2 raPerp = { -ra.y, ra.x };
-	//	Vec2 rbPerp = { -rb.y, rb.x };
-
-	//	raPerpList[i] = raPerp;
-	//	rbPerpList[i] = rbPerp;
-
-	//	Vec2 angularLinearVelocityA = Vec2MulFloat(raPerp, body1.AngularVelocity);
-	//	Vec2 angularLinearVelocityB = Vec2MulFloat(rbPerp, body2.AngularVelocity);
-
-	//	Vec2 relativeVelocity = Vec2Sub(
-	//		Vec2Add(body2.Velocity, angularLinearVelocityB),
-	//		Vec2Add(body1.Velocity, angularLinearVelocityA));
-
-	//	float contactVelocityMag = Vec2Dot(relativeVelocity, normal);
-
-	//	if (contactVelocityMag > 0.0f)
-	//	{
-	//		continue;
-	//	}
-
-	//	float raPerpDotN = Vec2Dot(raPerp, normal);
-	//	float rbPerpDotN = Vec2Dot(rbPerp, normal);
-
-	//	/*float denom = body1.InvMass + body2.InvMass +
-	//		(raPerpDotN * raPerpDotN) * body1.InvInertia +
-	//		(rbPerpDotN * rbPerpDotN) * body2.InvInertia;*/
-
-	//	float denom = body1.InvMass + body2.InvMass +
-	//		(raPerpDotN * raPerpDotN) * InvInertia +
-	//		(rbPerpDotN * rbPerpDotN) * InvInertia;
-
-	//	float j = -(1.0f + e) * contactVelocityMag;
-	//	j /= denom;
-	//	j /= (float)contactPointCount;
-
-	//	jList[i] = j;
-
-	//	Vec2 impulse = Vec2MulFloat(normal, j);
-	//	impulseList[i] = impulse;
-	//}
-
-	//for (size_t i = 0; i < contactPointCount; i++)
-	//{
-	//	Vec2 impulse = impulseList[i];
-	//	Vec2 ra = raList[i];
-	//	Vec2 rb = rbList[i];
-
-	//	body1.Velocity = Vec2Add(body1.Velocity, Vec2MulFloat(impulse, -body1.InvMass));
-	//	/*body1.AngularVelocity += Vec2Cross(ra, impulse) * -body1.InvInertia;*/
-	//	body1.AngularVelocity += Vec2Cross(ra, impulse) * -InvInertia;
-	//	body2.Velocity = Vec2Add(body2.Velocity, Vec2MulFloat(impulse, body2.InvMass));
-	//	//body2.AngularVelocity += Vec2Cross(rb, impulse) * body2.InvInertia;
-	//	body2.AngularVelocity += Vec2Cross(rb, impulse) * InvInertia;
-	//}
-
-	//for (size_t i = 0; i < contactPointCount; i++)
-	//{
-	//	Vec2 ra = Vec2Sub(contactPoint[i], body1.Position);
-	//	Vec2 rb = Vec2Sub(contactPoint[i], body2.Position);
-
-	//	raList[i] = ra;
-	//	rbList[i] = rb;
-
-	//	Vec2 raPerp = { -ra.y, ra.x };
-	//	Vec2 rbPerp = { -rb.y, rb.x };
-
-	//	Vec2 angularLinearVelocityA = Vec2MulFloat(raPerp, body1.AngularVelocity);
-	//	Vec2 angularLinearVelocityB = Vec2MulFloat(rbPerp, body2.AngularVelocity);
-
-	//	Vec2 relativeVelocity = Vec2Sub(
-	//		Vec2Add(body2.Velocity, angularLinearVelocityB),
-	//		Vec2Add(body1.Velocity, angularLinearVelocityA));
-
-	//	Vec2 tangent = Vec2Sub(relativeVelocity, Vec2MulFloat(normal, Vec2Dot(relativeVelocity, normal)));
-
-	//	if (Vec2NearlyEqual(tangent, Vec2Zero))
-	//	{
-	//		continue;
-	//	}
-	//	else
-	//	{
-	//		tangent = Vec2Normalize(tangent);
-	//	}
-
-	//	float raPerpDotT = Vec2Dot(raPerp, tangent);
-	//	float rbPerpDotT = Vec2Dot(rbPerp, tangent);
-
-	//	//float denom = body1.InvMass + body2.InvMass +
-	//	//	(raPerpDotT * raPerpDotT) * body1.InvInertia +
-	//	//	(rbPerpDotT * rbPerpDotT) * body2.InvInertia;
-
-	//	float denom = body1.InvMass + body2.InvMass +
-	//		(raPerpDotT * raPerpDotT) * InvInertia +
-	//		(rbPerpDotT * rbPerpDotT) * InvInertia;
-
-	//	float jt = -Vec2Dot(relativeVelocity, tangent);
-	//	jt /= denom;
-	//	jt /= (float)contactPointCount;
-
-	//	Vec2 frictionImpulse;
-	//	float j = jList[i];
-
-	//	if (fabs(jt) <= j * sf)
-	//	{
-	//		frictionImpulse = Vec2MulFloat(tangent, jt);
-	//	}
-	//	else
-	//	{
-	//		frictionImpulse = Vec2MulFloat(Vec2MulFloat(tangent, -j), df);
-	//	}
-
-	//	frictionImpulseList[i] = frictionImpulse;
-	//}
-
-	//for (size_t i = 0; i < contactPointCount; i++)
-	//{
-	//	Vec2 frictionImpulse = frictionImpulseList[i];
-	//	Vec2 ra = raList[i];
-	//	Vec2 rb = rbList[i];
-
-	//	body1.Velocity = Vec2Add(body1.Velocity, Vec2MulFloat(frictionImpulse, -body1.InvMass));
-	//	//body1.AngularVelocity += Vec2Cross(ra, frictionImpulse) * -body1.InvInertia;
-	//	body1.AngularVelocity += Vec2Cross(ra, frictionImpulse) * -InvInertia;
-	//	body2.Velocity = Vec2Add(body2.Velocity, Vec2MulFloat(frictionImpulse, body2.InvMass));
-	//	//body2.AngularVelocity += Vec2Cross(rb, frictionImpulse) * body2.InvInertia;
-	//	body2.AngularVelocity += Vec2Cross(rb, frictionImpulse) * InvInertia;
-	//}
-
 	// No rotation and friction version
 	Vec2 relativeVelocity = Vec2Sub(body2.Velocity, body1.Velocity);
 
@@ -371,9 +217,9 @@ void NarrowPhase(PhysicsWorld2D& world)
 		if (Collide(*body1, *body2, &normal, &depth, contactPoint, &contactPointCount))
 		{
 
-#ifndef CORE_DIST
+			#ifndef CORE_DIST
 			ContactPointVisualiztion(contactPoint, contactPointCount);
-#endif 
+			#endif 
 
 			if (body1->IsTrigger || body2->IsTrigger)
 			{
@@ -384,7 +230,7 @@ void NarrowPhase(PhysicsWorld2D& world)
 
 			if (body1->Type == Rigidbody2D::BodyType::Static)
 			{
-				Rigidbody2D_MovePosition(body2, Vec2MulFloat(normal, depth / 2.0f));
+				Rigidbody2D_MovePosition(body2, Vec2MulFloat(normal, depth));
 			}
 			else if (body2->Type == Rigidbody2D::BodyType::Static)
 			{
@@ -479,9 +325,9 @@ void* PhysicsWorld2D_Raycast(PhysicsWorld2D& world, const Vec2& rayOrigin, const
 		}
 	}
 
-#ifndef CORE_DIST
+	#ifndef CORE_DIST
 	RayVisualiztion(rayOrigin, rayDirection, *minDistance);
-#endif 
+	#endif 
 
 	return result;
 }

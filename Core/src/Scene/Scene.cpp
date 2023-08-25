@@ -206,8 +206,6 @@ void ColliderVisualiztion(const Scene& out)
 
 		if (Entity_HasComponent(*temp, ComponentType_Rigidbody2D))
 		{
-			Rigidbody2DComponent* rb2d = temp->Rigidbody2D;
-			Rigidbody2D* rb = (Rigidbody2D*)rb2d->RuntimeBody;
 			if (Entity_HasComponent(*temp, ComponentType_CircleCollider2D))
 			{
 				CircleCollider2DComponent* cc2d = temp->CircleCollider2D;
@@ -253,8 +251,7 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 			return;
 
 		SceneCamera* camera = &mainCamera->Camera->Camera;
-		TransformComponent* cameraTrans = &mainCamera->Transform;
-		Mat viewProjection = DirectX::XMMatrixInverse(nullptr, TransformComponent_GetTransform(*cameraTrans)) * camera->Projection;
+		Mat viewProjection = DirectX::XMMatrixInverse(nullptr, TransformComponent_GetTransform(mainCamera->Transform)) * camera->Projection;
 		Renderer2D_BeginScene(viewProjection);
 	}
 
@@ -276,7 +273,9 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 	// Update Physics
 	// Notice: Not support changing collider size and offset at runtime
 	{
-		PhysicsWorld2D_Update(out.PhysicsWorld, timeStep, 10);
+		static const uint32_t iterations = 10;
+
+		PhysicsWorld2D_Update(out.PhysicsWorld, timeStep, iterations);
 		{
 			for (size_t i = 0; i < size; i++)
 			{
@@ -307,9 +306,7 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 			if (!temp->Enabled)
 				continue;
 
-			bool IsUI = Entity_HasComponent(*temp, ComponentType_RectTransform);
-
-			if (!IsUI)
+			if (!Entity_HasComponent(*temp, ComponentType_RectTransform))
 			{
 				TransformComponent* tc = &temp->Transform;
 				if (Entity_HasComponent(*temp, ComponentType_SpriteRenderer))
@@ -383,9 +380,9 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 		}
 	}
 
-#ifndef CORE_DIST
+	#ifndef CORE_DIST
 	ColliderVisualiztion(out);
-#endif
+	#endif
 
 	Renderer2D_EndScene();
 }

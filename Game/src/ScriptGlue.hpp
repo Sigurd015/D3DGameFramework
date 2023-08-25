@@ -171,7 +171,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		Scene_AddEntity(scene, camera);
 	}
 
-#ifndef CORE_DIST
+	#ifndef CORE_DIST
 	{
 		Entity camera;
 		camera.Tag.Name = "DebugCamera";
@@ -196,7 +196,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 		Scene_AddEntity(scene, camera);
 	}
-#endif
+	#endif
 
 	//Player
 	{
@@ -208,6 +208,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 		Rigidbody2DComponent rigidbody2D = {};
 		rigidbody2D.Type = Rigidbody2D::BodyType::Kinematic;
+		rigidbody2D.GravityScale = 0.0f;
 		Entity_AddComponent(player, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
 
 		BoxCollider2DComponent boxCollider2D = {};
@@ -259,13 +260,13 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		scriptComponent.OnEnable = EnemyController_OnEnable;
 		scriptComponent.OnDisable = EnemyController_OnDisable;
 
-	/*	EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
-		*enemyData = {};
-		enemyData->Type = EnemyType::CACO_DEMON;
-		enemyData->WalkSpriteSheet = cacoDemonWalkSprite;
-		enemyData->AttackSpriteSheet = cacoDemonAttackSprite;
-		enemyData->DeathSpriteSheet = cacoDemonDeathSprite;
-		enemyData->PainSpriteSheet = cacoDemonPainSprite;	*/	
+		/*	EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+			*enemyData = {};
+			enemyData->Type = EnemyType::CACO_DEMON;
+			enemyData->WalkSpriteSheet = cacoDemonWalkSprite;
+			enemyData->AttackSpriteSheet = cacoDemonAttackSprite;
+			enemyData->DeathSpriteSheet = cacoDemonDeathSprite;
+			enemyData->PainSpriteSheet = cacoDemonPainSprite;	*/
 		EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
 		*enemyData = {};
 		enemyData->Type = EnemyType::CYBER_DEMON;

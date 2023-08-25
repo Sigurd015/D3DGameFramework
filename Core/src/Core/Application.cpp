@@ -51,7 +51,7 @@ void Application_Ininialize(Application* appInst)
 		Application_Close,
 	};
 
-	Window_Create(&props);
+	Window_Create(props);
 
 	RendererAPI_Initialize();
 

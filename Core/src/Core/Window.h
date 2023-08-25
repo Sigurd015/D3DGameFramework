@@ -15,7 +15,7 @@ struct WindowProps
 	void (*WindowClose)();
 };
 
-void Window_Create(const WindowProps* props);
+void Window_Create(const WindowProps& props);
 void Window_Update();
 void Window_Shutdown();
 void Window_SetFullScreen();
