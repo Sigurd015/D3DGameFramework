@@ -8,3 +8,5 @@ void TitleMenuController_OnCollision(Entity& entity, Entity& other, void* runtim
 void TitleMenuController_OnRaycastHit(Entity& entity, Entity& other, void* runtimeData);
 void TitleMenuController_OnEnable(Entity& entity, void* runtimeData);
 void TitleMenuController_OnDisable(Entity& entity, void* runtimeData);
+
+void TitleMenuController_OnKeyPressed(KeyCode key);

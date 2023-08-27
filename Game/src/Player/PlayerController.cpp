@@ -1,6 +1,6 @@
 #include "PlayerController.h"
-#include "../KeyMap/KeyMap.h"
-#include "../UI/UIController.h"
+#include "KeyMap/KeyMap.h"
+#include "UI/UIController.h"
 
 #define ENEMY_DAMAGE 30.0f
 #define ATTACK_RANGE 100.0f
@@ -37,23 +37,6 @@ void PlayerController_OnCreate(Entity& entity, void* runtimeData)
 
 void PlayerController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
 {
-	//Debug
-	{
-		if (Input_GetKeyDown(KeyCode::Numpad0))
-		{
-			s_Data.Stats.Hp = FloatClamp(s_Data.Stats.Hp + 30.0f, 0.0f, s_Data.Stats.MaxHp);
-
-		}
-		if (Input_GetKeyDown(KeyCode::Numpad1))
-		{
-			s_Data.Stats.Hp = FloatClamp(s_Data.Stats.Hp - 30.0f, 0.0f, s_Data.Stats.MaxHp);
-		}
-		if (Input_GetKeyDown(KeyCode::Numpad2))
-		{
-			UIController_PlayHitIcon();
-		}
-	}
-
 	//Movement
 	{
 		Vec2 movement = Vec2(0, 0);

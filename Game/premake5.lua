@@ -27,6 +27,7 @@ project "Game"
 	includedirs
 	{
 		"%{wks.location}/Core/src",
+		"src",
 	}
 
 	links

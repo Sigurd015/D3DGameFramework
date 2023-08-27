@@ -1,5 +1,5 @@
 #pragma once
-#include "../GameMode.h"
+#include "GameMode.h"
 
 void Loading_Initialize();
 void Loading_Reset(float maxTime = 5.0f);

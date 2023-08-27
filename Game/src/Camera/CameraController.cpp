@@ -7,12 +7,12 @@ struct CameraControllerData
 	TransformComponent* PlayerTransform = nullptr;
 	TransformComponent* Transform = nullptr;
 
-#ifndef CORE_DIST
+	#ifndef CORE_DIST
 	CameraComponent* Camera = nullptr;
 	TransformComponent* DebugCameraTransform = nullptr;
 	CameraComponent* DebugCameraCamera = nullptr;
 	bool AutoFollow = false;
-#endif
+	#endif
 };
 static CameraControllerData s_Data;
 
@@ -30,7 +30,7 @@ void CameraController_OnCreate(Entity& entity, void* runtimeData)
 	s_Data.Transform = (TransformComponent*)Entity_GetComponent(entity, ComponentType_Transform);
 	CORE_ASSERT(s_Data.Transform, "Entity does not have TransformComponent!");
 
-#ifndef CORE_DIST
+	#ifndef CORE_DIST
 	{
 		s_Data.Camera = (CameraComponent*)Entity_GetComponent(entity, ComponentType_Camera);
 		CORE_ASSERT(s_Data.Camera, "Entity does not have CameraComponent!");
@@ -44,14 +44,14 @@ void CameraController_OnCreate(Entity& entity, void* runtimeData)
 		s_Data.DebugCameraCamera = (CameraComponent*)Entity_GetComponent(*debugCamera, ComponentType_Camera);
 		CORE_ASSERT(s_Data.DebugCameraCamera, "Entity does not have CameraComponent!");
 	}
-#endif
+	#endif
 }
 
 void CameraController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
 {
 	s_Data.Transform->Translation = s_Data.PlayerTransform->Translation;
 
-#ifndef CORE_DIST
+	#ifndef CORE_DIST
 	{
 		if (Input_GetKeyDown(KeyCode::I))
 		{
@@ -64,15 +64,15 @@ void CameraController_OnUpdate(Entity& entity, float timeStep, void* runtimeData
 			s_Data.AutoFollow = !s_Data.AutoFollow;
 		}
 
-		if (s_Data.AutoFollow)
+		if (s_Data.DebugCameraCamera->Primary)
 		{
-			Vec3 pos = s_Data.PlayerTransform->Translation;
-			pos.z = s_Data.DebugCameraTransform->Translation.z;
-			s_Data.DebugCameraTransform->Translation = Vec3Lerp(s_Data.DebugCameraTransform->Translation, pos, timeStep);
-		}
-		else
-		{
-			if (s_Data.DebugCameraCamera->Primary)
+			if (s_Data.AutoFollow)
+			{
+				Vec3 pos = s_Data.PlayerTransform->Translation;
+				pos.z = s_Data.DebugCameraTransform->Translation.z;
+				s_Data.DebugCameraTransform->Translation = Vec3Lerp(s_Data.DebugCameraTransform->Translation, pos, timeStep);
+			}
+			else
 			{
 				Vec3 pos = s_Data.DebugCameraTransform->Translation;
 				static float speed = 45.0f;
@@ -95,7 +95,7 @@ void CameraController_OnUpdate(Entity& entity, float timeStep, void* runtimeData
 			}
 		}
 	}
-#endif
+	#endif
 }
 
 void CameraController_OnDestroy(Entity& entity, void* runtimeData)

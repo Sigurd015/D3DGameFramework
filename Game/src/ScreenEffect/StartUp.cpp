@@ -1,6 +1,6 @@
 #include "Core.h"
 #include "StartUp.h"
-#include "../GameMode.h"
+#include "GameMode.h"
 
 #define STUDIO_LOGO_START_FRAME_TIME 1.0f
 #define STUDIO_LOGO_END_FRAME_TIME 3.0f
@@ -58,6 +58,3 @@ void StartUp_Draw(float timeStep)
 
 	s_Data.CurrentFrameTime += timeStep;
 }
-
-void StartUp_Destroy()
-{}

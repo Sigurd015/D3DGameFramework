@@ -260,20 +260,21 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		scriptComponent.OnEnable = EnemyController_OnEnable;
 		scriptComponent.OnDisable = EnemyController_OnDisable;
 
-		/*	EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
-			*enemyData = {};
-			enemyData->Type = EnemyType::CACO_DEMON;
-			enemyData->WalkSpriteSheet = cacoDemonWalkSprite;
-			enemyData->AttackSpriteSheet = cacoDemonAttackSprite;
-			enemyData->DeathSpriteSheet = cacoDemonDeathSprite;
-			enemyData->PainSpriteSheet = cacoDemonPainSprite;	*/
 		EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
 		*enemyData = {};
-		enemyData->Type = EnemyType::CYBER_DEMON;
-		enemyData->WalkSpriteSheet = cyberDemonWalkSprite;
-		enemyData->AttackSpriteSheet = cyberDemonAttackSprite;
-		enemyData->DeathSpriteSheet = cyberDemonDeathSprite;
-		enemyData->PainSpriteSheet = cyberDemonPainSprite;
+		enemyData->Type = EnemyType::CACO_DEMON;
+		enemyData->WalkSpriteSheet = cacoDemonWalkSprite;
+		enemyData->AttackSpriteSheet = cacoDemonAttackSprite;
+		enemyData->DeathSpriteSheet = cacoDemonDeathSprite;
+		enemyData->PainSpriteSheet = cacoDemonPainSprite;
+
+		//EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+		//*enemyData = {};
+		//enemyData->Type = EnemyType::CYBER_DEMON;
+		//enemyData->WalkSpriteSheet = cyberDemonWalkSprite;
+		//enemyData->AttackSpriteSheet = cyberDemonAttackSprite;
+		//enemyData->DeathSpriteSheet = cyberDemonDeathSprite;
+		//enemyData->PainSpriteSheet = cyberDemonPainSprite;
 
 		scriptComponent.RuntimeData = enemyData;
 
@@ -311,21 +312,22 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		scriptComponent.OnEnable = EnemyController_OnEnable;
 		scriptComponent.OnDisable = EnemyController_OnDisable;
 
-		//EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
-		//*enemyData = {};
-		//enemyData->Type = EnemyType::CACO_DEMON;
-		//enemyData->WalkSpriteSheet = cacoDemonWalkSprite;
-		//enemyData->AttackSpriteSheet = cacoDemonAttackSprite;
-		//enemyData->DeathSpriteSheet = cacoDemonDeathSprite;
-		//enemyData->PainSpriteSheet = cacoDemonPainSprite;
-
 		EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
 		*enemyData = {};
-		enemyData->Type = EnemyType::CYBER_DEMON;
-		enemyData->WalkSpriteSheet = cyberDemonWalkSprite;
-		enemyData->AttackSpriteSheet = cyberDemonAttackSprite;
-		enemyData->DeathSpriteSheet = cyberDemonDeathSprite;
-		enemyData->PainSpriteSheet = cyberDemonPainSprite;
+		enemyData->Type = EnemyType::CACO_DEMON;
+		enemyData->WalkSpriteSheet = cacoDemonWalkSprite;
+		enemyData->AttackSpriteSheet = cacoDemonAttackSprite;
+		enemyData->DeathSpriteSheet = cacoDemonDeathSprite;
+		enemyData->PainSpriteSheet = cacoDemonPainSprite;
+
+		//EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+		//*enemyData = {};
+		//enemyData->Type = EnemyType::CYBER_DEMON;
+		//enemyData->WalkSpriteSheet = cyberDemonWalkSprite;
+		//enemyData->AttackSpriteSheet = cyberDemonAttackSprite;
+		//enemyData->DeathSpriteSheet = cyberDemonDeathSprite;
+		//enemyData->PainSpriteSheet = cyberDemonPainSprite;
+		
 		scriptComponent.RuntimeData = enemyData;
 
 		Entity_AddComponent(enemy, ComponentType::ComponentType_Script, &scriptComponent);

@@ -42,8 +42,5 @@ void Rigidbody2DComponent_MovePosition(Rigidbody2DComponent& rigidbody2D, const 
 	if (Vec2Equal(position, Vec2Zero))
 		return;
 
-	if (rigidbody2D.Type != Rigidbody2D::Kinematic)
-		return;
-
 	Rigidbody2D_MovePosition(rigidbody2D.RuntimeBody, position);
 }

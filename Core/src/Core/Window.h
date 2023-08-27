@@ -1,3 +1,5 @@
+#include "Input/Keycode.h"
+
 #include <stdint.h>
 
 struct WindowProps
@@ -13,6 +15,7 @@ struct WindowProps
 
 	void (*WindowResize)(float width, float height);
 	void (*WindowClose)();
+	void (*OnKeyPressed)(KeyCode key);
 };
 
 void Window_Create(const WindowProps& props);

@@ -7,5 +7,6 @@ enum KeyType
 };
 
 void KeyMap_Init();
-void KeyMap_SetKey(KeyType type, KeyCode key);
+bool KeyMap_SetKey(KeyType type, KeyCode key);
 KeyCode KeyMap_GetKey(KeyType type);
+const WCHAR* KeyMap_GetKeyName(KeyType type);

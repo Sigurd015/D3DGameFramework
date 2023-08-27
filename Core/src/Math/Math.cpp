@@ -20,6 +20,13 @@ Vec4 Vec4MulMat(const Vec4& vec, const Mat& mat)
 	return result;
 }
 
+Vec4 Vec4Lerp(const Vec4& a, const Vec4& b, float t)
+{
+	Vec4 result;
+	DirectX::XMStoreFloat4(&result, DirectX::XMVectorLerp(DirectX::XMLoadFloat4(&a), DirectX::XMLoadFloat4(&b), t));
+	return result;
+}
+
 float Vec2Dot(const Vec2& a, const Vec2& b)
 {
 	DirectX::XMVECTOR dotProduct = DirectX::XMVector2Dot(DirectX::XMLoadFloat2(&a), DirectX::XMLoadFloat2(&b));

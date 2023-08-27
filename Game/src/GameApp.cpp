@@ -77,7 +77,7 @@ void Game_Update(float timeStep)
 	{
 		RendererAPI_SetClearColor({ 0.3f,0.3f,0.3f,1.0f });
 		RendererAPI_Clear();
-
+		FadeInOut_Draw(timeStep);
 		Scene_OnViewportResize(s_Data.PlayScene, Window_GetWidth(), Window_GetHeight());
 		Scene_OnUpdate(s_Data.PlayScene, timeStep);
 		break;
@@ -95,6 +95,11 @@ void Game_SetMode(GameMode mode)
 {
 	s_Data.Mode = mode;
 	FadeInOut_Reset(FADE_IN);
+}
+
+void Game_OnKeyPressed(Application* appInst, KeyCode key)
+{
+	TitleMenuController_OnKeyPressed(key);
 }
 
 void CreateApplication(Application* appInst, ApplicationCommandLineArgs args)
@@ -127,4 +132,5 @@ void CreateApplication(Application* appInst, ApplicationCommandLineArgs args)
 	appInst->Ininialize = Game_Ininialize;
 	appInst->Shutdown = Game_Shutdown;
 	appInst->Update = Game_Update;
+	appInst->OnKeyPressed = Game_OnKeyPressed;
 }

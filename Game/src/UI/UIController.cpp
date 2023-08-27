@@ -1,5 +1,5 @@
 #include "UIController.h"
-#include "../Player/PlayerController.h"
+#include "Player/PlayerController.h"
 
 #define BACKBAR_FOLLOW_COUNT_TIME 1.0f
 #define SHOOTING_ANIMATION_FRAME_SPEED 0.15f
@@ -191,3 +191,6 @@ void UIController_PlayHitIcon()
 {
 	s_Data.IsHit = true;
 }
+
+void UIController_PlayBloodScreen()
+{}

@@ -40,6 +40,12 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		data.WindowResize(data.Width, data.Height);
 		return 0;
 	}
+	case WM_KEYDOWN:
+	{
+		WindowProps& data = s_WindowState.Props;
+		data.OnKeyPressed((KeyCode)wParam);
+		return 0;
+	}
 	case WM_CLOSE:
 	{
 		Window_Shutdown();

@@ -35,6 +35,11 @@ void Application_Resize(float width, float height)
 	RendererAPI_SetViewport(width, height);
 }
 
+void Application_OnKeyPressed(KeyCode key)
+{
+	s_AppState.AppInst->OnKeyPressed(s_AppState.AppInst, key);
+}
+
 void Application_Ininialize(Application* appInst)
 {
 	s_AppState.AppInst = appInst;
@@ -49,6 +54,7 @@ void Application_Ininialize(Application* appInst)
 		appInst->Spec.Minimizable,
 		Application_Resize,
 		Application_Close,
+		Application_OnKeyPressed,
 	};
 
 	Window_Create(props);

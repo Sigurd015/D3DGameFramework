@@ -1,6 +1,5 @@
 #include "Core.h"
 #include "Loading.h"
-#include "../GameMode.h"
 
 #define LOADING_FRAME_SPEED 0.15f
 
