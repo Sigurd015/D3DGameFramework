@@ -147,6 +147,11 @@ void RendererAPI_SetBlendingState(BlendMode type)
 	s_RendererAPIState.DeviceContext->OMSetBlendState(RendererContext_GetBlendState(type), blendFactor, 0xffffffff);
 }
 
+ID3D11SamplerState* RendererAPI_GetSamplerState(TextureWrap wrap, TextureFilter filter)
+{
+	return RendererContext_GetSamplerState(wrap, filter);
+}
+
 void RendererAPI_DrawText(const WCHAR* str, const WCHAR* fontFamilyName, const Vec2& pos, const Vec4& color, float fontSize)
 {
 	IDWriteTextFormat* writeTextFormat;

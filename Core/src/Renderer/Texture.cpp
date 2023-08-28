@@ -2,8 +2,21 @@
 #include "DXTrace.h"
 #include "RendererContext.h"
 #include "Texture.h"
+#include "RendererAPI.h"
 
 #include <stb_image.h>
+
+DXGI_FORMAT ImageFormatToDXDataFormat(ImageFormat format)
+{
+	switch (format)
+	{
+	case ImageFormat::RGB8:  return DXGI_FORMAT_R8G8B8A8_UNORM;
+	case ImageFormat::RGBA8: return DXGI_FORMAT_R8G8B8A8_UNORM;
+	}
+
+	CORE_ASSERT(false, "Unknown ImageFormat!");
+	return DXGI_FORMAT_UNKNOWN;
+}
 
 void CreateTexture(D3D11_USAGE usage, int cpuAccess, uint32_t width, uint32_t height,
 	DXGI_FORMAT format, const D3D11_SUBRESOURCE_DATA* pInitialData, ID3D11Texture2D** ppTexture2D)
@@ -54,7 +67,9 @@ void Texture2D_Create(Texture2D& out, const char* path)
 		out.Spec.Width = width;
 		out.Spec.Height = height;
 		out.Spec.Format = ImageFormat::RGBA8;
-		out.DataFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+		out.Spec.Wrap = TextureWrap::Repeat;
+		out.Spec.Filter = TextureFilter::Linear;
+		out.DataFormat = ImageFormatToDXDataFormat(out.Spec.Format);
 
 		D3D11_SUBRESOURCE_DATA subresourceData = {};
 		subresourceData.pSysMem = data;
@@ -62,6 +77,8 @@ void Texture2D_Create(Texture2D& out, const char* path)
 		CreateTexture(D3D11_USAGE_DEFAULT, 0, width, height, out.DataFormat, &subresourceData, &out.Texture);
 		CreateShaderView(out.DataFormat, out.Texture, &out.TextureView);
 		CreateSamplerState(&out.SamplerState);
+		//TODO: Why floor and roof texture are not working with this? (They dint work with same sampler state as the other textures)
+		//out.SamplerState = RendererAPI_GetSamplerState(TextureWrap::Repeat, TextureFilter::Linear);
 		stbi_image_free(data);
 	}
 }
@@ -69,9 +86,10 @@ void Texture2D_Create(Texture2D& out, const char* path)
 void Texture2D_Create(Texture2D& out, const TextureSpecification& spec)
 {
 	out.Spec = spec;
-	CreateTexture(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, spec.Width, spec.Height, DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, &out.Texture);
-	CreateShaderView(DXGI_FORMAT_R8G8B8A8_UNORM, out.Texture, &out.TextureView);
-	CreateSamplerState(&out.SamplerState);
+	out.DataFormat = ImageFormatToDXDataFormat(spec.Format);
+	CreateTexture(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, spec.Width, spec.Height, out.DataFormat, nullptr, &out.Texture);
+	CreateShaderView(out.DataFormat, out.Texture, &out.TextureView);
+	out.SamplerState = RendererAPI_GetSamplerState(spec.Wrap, spec.Filter);
 }
 
 void Texture2D_SetData(Texture2D& out, void* data, uint32_t size)

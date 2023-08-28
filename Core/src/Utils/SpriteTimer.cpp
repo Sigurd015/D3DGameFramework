@@ -5,6 +5,8 @@ void SpriteTimer_Create(SpriteTimer& timer, uint32_t framesCount, float frameTim
 {
 	timer.FramesCount = framesCount;
 	timer.FrameTime = frameTime;
+	timer.CurrentFrame = 0;
+	timer.CurrentTimer = 0.0f;
 }
 
 void SpriteTimer_Update(SpriteTimer& timer, float timeStep)

@@ -102,7 +102,6 @@ void Rigidbody2D_Step(Rigidbody2D& rigidbody2D, float timeStep)
 		return;
 
 	// Integrate velocity
-
 	if (rigidbody2D.Type == Rigidbody2D::BodyType::Dynamic)
 	{
 		Vec2 gravity = { 0.0f, -9.8f };

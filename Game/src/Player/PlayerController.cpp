@@ -102,6 +102,8 @@ void PlayerController_OnRaycastHit(Entity& entity, Entity& other, void* runtimeD
 		APP_LOG_INFO("Player hited by enemy");
 
 		s_Data.Stats.Hp -= ENEMY_DAMAGE;
+
+		UIController_PlayBloodEffect();
 	}
 }
 

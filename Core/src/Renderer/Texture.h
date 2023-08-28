@@ -13,11 +13,26 @@ enum ImageFormat
 	RGBA32F
 };
 
+enum TextureWrap
+{
+	Clamp,
+	Repeat
+};
+
+enum TextureFilter
+{
+	Linear,
+	Nearest,
+	Cubic
+};
+
 struct TextureSpecification
 {
 	uint32_t Width = 1;
 	uint32_t Height = 1;
 	ImageFormat Format = ImageFormat::NoneFormat;
+	TextureWrap Wrap = TextureWrap::Repeat;
+	TextureFilter Filter = TextureFilter::Linear;
 };
 
 struct Texture2D

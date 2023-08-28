@@ -9,13 +9,15 @@ struct RendererContextState
 	ID3D11Device* Device;
 	ID3D11DeviceContext* DeviceContext;
 
-	ID3D11DepthStencilState* NoDepthTestStencilState;
-	ID3D11DepthStencilState* DepthTestStencilState;
+	ID3D11DepthStencilState* DSSNoDepthTest;
+	ID3D11DepthStencilState* DSSLess;
 
-	ID3D11BlendState* BlendStateDisabled;
-	ID3D11BlendState* BlendStateAlpha;
-	ID3D11BlendState* BlendStateAdditive;
-	ID3D11BlendState* BlendStateSubtractive;
+	ID3D11BlendState* BSDisabled;
+	ID3D11BlendState* BSAlpha;
+	ID3D11BlendState* BSAdditive;
+	ID3D11BlendState* BSSubtractive;
+
+	ID3D11SamplerState* SSLinearWrap;
 };
 static RendererContextState s_RendererContextState;
 
@@ -107,6 +109,32 @@ ID3D11BlendState* CreateBlendState(BlendMode type)
 	return blendState;
 }
 
+ID3D11SamplerState* CreateSamplerState(TextureWrap wrap, TextureFilter filter)
+{
+	ID3D11SamplerState* samplerState = nullptr;
+
+	D3D11_SAMPLER_DESC samplerDesc = {};
+	switch (filter)
+	{
+	case TextureFilter::Linear:
+	{
+		if (wrap == TextureWrap::Repeat)
+		{
+			samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+			CORE_CHECK_DX_RESULT(s_RendererContextState.Device->CreateSamplerState(&samplerDesc, &samplerState));
+			break;
+		}
+	}
+	default :
+		CORE_ASSERT(false, "Unknown SamplerState type!");
+	}
+	
+	return nullptr;
+}
+
 void RendererContext_Initialize(HWND* windowHandle)
 {
 	s_RendererContextState.WindowHandle = windowHandle;
@@ -131,12 +159,13 @@ void RendererContext_Initialize(HWND* windowHandle)
 	CORE_CHECK_DX_RESULT(D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_BGRA_SUPPORT, nullptr, 0, D3D11_SDK_VERSION, &swapChainDesc,
 		&s_RendererContextState.SwapChain, &s_RendererContextState.Device, nullptr, &s_RendererContextState.DeviceContext));
 
-	s_RendererContextState.NoDepthTestStencilState = CreateDepthStencilState(false);
-	s_RendererContextState.DepthTestStencilState = CreateDepthStencilState(true);
-	s_RendererContextState.BlendStateDisabled = CreateBlendState(BlendMode_Disabled);
-	s_RendererContextState.BlendStateAlpha = CreateBlendState(BlendMode_Alpha);
-	s_RendererContextState.BlendStateAdditive = CreateBlendState(BlendMode_Additive);
-	s_RendererContextState.BlendStateSubtractive = CreateBlendState(BlendMode_Subtractive);
+	s_RendererContextState.DSSNoDepthTest = CreateDepthStencilState(false);
+	s_RendererContextState.DSSLess = CreateDepthStencilState(true);
+	s_RendererContextState.BSDisabled = CreateBlendState(BlendMode_Disabled);
+	s_RendererContextState.BSAlpha = CreateBlendState(BlendMode_Alpha);
+	s_RendererContextState.BSAdditive = CreateBlendState(BlendMode_Additive);
+	s_RendererContextState.BSSubtractive = CreateBlendState(BlendMode_Subtractive);
+	s_RendererContextState.SSLinearWrap = CreateSamplerState(TextureWrap::Repeat, TextureFilter::Linear);
 }
 
 void RendererContext_SwapBuffer(bool VSync)
@@ -163,11 +192,11 @@ ID3D11DepthStencilState* RendererContext_GetDepthStencilState(bool enable)
 {
 	if (!enable)
 	{
-		return s_RendererContextState.NoDepthTestStencilState;
+		return s_RendererContextState.DSSNoDepthTest;
 	}
 	else
 	{
-		return s_RendererContextState.DepthTestStencilState;
+		return s_RendererContextState.DSSLess;
 	}
 }
 
@@ -176,16 +205,34 @@ ID3D11BlendState* RendererContext_GetBlendState(BlendMode type)
 	switch (type)
 	{
 	case BlendMode_Disabled:
-		return s_RendererContextState.BlendStateDisabled;
+		return s_RendererContextState.BSDisabled;
 	case BlendMode_Alpha:
-		return s_RendererContextState.BlendStateAlpha;
+		return s_RendererContextState.BSAlpha;
 	case BlendMode_Additive:
-		return s_RendererContextState.BlendStateAdditive;
+		return s_RendererContextState.BSAdditive;
 	case BlendMode_Subtractive:
-		return s_RendererContextState.BlendStateSubtractive;
+		return s_RendererContextState.BSSubtractive;
 	}
 
 	CORE_ASSERT(false, "Unknown blend mode type");
+
+	return nullptr;
+}
+
+ID3D11SamplerState* RendererContext_GetSamplerState(TextureWrap wrap, TextureFilter filter)
+{
+	switch (filter)
+	{
+	case TextureFilter::Linear:
+	{
+		if (wrap == TextureWrap::Repeat)
+		{
+			return s_RendererContextState.SSLinearWrap;
+		}
+	}
+	}
+
+	CORE_ASSERT(false, "Unknown SamplerState type!");
 
 	return nullptr;
 }

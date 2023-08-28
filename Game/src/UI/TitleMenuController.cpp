@@ -173,10 +173,7 @@ void TitleMenuController_OnKeyPressed(KeyCode key)
 {
 	if (s_Data.IsWaitingForKey)
 	{
-		if (KeyMap_SetKey(s_Data.CurrentKeyConfigNode->Type, key))
-		{
-			s_Data.IsWaitingForKey = false;
-		}
+		s_Data.IsWaitingForKey = !KeyMap_SetKey(s_Data.CurrentKeyConfigNode->Type, key);
 	}
 }
 

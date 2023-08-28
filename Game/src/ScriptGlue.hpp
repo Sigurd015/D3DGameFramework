@@ -7,6 +7,7 @@
 #include "UI/UIController.h"
 #include "Map/FieldController.h"
 #include "Map/FieldTrigger.h"
+#include "Map/LightController.h"
 
 // Hardcoded scene
 void ScriptGlue_CreateTitleScene(Scene& scene)
@@ -83,7 +84,7 @@ void ScriptGlue_CreateTitleScene(Scene& scene)
 
 void ScriptGlue_CreatePlayScene(Scene& scene)
 {
-	//Textures
+	#pragma region Textures
 	Texture2D* wallTex1 = (Texture2D*)malloc(sizeof(Texture2D));
 	Texture2D_Create(*wallTex1, "assets/textures/1.png");
 
@@ -104,6 +105,12 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 	Texture2D* roofTex = (Texture2D*)malloc(sizeof(Texture2D));
 	Texture2D_Create(*roofTex, "assets/textures/roof.png");
+
+	Texture2D* redLight = (Texture2D*)malloc(sizeof(Texture2D));
+	Texture2D_Create(*redLight, "assets/textures/animated_sprites/red_light/spritesheet.png");
+
+	Texture2D* greenLight = (Texture2D*)malloc(sizeof(Texture2D));
+	Texture2D_Create(*greenLight, "assets/textures/animated_sprites/green_light/spritesheet.png");
 
 	Texture2D* shotgunSprite = (Texture2D*)malloc(sizeof(Texture2D));
 	Texture2D_Create(*shotgunSprite, "assets/textures/weapon/shotgun/spritesheet.png");
@@ -134,8 +141,9 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 	Texture2D* cyberDemonPainSprite = (Texture2D*)malloc(sizeof(Texture2D));
 	Texture2D_Create(*cyberDemonPainSprite, "assets/textures/npc/cyber_demon/pain/spritesheet.png");
+	#pragma endregion
 
-	//Main Camera
+	#pragma region Camera
 	{
 		Entity camera = {};
 		camera.Tag.Name = "MainCamera";
@@ -170,7 +178,6 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 		Scene_AddEntity(scene, camera);
 	}
-
 	#ifndef CORE_DIST
 	{
 		Entity camera;
@@ -197,8 +204,9 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		Scene_AddEntity(scene, camera);
 	}
 	#endif
+	#pragma endregion
 
-	//Player
+	#pragma region Player
 	{
 		Entity player = {};
 		player.Tag.Name = "Player";
@@ -229,117 +237,508 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 		Scene_AddEntity(scene, player);
 	}
+	#pragma endregion
 
+	#pragma region Enemy
 	//Enemy
+	//{
+	//	{
+	//		Entity enemy = {};
+	//		enemy.Tag.Name = "Enemy-1";
+	//		enemy.Transform.Translation = { 45.0f, -5.0f, 1.5f };
+	//		enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
+	//		enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
+
+	//		SpriteRendererComponent spriteRenderer = {};
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+	//		Rigidbody2DComponent rigidbody2D = {};
+	//		rigidbody2D.Type = Rigidbody2D::BodyType::Kinematic;
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
+
+	//		BoxCollider2DComponent boxCollider2D = {};
+	//		boxCollider2D.Restitution = 0.0f;
+	//		boxCollider2D.Offset = { 0,0 };
+	//		boxCollider2D.Size = { 0.6f,0.2f };
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+
+	//		ScriptComponent scriptComponent = {};
+	//		scriptComponent.OnCreate = EnemyController_OnCreate;
+	//		scriptComponent.OnUpdate = EnemyController_OnUpdate;
+	//		scriptComponent.OnDestroy = EnemyController_OnDestroy;
+	//		scriptComponent.OnCollision = EnemyController_OnCollision;
+	//		scriptComponent.OnRaycastHit = EnemyController_OnRaycastHit;
+	//		scriptComponent.OnEnable = EnemyController_OnEnable;
+	//		scriptComponent.OnDisable = EnemyController_OnDisable;
+
+	//		EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+	//		*enemyData = {};
+	//		enemyData->Type = EnemyType::CACO_DEMON;
+	//		enemyData->WalkSpriteSheet = cacoDemonWalkSprite;
+	//		enemyData->AttackSpriteSheet = cacoDemonAttackSprite;
+	//		enemyData->DeathSpriteSheet = cacoDemonDeathSprite;
+	//		enemyData->PainSpriteSheet = cacoDemonPainSprite;
+
+	//		scriptComponent.RuntimeData = enemyData;
+
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_Script, &scriptComponent);
+
+	//		Scene_AddEntity(scene, enemy);
+	//	}
+	//	{
+	//		Entity enemy = {};
+	//		enemy.Tag.Name = "Enemy-2";
+	//		enemy.Transform.Translation = { 35.0f, -5.0f, 1.5f };
+	//		enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
+	//		enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
+
+	//		SpriteRendererComponent spriteRenderer = {};
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+	//		Rigidbody2DComponent rigidbody2D = {};
+	//		rigidbody2D.Type = Rigidbody2D::BodyType::Kinematic;
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
+
+	//		BoxCollider2DComponent boxCollider2D = {};
+	//		boxCollider2D.Restitution = 0.0f;
+	//		boxCollider2D.Offset = { 0,0 };
+	//		boxCollider2D.Size = { 0.6f,0.2f };
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+
+	//		ScriptComponent scriptComponent = {};
+	//		scriptComponent.OnCreate = EnemyController_OnCreate;
+	//		scriptComponent.OnUpdate = EnemyController_OnUpdate;
+	//		scriptComponent.OnDestroy = EnemyController_OnDestroy;
+	//		scriptComponent.OnCollision = EnemyController_OnCollision;
+	//		scriptComponent.OnRaycastHit = EnemyController_OnRaycastHit;
+	//		scriptComponent.OnEnable = EnemyController_OnEnable;
+	//		scriptComponent.OnDisable = EnemyController_OnDisable;
+
+	//		EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+	//		*enemyData = {};
+	//		enemyData->Type = EnemyType::CACO_DEMON;
+	//		enemyData->WalkSpriteSheet = cacoDemonWalkSprite;
+	//		enemyData->AttackSpriteSheet = cacoDemonAttackSprite;
+	//		enemyData->DeathSpriteSheet = cacoDemonDeathSprite;
+	//		enemyData->PainSpriteSheet = cacoDemonPainSprite;
+
+	//		scriptComponent.RuntimeData = enemyData;
+
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_Script, &scriptComponent);
+
+	//		Scene_AddEntity(scene, enemy);
+	//	}
+	//	{
+	//		Entity enemy = {};
+	//		enemy.Tag.Name = "Enemy-3";
+	//		enemy.Transform.Translation = { 35.0f, -5.0f, 1.5f };
+	//		enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
+	//		enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
+
+	//		SpriteRendererComponent spriteRenderer = {};
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+	//		Rigidbody2DComponent rigidbody2D = {};
+	//		rigidbody2D.Type = Rigidbody2D::BodyType::Kinematic;
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
+
+	//		BoxCollider2DComponent boxCollider2D = {};
+	//		boxCollider2D.Restitution = 0.0f;
+	//		boxCollider2D.Offset = { 0,0 };
+	//		boxCollider2D.Size = { 0.6f,0.2f };
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+
+	//		ScriptComponent scriptComponent = {};
+	//		scriptComponent.OnCreate = EnemyController_OnCreate;
+	//		scriptComponent.OnUpdate = EnemyController_OnUpdate;
+	//		scriptComponent.OnDestroy = EnemyController_OnDestroy;
+	//		scriptComponent.OnCollision = EnemyController_OnCollision;
+	//		scriptComponent.OnRaycastHit = EnemyController_OnRaycastHit;
+	//		scriptComponent.OnEnable = EnemyController_OnEnable;
+	//		scriptComponent.OnDisable = EnemyController_OnDisable;
+
+	//		EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+	//		*enemyData = {};
+	//		enemyData->Type = EnemyType::CYBER_DEMON;
+	//		enemyData->WalkSpriteSheet = cyberDemonWalkSprite;
+	//		enemyData->AttackSpriteSheet = cyberDemonAttackSprite;
+	//		enemyData->DeathSpriteSheet = cyberDemonDeathSprite;
+	//		enemyData->PainSpriteSheet = cyberDemonPainSprite;
+
+	//		scriptComponent.RuntimeData = enemyData;
+
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_Script, &scriptComponent);
+
+	//		Scene_AddEntity(scene, enemy);
+	//	}
+	//	{
+	//		Entity enemy = {};
+	//		enemy.Tag.Name = "Enemy-4";
+	//		enemy.Transform.Translation = { 35.0f, -5.0f, 1.5f };
+	//		enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
+	//		enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
+
+	//		SpriteRendererComponent spriteRenderer = {};
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+	//		Rigidbody2DComponent rigidbody2D = {};
+	//		rigidbody2D.Type = Rigidbody2D::BodyType::Kinematic;
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
+
+	//		BoxCollider2DComponent boxCollider2D = {};
+	//		boxCollider2D.Restitution = 0.0f;
+	//		boxCollider2D.Offset = { 0,0 };
+	//		boxCollider2D.Size = { 0.6f,0.2f };
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+
+	//		ScriptComponent scriptComponent = {};
+	//		scriptComponent.OnCreate = EnemyController_OnCreate;
+	//		scriptComponent.OnUpdate = EnemyController_OnUpdate;
+	//		scriptComponent.OnDestroy = EnemyController_OnDestroy;
+	//		scriptComponent.OnCollision = EnemyController_OnCollision;
+	//		scriptComponent.OnRaycastHit = EnemyController_OnRaycastHit;
+	//		scriptComponent.OnEnable = EnemyController_OnEnable;
+	//		scriptComponent.OnDisable = EnemyController_OnDisable;
+
+	//		EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+	//		*enemyData = {};
+	//		enemyData->Type = EnemyType::CYBER_DEMON;
+	//		enemyData->WalkSpriteSheet = cyberDemonWalkSprite;
+	//		enemyData->AttackSpriteSheet = cyberDemonAttackSprite;
+	//		enemyData->DeathSpriteSheet = cyberDemonDeathSprite;
+	//		enemyData->PainSpriteSheet = cyberDemonPainSprite;
+
+	//		scriptComponent.RuntimeData = enemyData;
+
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_Script, &scriptComponent);
+
+	//		Scene_AddEntity(scene, enemy);
+	//	}
+	//	{
+	//		Entity enemy = {};
+	//		enemy.Tag.Name = "Enemy-5";
+	//		enemy.Transform.Translation = { 35.0f, -5.0f, 1.5f };
+	//		enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
+	//		enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
+
+	//		SpriteRendererComponent spriteRenderer = {};
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+	//		Rigidbody2DComponent rigidbody2D = {};
+	//		rigidbody2D.Type = Rigidbody2D::BodyType::Kinematic;
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
+
+	//		BoxCollider2DComponent boxCollider2D = {};
+	//		boxCollider2D.Restitution = 0.0f;
+	//		boxCollider2D.Offset = { 0,0 };
+	//		boxCollider2D.Size = { 0.6f,0.2f };
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+
+	//		ScriptComponent scriptComponent = {};
+	//		scriptComponent.OnCreate = EnemyController_OnCreate;
+	//		scriptComponent.OnUpdate = EnemyController_OnUpdate;
+	//		scriptComponent.OnDestroy = EnemyController_OnDestroy;
+	//		scriptComponent.OnCollision = EnemyController_OnCollision;
+	//		scriptComponent.OnRaycastHit = EnemyController_OnRaycastHit;
+	//		scriptComponent.OnEnable = EnemyController_OnEnable;
+	//		scriptComponent.OnDisable = EnemyController_OnDisable;
+
+	//		EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+	//		*enemyData = {};
+	//		enemyData->Type = EnemyType::CACO_DEMON;
+	//		enemyData->WalkSpriteSheet = cacoDemonWalkSprite;
+	//		enemyData->AttackSpriteSheet = cacoDemonAttackSprite;
+	//		enemyData->DeathSpriteSheet = cacoDemonDeathSprite;
+	//		enemyData->PainSpriteSheet = cacoDemonPainSprite;
+
+	//		//EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+	//		//*enemyData = {};
+	//		//enemyData->Type = EnemyType::CYBER_DEMON;
+	//		//enemyData->WalkSpriteSheet = cyberDemonWalkSprite;
+	//		//enemyData->AttackSpriteSheet = cyberDemonAttackSprite;
+	//		//enemyData->DeathSpriteSheet = cyberDemonDeathSprite;
+	//		//enemyData->PainSpriteSheet = cyberDemonPainSprite;
+
+	//		scriptComponent.RuntimeData = enemyData;
+
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_Script, &scriptComponent);
+
+	//		Scene_AddEntity(scene, enemy);
+	//	}
+	//	{
+	//		Entity enemy = {};
+	//		enemy.Tag.Name = "Enemy-6";
+	//		enemy.Transform.Translation = { 35.0f, -5.0f, 1.5f };
+	//		enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
+	//		enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
+
+	//		SpriteRendererComponent spriteRenderer = {};
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+	//		Rigidbody2DComponent rigidbody2D = {};
+	//		rigidbody2D.Type = Rigidbody2D::BodyType::Kinematic;
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
+
+	//		BoxCollider2DComponent boxCollider2D = {};
+	//		boxCollider2D.Restitution = 0.0f;
+	//		boxCollider2D.Offset = { 0,0 };
+	//		boxCollider2D.Size = { 0.6f,0.2f };
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+
+	//		ScriptComponent scriptComponent = {};
+	//		scriptComponent.OnCreate = EnemyController_OnCreate;
+	//		scriptComponent.OnUpdate = EnemyController_OnUpdate;
+	//		scriptComponent.OnDestroy = EnemyController_OnDestroy;
+	//		scriptComponent.OnCollision = EnemyController_OnCollision;
+	//		scriptComponent.OnRaycastHit = EnemyController_OnRaycastHit;
+	//		scriptComponent.OnEnable = EnemyController_OnEnable;
+	//		scriptComponent.OnDisable = EnemyController_OnDisable;
+
+	//		EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+	//		*enemyData = {};
+	//		enemyData->Type = EnemyType::CACO_DEMON;
+	//		enemyData->WalkSpriteSheet = cacoDemonWalkSprite;
+	//		enemyData->AttackSpriteSheet = cacoDemonAttackSprite;
+	//		enemyData->DeathSpriteSheet = cacoDemonDeathSprite;
+	//		enemyData->PainSpriteSheet = cacoDemonPainSprite;
+
+	//		//EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+	//		//*enemyData = {};
+	//		//enemyData->Type = EnemyType::CYBER_DEMON;
+	//		//enemyData->WalkSpriteSheet = cyberDemonWalkSprite;
+	//		//enemyData->AttackSpriteSheet = cyberDemonAttackSprite;
+	//		//enemyData->DeathSpriteSheet = cyberDemonDeathSprite;
+	//		//enemyData->PainSpriteSheet = cyberDemonPainSprite;
+
+	//		scriptComponent.RuntimeData = enemyData;
+
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_Script, &scriptComponent);
+
+	//		Scene_AddEntity(scene, enemy);
+	//	}
+	//	{
+	//		Entity enemy = {};
+	//		enemy.Tag.Name = "Enemy-7";
+	//		enemy.Transform.Translation = { 35.0f, -5.0f, 1.5f };
+	//		enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
+	//		enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
+
+	//		SpriteRendererComponent spriteRenderer = {};
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+	//		Rigidbody2DComponent rigidbody2D = {};
+	//		rigidbody2D.Type = Rigidbody2D::BodyType::Kinematic;
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
+
+	//		BoxCollider2DComponent boxCollider2D = {};
+	//		boxCollider2D.Restitution = 0.0f;
+	//		boxCollider2D.Offset = { 0,0 };
+	//		boxCollider2D.Size = { 0.6f,0.2f };
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+
+	//		ScriptComponent scriptComponent = {};
+	//		scriptComponent.OnCreate = EnemyController_OnCreate;
+	//		scriptComponent.OnUpdate = EnemyController_OnUpdate;
+	//		scriptComponent.OnDestroy = EnemyController_OnDestroy;
+	//		scriptComponent.OnCollision = EnemyController_OnCollision;
+	//		scriptComponent.OnRaycastHit = EnemyController_OnRaycastHit;
+	//		scriptComponent.OnEnable = EnemyController_OnEnable;
+	//		scriptComponent.OnDisable = EnemyController_OnDisable;
+
+	//		EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+	//		*enemyData = {};
+	//		enemyData->Type = EnemyType::CACO_DEMON;
+	//		enemyData->WalkSpriteSheet = cacoDemonWalkSprite;
+	//		enemyData->AttackSpriteSheet = cacoDemonAttackSprite;
+	//		enemyData->DeathSpriteSheet = cacoDemonDeathSprite;
+	//		enemyData->PainSpriteSheet = cacoDemonPainSprite;
+
+	//		//EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+	//		//*enemyData = {};
+	//		//enemyData->Type = EnemyType::CYBER_DEMON;
+	//		//enemyData->WalkSpriteSheet = cyberDemonWalkSprite;
+	//		//enemyData->AttackSpriteSheet = cyberDemonAttackSprite;
+	//		//enemyData->DeathSpriteSheet = cyberDemonDeathSprite;
+	//		//enemyData->PainSpriteSheet = cyberDemonPainSprite;
+
+	//		scriptComponent.RuntimeData = enemyData;
+
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_Script, &scriptComponent);
+
+	//		Scene_AddEntity(scene, enemy);
+	//	}
+	//	{
+	//		Entity enemy = {};
+	//		enemy.Tag.Name = "Enemy-8";
+	//		enemy.Transform.Translation = { 35.0f, -5.0f, 1.5f };
+	//		enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
+	//		enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
+
+	//		SpriteRendererComponent spriteRenderer = {};
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+	//		Rigidbody2DComponent rigidbody2D = {};
+	//		rigidbody2D.Type = Rigidbody2D::BodyType::Kinematic;
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
+
+	//		BoxCollider2DComponent boxCollider2D = {};
+	//		boxCollider2D.Restitution = 0.0f;
+	//		boxCollider2D.Offset = { 0,0 };
+	//		boxCollider2D.Size = { 0.6f,0.2f };
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+
+	//		ScriptComponent scriptComponent = {};
+	//		scriptComponent.OnCreate = EnemyController_OnCreate;
+	//		scriptComponent.OnUpdate = EnemyController_OnUpdate;
+	//		scriptComponent.OnDestroy = EnemyController_OnDestroy;
+	//		scriptComponent.OnCollision = EnemyController_OnCollision;
+	//		scriptComponent.OnRaycastHit = EnemyController_OnRaycastHit;
+	//		scriptComponent.OnEnable = EnemyController_OnEnable;
+	//		scriptComponent.OnDisable = EnemyController_OnDisable;
+
+	//		EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+	//		*enemyData = {};
+	//		enemyData->Type = EnemyType::CACO_DEMON;
+	//		enemyData->WalkSpriteSheet = cacoDemonWalkSprite;
+	//		enemyData->AttackSpriteSheet = cacoDemonAttackSprite;
+	//		enemyData->DeathSpriteSheet = cacoDemonDeathSprite;
+	//		enemyData->PainSpriteSheet = cacoDemonPainSprite;
+
+	//		//EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+	//		//*enemyData = {};
+	//		//enemyData->Type = EnemyType::CYBER_DEMON;
+	//		//enemyData->WalkSpriteSheet = cyberDemonWalkSprite;
+	//		//enemyData->AttackSpriteSheet = cyberDemonAttackSprite;
+	//		//enemyData->DeathSpriteSheet = cyberDemonDeathSprite;
+	//		//enemyData->PainSpriteSheet = cyberDemonPainSprite;
+
+	//		scriptComponent.RuntimeData = enemyData;
+
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_Script, &scriptComponent);
+
+	//		Scene_AddEntity(scene, enemy);
+	//	}
+	//	{
+	//		Entity enemy = {};
+	//		enemy.Tag.Name = "Enemy-9";
+	//		enemy.Transform.Translation = { 35.0f, -5.0f, 1.5f };
+	//		enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
+	//		enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
+
+	//		SpriteRendererComponent spriteRenderer = {};
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+	//		Rigidbody2DComponent rigidbody2D = {};
+	//		rigidbody2D.Type = Rigidbody2D::BodyType::Kinematic;
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
+
+	//		BoxCollider2DComponent boxCollider2D = {};
+	//		boxCollider2D.Restitution = 0.0f;
+	//		boxCollider2D.Offset = { 0,0 };
+	//		boxCollider2D.Size = { 0.6f,0.2f };
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+
+	//		ScriptComponent scriptComponent = {};
+	//		scriptComponent.OnCreate = EnemyController_OnCreate;
+	//		scriptComponent.OnUpdate = EnemyController_OnUpdate;
+	//		scriptComponent.OnDestroy = EnemyController_OnDestroy;
+	//		scriptComponent.OnCollision = EnemyController_OnCollision;
+	//		scriptComponent.OnRaycastHit = EnemyController_OnRaycastHit;
+	//		scriptComponent.OnEnable = EnemyController_OnEnable;
+	//		scriptComponent.OnDisable = EnemyController_OnDisable;
+
+	//		EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+	//		*enemyData = {};
+	//		enemyData->Type = EnemyType::CACO_DEMON;
+	//		enemyData->WalkSpriteSheet = cacoDemonWalkSprite;
+	//		enemyData->AttackSpriteSheet = cacoDemonAttackSprite;
+	//		enemyData->DeathSpriteSheet = cacoDemonDeathSprite;
+	//		enemyData->PainSpriteSheet = cacoDemonPainSprite;
+
+	//		//EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+	//		//*enemyData = {};
+	//		//enemyData->Type = EnemyType::CYBER_DEMON;
+	//		//enemyData->WalkSpriteSheet = cyberDemonWalkSprite;
+	//		//enemyData->AttackSpriteSheet = cyberDemonAttackSprite;
+	//		//enemyData->DeathSpriteSheet = cyberDemonDeathSprite;
+	//		//enemyData->PainSpriteSheet = cyberDemonPainSprite;
+
+	//		scriptComponent.RuntimeData = enemyData;
+
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_Script, &scriptComponent);
+
+	//		Scene_AddEntity(scene, enemy);
+	//	}
+	//	{
+	//		Entity enemy = {};
+	//		enemy.Tag.Name = "Enemy-10";
+	//		enemy.Transform.Translation = { 35.0f, -5.0f, 1.5f };
+	//		enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
+	//		enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
+
+	//		SpriteRendererComponent spriteRenderer = {};
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+	//		Rigidbody2DComponent rigidbody2D = {};
+	//		rigidbody2D.Type = Rigidbody2D::BodyType::Kinematic;
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
+
+	//		BoxCollider2DComponent boxCollider2D = {};
+	//		boxCollider2D.Restitution = 0.0f;
+	//		boxCollider2D.Offset = { 0,0 };
+	//		boxCollider2D.Size = { 0.6f,0.2f };
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+
+	//		ScriptComponent scriptComponent = {};
+	//		scriptComponent.OnCreate = EnemyController_OnCreate;
+	//		scriptComponent.OnUpdate = EnemyController_OnUpdate;
+	//		scriptComponent.OnDestroy = EnemyController_OnDestroy;
+	//		scriptComponent.OnCollision = EnemyController_OnCollision;
+	//		scriptComponent.OnRaycastHit = EnemyController_OnRaycastHit;
+	//		scriptComponent.OnEnable = EnemyController_OnEnable;
+	//		scriptComponent.OnDisable = EnemyController_OnDisable;
+
+	//		EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+	//		*enemyData = {};
+	//		enemyData->Type = EnemyType::CACO_DEMON;
+	//		enemyData->WalkSpriteSheet = cacoDemonWalkSprite;
+	//		enemyData->AttackSpriteSheet = cacoDemonAttackSprite;
+	//		enemyData->DeathSpriteSheet = cacoDemonDeathSprite;
+	//		enemyData->PainSpriteSheet = cacoDemonPainSprite;
+
+	//		//EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
+	//		//*enemyData = {};
+	//		//enemyData->Type = EnemyType::CYBER_DEMON;
+	//		//enemyData->WalkSpriteSheet = cyberDemonWalkSprite;
+	//		//enemyData->AttackSpriteSheet = cyberDemonAttackSprite;
+	//		//enemyData->DeathSpriteSheet = cyberDemonDeathSprite;
+	//		//enemyData->PainSpriteSheet = cyberDemonPainSprite;
+
+	//		scriptComponent.RuntimeData = enemyData;
+
+	//		Entity_AddComponent(enemy, ComponentType::ComponentType_Script, &scriptComponent);
+
+	//		Scene_AddEntity(scene, enemy);
+	//	}
+	//}
+	#pragma endregion
+
+	#pragma region UI
 	{
-		Entity enemy = {};
-		enemy.Tag.Name = "Enemy-1";
-		enemy.Transform.Translation = { 45.0f, -5.0f, 1.5f };
-		enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
-		enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
-
-		SpriteRendererComponent spriteRenderer = {};
-		Entity_AddComponent(enemy, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-		Rigidbody2DComponent rigidbody2D = {};
-		rigidbody2D.Type = Rigidbody2D::BodyType::Kinematic;
-		Entity_AddComponent(enemy, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
-
-		BoxCollider2DComponent boxCollider2D = {};
-		boxCollider2D.Restitution = 0.0f;
-		boxCollider2D.Offset = { 0,0 };
-		boxCollider2D.Size = { 0.6f,0.2f };
-		Entity_AddComponent(enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
-
-		ScriptComponent scriptComponent = {};
-		scriptComponent.OnCreate = EnemyController_OnCreate;
-		scriptComponent.OnUpdate = EnemyController_OnUpdate;
-		scriptComponent.OnDestroy = EnemyController_OnDestroy;
-		scriptComponent.OnCollision = EnemyController_OnCollision;
-		scriptComponent.OnRaycastHit = EnemyController_OnRaycastHit;
-		scriptComponent.OnEnable = EnemyController_OnEnable;
-		scriptComponent.OnDisable = EnemyController_OnDisable;
-
-		EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
-		*enemyData = {};
-		enemyData->Type = EnemyType::CACO_DEMON;
-		enemyData->WalkSpriteSheet = cacoDemonWalkSprite;
-		enemyData->AttackSpriteSheet = cacoDemonAttackSprite;
-		enemyData->DeathSpriteSheet = cacoDemonDeathSprite;
-		enemyData->PainSpriteSheet = cacoDemonPainSprite;
-
-		//EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
-		//*enemyData = {};
-		//enemyData->Type = EnemyType::CYBER_DEMON;
-		//enemyData->WalkSpriteSheet = cyberDemonWalkSprite;
-		//enemyData->AttackSpriteSheet = cyberDemonAttackSprite;
-		//enemyData->DeathSpriteSheet = cyberDemonDeathSprite;
-		//enemyData->PainSpriteSheet = cyberDemonPainSprite;
-
-		scriptComponent.RuntimeData = enemyData;
-
-		Entity_AddComponent(enemy, ComponentType::ComponentType_Script, &scriptComponent);
-
-		Scene_AddEntity(scene, enemy);
-	}
-
-	{
-		Entity enemy = {};
-		enemy.Tag.Name = "Enemy-2";
-		enemy.Transform.Translation = { 35.0f, -5.0f, 1.5f };
-		enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
-		enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
-
-		SpriteRendererComponent spriteRenderer = {};
-		Entity_AddComponent(enemy, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-		Rigidbody2DComponent rigidbody2D = {};
-		rigidbody2D.Type = Rigidbody2D::BodyType::Kinematic;
-		Entity_AddComponent(enemy, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
-
-		BoxCollider2DComponent boxCollider2D = {};
-		boxCollider2D.Restitution = 0.0f;
-		boxCollider2D.Offset = { 0,0 };
-		boxCollider2D.Size = { 0.6f,0.2f };
-		Entity_AddComponent(enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
-
-		ScriptComponent scriptComponent = {};
-		scriptComponent.OnCreate = EnemyController_OnCreate;
-		scriptComponent.OnUpdate = EnemyController_OnUpdate;
-		scriptComponent.OnDestroy = EnemyController_OnDestroy;
-		scriptComponent.OnCollision = EnemyController_OnCollision;
-		scriptComponent.OnRaycastHit = EnemyController_OnRaycastHit;
-		scriptComponent.OnEnable = EnemyController_OnEnable;
-		scriptComponent.OnDisable = EnemyController_OnDisable;
-
-		EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
-		*enemyData = {};
-		enemyData->Type = EnemyType::CACO_DEMON;
-		enemyData->WalkSpriteSheet = cacoDemonWalkSprite;
-		enemyData->AttackSpriteSheet = cacoDemonAttackSprite;
-		enemyData->DeathSpriteSheet = cacoDemonDeathSprite;
-		enemyData->PainSpriteSheet = cacoDemonPainSprite;
-
-		//EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
-		//*enemyData = {};
-		//enemyData->Type = EnemyType::CYBER_DEMON;
-		//enemyData->WalkSpriteSheet = cyberDemonWalkSprite;
-		//enemyData->AttackSpriteSheet = cyberDemonAttackSprite;
-		//enemyData->DeathSpriteSheet = cyberDemonDeathSprite;
-		//enemyData->PainSpriteSheet = cyberDemonPainSprite;
-		
-		scriptComponent.RuntimeData = enemyData;
-
-		Entity_AddComponent(enemy, ComponentType::ComponentType_Script, &scriptComponent);
-
-		Scene_AddEntity(scene, enemy);
-	}
-
-	//UI
-	{
+		//Background and UI manager
 		{
-			Entity uiManager = {};
-			uiManager.Tag.Name = "UIManager";
+			Entity background = {};
+			background.Tag.Name = "Background";
+
+			RectTransformComponent rectTransform = {};
+			rectTransform.Position = { 0.0f, 0.0f };
+			rectTransform.Size = { 1920.0f, 1080.0f };
+			Entity_AddComponent(background, ComponentType::ComponentType_RectTransform, &rectTransform);
+
+			SpriteRendererComponent spriteRenderer = {};
+			spriteRenderer.Color = { 1.0f, 0.0f, 0.0f, 0.0f };
+			Entity_AddComponent(background, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
 			ScriptComponent scriptComponent = {};
 			scriptComponent.OnCreate = UIController_OnCreate;
 			scriptComponent.OnUpdate = UIController_OnUpdate;
@@ -348,9 +747,9 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			scriptComponent.OnRaycastHit = UIController_OnRaycastHit;
 			scriptComponent.OnEnable = UIController_OnEnable;
 			scriptComponent.OnDisable = UIController_OnDisable;
-			Entity_AddComponent(uiManager, ComponentType::ComponentType_Script, &scriptComponent);
+			Entity_AddComponent(background, ComponentType::ComponentType_Script, &scriptComponent);
 
-			Scene_AddEntity(scene, uiManager);
+			Scene_AddEntity(scene, background);
 		}
 		{
 			Entity weapon = {};
@@ -423,8 +822,9 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			Scene_AddEntity(scene, hpBarBackground);
 		}
 	}
+	#pragma endregion
 
-	//Map
+	#pragma region Map
 	{
 		{
 			Entity fieldManager = {};
@@ -441,10 +841,9 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 			Scene_AddEntity(scene, fieldManager);
 		}
-
 		{
 			Entity wall = {};
-			wall.Tag.Name = "back-wall";
+			wall.Tag.Name = "BackWall";
 			wall.Transform.Translation = { 15.0f,-30.0f,0 };
 			wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
 			wall.Transform.Scale = { 10.0f,10.0f,1.0f };
@@ -460,48 +859,140 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 			Scene_AddEntity(scene, wall);
 		}
+		{
+			Entity quad = {};
+			quad.Tag.Name = "Floor";
+			quad.Transform.Translation = { 15.0f,30.0f,5.0f };
+			quad.Transform.Scale = { 150.0f,150.0f,1.0f };
 
-		//Left
+			SpriteRendererComponent spriteRenderer = {};
+			spriteRenderer.Texture = floorTex;
+			spriteRenderer.TilingFactor = 5.0f;
+			Entity_AddComponent(quad, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+			Scene_AddEntity(scene, quad);
+		}
+		{
+			Entity quad = {};
+			quad.Tag.Name = "Roof";
+			quad.Transform.Translation = { 15.0f,30.0f,-5.0f };
+			quad.Transform.Rotation = { 0,DirectX::XMConvertToRadians(180.0f),0 };
+			quad.Transform.Scale = { 150.0f,150.0f,1.0f };
+
+			SpriteRendererComponent spriteRenderer = {};
+			spriteRenderer.Texture = roofTex;
+			spriteRenderer.TilingFactor = 5.0f;
+			Entity_AddComponent(quad, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+			Scene_AddEntity(scene, quad);
+		}
+
+		#pragma region MAP_ELEMENT_1
 		{
 			{
+				Entity light = {};
+				light.Tag.Name = "MAP_Element_1_Light_1";
+				light.Transform.Translation = { -15.0f, 28.0f, 2.7f };
+				light.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				light.Transform.Scale = { 1.0f,5.0f,1.0f };
+
+				Rigidbody2DComponent rigidbody2D = {};
+				rigidbody2D.Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(light, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
+
+				BoxCollider2DComponent boxCollider2D = {};
+				boxCollider2D.Restitution = 0.0f;
+				boxCollider2D.Size = { 1.0f,0.1f };
+				Entity_AddComponent(light, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = redLight;
+				Entity_AddComponent(light, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				ScriptComponent scriptComponent = {};
+				scriptComponent.OnCreate = LightController_OnCreate;
+				scriptComponent.OnUpdate = LightController_OnUpdate;
+				scriptComponent.OnDestroy = LightController_OnDestroy;
+				scriptComponent.OnCollision = LightController_OnCollision;
+				scriptComponent.OnRaycastHit = LightController_OnRaycastHit;
+				scriptComponent.OnEnable = LightController_OnEnable;
+				scriptComponent.OnDisable = LightController_OnDisable;
+
+				LightData* data = (LightData*)malloc(sizeof(LightData));
+				data->Type = LightType::RED;
+				scriptComponent.RuntimeData = data;
+
+				Entity_AddComponent(light, ComponentType::ComponentType_Script, &scriptComponent);
+
+				Scene_AddEntity(scene, light);
+			}
+			{
+				Entity light = {};
+				light.Tag.Name = "MAP_Element_1_Light_2";
+				light.Transform.Translation = { 45.0f, 28.0f, 2.7f };
+				light.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				light.Transform.Scale = { 1.0f,5.0f,1.0f };
+
+				Rigidbody2DComponent rigidbody2D = {};
+				rigidbody2D.Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(light, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
+
+				BoxCollider2DComponent boxCollider2D = {};
+				boxCollider2D.Restitution = 0.0f;
+				boxCollider2D.Size = { 1.0f,0.1f };
+				Entity_AddComponent(light, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = greenLight;
+				Entity_AddComponent(light, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				ScriptComponent scriptComponent = {};
+				scriptComponent.OnCreate = LightController_OnCreate;
+				scriptComponent.OnUpdate = LightController_OnUpdate;
+				scriptComponent.OnDestroy = LightController_OnDestroy;
+				scriptComponent.OnCollision = LightController_OnCollision;
+				scriptComponent.OnRaycastHit = LightController_OnRaycastHit;
+				scriptComponent.OnEnable = LightController_OnEnable;
+				scriptComponent.OnDisable = LightController_OnDisable;
+
+				LightData* data = (LightData*)malloc(sizeof(LightData));
+				data->Type = LightType::GREEN;
+				scriptComponent.RuntimeData = data;
+
+				Entity_AddComponent(light, ComponentType::ComponentType_Script, &scriptComponent);
+
+				Scene_AddEntity(scene, light);
+			}
+			{
 				Entity wall = {};
-				wall.Tag.Name = "left-wall-1";
+				wall.Tag.Name = "MAP_Element_1_Wall_1";
 				wall.Transform.Translation = { 15.0f,30.0f,0 };
 				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex4;
+				spriteRenderer.Texture = wallTex5;
 				spriteRenderer.Color = { 1.0f,1.0f,1.0f,1.0f };
 				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-				Rigidbody2DComponent rigidbody2D = {};
-				rigidbody2D.Type = Rigidbody2D::BodyType::Static;
-				Entity_AddComponent(wall, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
-
-				BoxCollider2DComponent boxCollider2D = {};
-				boxCollider2D.Restitution = 0.0f;
-				boxCollider2D.Size = { 1.5f,0.1f };
-				Entity_AddComponent(wall, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
 				Scene_AddEntity(scene, wall);
 			}
 			{
 				Entity wall = {};
-				wall.Tag.Name = "left-wall-2";
+				wall.Tag.Name = "MAP_Element_1_Wall_2";
 				wall.Transform.Translation = { 5.0f,30.0f,0 };
 				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex3;
+				spriteRenderer.Texture = wallTex2;
 				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				Scene_AddEntity(scene, wall);
 			}
 			{
 				Entity wall = {};
-				wall.Tag.Name = "left-wall-3";
+				wall.Tag.Name = "MAP_Element_1_Wall_3";
 				wall.Transform.Translation = { -5.0f,31.5f,0 };
 				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
@@ -525,19 +1016,24 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				scriptComponent.OnRaycastHit = FieldTrigger_OnRaycastHit;
 				scriptComponent.OnEnable = FieldController_OnEnable;
 				scriptComponent.OnDisable = FieldController_OnDisable;
+
+				FieldTriggerData* data = (FieldTriggerData*)malloc(sizeof(FieldTriggerData));
+				data->Type = FieldTriggerType::GEN_MAP;
+				scriptComponent.RuntimeData = data;
+
 				Entity_AddComponent(wall, ComponentType::ComponentType_Script, &scriptComponent);
 
 				Scene_AddEntity(scene, wall);
 			}
 			{
 				Entity wall = {};
-				wall.Tag.Name = "left-wall-4";
+				wall.Tag.Name = "MAP_Element_1_Wall_4";
 				wall.Transform.Translation = { -15.0f,30.0f,0 };
 				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex3;
+				spriteRenderer.Texture = wallTex2;
 				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				Rigidbody2DComponent rigidbody2D = {};
@@ -553,50 +1049,59 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			}
 			{
 				Entity wall = {};
-				wall.Tag.Name = "left-wall-5";
+				wall.Tag.Name = "MAP_Element_1_Wall_5";
 				wall.Transform.Translation = { 25.0f,30.0f,0 };
 				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex3;
+				spriteRenderer.Texture = wallTex2;
 				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				Rigidbody2DComponent rigidbody2D = {};
+				rigidbody2D.Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(wall, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
+
+				BoxCollider2DComponent boxCollider2D = {};
+				boxCollider2D.Restitution = 0.0f;
+				boxCollider2D.Size = { 2.5f,0.1f };
+				Entity_AddComponent(wall, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
 				Scene_AddEntity(scene, wall);
 			}
 			{
 				Entity wall = {};
-				wall.Tag.Name = "left-wall-6";
+				wall.Tag.Name = "MAP_Element_1_Wall_6";
 				wall.Transform.Translation = { 35.0f,30.0f,0 };
 				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex3;
+				spriteRenderer.Texture = wallTex2;
 				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-				Rigidbody2DComponent rigidbody2D = {};
-				rigidbody2D.Type = Rigidbody2D::BodyType::Static;
-				Entity_AddComponent(wall, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
-
-				BoxCollider2DComponent boxCollider2D = {};
-				boxCollider2D.Restitution = 0.0f;
-				boxCollider2D.Size = { 0.5f,0.1f };
-				Entity_AddComponent(wall, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
 				Scene_AddEntity(scene, wall);
 			}
 			{
 				Entity wall = {};
 				wall = {};
-				wall.Tag.Name = "left-wall-7";
+				wall.Tag.Name = "MAP_Element_1_Wall_7";
 				wall.Transform.Translation = { 45.0f,30.0f,0 };
 				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex3;
+				spriteRenderer.Texture = wallTex2;
 				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				Scene_AddEntity(scene, wall);
+			}
+			{
+				Entity wall = {};
+				wall.Tag.Name = "MAP_Element_1_Wall_8";
+				wall.Transform.Translation = { -20.0f,0.0f,0 };
+				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				Rigidbody2DComponent rigidbody2D = {};
 				rigidbody2D.Type = Rigidbody2D::BodyType::Static;
@@ -604,76 +1109,20 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 				BoxCollider2DComponent boxCollider2D = {};
 				boxCollider2D.Restitution = 0.0f;
-				boxCollider2D.Size = { 0.5f,0.1f };
+				boxCollider2D.Size = { 3.0f,0.1f };
 				Entity_AddComponent(wall, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
 				Scene_AddEntity(scene, wall);
 			}
 			{
 				Entity wall = {};
-				wall = {};
-				wall.Tag.Name = "left-wall-8";
-				wall.Transform.Translation = { 50.0f,25.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
-				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
-
-				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex3;
-				spriteRenderer.UVStart = { 1.0f,1.0f };
-				spriteRenderer.UVEnd = { 0.0f,0.0f };
-				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-				Scene_AddEntity(scene, wall);
-			}
-			{
-				Entity wall = {};
-				wall = {};
-				wall.Tag.Name = "left-wall-9";
-				wall.Transform.Translation = { 50.0f,15.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
-				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
-
-				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex3;
-				spriteRenderer.UVStart = { 1.0f,1.0f };
-				spriteRenderer.UVEnd = { 0.0f,0.0f };
-				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-				Rigidbody2DComponent rigidbody2D = {};
-				rigidbody2D.Type = Rigidbody2D::BodyType::Static;
-				Entity_AddComponent(wall, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
-
-				BoxCollider2DComponent boxCollider2D = {};
-				boxCollider2D.Restitution = 0.0f;
-				boxCollider2D.Size = { 1.5f,0.1f };
-				Entity_AddComponent(wall, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
-
-				Scene_AddEntity(scene, wall);
-			}
-			{
-				Entity wall = {};
-				wall.Tag.Name = "left-wall-10";
-				wall.Transform.Translation = { 50.0f,5.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
-				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
-
-				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex3;
-				spriteRenderer.UVStart = { 1.0f,1.0f };
-				spriteRenderer.UVEnd = { 0.0f,0.0f };
-				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-				Scene_AddEntity(scene, wall);
-			}
-			{
-				Entity wall = {};
-				wall.Tag.Name = "left-wall-11";
+				wall.Tag.Name = "MAP_Element_1_Wall_9";
 				wall.Transform.Translation = { -20.0f,25.0f,0 };
 				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex3;
+				spriteRenderer.Texture = wallTex2;
 				spriteRenderer.UVStart = { 0.0f,0.0f };
 				spriteRenderer.UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -682,92 +1131,295 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			}
 			{
 				Entity wall = {};
-				wall.Tag.Name = "left-wall-12";
+				wall.Tag.Name = "MAP_Element_1_Wall_10";
 				wall.Transform.Translation = { -20.0f,15.0f,0 };
 				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex3;
+				spriteRenderer.Texture = wallTex2;
 				spriteRenderer.UVStart = { 0.0f,0.0f };
 				spriteRenderer.UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-				Rigidbody2DComponent rigidbody2D = {};
-				rigidbody2D.Type = Rigidbody2D::BodyType::Static;
-				Entity_AddComponent(wall, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
-
-				BoxCollider2DComponent boxCollider2D = {};
-				boxCollider2D.Restitution = 0.0f;
-				boxCollider2D.Size = { 1.5f,0.1f };
-				Entity_AddComponent(wall, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
 				Scene_AddEntity(scene, wall);
 			}
 			{
 				Entity wall = {};
-				wall.Tag.Name = "left-wall-13";
+				wall.Tag.Name = "MAP_Element_1_Wall_11";
 				wall.Transform.Translation = { -20.0f,5.0f,0 };
 				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex3;
+				spriteRenderer.Texture = wallTex2;
 				spriteRenderer.UVStart = { 0.0f,0.0f };
 				spriteRenderer.UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				Scene_AddEntity(scene, wall);
 			}
-		}
-
-		//Right
-		{
 			{
 				Entity wall = {};
-				wall.Tag.Name = "right-wall-1";
-				wall.Transform.Translation = { 15.0f,0,0 };
+				wall.Tag.Name = "MAP_Element_1_Wall_12";
+				wall.Transform.Translation = { -20.0f,-5.0f,0 };
+				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = wallTex2;
+				spriteRenderer.UVStart = { 0.0f,0.0f };
+				spriteRenderer.UVEnd = { 1.0f,1.0f };
+				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				Scene_AddEntity(scene, wall);
+			}
+			{
+				Entity wall = {};
+				wall.Tag.Name = "MAP_Element_1_Wall_13";
+				wall.Transform.Translation = { -20.0f,-15.0f,0 };
+				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = wallTex2;
+				spriteRenderer.UVStart = { 0.0f,0.0f };
+				spriteRenderer.UVEnd = { 1.0f,1.0f };
+				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				Scene_AddEntity(scene, wall);
+			}
+			{
+				Entity wall = {};
+				wall.Tag.Name = "MAP_Element_1_Wall_14";
+				wall.Transform.Translation = { -20.0f,-25.0f,0 };
+				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = wallTex2;
+				spriteRenderer.UVStart = { 0.0f,0.0f };
+				spriteRenderer.UVEnd = { 1.0f,1.0f };
+				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				Scene_AddEntity(scene, wall);
+			}
+			{
+				Entity wall = {};
+				wall.Tag.Name = "MAP_Element_1_Wall_15";
+				wall.Transform.Translation = { 50.0f,0.0f,0 };
+				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				Rigidbody2DComponent rigidbody2D = {};
+				rigidbody2D.Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(wall, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
+
+				BoxCollider2DComponent boxCollider2D = {};
+				boxCollider2D.Restitution = 0.0f;
+				boxCollider2D.Size = { 3.0f,0.1f };
+				Entity_AddComponent(wall, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+
+				Scene_AddEntity(scene, wall);
+			}
+			{
+				Entity wall = {};
+				wall = {};
+				wall.Tag.Name = "MAP_Element_1_Wall_16";
+				wall.Transform.Translation = { 50.0f,25.0f,0 };
+				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = wallTex2;
+				spriteRenderer.UVStart = { 1.0f,1.0f };
+				spriteRenderer.UVEnd = { 0.0f,0.0f };
+				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				Scene_AddEntity(scene, wall);
+			}
+			{
+				Entity wall = {};
+				wall = {};
+				wall.Tag.Name = "MAP_Element_1_Wall_17";
+				wall.Transform.Translation = { 50.0f,15.0f,0 };
+				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = wallTex2;
+				spriteRenderer.UVStart = { 1.0f,1.0f };
+				spriteRenderer.UVEnd = { 0.0f,0.0f };
+				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				Scene_AddEntity(scene, wall);
+			}
+			{
+				Entity wall = {};
+				wall = {};
+				wall.Tag.Name = "MAP_Element_1_Wall_18";
+				wall.Transform.Translation = { 50.0f,5.0f,0 };
+				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = wallTex2;
+				spriteRenderer.UVStart = { 1.0f,1.0f };
+				spriteRenderer.UVEnd = { 0.0f,0.0f };
+				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				Scene_AddEntity(scene, wall);
+			}
+			{
+				Entity wall = {};
+				wall = {};
+				wall.Tag.Name = "MAP_Element_1_Wall_19";
+				wall.Transform.Translation = { 50.0f,-5.0f,0 };
+				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = wallTex2;
+				spriteRenderer.UVStart = { 1.0f,1.0f };
+				spriteRenderer.UVEnd = { 0.0f,0.0f };
+				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				Scene_AddEntity(scene, wall);
+			}
+			{
+				Entity wall = {};
+				wall = {};
+				wall.Tag.Name = "MAP_Element_1_Wall_20";
+				wall.Transform.Translation = { 50.0f,-15.0f,0 };
+				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = wallTex2;
+				spriteRenderer.UVStart = { 1.0f,1.0f };
+				spriteRenderer.UVEnd = { 0.0f,0.0f };
+				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				Scene_AddEntity(scene, wall);
+			}
+			{
+				Entity wall = {};
+				wall = {};
+				wall.Tag.Name = "MAP_Element_1_Wall_21";
+				wall.Transform.Translation = { 50.0f,-25.0f,0 };
+				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = wallTex2;
+				spriteRenderer.UVStart = { 1.0f,1.0f };
+				spriteRenderer.UVEnd = { 0.0f,0.0f };
+				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				Scene_AddEntity(scene, wall);
+			}
+		}
+		#pragma endregion
+
+		#pragma region MAP_ELEMENT_2
+		{
+			{
+				Entity light = {};
+				light.Tag.Name = "MAP_Element_2_Light_1";
+				light.Transform.Translation = { -15.0f, 88.0f, 2.7f };
+				light.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				light.Transform.Scale = { 1.0f,5.0f,1.0f };
+
+				Rigidbody2DComponent rigidbody2D = {};
+				rigidbody2D.Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(light, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
+
+				BoxCollider2DComponent boxCollider2D = {};
+				boxCollider2D.Restitution = 0.0f;
+				boxCollider2D.Size = { 1.0f,0.1f };
+				Entity_AddComponent(light, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = greenLight;
+				Entity_AddComponent(light, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				ScriptComponent scriptComponent = {};
+				scriptComponent.OnCreate = LightController_OnCreate;
+				scriptComponent.OnUpdate = LightController_OnUpdate;
+				scriptComponent.OnDestroy = LightController_OnDestroy;
+				scriptComponent.OnCollision = LightController_OnCollision;
+				scriptComponent.OnRaycastHit = LightController_OnRaycastHit;
+				scriptComponent.OnEnable = LightController_OnEnable;
+				scriptComponent.OnDisable = LightController_OnDisable;
+
+				LightData* data = (LightData*)malloc(sizeof(LightData));
+				data->Type = LightType::GREEN;
+				scriptComponent.RuntimeData = data;
+
+				Entity_AddComponent(light, ComponentType::ComponentType_Script, &scriptComponent);
+
+				Scene_AddEntity(scene, light);
+			}
+			{
+				Entity light = {};
+				light.Tag.Name = "MAP_Element_2_Light_2";
+				light.Transform.Translation = { 45.0f, 88.0f, 2.7f };
+				light.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				light.Transform.Scale = { 1.0f,5.0f,1.0f };
+
+				Rigidbody2DComponent rigidbody2D = {};
+				rigidbody2D.Type = Rigidbody2D::BodyType::Static;
+				Entity_AddComponent(light, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
+
+				BoxCollider2DComponent boxCollider2D = {};
+				boxCollider2D.Restitution = 0.0f;
+				boxCollider2D.Size = { 1.0f,0.1f };
+				Entity_AddComponent(light, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = redLight;
+				Entity_AddComponent(light, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				ScriptComponent scriptComponent = {};
+				scriptComponent.OnCreate = LightController_OnCreate;
+				scriptComponent.OnUpdate = LightController_OnUpdate;
+				scriptComponent.OnDestroy = LightController_OnDestroy;
+				scriptComponent.OnCollision = LightController_OnCollision;
+				scriptComponent.OnRaycastHit = LightController_OnRaycastHit;
+				scriptComponent.OnEnable = LightController_OnEnable;
+				scriptComponent.OnDisable = LightController_OnDisable;
+
+				LightData* data = (LightData*)malloc(sizeof(LightData));
+				data->Type = LightType::RED;
+				scriptComponent.RuntimeData = data;
+
+				Entity_AddComponent(light, ComponentType::ComponentType_Script, &scriptComponent);
+
+				Scene_AddEntity(scene, light);
+			}
+			{
+				Entity wall = {};
+				wall.Tag.Name = "MAP_Element_2_Wall_1";
+				wall.Transform.Translation = { 15.0f,90.0f,0 };
 				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex5;
+				spriteRenderer.Texture = wallTex4;
 				spriteRenderer.Color = { 1.0f,1.0f,1.0f,1.0f };
 				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
-				Rigidbody2DComponent rigidbody2D = {};
-				rigidbody2D.Type = Rigidbody2D::BodyType::Static;
-				Entity_AddComponent(wall, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
-
-				BoxCollider2DComponent boxCollider2D = {};
-				boxCollider2D.Restitution = 0.0f;
-				boxCollider2D.Size = { 1.5f,0.1f };
-				Entity_AddComponent(wall, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
-
 				Scene_AddEntity(scene, wall);
 			}
 			{
 				Entity wall = {};
-				wall.Tag.Name = "right-wall-2";
-				wall.Transform.Translation = { 5.0f,0,0 };
+				wall.Tag.Name = "MAP_Element_2_Wall_2";
+				wall.Transform.Translation = { 5.0f,90.0f,0 };
 				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
-				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-				Scene_AddEntity(scene, wall);
-			}
-			{
-				Entity wall = {};
-				wall.Tag.Name = "right-wall-3";
-				wall.Transform.Translation = { -5.0f,0,0 };
-				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
-				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
-
-				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
+				spriteRenderer.Texture = wallTex3;
 				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				Rigidbody2DComponent rigidbody2D = {};
@@ -776,50 +1428,54 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 				BoxCollider2DComponent boxCollider2D = {};
 				boxCollider2D.Restitution = 0.0f;
-				boxCollider2D.Size = { 0.5f,0.1f };
+				boxCollider2D.Size = { 2.5f,0.1f };
 				Entity_AddComponent(wall, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
 				Scene_AddEntity(scene, wall);
 			}
 			{
 				Entity wall = {};
-				wall.Tag.Name = "right-wall-4";
-				wall.Transform.Translation = { -15.0f,0,0 };
+				wall.Tag.Name = "MAP_Element_2_Wall_3";
+				wall.Transform.Translation = { -5.0f,90.0f,0 };
 				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
-				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-				Rigidbody2DComponent rigidbody2D = {};
-				rigidbody2D.Type = Rigidbody2D::BodyType::Static;
-				Entity_AddComponent(wall, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
-
-				BoxCollider2DComponent boxCollider2D = {};
-				boxCollider2D.Restitution = 0.0f;
-				boxCollider2D.Size = { 0.5f,0.1f };
-				Entity_AddComponent(wall, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
-
-				Scene_AddEntity(scene, wall);
-			}
-			{
-				Entity wall = {};
-				wall.Tag.Name = "right-wall-5";
-				wall.Transform.Translation = { 25.0f,0,0 };
-				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
-				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
-
-				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
+				spriteRenderer.Texture = wallTex3;
 				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				Scene_AddEntity(scene, wall);
 			}
 			{
 				Entity wall = {};
-				wall.Tag.Name = "right-wall-6";
-				wall.Transform.Translation = { 35.0f,1.5f,0 };
+				wall.Tag.Name = "MAP_Element_2_Wall_4";
+				wall.Transform.Translation = { -15.0f,90.0f,0 };
+				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = wallTex3;
+				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				Scene_AddEntity(scene, wall);
+			}
+			{
+				Entity wall = {};
+				wall.Tag.Name = "MAP_Element_2_Wall_5";
+				wall.Transform.Translation = { 25.0f,90.0f,0 };
+				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = wallTex3;
+				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				Scene_AddEntity(scene, wall);
+			}
+			{
+				Entity wall = {};
+				wall.Tag.Name = "MAP_Element_2_Wall_6";
+				wall.Transform.Translation = { 35.0f,91.5f,0 };
 				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
@@ -840,19 +1496,27 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				scriptComponent.OnDestroy = FieldTrigger_OnDestroy;
 				scriptComponent.OnCollision = FieldTrigger_OnCollision;
 				scriptComponent.OnRaycastHit = FieldTrigger_OnRaycastHit;
+				scriptComponent.OnEnable = FieldController_OnEnable;
+				scriptComponent.OnDisable = FieldController_OnDisable;
+
+				FieldTriggerData* data = (FieldTriggerData*)malloc(sizeof(FieldTriggerData));
+				data->Type = FieldTriggerType::GEN_MAP;
+				scriptComponent.RuntimeData = data;
+
 				Entity_AddComponent(wall, ComponentType::ComponentType_Script, &scriptComponent);
 
 				Scene_AddEntity(scene, wall);
 			}
 			{
 				Entity wall = {};
-				wall.Tag.Name = "right-wall-7";
-				wall.Transform.Translation = { 45.0f,0,0 };
+				wall = {};
+				wall.Tag.Name = "MAP_Element_2_Wall_7";
+				wall.Transform.Translation = { 45.0f,90.0f,0 };
 				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
+				spriteRenderer.Texture = wallTex3;
 				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				Rigidbody2DComponent rigidbody2D = {};
@@ -868,31 +1532,10 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			}
 			{
 				Entity wall = {};
-				wall.Tag.Name = "right-wall-8";
-				wall.Transform.Translation = { 50.0f,-5.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Tag.Name = "MAP_Element_2_Wall_8";
+				wall.Transform.Translation = { -20.0f,60.0f,0 };
+				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
-
-				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
-				spriteRenderer.UVStart = { 1.0f,1.0f };
-				spriteRenderer.UVEnd = { 0.0f,0.0f };
-				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-				Scene_AddEntity(scene, wall);
-			}
-			{
-				Entity wall = {};
-				wall.Tag.Name = "right-wall-9";
-				wall.Transform.Translation = { 50.0f,-15.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
-				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
-
-				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
-				spriteRenderer.UVStart = { 1.0f,1.0f };
-				spriteRenderer.UVEnd = { 0.0f,0.0f };
-				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				Rigidbody2DComponent rigidbody2D = {};
 				rigidbody2D.Type = Rigidbody2D::BodyType::Static;
@@ -900,35 +1543,20 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 				BoxCollider2DComponent boxCollider2D = {};
 				boxCollider2D.Restitution = 0.0f;
-				boxCollider2D.Size = { 1.5f,0.1f };
+				boxCollider2D.Size = { 3.0f,0.1f };
 				Entity_AddComponent(wall, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
 				Scene_AddEntity(scene, wall);
 			}
 			{
 				Entity wall = {};
-				wall.Tag.Name = "right-wall-10";
-				wall.Transform.Translation = { 50.0f,-25.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
-				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
-
-				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
-				spriteRenderer.UVStart = { 1.0f,1.0f };
-				spriteRenderer.UVEnd = { 0.0f,0.0f };
-				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-				Scene_AddEntity(scene, wall);
-			}
-			{
-				Entity wall = {};
-				wall.Tag.Name = "right-wall-11";
-				wall.Transform.Translation = { -20.0f,-5.0f,0 };
+				wall.Tag.Name = "MAP_Element_2_Wall_9";
+				wall.Transform.Translation = { -20.0f,85.0f,0 };
 				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
+				spriteRenderer.Texture = wallTex3;
 				spriteRenderer.UVStart = { 0.0f,0.0f };
 				spriteRenderer.UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -937,211 +1565,43 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			}
 			{
 				Entity wall = {};
-				wall.Tag.Name = "right-wall-12";
-				wall.Transform.Translation = { -20.0f,-15.0f,0 };
+				wall.Tag.Name = "MAP_Element_2_Wall_10";
+				wall.Transform.Translation = { -20.0f,75.0f,0 };
 				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
-				spriteRenderer.UVStart = { 0.0f,0.0f };
-				spriteRenderer.UVEnd = { 1.0f,1.0f };
-				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-				Rigidbody2DComponent rigidbody2D = {};
-				rigidbody2D.Type = Rigidbody2D::BodyType::Static;
-				Entity_AddComponent(wall, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
-
-				BoxCollider2DComponent boxCollider2D = {};
-				boxCollider2D.Restitution = 0.0f;
-				boxCollider2D.Size = { 1.5f,0.1f };
-				Entity_AddComponent(wall, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
-
-				Scene_AddEntity(scene, wall);
-			}
-			{
-				Entity wall = {};
-				wall.Tag.Name = "right-wall-13";
-				wall.Transform.Translation = { -20.0f,-25.0f,0 };
-				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
-				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
-
-				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
+				spriteRenderer.Texture = wallTex3;
 				spriteRenderer.UVStart = { 0.0f,0.0f };
 				spriteRenderer.UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				Scene_AddEntity(scene, wall);
 			}
-		}
-
-		// End
-		{
 			{
 				Entity wall = {};
-				wall.Tag.Name = "end-wall-1";
-				wall.Transform.Translation = { 15.0f,60.0f,0 };
-				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+				wall.Tag.Name = "MAP_Element_2_Wall_11";
+				wall.Transform.Translation = { -20.0f,65.0f,0 };
+				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex5;
-				spriteRenderer.Color = { 1.0f,1.0f,1.0f,1.0f };
-				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-				Rigidbody2DComponent rigidbody2D = {};
-				rigidbody2D.Type = Rigidbody2D::BodyType::Static;
-				Entity_AddComponent(wall, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
-
-				BoxCollider2DComponent boxCollider2D = {};
-				boxCollider2D.Restitution = 0.0f;
-				boxCollider2D.Size = { 3.5f,0.1f };
-				Entity_AddComponent(wall, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
-
-				Scene_AddEntity(scene, wall);
-			}
-			{
-				Entity wall = {};
-				wall.Tag.Name = "end-wall-2";
-				wall.Transform.Translation = { 5.0f,60.0f,0 };
-				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
-				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
-
-				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
+				spriteRenderer.Texture = wallTex3;
+				spriteRenderer.UVStart = { 0.0f,0.0f };
+				spriteRenderer.UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				Scene_AddEntity(scene, wall);
 			}
 			{
 				Entity wall = {};
-				wall.Tag.Name = "end-wall-3";
-				wall.Transform.Translation = { -5.0f,60.0f,0 };
-				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
-				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
-
-				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
-				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-				Scene_AddEntity(scene, wall);
-			}
-			{
-				Entity wall = {};
-				wall.Tag.Name = "end-wall-4";
-				wall.Transform.Translation = { -15.0f,60.0f,0 };
-				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
-				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
-
-				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
-				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-				Scene_AddEntity(scene, wall);
-			}
-			{
-				Entity wall = {};
-				wall.Tag.Name = "end-wall-5";
-				wall.Transform.Translation = { 25.0f,60.0f,0 };
-				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
-				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
-
-				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
-				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-				Scene_AddEntity(scene, wall);
-			}
-			{
-				Entity wall = {};
-				wall.Tag.Name = "end-wall-6";
-				wall.Transform.Translation = { 35.0f,60.0f,0 };
-				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
-				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
-
-				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
-				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-				Scene_AddEntity(scene, wall);
-			}
-			{
-				Entity wall = {};
-				wall.Tag.Name = "end-wall-7";
-				wall.Transform.Translation = { 45.0f,60.0f,0 };
-				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
-				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
-
-				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
-				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-				Scene_AddEntity(scene, wall);
-			}
-			{
-				Entity wall = {};
-				wall.Tag.Name = "end-wall-8";
-				wall.Transform.Translation = { 50.0f,55.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
-				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
-
-				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
-				spriteRenderer.UVStart = { 1.0f,1.0f };
-				spriteRenderer.UVEnd = { 0.0f,0.0f };
-				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-				Scene_AddEntity(scene, wall);
-			}
-			{
-				Entity wall = {};
-				wall.Tag.Name = "end-wall-9";
-				wall.Transform.Translation = { 50.0f,45.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
-				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
-
-				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
-				spriteRenderer.UVStart = { 1.0f,1.0f };
-				spriteRenderer.UVEnd = { 0.0f,0.0f };
-				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-				Rigidbody2DComponent rigidbody2D = {};
-				rigidbody2D.Type = Rigidbody2D::BodyType::Static;
-				Entity_AddComponent(wall, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
-
-				BoxCollider2DComponent boxCollider2D = {};
-				boxCollider2D.Restitution = 0.0f;
-				boxCollider2D.Size = { 1.5f,0.1f };
-				Entity_AddComponent(wall, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
-
-				Scene_AddEntity(scene, wall);
-			}
-			{
-				Entity wall = {};
-				wall.Tag.Name = "end-wall-10";
-				wall.Transform.Translation = { 50.0f,35.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
-				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
-
-				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
-				spriteRenderer.UVStart = { 1.0f,1.0f };
-				spriteRenderer.UVEnd = { 0.0f,0.0f };
-				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-				Scene_AddEntity(scene, wall);
-			}
-			{
-				Entity wall = {};
-				wall.Tag.Name = "end-wall-11";
+				wall.Tag.Name = "MAP_Element_2_Wall_12";
 				wall.Transform.Translation = { -20.0f,55.0f,0 };
 				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
+				spriteRenderer.Texture = wallTex3;
 				spriteRenderer.UVStart = { 0.0f,0.0f };
 				spriteRenderer.UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1150,16 +1610,40 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			}
 			{
 				Entity wall = {};
-				wall.Tag.Name = "end-wall-12";
+				wall.Tag.Name = "MAP_Element_2_Wall_13";
 				wall.Transform.Translation = { -20.0f,45.0f,0 };
 				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
+				spriteRenderer.Texture = wallTex3;
 				spriteRenderer.UVStart = { 0.0f,0.0f };
 				spriteRenderer.UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				Scene_AddEntity(scene, wall);
+			}
+			{
+				Entity wall = {};
+				wall.Tag.Name = "MAP_Element_2_Wall_14";
+				wall.Transform.Translation = { -20.0f,35.0f,0 };
+				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = wallTex3;
+				spriteRenderer.UVStart = { 0.0f,0.0f };
+				spriteRenderer.UVEnd = { 1.0f,1.0f };
+				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				Scene_AddEntity(scene, wall);
+			}
+			{
+				Entity wall = {};
+				wall.Tag.Name = "MAP_Element_2_Wall_15";
+				wall.Transform.Translation = { 50.0f,60.0f,0 };
+				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				Rigidbody2DComponent rigidbody2D = {};
 				rigidbody2D.Type = Rigidbody2D::BodyType::Static;
@@ -1167,54 +1651,109 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 				BoxCollider2DComponent boxCollider2D = {};
 				boxCollider2D.Restitution = 0.0f;
-				boxCollider2D.Size = { 1.5f,0.1f };
+				boxCollider2D.Size = { 3.0f,0.1f };
 				Entity_AddComponent(wall, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
 				Scene_AddEntity(scene, wall);
 			}
 			{
 				Entity wall = {};
-				wall.Tag.Name = "end-wall-13";
-				wall.Transform.Translation = { -20.0f,35.0f,0 };
-				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall = {};
+				wall.Tag.Name = "MAP_Element_2_Wall_16";
+				wall.Transform.Translation = { 50.0f,85.0f,0 };
+				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex2;
-				spriteRenderer.UVStart = { 0.0f,0.0f };
-				spriteRenderer.UVEnd = { 1.0f,1.0f };
+				spriteRenderer.Texture = wallTex3;
+				spriteRenderer.UVStart = { 1.0f,1.0f };
+				spriteRenderer.UVEnd = { 0.0f,0.0f };
+				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				Scene_AddEntity(scene, wall);
+			}
+			{
+				Entity wall = {};
+				wall = {};
+				wall.Tag.Name = "MAP_Element_2_Wall_17";
+				wall.Transform.Translation = { 50.0f,75.0f,0 };
+				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = wallTex3;
+				spriteRenderer.UVStart = { 1.0f,1.0f };
+				spriteRenderer.UVEnd = { 0.0f,0.0f };
+				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				Scene_AddEntity(scene, wall);
+			}
+			{
+				Entity wall = {};
+				wall = {};
+				wall.Tag.Name = "MAP_Element_2_Wall_18";
+				wall.Transform.Translation = { 50.0f,65.0f,0 };
+				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = wallTex3;
+				spriteRenderer.UVStart = { 1.0f,1.0f };
+				spriteRenderer.UVEnd = { 0.0f,0.0f };
+				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				Scene_AddEntity(scene, wall);
+			}
+			{
+				Entity wall = {};
+				wall = {};
+				wall.Tag.Name = "MAP_Element_2_Wall_19";
+				wall.Transform.Translation = { 50.0f,55.0f,0 };
+				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = wallTex3;
+				spriteRenderer.UVStart = { 1.0f,1.0f };
+				spriteRenderer.UVEnd = { 0.0f,0.0f };
+				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				Scene_AddEntity(scene, wall);
+			}
+			{
+				Entity wall = {};
+				wall = {};
+				wall.Tag.Name = "MAP_Element_2_Wall_20";
+				wall.Transform.Translation = { 50.0f,45.0f,0 };
+				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = wallTex3;
+				spriteRenderer.UVStart = { 1.0f,1.0f };
+				spriteRenderer.UVEnd = { 0.0f,0.0f };
+				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+				Scene_AddEntity(scene, wall);
+			}
+			{
+				Entity wall = {};
+				wall = {};
+				wall.Tag.Name = "MAP_Element_2_Wall_21";
+				wall.Transform.Translation = { 50.0f,35.0f,0 };
+				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+				SpriteRendererComponent spriteRenderer = {};
+				spriteRenderer.Texture = wallTex3;
+				spriteRenderer.UVStart = { 1.0f,1.0f };
+				spriteRenderer.UVEnd = { 0.0f,0.0f };
 				Entity_AddComponent(wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				Scene_AddEntity(scene, wall);
 			}
 		}
-		{
-			Entity quad = {};
-			quad.Tag.Name = "Floor";
-			quad.Transform.Translation = { 15.0f,0,5.0f };
-			quad.Transform.Scale = { 100.0f,100.0f,1.0f };
-
-			SpriteRendererComponent spriteRenderer = {};
-			spriteRenderer.Texture = floorTex;
-			spriteRenderer.TilingFactor = 5.0f;
-			Entity_AddComponent(quad, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-			Scene_AddEntity(scene, quad);
-		}
-		{
-			Entity quad = {};
-			quad.Tag.Name = "Roof";
-			quad.Transform.Translation = { 15.0f,0,-5.0f };
-			quad.Transform.Rotation = { 0,DirectX::XMConvertToRadians(180.0f),0 };
-			quad.Transform.Scale = { 100.0f,100.0f,1.0f };
-
-			SpriteRendererComponent spriteRenderer = {};
-			spriteRenderer.Texture = roofTex;
-			spriteRenderer.TilingFactor = 5.0f;
-			Entity_AddComponent(quad, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-			Scene_AddEntity(scene, quad);
-		}
+		#pragma endregion
 	}
+	#pragma endregion
 }
-

@@ -10,7 +10,7 @@ struct KeyMapData
 };
 static KeyMapData s_Data;
 
-void KeyMap_Init(void)
+void KeyMap_Init()
 {
 	s_Data = {};
 }
@@ -70,7 +70,6 @@ KeyCode KeyMap_GetKey(KeyType type)
 
 const WCHAR* GetKeyName(KeyCode key)
 {
-
 	switch (key)
 	{
 	case A:

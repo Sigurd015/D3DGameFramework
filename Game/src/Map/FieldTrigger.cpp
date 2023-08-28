@@ -16,8 +16,22 @@ void FieldTrigger_OnDisable(Entity& entity, void* runtimeData)
 
 void FieldTrigger_OnCollision(Entity& entity, Entity& other, void* runtimeData)
 {
-	if (!strcmp(other.Tag.Name, "Player"))
+	FieldTriggerData* data = (FieldTriggerData*)runtimeData;
+
+	switch (data->Type)
 	{
-		FieldController_GenMap();
+	case FieldTriggerType::GEN_MAP:
+	{
+		if (!strcmp(other.Tag.Name, "Player"))
+		{
+			FieldController_GenMap();
+		}
+		break;
+	}
+	case FieldTriggerType::OPEN_DOOR:
+	{
+
+		break;
+	}
 	}
 }

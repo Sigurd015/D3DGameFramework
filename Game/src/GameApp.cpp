@@ -4,7 +4,6 @@
 #include "ScreenEffect/StartUp.h"
 #include "ScreenEffect/Loading.h"
 #include "GameMode.h"
-#include "ScreenEffect/FadeInOut.h"
 #include "KeyMap/KeyMap.h"
 
 #include <ctype.h>
@@ -30,7 +29,6 @@ void Game_Ininialize(Application* appInst)
 
 	KeyMap_Init();
 
-	FadeInOut_Initialize();
 	StartUp_Initialize();
 	Loading_Initialize();
 	Loading_SetDepature(STARTUP_TITLE);
@@ -48,7 +46,7 @@ void Game_Update(float timeStep)
 		RendererAPI_Clear();
 
 		Renderer2D_BeginScene(DirectX::XMMatrixIdentity());
-		//FadeInOut_Draw(timeStep);
+
 		Loading_Draw(timeStep);
 		Renderer2D_EndScene();
 		break;
@@ -59,7 +57,7 @@ void Game_Update(float timeStep)
 		RendererAPI_Clear();
 
 		Renderer2D_BeginScene(DirectX::XMMatrixIdentity());
-		//FadeInOut_Draw(timeStep);
+
 		StartUp_Draw(timeStep);
 		Renderer2D_EndScene();
 		break;
@@ -77,7 +75,7 @@ void Game_Update(float timeStep)
 	{
 		RendererAPI_SetClearColor({ 0.3f,0.3f,0.3f,1.0f });
 		RendererAPI_Clear();
-		FadeInOut_Draw(timeStep);
+
 		Scene_OnViewportResize(s_Data.PlayScene, Window_GetWidth(), Window_GetHeight());
 		Scene_OnUpdate(s_Data.PlayScene, timeStep);
 		break;
@@ -94,7 +92,6 @@ void Game_Shutdown(Application* appInst)
 void Game_SetMode(GameMode mode)
 {
 	s_Data.Mode = mode;
-	FadeInOut_Reset(FADE_IN);
 }
 
 void Game_OnKeyPressed(Application* appInst, KeyCode key)

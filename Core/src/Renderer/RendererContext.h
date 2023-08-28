@@ -1,4 +1,6 @@
 #pragma once
+#include "Texture.h"
+
 #include <Windows.h>
 #include <d3d11.h>
 
@@ -17,3 +19,4 @@ ID3D11Device* RendererContext_GetDevice();
 ID3D11DeviceContext* RendererContext_GetDeviceContext();
 ID3D11DepthStencilState* RendererContext_GetDepthStencilState(bool enable);
 ID3D11BlendState* RendererContext_GetBlendState(BlendMode type);
+ID3D11SamplerState* RendererContext_GetSamplerState(TextureWrap wrap, TextureFilter filter);

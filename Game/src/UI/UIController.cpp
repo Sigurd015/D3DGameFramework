@@ -5,6 +5,9 @@
 #define SHOOTING_ANIMATION_FRAME_SPEED 0.15f
 #define HIT_ICON_HOLD_TIME 0.5f
 
+#define BLOOD_EFFECT_MAX_TIME 0.2f
+#define BLOOD_EFFECT_ALPHA 0.2f
+
 struct UIControllerData
 {
 	float BarMaxWidth = 500.0f;
@@ -25,6 +28,10 @@ struct UIControllerData
 	float HitIconHoldTimer = 0;
 	uint32_t SightIconMaxAnimationFrames = 2;
 	bool IsHit = false;
+
+	SpriteRendererComponent* BloodEffectSpriteRenderer = nullptr;
+	float BloodEffectTimer = 0;
+	bool IsBloodEffect = false;
 };
 static UIControllerData s_Data;
 
@@ -98,6 +105,12 @@ void UIController_OnCreate(Entity& entity, void* runtimeData)
 		s_Data.WeaponSpriteRenderer->UVStart = spriteElement->UVStart;
 		s_Data.WeaponSpriteRenderer->UVEnd = spriteElement->UVEnd;
 	}
+
+	// Background
+	{
+		s_Data.BloodEffectSpriteRenderer = (SpriteRendererComponent*)Entity_GetComponent(entity, ComponentType_SpriteRenderer);
+		CORE_ASSERT(s_Data.BloodEffectSpriteRenderer, "Entity does not have SpriteRendererComponent!");
+	}
 }
 
 void UIController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
@@ -169,6 +182,21 @@ void UIController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
 			}
 		}
 	}
+
+	//Blood effect
+	{
+		if (s_Data.IsBloodEffect)
+		{
+			if (s_Data.BloodEffectTimer > BLOOD_EFFECT_MAX_TIME)
+			{
+				s_Data.IsBloodEffect = false;
+				s_Data.BloodEffectSpriteRenderer->Color.w = 0.0f;
+				s_Data.BloodEffectTimer = 0.0f;
+			}
+			
+			s_Data.BloodEffectTimer += timeStep;
+		}
+	}
 }
 
 void UIController_OnDestroy(Entity& entity, void* runtimeData)
@@ -192,5 +220,8 @@ void UIController_PlayHitIcon()
 	s_Data.IsHit = true;
 }
 
-void UIController_PlayBloodScreen()
-{}
+void UIController_PlayBloodEffect()
+{
+	s_Data.IsBloodEffect = true;
+	s_Data.BloodEffectSpriteRenderer->Color.w = BLOOD_EFFECT_ALPHA;
+}
