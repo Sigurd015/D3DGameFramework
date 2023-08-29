@@ -35,20 +35,20 @@ struct UIControllerData
 };
 static UIControllerData s_Data;
 
-void UIController_OnCreate(Entity& entity, void* runtimeData)
+void UIController_OnCreate(Entity* entity, void* runtimeData)
 {
 	s_Data = {};
 
 	//HP Bar
 	{
-		Entity* Front = Scene_GetEntityByName(*entity.Scene, "HPBarFront");
-		Entity* Back = Scene_GetEntityByName(*entity.Scene, "HPBarBack");
+		Entity* Front = Scene_GetEntityByName(entity->Scene, "HPBarFront");
+		Entity* Back = Scene_GetEntityByName(entity->Scene, "HPBarBack");
 
 		CORE_ASSERT(Front, "Cannot find HPBarFront entity!");
 		CORE_ASSERT(Back, "Cannot find HPBarBack entity!");
 
-		s_Data.HPBarFrontRectTrans = (RectTransformComponent*)Entity_GetComponent(*Front, ComponentType_RectTransform);
-		s_Data.HPBarBackRectTrans = (RectTransformComponent*)Entity_GetComponent(*Back, ComponentType_RectTransform);
+		s_Data.HPBarFrontRectTrans = (RectTransformComponent*)Entity_GetComponent(Front, ComponentType_RectTransform);
+		s_Data.HPBarBackRectTrans = (RectTransformComponent*)Entity_GetComponent(Back, ComponentType_RectTransform);
 
 		CORE_ASSERT(s_Data.HPBarFrontRectTrans, "Entity does not have RectTransformComponent!");
 		CORE_ASSERT(s_Data.HPBarBackRectTrans, "Entity does not have RectTransformComponent!");
@@ -56,15 +56,16 @@ void UIController_OnCreate(Entity& entity, void* runtimeData)
 
 	//Sight Icon
 	{
-		Entity* sightIcon = Scene_GetEntityByName(*entity.Scene, "SightIcon");
+		Entity* sightIcon = Scene_GetEntityByName(entity->Scene, "SightIcon");
 		CORE_ASSERT(sightIcon, "Cannot find Weapon entity!");
 
-		s_Data.SightIconSpriteRenderer = (SpriteRendererComponent*)Entity_GetComponent(*sightIcon, ComponentType_SpriteRenderer);
+		s_Data.SightIconSpriteRenderer = (SpriteRendererComponent*)Entity_GetComponent(sightIcon, ComponentType_SpriteRenderer);
 		CORE_ASSERT(s_Data.SightIconSpriteRenderer, "Entity does not have SpriteRendererComponent!");
 
 		SpriteAnimatorSpecification spec;
-		spec.TextureWidth = Texture2D_GetWidth(*s_Data.SightIconSpriteRenderer->Texture);
-		spec.TextureHeight = Texture2D_GetHeight(*s_Data.SightIconSpriteRenderer->Texture);
+		Texture2D* texture = (Texture2D*)RefPtr_Get(s_Data.SightIconSpriteRenderer->Texture);
+		spec.TextureWidth = Texture2D_GetWidth(texture);
+		spec.TextureHeight = Texture2D_GetHeight(texture);
 		spec.ElementsCount = 2;
 		spec.ElementsPerColumn = 2;
 		spec.ElementsPerRow = 1;
@@ -81,15 +82,16 @@ void UIController_OnCreate(Entity& entity, void* runtimeData)
 
 	//Player Animation
 	{
-		Entity* weapon = Scene_GetEntityByName(*entity.Scene, "Weapon");
+		Entity* weapon = Scene_GetEntityByName(entity->Scene, "Weapon");
 		CORE_ASSERT(weapon, "Cannot find Weapon entity!");
 
-		s_Data.WeaponSpriteRenderer = (SpriteRendererComponent*)Entity_GetComponent(*weapon, ComponentType_SpriteRenderer);
+		s_Data.WeaponSpriteRenderer = (SpriteRendererComponent*)Entity_GetComponent(weapon, ComponentType_SpriteRenderer);
 		CORE_ASSERT(s_Data.WeaponSpriteRenderer, "Entity does not have SpriteRendererComponent!");
 
 		SpriteAnimatorSpecification spec;
-		spec.TextureWidth = Texture2D_GetWidth(*s_Data.WeaponSpriteRenderer->Texture);
-		spec.TextureHeight = Texture2D_GetHeight(*s_Data.WeaponSpriteRenderer->Texture);
+		Texture2D* texture = (Texture2D*)RefPtr_Get(s_Data.WeaponSpriteRenderer->Texture);
+		spec.TextureWidth = Texture2D_GetWidth(texture);
+		spec.TextureHeight = Texture2D_GetHeight(texture);
 		spec.ElementsCount = 6;
 		spec.ElementsPerColumn = 6;
 		spec.ElementsPerRow = 1;
@@ -113,7 +115,7 @@ void UIController_OnCreate(Entity& entity, void* runtimeData)
 	}
 }
 
-void UIController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
+void UIController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 {
 	//HP Bar
 	{
@@ -193,21 +195,21 @@ void UIController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
 				s_Data.BloodEffectSpriteRenderer->Color.w = 0.0f;
 				s_Data.BloodEffectTimer = 0.0f;
 			}
-			
+
 			s_Data.BloodEffectTimer += timeStep;
 		}
 	}
 }
 
-void UIController_OnDestroy(Entity& entity, void* runtimeData)
+void UIController_OnDestroy(Entity* entity, void* runtimeData)
 {}
-void UIController_OnCollision(Entity& entity, Entity& other, void* runtimeData)
+void UIController_OnCollision(Entity* entity, Entity* other, void* runtimeData)
 {}
-void UIController_OnRaycastHit(Entity& entity, Entity& other, void* runtimeData)
+void UIController_OnRaycastHit(Entity* entity, Entity* other, void* runtimeData)
 {}
-void UIController_OnEnable(Entity& entity, void* runtimeData)
+void UIController_OnEnable(Entity* entity, void* runtimeData)
 {}
-void UIController_OnDisable(Entity& entity, void* runtimeData)
+void UIController_OnDisable(Entity* entity, void* runtimeData)
 {}
 
 void UIController_PlayShootAnimation()

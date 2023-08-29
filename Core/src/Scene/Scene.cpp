@@ -13,14 +13,14 @@ void OnCollide(void* entity1, void* entity2)
 {
 	Entity* ent1 = (Entity*)entity1;
 	Entity* ent2 = (Entity*)entity2;
-	if (Entity_HasComponent(*ent1, ComponentType_Script))
+	if (Entity_HasComponent(ent1, ComponentType_Script))
 	{
-		ent1->Script->OnCollision(*ent1, *ent2, ent1->Script->RuntimeData);
+		ent1->Script->OnCollision(ent1, ent2, ent1->Script->RuntimeData);
 	}
 
-	if (Entity_HasComponent(*ent2, ComponentType_Script))
+	if (Entity_HasComponent(ent2, ComponentType_Script))
 	{
-		ent2->Script->OnCollision(*ent2, *ent1, ent2->Script->RuntimeData);
+		ent2->Script->OnCollision(ent2, ent1, ent2->Script->RuntimeData);
 	}
 }
 
@@ -32,9 +32,9 @@ void Scene_Ininialize(Scene& out)
 		for (size_t i = 0; i < size; i++)
 		{
 			Entity* temp = (Entity*)List_Get(out.Entities, i);
-			if (Entity_HasComponent(*temp, ComponentType_Script))
+			if (Entity_HasComponent(temp, ComponentType_Script))
 			{
-				temp->Script->OnCreate(*temp, temp->Script->RuntimeData);
+				temp->Script->OnCreate(temp, temp->Script->RuntimeData);
 			}
 		}
 	}
@@ -47,7 +47,7 @@ void Scene_Ininialize(Scene& out)
 			Entity* temp = (Entity*)List_Get(out.Entities, i);
 			TransformComponent* tc = &temp->Transform;
 
-			if (Entity_HasComponent(*temp, ComponentType_Rigidbody2D))
+			if (Entity_HasComponent(temp, ComponentType_Rigidbody2D))
 			{
 				Rigidbody2DComponent* rb2d = temp->Rigidbody2D;
 
@@ -59,7 +59,7 @@ void Scene_Ininialize(Scene& out)
 				rigidbody2D.Entity = temp;
 				rigidbody2D.Enabled = temp->Enabled;
 
-				if (Entity_HasComponent(*temp, ComponentType_CircleCollider2D))
+				if (Entity_HasComponent(temp, ComponentType_CircleCollider2D))
 				{
 					CircleCollider2DComponent* cc2d = temp->CircleCollider2D;
 
@@ -73,7 +73,7 @@ void Scene_Ininialize(Scene& out)
 					Rigidbody2D_CreateCircleCollider(rigidbody2D, cc2d->Offset, cc2d->Radius * tc->Scale.x);
 				}
 
-				if (Entity_HasComponent(*temp, ComponentType_BoxCollider2D))
+				if (Entity_HasComponent(temp, ComponentType_BoxCollider2D))
 				{
 					BoxCollider2DComponent* bc2d = temp->BoxCollider2D;
 
@@ -100,42 +100,42 @@ void Scene_Destroy(Scene& out)
 	{
 		Entity* temp = (Entity*)List_Get(out.Entities, i);
 
-		if (Entity_HasComponent(*temp, ComponentType_RectTransform))
+		if (Entity_HasComponent(temp, ComponentType_RectTransform))
 		{
-			Entity_RemoveComponent(*temp, ComponentType_RectTransform);
+			Entity_RemoveComponent(temp, ComponentType_RectTransform);
 		}
-		if (Entity_HasComponent(*temp, ComponentType_Script))
+		if (Entity_HasComponent(temp, ComponentType_Script))
 		{
-			temp->Script->OnDestroy(*temp, temp->Script->RuntimeData);
-			Entity_RemoveComponent(*temp, ComponentType_Script);
+			temp->Script->OnDestroy(temp, temp->Script->RuntimeData);
+			Entity_RemoveComponent(temp, ComponentType_Script);
 		}
-		if (Entity_HasComponent(*temp, ComponentType_Camera))
+		if (Entity_HasComponent(temp, ComponentType_Camera))
 		{
-			Entity_RemoveComponent(*temp, ComponentType_Camera);
+			Entity_RemoveComponent(temp, ComponentType_Camera);
 		}
-		if (Entity_HasComponent(*temp, ComponentType_SpriteRenderer))
+		if (Entity_HasComponent(temp, ComponentType_SpriteRenderer))
 		{
-			Entity_RemoveComponent(*temp, ComponentType_SpriteRenderer);
+			Entity_RemoveComponent(temp, ComponentType_SpriteRenderer);
 		}
-		if (Entity_HasComponent(*temp, ComponentType_CircleRenderer))
+		if (Entity_HasComponent(temp, ComponentType_CircleRenderer))
 		{
-			Entity_RemoveComponent(*temp, ComponentType_CircleRenderer);
+			Entity_RemoveComponent(temp, ComponentType_CircleRenderer);
 		}
-		if (Entity_HasComponent(*temp, ComponentType_Rigidbody2D))
+		if (Entity_HasComponent(temp, ComponentType_Rigidbody2D))
 		{
-			Entity_RemoveComponent(*temp, ComponentType_Rigidbody2D);
+			Entity_RemoveComponent(temp, ComponentType_Rigidbody2D);
 		}
-		if (Entity_HasComponent(*temp, ComponentType_BoxCollider2D))
+		if (Entity_HasComponent(temp, ComponentType_BoxCollider2D))
 		{
-			Entity_RemoveComponent(*temp, ComponentType_BoxCollider2D);
+			Entity_RemoveComponent(temp, ComponentType_BoxCollider2D);
 		}
-		if (Entity_HasComponent(*temp, ComponentType_CircleCollider2D))
+		if (Entity_HasComponent(temp, ComponentType_CircleCollider2D))
 		{
-			Entity_RemoveComponent(*temp, ComponentType_CircleCollider2D);
+			Entity_RemoveComponent(temp, ComponentType_CircleCollider2D);
 		}
-		if (Entity_HasComponent(*temp, ComponentType_Text))
+		if (Entity_HasComponent(temp, ComponentType_Text))
 		{
-			Entity_RemoveComponent(*temp, ComponentType_Text);
+			Entity_RemoveComponent(temp, ComponentType_Text);
 		}
 	}
 
@@ -149,12 +149,12 @@ void Scene_AddEntity(Scene& out, Entity& entity)
 	List_Add(out.Entities, sizeof(Entity), &entity);
 }
 
-Entity* Scene_GetEntityByName(const Scene& out, const char* name)
+Entity* Scene_GetEntityByName(const Scene* out, const char* name)
 {
-	uint32_t size = List_Size(out.Entities);
+	uint32_t size = List_Size(out->Entities);
 	for (size_t i = 0; i < size; i++)
 	{
-		Entity* temp = (Entity*)List_Get(out.Entities, i);
+		Entity* temp = (Entity*)List_Get(out->Entities, i);
 		if (!strcmp(temp->Tag.Name, name))
 			return temp;
 	}
@@ -167,28 +167,28 @@ Entity* Scene_GetPrimaryCamera(const Scene& out)
 	for (size_t i = 0; i < size; i++)
 	{
 		Entity* temp = (Entity*)List_Get(out.Entities, i);
-		if (Entity_HasComponent(*temp, ComponentType_Camera))
+		if (Entity_HasComponent(temp, ComponentType_Camera))
 			if (temp->Camera->Primary)
 				return temp;
 	}
 	return nullptr;
 }
 
-void Scene_SetEntityEnabled(Entity& entity, bool enabled)
+void Scene_SetEntityEnabled(Entity* entity, bool enabled)
 {
-	entity.Enabled = enabled;
+	entity->Enabled = enabled;
 	if (Entity_HasComponent(entity, ComponentType_Rigidbody2D))
 	{
-		Rigidbody2D* rigidbody2D = (Rigidbody2D*)entity.Rigidbody2D->RuntimeBody;
+		Rigidbody2D* rigidbody2D = (Rigidbody2D*)entity->Rigidbody2D->RuntimeBody;
 		rigidbody2D->Enabled = enabled;
 	}
 
 	if (Entity_HasComponent(entity, ComponentType_Script))
 	{
 		if (enabled)
-			entity.Script->OnEnable(entity, entity.Script->RuntimeData);
+			entity->Script->OnEnable(entity, entity->Script->RuntimeData);
 		else
-			entity.Script->OnDisable(entity, entity.Script->RuntimeData);
+			entity->Script->OnDisable(entity, entity->Script->RuntimeData);
 	}
 }
 
@@ -204,9 +204,9 @@ void ColliderVisualiztion(const Scene& out)
 		if (!temp->Enabled)
 			continue;
 
-		if (Entity_HasComponent(*temp, ComponentType_Rigidbody2D))
+		if (Entity_HasComponent(temp, ComponentType_Rigidbody2D))
 		{
-			if (Entity_HasComponent(*temp, ComponentType_CircleCollider2D))
+			if (Entity_HasComponent(temp, ComponentType_CircleCollider2D))
 			{
 				CircleCollider2DComponent* cc2d = temp->CircleCollider2D;
 
@@ -220,7 +220,7 @@ void ColliderVisualiztion(const Scene& out)
 				Renderer2D_DrawCircle(transform, Vec4(0, 1, 0, 1), 0.01f);
 			}
 
-			if (Entity_HasComponent(*temp, ComponentType_BoxCollider2D))
+			if (Entity_HasComponent(temp, ComponentType_BoxCollider2D))
 			{
 				BoxCollider2DComponent* bc2d = temp->BoxCollider2D;
 
@@ -263,9 +263,9 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 		{
 			Entity* temp = (Entity*)List_Get(out.Entities, i);
 
-			if (Entity_HasComponent(*temp, ComponentType_Script) && temp->Enabled)
+			if (Entity_HasComponent(temp, ComponentType_Script) && temp->Enabled)
 			{
-				temp->Script->OnUpdate(*temp, timeStep, temp->Script->RuntimeData);
+				temp->Script->OnUpdate(temp, timeStep, temp->Script->RuntimeData);
 			}
 		}
 	}
@@ -286,7 +286,7 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 
 				TransformComponent* tc = &temp->Transform;
 
-				if (Entity_HasComponent(*temp, ComponentType_Rigidbody2D))
+				if (Entity_HasComponent(temp, ComponentType_Rigidbody2D))
 				{
 					Rigidbody2DComponent* rb2d = temp->Rigidbody2D;
 					Rigidbody2D* rb = (Rigidbody2D*)rb2d->RuntimeBody;
@@ -306,10 +306,10 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 			if (!temp->Enabled)
 				continue;
 
-			if (!Entity_HasComponent(*temp, ComponentType_RectTransform))
+			if (!Entity_HasComponent(temp, ComponentType_RectTransform))
 			{
 				TransformComponent* tc = &temp->Transform;
-				if (Entity_HasComponent(*temp, ComponentType_SpriteRenderer))
+				if (Entity_HasComponent(temp, ComponentType_SpriteRenderer))
 				{
 					SpriteRendererComponent* sprite = temp->SpriteRenderer;
 
@@ -317,7 +317,7 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 					{
 						Renderer2D_DrawQuad(
 							TransformComponent_GetTransform(*tc),
-							*sprite->Texture,
+							sprite->Texture,
 							sprite->UVStart,
 							sprite->UVEnd,
 							sprite->Color,
@@ -330,7 +330,7 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 					}
 				}
 
-				if (Entity_HasComponent(*temp, ComponentType_CircleRenderer))
+				if (Entity_HasComponent(temp, ComponentType_CircleRenderer))
 				{
 					CircleRendererComponent* circle = temp->CircleRenderer;
 
@@ -349,7 +349,7 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 				Vec2 viewPortSize = { (float)out.ViewportWidth,(float)out.ViewportHeight };
 				RectTransformComponent_GetPositionAndSize(*rect, viewPortSize, &ndcPos, &position, &size);
 
-				if (Entity_HasComponent(*temp, ComponentType_SpriteRenderer))
+				if (Entity_HasComponent(temp, ComponentType_SpriteRenderer))
 				{
 					SpriteRendererComponent* sprite = temp->SpriteRenderer;
 
@@ -358,7 +358,7 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 						Renderer2D_DrawUI(
 							ndcPos,
 							size,
-							*sprite->Texture,
+							sprite->Texture,
 							sprite->UVStart,
 							sprite->UVEnd,
 							sprite->Color,
@@ -371,7 +371,7 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 					}
 				}
 
-				if (Entity_HasComponent(*temp, ComponentType_Text))
+				if (Entity_HasComponent(temp, ComponentType_Text))
 				{
 					TextComponent* text = temp->Text;
 					Renderer2D_DrawText(text->TextString, text->FontName, position, text->Color, text->FontSize);
@@ -399,7 +399,7 @@ void Scene_OnViewportResize(Scene& out, uint32_t width, uint32_t height)
 	for (size_t i = 0; i < size; i++)
 	{
 		Entity* temp = (Entity*)List_Get(out.Entities, i);
-		if (Entity_HasComponent(*temp, ComponentType_Camera))
+		if (Entity_HasComponent(temp, ComponentType_Camera))
 			if (!temp->Camera->FixedAspectRatio)
 				SceneCamera_SetViewportSize(temp->Camera->Camera, width, height);
 	}
@@ -411,28 +411,28 @@ bool LayerMask(void* entity, const char* mask)
 	return strstr(ent->Tag.Name, mask) != NULL;
 }
 
-bool Scene_Raycast(Scene& out, Entity& entity, const Vec2& rayDirection, const char* mask, float maxDistance)
+bool Scene_Raycast(Scene* out, Entity* entity, const Vec2& rayDirection, const char* mask, float maxDistance)
 {
-	Vec2 rayOrigin = Vec3ToVec2(entity.Transform.Translation);
+	Vec2 rayOrigin = Vec3ToVec2(entity->Transform.Translation);
 
 	//TODO: Make a better way to do this
 	Rigidbody2D* rigidbody2D = nullptr;
 	if (Entity_HasComponent(entity, ComponentType_Rigidbody2D))
 	{
-		rigidbody2D = (Rigidbody2D*)entity.Rigidbody2D->RuntimeBody;
+		rigidbody2D = (Rigidbody2D*)entity->Rigidbody2D->RuntimeBody;
 		rigidbody2D->Enabled = false;
 	}
 	float distance;
-	void* ent = PhysicsWorld2D_Raycast(out.PhysicsWorld, rayOrigin, rayDirection, &distance);
+	void* ent = PhysicsWorld2D_Raycast(out->PhysicsWorld, rayOrigin, rayDirection, &distance);
 	if (rigidbody2D != nullptr)
 		rigidbody2D->Enabled = true;
 
 	if (ent != nullptr && LayerMask(ent, mask) && distance < maxDistance)
 	{
 		Entity* temp = (Entity*)ent;
-		if (Entity_HasComponent(*temp, ComponentType_Script))
+		if (Entity_HasComponent(temp, ComponentType_Script))
 		{
-			temp->Script->OnRaycastHit(*temp, entity, temp->Script->RuntimeData);
+			temp->Script->OnRaycastHit(temp, entity, temp->Script->RuntimeData);
 		}
 		return true;
 	}

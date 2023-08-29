@@ -16,8 +16,6 @@ struct RendererContextState
 	ID3D11BlendState* BSAlpha;
 	ID3D11BlendState* BSAdditive;
 	ID3D11BlendState* BSSubtractive;
-
-	ID3D11SamplerState* SSLinearWrap;
 };
 static RendererContextState s_RendererContextState;
 
@@ -109,32 +107,6 @@ ID3D11BlendState* CreateBlendState(BlendMode type)
 	return blendState;
 }
 
-ID3D11SamplerState* CreateSamplerState(TextureWrap wrap, TextureFilter filter)
-{
-	ID3D11SamplerState* samplerState = nullptr;
-
-	D3D11_SAMPLER_DESC samplerDesc = {};
-	switch (filter)
-	{
-	case TextureFilter::Linear:
-	{
-		if (wrap == TextureWrap::Repeat)
-		{
-			samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-			CORE_CHECK_DX_RESULT(s_RendererContextState.Device->CreateSamplerState(&samplerDesc, &samplerState));
-			break;
-		}
-	}
-	default :
-		CORE_ASSERT(false, "Unknown SamplerState type!");
-	}
-	
-	return nullptr;
-}
-
 void RendererContext_Initialize(HWND* windowHandle)
 {
 	s_RendererContextState.WindowHandle = windowHandle;
@@ -165,12 +137,21 @@ void RendererContext_Initialize(HWND* windowHandle)
 	s_RendererContextState.BSAlpha = CreateBlendState(BlendMode_Alpha);
 	s_RendererContextState.BSAdditive = CreateBlendState(BlendMode_Additive);
 	s_RendererContextState.BSSubtractive = CreateBlendState(BlendMode_Subtractive);
-	s_RendererContextState.SSLinearWrap = CreateSamplerState(TextureWrap::Repeat, TextureFilter::Linear);
 }
 
 void RendererContext_SwapBuffer(bool VSync)
 {
 	s_RendererContextState.SwapChain->Present(VSync, 0);
+}
+
+void RendererContext_Shutdown()
+{
+	s_RendererContextState.DSSNoDepthTest->Release();
+	s_RendererContextState.DSSLess->Release();
+	s_RendererContextState.BSDisabled->Release();
+	s_RendererContextState.BSAlpha->Release();
+	s_RendererContextState.BSAdditive->Release();
+	s_RendererContextState.BSSubtractive->Release();
 }
 
 IDXGISwapChain* RendererContext_GetSwapChain()
@@ -215,24 +196,6 @@ ID3D11BlendState* RendererContext_GetBlendState(BlendMode type)
 	}
 
 	CORE_ASSERT(false, "Unknown blend mode type");
-
-	return nullptr;
-}
-
-ID3D11SamplerState* RendererContext_GetSamplerState(TextureWrap wrap, TextureFilter filter)
-{
-	switch (filter)
-	{
-	case TextureFilter::Linear:
-	{
-		if (wrap == TextureWrap::Repeat)
-		{
-			return s_RendererContextState.SSLinearWrap;
-		}
-	}
-	}
-
-	CORE_ASSERT(false, "Unknown SamplerState type!");
 
 	return nullptr;
 }

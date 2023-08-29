@@ -26,41 +26,45 @@ struct EnemyData
 	float AttackCooldown = 0.0f;
 	EnemyStats Stats;
 
+	float AttackDistance = 0.0f;
+	float WalkSpeed = 0.0f;
+	float AttackRange = 0.0f;
+
 	TransformComponent* PlayerTransform = nullptr;
 	TransformComponent* Transform = nullptr;
 
 	Rigidbody2DComponent* Rigidbody = nullptr;
 	SpriteRendererComponent* SpriteRenderer = nullptr;
 
-	Texture2D* WalkSpriteSheet = nullptr;
+	RefPtr* WalkSpriteSheet = nullptr;
 	SpriteAnimator WalkSpriteAnimator;
 	SpriteTimer WalkSpriteTimer;
 	uint32_t WalkSpriteMaxAnimationFrames;
 
-	Texture2D* AttackSpriteSheet = nullptr;
+	RefPtr* AttackSpriteSheet = nullptr;
 	SpriteAnimator AttackSpriteAnimator;
 	SpriteTimer AttackSpriteTimer;
 	uint32_t AttackSpriteMaxAnimationFrames;
 
-	Texture2D* DeathSpriteSheet = nullptr;
+	RefPtr* DeathSpriteSheet = nullptr;
 	SpriteAnimator DeathSpriteAnimator;
 	SpriteTimer DeathSpriteTimer;
 	uint32_t DeathSpriteMaxAnimationFrames;
 
-	Texture2D* PainSpriteSheet = nullptr;
+	RefPtr* PainSpriteSheet = nullptr;
 	SpriteAnimator PainSpriteAnimator;
 	SpriteTimer PainSpriteTimer;
 	uint32_t PainSpriteMaxAnimationFrames;
 
-	Texture2D* IdleSpriteSheet = nullptr;
+	RefPtr* IdleSpriteSheet = nullptr;
 	Vec2 IdleUVStart;
 	Vec2 IdleUVEnd;
 };
 
-void EnemyController_OnCreate(Entity& entity, void* runtimeData);
-void EnemyController_OnUpdate(Entity& entity, float timeStep, void* runtimeData);
-void EnemyController_OnDestroy(Entity& entity, void* runtimeData);
-void EnemyController_OnCollision(Entity& entity, Entity& other, void* runtimeData);
-void EnemyController_OnRaycastHit(Entity& entity, Entity& other, void* runtimeData);
-void EnemyController_OnEnable(Entity& entity, void* runtimeData);
-void EnemyController_OnDisable(Entity& entity, void* runtimeData);
+void EnemyController_OnCreate(Entity* entity, void* runtimeData);
+void EnemyController_OnUpdate(Entity* entity, float timeStep, void* runtimeData);
+void EnemyController_OnDestroy(Entity* entity, void* runtimeData);
+void EnemyController_OnCollision(Entity* entity, Entity* other, void* runtimeData);
+void EnemyController_OnRaycastHit(Entity* entity, Entity* other, void* runtimeData);
+void EnemyController_OnEnable(Entity* entity, void* runtimeData);
+void EnemyController_OnDisable(Entity* entity, void* runtimeData);

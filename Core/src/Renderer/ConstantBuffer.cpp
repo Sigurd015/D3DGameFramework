@@ -27,17 +27,17 @@ void ConstantBuffer_SetData(ConstantBuffer& out, void* data)
 	RendererContext_GetDeviceContext()->Unmap(out.Buffer, 0);
 }
 
-void ConstantBuffer_Bind(const ConstantBuffer& out)
+void ConstantBuffer_Bind(const ConstantBuffer* out)
 {
-	RendererContext_GetDeviceContext()->VSSetConstantBuffers(out.BindSlot, 1, &out.Buffer);
-	RendererContext_GetDeviceContext()->PSSetConstantBuffers(out.BindSlot, 1, &out.Buffer);
+	RendererContext_GetDeviceContext()->VSSetConstantBuffers(out->BindSlot, 1, &out->Buffer);
+	RendererContext_GetDeviceContext()->PSSetConstantBuffers(out->BindSlot, 1, &out->Buffer);
 }
 
-void ConstantBuffer_Release(ConstantBuffer& out)
+void ConstantBuffer_Release(ConstantBuffer* out)
 {
-	if (out.Buffer)
+	if (out->Buffer)
 	{
-		out.Buffer->Release();
-		out.Buffer = nullptr;
+		out->Buffer->Release();
+		out->Buffer = nullptr;
 	}
 }

@@ -22,10 +22,10 @@ struct Pipeline
 	VertexBufferLayout Layout;
 	ID3D11InputLayout* InputLayout;
 
-	List ConstantBuffers;
+	ConstantBuffer* ConstantBuffer = nullptr;
 };
 
 void Pipeline_Create(Pipeline& out, const PipelineSpecification& spec);
-void Pipeline_SetConstantBuffer(Pipeline& out, const ConstantBuffer& constantBuffer);
+void Pipeline_SetConstantBuffer(Pipeline& out, ConstantBuffer& constantBuffer);
 void Pipeline_Bind(const Pipeline& out);
 void Pipeline_Release(Pipeline& out);

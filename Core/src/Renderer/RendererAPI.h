@@ -5,7 +5,6 @@
 #include "IndexBuffer.h"
 #include "Pipeline.h"
 #include "RendererContext.h"
-#include "Texture.h"
 
 void RendererAPI_Initialize();
 void RendererAPI_Shutdown();
@@ -17,4 +16,3 @@ void RendererAPI_DrawLines(const VertexBuffer& vertexBuffer, const Pipeline& pip
 void RendererAPI_DrawText(const WCHAR* str, const WCHAR* fontFamilyName, const Vec2& pos, const Vec4& color, float fontSize);
 void RendererAPI_SetDepthTest(bool enable);
 void RendererAPI_SetBlendingState(BlendMode type);
-ID3D11SamplerState* RendererAPI_GetSamplerState(TextureWrap wrap,TextureFilter filter);

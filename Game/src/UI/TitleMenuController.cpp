@@ -62,7 +62,7 @@ enum MenuState
 struct TitleMenuControllerData
 {
 	SpriteRendererComponent* BackgroundSprite = nullptr;
-	Texture2D* MenuBGTexture = nullptr;
+	RefPtr* MenuBGTexture = nullptr;
 	Entity* SelectionEntity = nullptr;
 	RectTransformComponent* SelectionRectTrans = nullptr;
 	SpriteRendererComponent* SelectionSprite = nullptr;
@@ -148,7 +148,7 @@ void Credits()
 {
 	s_Data.BackgroundSprite->Texture = nullptr;
 	s_Data.BackgroundSprite->Color = { 0.0f,0.0f,0.0f,1.0f };
-	Scene_SetEntityEnabled(*s_Data.SelectionEntity, false);
+	Scene_SetEntityEnabled(s_Data.SelectionEntity, false);
 	s_Data.State = CREDITS;
 
 	for (size_t i = 0; i < CREDITS_TEXT_COUNT; i++)
@@ -164,7 +164,7 @@ void ResetToIdle()
 	s_Data.SelectionRectTrans->Position.y = s_Data.CurrentMenuNode->yPos;
 	s_Data.SelectionRectTrans->Size = { 300.0f, 70.0f };
 	s_Data.SelectionSprite->Color = { 0.4f, 0.4f, 0.4f, 0.5f };
-	Scene_SetEntityEnabled(*s_Data.SelectionEntity, true);
+	Scene_SetEntityEnabled(s_Data.SelectionEntity, true);
 	s_Data.BackgroundSprite->Texture = s_Data.MenuBGTexture;
 	s_Data.BackgroundSprite->Color = { 1.0f,1.0f,1.0f,1.0f };
 }
@@ -177,7 +177,7 @@ void TitleMenuController_OnKeyPressed(KeyCode key)
 	}
 }
 
-void TitleMenuController_OnCreate(Entity& entity, void* runtimeData)
+void TitleMenuController_OnCreate(Entity* entity, void* runtimeData)
 {
 	s_Data = {};
 
@@ -209,21 +209,21 @@ void TitleMenuController_OnCreate(Entity& entity, void* runtimeData)
 
 	//Selection
 	{
-		s_Data.SelectionEntity = Scene_GetEntityByName(*entity.Scene, "Selection");
+		s_Data.SelectionEntity = Scene_GetEntityByName(entity->Scene, "Selection");
 
 		CORE_ASSERT(s_Data.SelectionEntity, "Cannot find selection entity!");
 
-		s_Data.SelectionRectTrans = (RectTransformComponent*)Entity_GetComponent(*s_Data.SelectionEntity, ComponentType_RectTransform);
+		s_Data.SelectionRectTrans = (RectTransformComponent*)Entity_GetComponent(s_Data.SelectionEntity, ComponentType_RectTransform);
 
 		CORE_ASSERT(s_Data.SelectionRectTrans, "Entity does not have RectTransformComponent!");
 
-		s_Data.SelectionSprite = (SpriteRendererComponent*)Entity_GetComponent(*s_Data.SelectionEntity, ComponentType_SpriteRenderer);
+		s_Data.SelectionSprite = (SpriteRendererComponent*)Entity_GetComponent(s_Data.SelectionEntity, ComponentType_SpriteRenderer);
 
 		CORE_ASSERT(s_Data.SelectionSprite, "Entity does not have RectTransformComponent!");
 	}
 }
 
-void TitleMenuController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
+void TitleMenuController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 {
 	if (Input_GetKeyDown(KeyCode::Esc))
 	{
@@ -401,13 +401,13 @@ void TitleMenuController_OnUpdate(Entity& entity, float timeStep, void* runtimeD
 	}
 }
 
-void TitleMenuController_OnDestroy(Entity& entity, void* runtimeData)
+void TitleMenuController_OnDestroy(Entity* entity, void* runtimeData)
 {}
-void TitleMenuController_OnCollision(Entity& entity, Entity& other, void* runtimeData)
+void TitleMenuController_OnCollision(Entity* entity, Entity* other, void* runtimeData)
 {}
-void TitleMenuController_OnRaycastHit(Entity& entity, Entity& other, void* runtimeData)
+void TitleMenuController_OnRaycastHit(Entity* entity, Entity* other, void* runtimeData)
 {}
-void TitleMenuController_OnEnable(Entity& entity, void* runtimeData)
+void TitleMenuController_OnEnable(Entity* entity, void* runtimeData)
 {}
-void TitleMenuController_OnDisable(Entity& entity, void* runtimeData)
+void TitleMenuController_OnDisable(Entity* entity, void* runtimeData)
 {}

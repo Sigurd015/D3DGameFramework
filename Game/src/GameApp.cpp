@@ -87,6 +87,8 @@ void Game_Shutdown(Application* appInst)
 {
 	Scene_Destroy(s_Data.PlayScene);
 	Scene_Destroy(s_Data.TitleScene);
+
+	Loading_Destroy();
 }
 
 void Game_SetMode(GameMode mode)
@@ -111,20 +113,20 @@ void CreateApplication(Application* appInst, ApplicationCommandLineArgs args)
 	appInst->Spec.CommandLineArgs = args;
 	if (appInst->Spec.CommandLineArgs.Count > 1)
 	{
-		appInst->Spec.FullScreen = true;
-		char* temp = "fullscreen";
+		appInst->Spec.FullScreen = false;
+		char* temp = "nofullscreen";
 		for (size_t i = 0; i < strlen(temp); i++)
 		{
 			if (tolower(appInst->Spec.CommandLineArgs.Args[1][i]) != temp[i])
 			{
-				appInst->Spec.FullScreen = false;
+				appInst->Spec.FullScreen = true;
 				break;
 			}
 		}
 	}
 	else
 	{
-		appInst->Spec.FullScreen = false;
+		appInst->Spec.FullScreen = true;
 	}
 	appInst->Ininialize = Game_Ininialize;
 	appInst->Shutdown = Game_Shutdown;

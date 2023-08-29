@@ -3,6 +3,7 @@
 #include "SceneCamera.h"
 #include "Renderer/Texture.h"
 #include "Physics/Rigidbody.h"
+#include "Utils/RefPtr.h"
 
 enum ComponentType
 {
@@ -63,7 +64,7 @@ struct CircleRendererComponent
 struct SpriteRendererComponent
 {
 	Vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
-	Texture2D* Texture;
+	RefPtr* Texture;
 	float TilingFactor = 1.0f;
 	Vec2 UVStart = { 0.0f, 0.0f };
 	Vec2 UVEnd = { 1.0f,1.0f };
@@ -79,9 +80,9 @@ struct Rigidbody2DComponent
 	void* RuntimeBody = nullptr;
 };
 
-void Rigidbody2DComponent_ApplyForce(Rigidbody2DComponent& rigidbody2D, const Vec2& force);
-void Rigidbody2DComponent_ApplyRotation(Rigidbody2DComponent& rigidbody2D, float rotation);
-void Rigidbody2DComponent_MovePosition(Rigidbody2DComponent& rigidbody2D, const Vec2& position);
+void Rigidbody2DComponent_ApplyForce(Rigidbody2DComponent* rigidbody2D, const Vec2& force);
+void Rigidbody2DComponent_ApplyRotation(Rigidbody2DComponent* rigidbody2D, float rotation);
+void Rigidbody2DComponent_MovePosition(Rigidbody2DComponent* rigidbody2D, const Vec2& position);
 
 struct BoxCollider2DComponent
 {
@@ -126,13 +127,13 @@ struct Entity;
 
 struct ScriptComponent
 {
-	void (*OnCreate)(Entity& entity, void* runtimeData);
-	void (*OnUpdate)(Entity& entity, float timeStep, void* runtimeData);
-	void (*OnDestroy)(Entity& entity, void* runtimeData);
-	void (*OnCollision)(Entity& entity, Entity& other, void* runtimeData);
-	void (*OnRaycastHit)(Entity& entity, Entity& other, void* runtimeData);
-	void (*OnEnable)(Entity& entity, void* runtimeData);
-	void (*OnDisable)(Entity& entity, void* runtimeData);
+	void (*OnCreate)(Entity* entity, void* runtimeData);
+	void (*OnUpdate)(Entity* entity, float timeStep, void* runtimeData);
+	void (*OnDestroy)(Entity* entity, void* runtimeData);
+	void (*OnCollision)(Entity* entity, Entity* other, void* runtimeData);
+	void (*OnRaycastHit)(Entity* entity, Entity* other, void* runtimeData);
+	void (*OnEnable)(Entity* entity, void* runtimeData);
+	void (*OnDisable)(Entity* entity, void* runtimeData);
 
 	// For ScriptComponent that used by multiple entities, this is the runtime data for each entity
 	void* RuntimeData = nullptr;

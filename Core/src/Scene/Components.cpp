@@ -24,23 +24,23 @@ void RectTransformComponent_GetPositionAndSize(const RectTransformComponent& rec
 	size->y = (rectTransform.Size.y / standardScreenSize.y) * rectTransform.Scale.y * scale.y * 2.0f;
 }
 
-void Rigidbody2DComponent_ApplyForce(Rigidbody2DComponent& rigidbody2D, const Vec2& force)
+void Rigidbody2DComponent_ApplyForce(Rigidbody2DComponent* rigidbody2D, const Vec2& force)
 {
 	if (Vec2Equal(force, Vec2Zero))
 		return;
-	Rigidbody2D_ApplyForce(rigidbody2D.RuntimeBody, force);
+	Rigidbody2D_ApplyForce(rigidbody2D->RuntimeBody, force);
 }
 
-void Rigidbody2DComponent_ApplyRotation(Rigidbody2DComponent& rigidbody2D, float rotation)
+void Rigidbody2DComponent_ApplyRotation(Rigidbody2DComponent* rigidbody2D, float rotation)
 {
 	if (rotation != 0.0f)
-		Rigidbody2D_ApplyRotation(rigidbody2D.RuntimeBody, rotation);
+		Rigidbody2D_ApplyRotation(rigidbody2D->RuntimeBody, rotation);
 }
 
-void Rigidbody2DComponent_MovePosition(Rigidbody2DComponent& rigidbody2D, const Vec2& position)
+void Rigidbody2DComponent_MovePosition(Rigidbody2DComponent* rigidbody2D, const Vec2& position)
 {
 	if (Vec2Equal(position, Vec2Zero))
 		return;
 
-	Rigidbody2D_MovePosition(rigidbody2D.RuntimeBody, position);
+	Rigidbody2D_MovePosition(rigidbody2D->RuntimeBody, position);
 }

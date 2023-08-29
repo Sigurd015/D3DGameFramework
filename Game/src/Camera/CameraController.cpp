@@ -16,15 +16,15 @@ struct CameraControllerData
 };
 static CameraControllerData s_Data;
 
-void CameraController_OnCreate(Entity& entity, void* runtimeData)
+void CameraController_OnCreate(Entity* entity, void* runtimeData)
 {
 	s_Data = {};
 
-	Entity* Player = Scene_GetEntityByName(*entity.Scene, "Player");
+	Entity* Player = Scene_GetEntityByName(entity->Scene, "Player");
 	CORE_ASSERT(Player, "Cannot find Player entity!");
 
 	if (Player)
-		s_Data.PlayerTransform = (TransformComponent*)Entity_GetComponent(*Player, ComponentType_Transform);
+		s_Data.PlayerTransform = (TransformComponent*)Entity_GetComponent(Player, ComponentType_Transform);
 	CORE_ASSERT(s_Data.PlayerTransform, "Entity does not have TransformComponent!");
 
 	s_Data.Transform = (TransformComponent*)Entity_GetComponent(entity, ComponentType_Transform);
@@ -35,19 +35,19 @@ void CameraController_OnCreate(Entity& entity, void* runtimeData)
 		s_Data.Camera = (CameraComponent*)Entity_GetComponent(entity, ComponentType_Camera);
 		CORE_ASSERT(s_Data.Camera, "Entity does not have CameraComponent!");
 
-		Entity* debugCamera = Scene_GetEntityByName(*entity.Scene, "DebugCamera");
+		Entity* debugCamera = Scene_GetEntityByName(entity->Scene, "DebugCamera");
 		CORE_ASSERT(debugCamera, "Cannot find DebugCamera entity!");
 
-		s_Data.DebugCameraTransform = (TransformComponent*)Entity_GetComponent(*debugCamera, ComponentType_Transform);
+		s_Data.DebugCameraTransform = (TransformComponent*)Entity_GetComponent(debugCamera, ComponentType_Transform);
 		CORE_ASSERT(s_Data.DebugCameraTransform, "Entity does not have TransformComponent!");
 
-		s_Data.DebugCameraCamera = (CameraComponent*)Entity_GetComponent(*debugCamera, ComponentType_Camera);
+		s_Data.DebugCameraCamera = (CameraComponent*)Entity_GetComponent(debugCamera, ComponentType_Camera);
 		CORE_ASSERT(s_Data.DebugCameraCamera, "Entity does not have CameraComponent!");
 	}
 	#endif
 }
 
-void CameraController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
+void CameraController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 {
 	s_Data.Transform->Translation = s_Data.PlayerTransform->Translation;
 
@@ -98,13 +98,13 @@ void CameraController_OnUpdate(Entity& entity, float timeStep, void* runtimeData
 	#endif
 }
 
-void CameraController_OnDestroy(Entity& entity, void* runtimeData)
+void CameraController_OnDestroy(Entity* entity, void* runtimeData)
 {}
-void CameraController_OnCollision(Entity& entity, Entity& other, void* runtimeData)
+void CameraController_OnCollision(Entity* entity, Entity* other, void* runtimeData)
 {}
-void CameraController_OnRaycastHit(Entity& entity, Entity& other, void* runtimeData)
+void CameraController_OnRaycastHit(Entity* entity, Entity* other, void* runtimeData)
 {}
-void CameraController_OnEnable(Entity& entity, void* runtimeData)
+void CameraController_OnEnable(Entity* entity, void* runtimeData)
 {}
-void CameraController_OnDisable(Entity& entity, void* runtimeData)
+void CameraController_OnDisable(Entity* entity, void* runtimeData)
 {}

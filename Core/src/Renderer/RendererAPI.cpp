@@ -95,6 +95,8 @@ void RendererAPI_Shutdown()
 	s_RendererAPIState.D2DFactory->Release();
 	s_RendererAPIState.DWriteFactory->Release();
 	s_RendererAPIState.D2DRenderTarget->Release();
+
+	RendererContext_Shutdown();
 }
 
 void RendererAPI_SetViewport(uint32_t width, uint32_t height)
@@ -145,11 +147,6 @@ void RendererAPI_SetBlendingState(BlendMode type)
 {
 	static float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	s_RendererAPIState.DeviceContext->OMSetBlendState(RendererContext_GetBlendState(type), blendFactor, 0xffffffff);
-}
-
-ID3D11SamplerState* RendererAPI_GetSamplerState(TextureWrap wrap, TextureFilter filter)
-{
-	return RendererContext_GetSamplerState(wrap, filter);
 }
 
 void RendererAPI_DrawText(const WCHAR* str, const WCHAR* fontFamilyName, const Vec2& pos, const Vec4& color, float fontSize)

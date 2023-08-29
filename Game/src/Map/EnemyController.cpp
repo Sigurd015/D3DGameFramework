@@ -1,4 +1,5 @@
 #include "EnemyController.h"
+#include "FieldController.h"
 
 #define WALK_ANIMATION_FRAME_SPEED 0.25f
 #define ATTACK_ANIMATION_FRAME_SPEED 0.25f
@@ -19,15 +20,21 @@
 #define CYBER_DEMON_MAX_HP 50.0f
 #define CYBER_DEMON_ATTACK_COOLDOWN_TIME 3.0f
 
-void EnemyController_OnCreate(Entity& entity, void* runtimeData)
+#define SOLDIER_WALK_SPEED 1.0f
+#define SOLDIER_ATTACK_DISTANCE 15.0f
+#define SOLDIER_ATTACK_RANGE 20.0f
+#define SOLDIER_MAX_HP 50.0f
+#define SOLDIER_ATTACK_COOLDOWN_TIME 3.0f
+
+void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 {
 	EnemyData* data = (EnemyData*)runtimeData;
 
-	Entity* Player = Scene_GetEntityByName(*entity.Scene, "Player");
+	Entity* Player = Scene_GetEntityByName(entity->Scene, "Player");
 	CORE_ASSERT(Player, "Cannot find Player entity!");
 
 	if (Player)
-		data->PlayerTransform = (TransformComponent*)Entity_GetComponent(*Player, ComponentType_Transform);
+		data->PlayerTransform = (TransformComponent*)Entity_GetComponent(Player, ComponentType_Transform);
 	CORE_ASSERT(data->PlayerTransform, "Entity does not have TransformComponent!");
 
 	data->Transform = (TransformComponent*)Entity_GetComponent(entity, ComponentType_Transform);
@@ -46,12 +53,16 @@ void EnemyController_OnCreate(Entity& entity, void* runtimeData)
 		data->Stats.MaxHP = CACO_DEMON_MAX_HP;
 		data->Stats.HP = data->Stats.MaxHP;
 		data->AttackCooldown = CACO_DEMON_ATTACK_COOLDOWN_TIME;
+		data->AttackDistance = CACO_DEMON_ATTACK_DISTANCE;
+		data->WalkSpeed = CACO_DEMON_WALK_SPEED;
+		data->AttackRange = CACO_DEMON_ATTACK_RANGE;
 
 		data->WalkSpriteMaxAnimationFrames = 3;
 		{
 			SpriteAnimatorSpecification spec;
-			spec.TextureWidth = Texture2D_GetWidth(*data->WalkSpriteSheet);
-			spec.TextureHeight = Texture2D_GetHeight(*data->WalkSpriteSheet);
+			Texture2D* texture = (Texture2D*)RefPtr_Get(data->WalkSpriteSheet);
+			spec.TextureWidth = Texture2D_GetWidth(texture);
+			spec.TextureHeight = Texture2D_GetHeight(texture);
 			spec.ElementsCount = 3;
 			spec.ElementsPerColumn = 3;
 			spec.ElementsPerRow = 1;
@@ -66,8 +77,9 @@ void EnemyController_OnCreate(Entity& entity, void* runtimeData)
 		data->PainSpriteMaxAnimationFrames = 2;
 		{
 			SpriteAnimatorSpecification spec;
-			spec.TextureWidth = Texture2D_GetWidth(*data->PainSpriteSheet);
-			spec.TextureHeight = Texture2D_GetHeight(*data->PainSpriteSheet);
+			Texture2D* texture = (Texture2D*)RefPtr_Get(data->PainSpriteSheet);
+			spec.TextureWidth = Texture2D_GetWidth(texture);
+			spec.TextureHeight = Texture2D_GetHeight(texture);
 			spec.ElementsCount = 2;
 			spec.ElementsPerColumn = 2;
 			spec.ElementsPerRow = 1;
@@ -82,8 +94,9 @@ void EnemyController_OnCreate(Entity& entity, void* runtimeData)
 		data->DeathSpriteMaxAnimationFrames = 6;
 		{
 			SpriteAnimatorSpecification spec;
-			spec.TextureWidth = Texture2D_GetWidth(*data->DeathSpriteSheet);
-			spec.TextureHeight = Texture2D_GetHeight(*data->DeathSpriteSheet);
+			Texture2D* texture = (Texture2D*)RefPtr_Get(data->DeathSpriteSheet);
+			spec.TextureWidth = Texture2D_GetWidth(texture);
+			spec.TextureHeight = Texture2D_GetHeight(texture);
 			spec.ElementsCount = 6;
 			spec.ElementsPerColumn = 6;
 			spec.ElementsPerRow = 1;
@@ -98,8 +111,9 @@ void EnemyController_OnCreate(Entity& entity, void* runtimeData)
 		data->AttackSpriteMaxAnimationFrames = 5;
 		{
 			SpriteAnimatorSpecification spec;
-			spec.TextureWidth = Texture2D_GetWidth(*data->AttackSpriteSheet);
-			spec.TextureHeight = Texture2D_GetHeight(*data->AttackSpriteSheet);
+			Texture2D* texture = (Texture2D*)RefPtr_Get(data->AttackSpriteSheet);
+			spec.TextureWidth = Texture2D_GetWidth(texture);
+			spec.TextureHeight = Texture2D_GetHeight(texture);
 			spec.ElementsCount = 5;
 			spec.ElementsPerColumn = 5;
 			spec.ElementsPerRow = 1;
@@ -127,12 +141,16 @@ void EnemyController_OnCreate(Entity& entity, void* runtimeData)
 		data->Stats.MaxHP = CYBER_DEMON_MAX_HP;
 		data->Stats.HP = data->Stats.MaxHP;
 		data->AttackCooldown = CYBER_DEMON_ATTACK_COOLDOWN_TIME;
+		data->AttackDistance = CYBER_DEMON_ATTACK_DISTANCE;
+		data->WalkSpeed = CYBER_DEMON_WALK_SPEED;
+		data->AttackRange = CYBER_DEMON_ATTACK_RANGE;
 
 		data->WalkSpriteMaxAnimationFrames = 4;
 		{
 			SpriteAnimatorSpecification spec;
-			spec.TextureWidth = Texture2D_GetWidth(*data->WalkSpriteSheet);
-			spec.TextureHeight = Texture2D_GetHeight(*data->WalkSpriteSheet);
+			Texture2D* texture = (Texture2D*)RefPtr_Get(data->WalkSpriteSheet);
+			spec.TextureWidth = Texture2D_GetWidth(texture);
+			spec.TextureHeight = Texture2D_GetHeight(texture);
 			spec.ElementsCount = 4;
 			spec.ElementsPerColumn = 4;
 			spec.ElementsPerRow = 1;
@@ -147,8 +165,9 @@ void EnemyController_OnCreate(Entity& entity, void* runtimeData)
 		data->PainSpriteMaxAnimationFrames = 2;
 		{
 			SpriteAnimatorSpecification spec;
-			spec.TextureWidth = Texture2D_GetWidth(*data->PainSpriteSheet);
-			spec.TextureHeight = Texture2D_GetHeight(*data->PainSpriteSheet);
+			Texture2D* texture = (Texture2D*)RefPtr_Get(data->PainSpriteSheet);
+			spec.TextureWidth = Texture2D_GetWidth(texture);
+			spec.TextureHeight = Texture2D_GetHeight(texture);
 			spec.ElementsCount = 2;
 			spec.ElementsPerColumn = 2;
 			spec.ElementsPerRow = 1;
@@ -163,8 +182,9 @@ void EnemyController_OnCreate(Entity& entity, void* runtimeData)
 		data->DeathSpriteMaxAnimationFrames = 9;
 		{
 			SpriteAnimatorSpecification spec;
-			spec.TextureWidth = Texture2D_GetWidth(*data->DeathSpriteSheet);
-			spec.TextureHeight = Texture2D_GetHeight(*data->DeathSpriteSheet);
+			Texture2D* texture = (Texture2D*)RefPtr_Get(data->DeathSpriteSheet);
+			spec.TextureWidth = Texture2D_GetWidth(texture);
+			spec.TextureHeight = Texture2D_GetHeight(texture);
 			spec.ElementsCount = 9;
 			spec.ElementsPerColumn = 9;
 			spec.ElementsPerRow = 1;
@@ -179,8 +199,9 @@ void EnemyController_OnCreate(Entity& entity, void* runtimeData)
 		data->AttackSpriteMaxAnimationFrames = 2;
 		{
 			SpriteAnimatorSpecification spec;
-			spec.TextureWidth = Texture2D_GetWidth(*data->AttackSpriteSheet);
-			spec.TextureHeight = Texture2D_GetHeight(*data->AttackSpriteSheet);
+			Texture2D* texture = (Texture2D*)RefPtr_Get(data->AttackSpriteSheet);
+			spec.TextureWidth = Texture2D_GetWidth(texture);
+			spec.TextureHeight = Texture2D_GetHeight(texture);
 			spec.ElementsCount = 2;
 			spec.ElementsPerColumn = 2;
 			spec.ElementsPerRow = 1;
@@ -196,7 +217,7 @@ void EnemyController_OnCreate(Entity& entity, void* runtimeData)
 		//Idle animation
 		{
 			data->IdleSpriteSheet = data->WalkSpriteSheet;
-			SpriteElement* spriteElement = SpriteAnimator_GetElement(data->WalkSpriteAnimator, 1);
+			SpriteElement* spriteElement = SpriteAnimator_GetElement(data->WalkSpriteAnimator, 0);
 			data->IdleUVStart = spriteElement->UVStart;
 			data->IdleUVEnd = spriteElement->UVEnd;
 
@@ -205,7 +226,90 @@ void EnemyController_OnCreate(Entity& entity, void* runtimeData)
 	}
 	case SOLDIER:
 	{
-		data->WalkSpriteMaxAnimationFrames = 3;
+		data->Stats.MaxHP = SOLDIER_MAX_HP;
+		data->Stats.HP = data->Stats.MaxHP;
+		data->AttackCooldown = SOLDIER_ATTACK_COOLDOWN_TIME;
+		data->AttackDistance = SOLDIER_ATTACK_DISTANCE;
+		data->WalkSpeed = SOLDIER_WALK_SPEED;
+		data->AttackRange = SOLDIER_ATTACK_RANGE;
+
+		data->WalkSpriteMaxAnimationFrames = 4;
+		{
+			SpriteAnimatorSpecification spec;
+			Texture2D* texture = (Texture2D*)RefPtr_Get(data->WalkSpriteSheet);
+			spec.TextureWidth = Texture2D_GetWidth(texture);
+			spec.TextureHeight = Texture2D_GetHeight(texture);
+			spec.ElementsCount = 4;
+			spec.ElementsPerColumn = 4;
+			spec.ElementsPerRow = 1;
+			spec.ElementWidth = 80;
+			spec.ElementHeight = 110;
+			spec.StartElement = { 0,0 };
+
+			SpriteAnimator_Create(data->WalkSpriteAnimator, spec);
+
+			SpriteTimer_Create(data->WalkSpriteTimer, data->WalkSpriteMaxAnimationFrames, WALK_ANIMATION_FRAME_SPEED);
+		}
+		data->PainSpriteMaxAnimationFrames = 1;
+		{
+			SpriteAnimatorSpecification spec;
+			Texture2D* texture = (Texture2D*)RefPtr_Get(data->PainSpriteSheet);
+			spec.TextureWidth = Texture2D_GetWidth(texture);
+			spec.TextureHeight = Texture2D_GetHeight(texture);
+			spec.ElementsCount = 1;
+			spec.ElementsPerColumn = 1;
+			spec.ElementsPerRow = 1;
+			spec.ElementWidth = 78;
+			spec.ElementHeight = 110;
+			spec.StartElement = { 0,0 };
+
+			SpriteAnimator_Create(data->PainSpriteAnimator, spec);
+
+			SpriteTimer_Create(data->PainSpriteTimer, data->PainSpriteMaxAnimationFrames, PAIN_ANIMATION_FRAME_SPEED);
+		}
+		data->DeathSpriteMaxAnimationFrames = 9;
+		{
+			SpriteAnimatorSpecification spec;
+			Texture2D* texture = (Texture2D*)RefPtr_Get(data->DeathSpriteSheet);
+			spec.TextureWidth = Texture2D_GetWidth(texture);
+			spec.TextureHeight = Texture2D_GetHeight(texture);
+			spec.ElementsCount = 9;
+			spec.ElementsPerColumn = 9;
+			spec.ElementsPerRow = 1;
+			spec.ElementWidth = 114;
+			spec.ElementHeight = 118;
+			spec.StartElement = { 0,0 };
+
+			SpriteAnimator_Create(data->DeathSpriteAnimator, spec);
+
+			SpriteTimer_Create(data->DeathSpriteTimer, data->DeathSpriteMaxAnimationFrames, DEATH_ANIMATION_FRAME_SPEED);
+		}
+		data->AttackSpriteMaxAnimationFrames = 2;
+		{
+			SpriteAnimatorSpecification spec;
+			Texture2D* texture = (Texture2D*)RefPtr_Get(data->AttackSpriteSheet);
+			spec.TextureWidth = Texture2D_GetWidth(texture);
+			spec.TextureHeight = Texture2D_GetHeight(texture);
+			spec.ElementsCount = 2;
+			spec.ElementsPerColumn = 2;
+			spec.ElementsPerRow = 1;
+			spec.ElementWidth = 54;
+			spec.ElementHeight = 110;
+			spec.StartElement = { 0,0 };
+
+			SpriteAnimator_Create(data->AttackSpriteAnimator, spec);
+
+			SpriteTimer_Create(data->AttackSpriteTimer, data->AttackSpriteMaxAnimationFrames, ATTACK_ANIMATION_FRAME_SPEED);
+		}
+
+		//Idle animation
+		{
+			data->IdleSpriteSheet = data->WalkSpriteSheet;
+			SpriteElement* spriteElement = SpriteAnimator_GetElement(data->WalkSpriteAnimator, 2);
+			data->IdleUVStart = spriteElement->UVStart;
+			data->IdleUVEnd = spriteElement->UVEnd;
+
+		}
 		break;
 	}
 	}
@@ -214,11 +318,10 @@ void EnemyController_OnCreate(Entity& entity, void* runtimeData)
 	data->SpriteRenderer->UVStart = data->IdleUVStart;
 	data->SpriteRenderer->UVEnd = data->IdleUVEnd;
 
-	//TODO: Test
 	data->State = ENEMY_WALK;
 }
 
-void EnemyController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
+void EnemyController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 {
 	EnemyData* data = (EnemyData*)runtimeData;
 
@@ -231,15 +334,12 @@ void EnemyController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
 	case ENEMY_WALK:
 	{
 		//Follow player and attack
-		switch (data->Type)
-		{
-		case EnemyType::CACO_DEMON:
 		{
 			Vec2 playerPos = { data->PlayerTransform->Translation.x, data->PlayerTransform->Translation.y };
 			Vec2 enemyPos = { data->Transform->Translation.x, data->Transform->Translation.y };
 			Vec2 dir = Vec2Sub(playerPos, enemyPos);
 
-			if (Vec2Length(dir) < CACO_DEMON_ATTACK_DISTANCE)
+			if (Vec2Length(dir) < data->AttackDistance)
 			{
 				if (data->CanAttack)
 				{
@@ -250,35 +350,9 @@ void EnemyController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
 
 			float angle = atan2f(dir.y, dir.x);
 
-			Vec2 temp = { cosf(angle) * CACO_DEMON_WALK_SPEED, sinf(angle) * CACO_DEMON_WALK_SPEED };
+			Vec2 temp = { cosf(angle) * data->WalkSpeed, sinf(angle) * data->WalkSpeed };
 
-			Rigidbody2DComponent_MovePosition(*data->Rigidbody, Vec2MulFloat(temp, timeStep));
-			break;
-		}
-		case EnemyType::CYBER_DEMON:
-		{
-			Vec2 playerPos = { data->PlayerTransform->Translation.x, data->PlayerTransform->Translation.y };
-			Vec2 enemyPos = { data->Transform->Translation.x, data->Transform->Translation.y };
-			Vec2 dir = Vec2Sub(playerPos, enemyPos);
-
-			if (Vec2Length(dir) < CYBER_DEMON_ATTACK_DISTANCE)
-			{
-				if (data->CanAttack)
-				{
-					data->State = ENEMY_ATTACK;
-					break;
-				}
-			}
-
-			float angle = atan2f(dir.y, dir.x);
-
-			Vec2 temp = { cosf(angle) * CYBER_DEMON_WALK_SPEED, sinf(angle) * CYBER_DEMON_WALK_SPEED };
-
-			Rigidbody2DComponent_MovePosition(*data->Rigidbody, Vec2MulFloat(temp, timeStep));
-			break;
-		}
-		case EnemyType::SOLDIER:
-			break;
+			Rigidbody2DComponent_MovePosition(data->Rigidbody, Vec2MulFloat(temp, timeStep));
 		}
 
 		//Walk animation
@@ -307,32 +381,9 @@ void EnemyController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
 
 			if (currentFrame == data->AttackSpriteMaxAnimationFrames - 1)
 			{
-				switch (data->Type)
+				if (Scene_Raycast(entity->Scene, entity, { 0.0f,-1.0f }, "Player", data->AttackRange))
 				{
-				case EnemyType::CACO_DEMON:
-				{
-					if (Scene_Raycast(*entity.Scene, entity, { 0.0f,-1.0f }, "Player", CACO_DEMON_ATTACK_RANGE))
-					{
-						data->CanAttack = false;
-					}
-					break;
-				}
-				case EnemyType::CYBER_DEMON:
-				{
-					if (Scene_Raycast(*entity.Scene, entity, { 0.0f,-1.0f }, "Player", CYBER_DEMON_ATTACK_RANGE))
-					{
-						data->CanAttack = false;
-					}
-					break;
-				}
-				case EnemyType::SOLDIER:
-				{
-					/*if (Scene_Raycast(*entity.Scene, entity, { 0.0f,-1.0f }, "Player", CACO_DEMON_ATTACK_RANGE))
-					{
-						data->CanAttack = false;
-					}*/
-					break;
-				}
+					data->CanAttack = false;
 				}
 
 				data->State = ENEMY_WALK;
@@ -355,7 +406,6 @@ void EnemyController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
 
 			if (currentFrame == data->PainSpriteMaxAnimationFrames - 1)
 			{
-				//TODO: Test
 				data->State = ENEMY_WALK;
 				SpriteTimer_Reset(data->PainSpriteTimer);
 
@@ -383,6 +433,7 @@ void EnemyController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
 				data->State = ENEMY_IDLE;
 				SpriteTimer_Reset(data->DeathSpriteTimer);
 				Scene_SetEntityEnabled(entity, false);
+				FieldController_OnEnemyDead(data->Transform->Translation);
 			}
 			break;
 		}
@@ -401,14 +452,28 @@ void EnemyController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
 	}
 }
 
-void EnemyController_OnDestroy(Entity& entity, void* runtimeData)
-{}
-void EnemyController_OnCollision(Entity& entity, Entity& other, void* runtimeData)
+void EnemyController_OnDestroy(Entity* entity, void* runtimeData)
+{
+	EnemyData* data = (EnemyData*)runtimeData;
+
+	void(*ReleaseFunc)(void* ptr) = [](void* ptr)
+		{
+			Texture2D_Release((Texture2D*)ptr);
+		};
+
+	RefPtr_Release(data->AttackSpriteSheet, ReleaseFunc);
+	RefPtr_Release(data->WalkSpriteSheet, ReleaseFunc);
+	RefPtr_Release(data->IdleSpriteSheet, ReleaseFunc);
+	RefPtr_Release(data->PainSpriteSheet, ReleaseFunc);
+	RefPtr_Release(data->DeathSpriteSheet, ReleaseFunc);
+}
+
+void EnemyController_OnCollision(Entity* entity, Entity* other, void* runtimeData)
 {}
 
-void EnemyController_OnRaycastHit(Entity& entity, Entity& other, void* runtimeData)
+void EnemyController_OnRaycastHit(Entity* entity, Entity* other, void* runtimeData)
 {
-	if (!strcmp(other.Tag.Name, "Player"))
+	if (!strcmp(other->Tag.Name, "Player"))
 	{
 		EnemyData* data = (EnemyData*)runtimeData;
 
@@ -420,18 +485,21 @@ void EnemyController_OnRaycastHit(Entity& entity, Entity& other, void* runtimeDa
 			data->State = ENEMY_PAIN;
 		//data->State = ENEMY_ATTACK;
 
-		APP_LOG_INFO(entity.Tag.Name);
-		APP_LOG_INFO("Enemy hited by player");
+		#ifndef CORE_DIST
+		APP_LOG_INFO("Enemy hited by player: ");
+		APP_LOG_INFO(entity->Tag.Name);
+		#endif 
+
 	}
 }
 
-void EnemyController_OnEnable(Entity& entity, void* runtimeData)
+void EnemyController_OnEnable(Entity* entity, void* runtimeData)
 {
 	EnemyData* data = (EnemyData*)runtimeData;
 	data->State = ENEMY_WALK;
 }
 
-void EnemyController_OnDisable(Entity& entity, void* runtimeData)
+void EnemyController_OnDisable(Entity* entity, void* runtimeData)
 {
 	EnemyData* data = (EnemyData*)runtimeData;
 	data->State = ENEMY_IDLE;

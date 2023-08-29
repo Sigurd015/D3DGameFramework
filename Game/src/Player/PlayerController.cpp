@@ -24,7 +24,7 @@ struct PlayerControllerData
 };
 static PlayerControllerData s_Data;
 
-void PlayerController_OnCreate(Entity& entity, void* runtimeData)
+void PlayerController_OnCreate(Entity* entity, void* runtimeData)
 {
 	s_Data = {};
 
@@ -35,7 +35,7 @@ void PlayerController_OnCreate(Entity& entity, void* runtimeData)
 	CORE_ASSERT(s_Data.Rigidbody2D, "Entity does not have Rigidbody2DComponent!");
 }
 
-void PlayerController_OnUpdate(Entity& entity, float timeStep, void* runtimeData)
+void PlayerController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 {
 	//Movement
 	{
@@ -51,7 +51,7 @@ void PlayerController_OnUpdate(Entity& entity, float timeStep, void* runtimeData
 		if (Input_GetKey(KeyMap_GetKey(MOVE_RIGHT)))
 			movement.x += speed;
 
-		Rigidbody2DComponent_MovePosition(*s_Data.Rigidbody2D, Vec2MulFloat(movement, timeStep));
+		Rigidbody2DComponent_MovePosition(s_Data.Rigidbody2D, Vec2MulFloat(movement, timeStep));
 	}
 
 	//Shooting
@@ -63,7 +63,7 @@ void PlayerController_OnUpdate(Entity& entity, float timeStep, void* runtimeData
 				s_Data.CanShoot = false;
 				UIController_PlayShootAnimation();
 				Vec2 direction = { 0.0f,1.0f };
-				if (Scene_Raycast(*entity.Scene, entity, direction, "Enemy", ATTACK_RANGE))
+				if (Scene_Raycast(entity->Scene, entity, direction, "Enemy", ATTACK_RANGE))
 				{
 					UIController_PlayHitIcon();
 				}
@@ -85,21 +85,26 @@ void PlayerController_OnUpdate(Entity& entity, float timeStep, void* runtimeData
 	}
 }
 
-void PlayerController_OnDestroy(Entity& entity, void* runtimeData)
+void PlayerController_OnDestroy(Entity* entity, void* runtimeData)
 {}
 
-void PlayerController_OnCollision(Entity& entity, Entity& other, void* runtimeData)
+void PlayerController_OnCollision(Entity* entity, Entity* other, void* runtimeData)
 {
-	APP_LOG_INFO("OnCollision - ");
-	APP_LOG_INFO(other.Tag.Name);
+	#ifndef CORE_DIST
+	APP_LOG_INFO("OnCollision: ");
+	APP_LOG_INFO(other->Tag.Name);
+	#endif 
 }
 
-void PlayerController_OnRaycastHit(Entity& entity, Entity& other, void* runtimeData)
+void PlayerController_OnRaycastHit(Entity* entity, Entity* other, void* runtimeData)
 {
-	if (strstr(other.Tag.Name, "Enemy") != NULL)
+	if (strstr(other->Tag.Name, "Enemy") != NULL)
 	{
-		APP_LOG_INFO(other.Tag.Name);
-		APP_LOG_INFO("Player hited by enemy");
+
+		#ifndef CORE_DIST
+		APP_LOG_INFO("Player hited by enemy: ");
+		APP_LOG_INFO(other->Tag.Name);
+		#endif 
 
 		s_Data.Stats.Hp -= ENEMY_DAMAGE;
 
@@ -107,9 +112,9 @@ void PlayerController_OnRaycastHit(Entity& entity, Entity& other, void* runtimeD
 	}
 }
 
-void PlayerController_OnEnable(Entity& entity, void* runtimeData)
+void PlayerController_OnEnable(Entity* entity, void* runtimeData)
 {}
-void PlayerController_OnDisable(Entity& entity, void* runtimeData)
+void PlayerController_OnDisable(Entity* entity, void* runtimeData)
 {}
 
 float PlayerController_GetHpPercent()

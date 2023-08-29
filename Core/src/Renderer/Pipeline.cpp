@@ -40,13 +40,11 @@ void Pipeline_Create(Pipeline& out, const PipelineSpecification& spec)
 		out.Shader.VertexShaderBlob->GetBufferSize(), &out.InputLayout));
 
 	free(tempList);
-
-	List_Create(out.ConstantBuffers);
 }
 
-void Pipeline_SetConstantBuffer(Pipeline& out, const ConstantBuffer& constantBuffer)
+void Pipeline_SetConstantBuffer(Pipeline& out, ConstantBuffer& constantBuffer)
 {
-	List_Add(out.ConstantBuffers, (void*)&constantBuffer);
+	out.ConstantBuffer = &constantBuffer;
 }
 
 void Pipeline_Bind(const Pipeline& out)
@@ -55,14 +53,8 @@ void Pipeline_Bind(const Pipeline& out)
 
 	Shader_Bind(out.Shader);
 
-	uint32_t size = List_Size(out.ConstantBuffers);
-	if (size)
-	{
-		for (size_t i = 0; i < size; i++)
-		{
-			ConstantBuffer_Bind(*(ConstantBuffer*)List_Get(out.ConstantBuffers, i));
-		}
-	}
+	if (out.ConstantBuffer)
+		ConstantBuffer_Bind(out.ConstantBuffer);
 }
 
 void Pipeline_Release(Pipeline& out)
@@ -74,14 +66,6 @@ void Pipeline_Release(Pipeline& out)
 	}
 	Shader_Release(out.Shader);
 
-	uint32_t size = List_Size(out.ConstantBuffers);
-	if (size)
-	{
-		for (size_t i = 0; i < size; i++)
-		{
-			ConstantBuffer_Release(*(ConstantBuffer*)List_Get(out.ConstantBuffers, i));
-		}
-	}
-
-	List_Free(out.ConstantBuffers, false);
+	if (out.ConstantBuffer)
+		ConstantBuffer_Release(out.ConstantBuffer);
 }
