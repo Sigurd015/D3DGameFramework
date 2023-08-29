@@ -26,6 +26,7 @@ struct ApplicationSpecification
 };
 
 void Application_Ininialize(Application* appInst);
+void Application_SetTimeScale(float timeScale);
 void Application_Run();
 void Application_Close();
 void Application_Shutdown();

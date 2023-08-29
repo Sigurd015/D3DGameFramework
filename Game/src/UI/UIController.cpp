@@ -8,6 +8,10 @@
 #define BLOOD_EFFECT_MAX_TIME 0.2f
 #define BLOOD_EFFECT_ALPHA 0.2f
 
+#define PAUSE_MENU_FONT_SIZE 40.0f
+#define PAUSE_MENU_FONT_NAME L"Arial"
+#define PAUSE_MENU_TEXT L"Exit Game"
+
 struct UIControllerData
 {
 	float BarMaxWidth = 500.0f;
@@ -29,9 +33,16 @@ struct UIControllerData
 	uint32_t SightIconMaxAnimationFrames = 2;
 	bool IsHit = false;
 
-	SpriteRendererComponent* BloodEffectSpriteRenderer = nullptr;
+	RectTransformComponent* RectTrans = nullptr;
+	SpriteRendererComponent* SpriteRenderer = nullptr;
 	float BloodEffectTimer = 0;
 	bool IsBloodEffect = false;
+
+	bool IsPaused = false;
+	RectTransformComponent PauseMenuCanvas = {
+		{ 840.0f,465.0f },
+		{ 150.0f, 150.0f },
+	};
 };
 static UIControllerData s_Data;
 
@@ -110,13 +121,55 @@ void UIController_OnCreate(Entity* entity, void* runtimeData)
 
 	// Background
 	{
-		s_Data.BloodEffectSpriteRenderer = (SpriteRendererComponent*)Entity_GetComponent(entity, ComponentType_SpriteRenderer);
-		CORE_ASSERT(s_Data.BloodEffectSpriteRenderer, "Entity does not have SpriteRendererComponent!");
+		s_Data.SpriteRenderer = (SpriteRendererComponent*)Entity_GetComponent(entity, ComponentType_SpriteRenderer);
+		CORE_ASSERT(s_Data.SpriteRenderer, "Entity does not have SpriteRendererComponent!");
+
+		s_Data.RectTrans = (RectTransformComponent*)Entity_GetComponent(entity, ComponentType_RectTransform);
+		CORE_ASSERT(s_Data.RectTrans, "Entity does not have RectTransformComponent!");
 	}
+}
+
+void PauseGame()
+{
+	if (s_Data.IsPaused)
+	{
+		Application_SetTimeScale(1.0f);
+		s_Data.RectTrans->Position = { 0,0 };
+		s_Data.RectTrans->Size = { 1920.0f,1080.0f };
+		s_Data.SpriteRenderer->Color = { 1.0f,0,0,0 };
+	}
+	else
+	{
+		Application_SetTimeScale(0.0f);
+		s_Data.RectTrans->Position = { 800.0f,500.0f };
+		s_Data.RectTrans->Size = { 300.0f,500.0f };
+		s_Data.SpriteRenderer->Color = { 1.0f,1.0f,1.0f,0.5f };
+	}
+
+	s_Data.IsPaused = !s_Data.IsPaused;
 }
 
 void UIController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 {
+	if (Input_GetKeyDown(KeyCode::Esc))
+	{
+		PauseGame();
+	}
+
+	if (s_Data.IsPaused)
+	{
+		Vec2 position, size, ndcPos;
+		Vec2 viewPortSize = { (float)Window_GetWidth(),(float)Window_GetHeight() };
+
+		{
+			RectTransformComponent_GetPositionAndSize(s_Data.PauseMenuCanvas, viewPortSize, &ndcPos, &position, &size);
+			Renderer2D_DrawText(PAUSE_MENU_TEXT, PAUSE_MENU_FONT_NAME, position, { 1.0f,1.0f,1.0f,1.0f }, PAUSE_MENU_FONT_SIZE);
+		}
+
+		if (Input_GetKeyDown(KeyCode::Enter))
+			Application_Close();
+	}
+
 	//HP Bar
 	{
 		float targetHPBarFrontWidth = PlayerController_GetHpPercent() * s_Data.BarMaxWidth;
@@ -192,7 +245,7 @@ void UIController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 			if (s_Data.BloodEffectTimer > BLOOD_EFFECT_MAX_TIME)
 			{
 				s_Data.IsBloodEffect = false;
-				s_Data.BloodEffectSpriteRenderer->Color.w = 0.0f;
+				s_Data.SpriteRenderer->Color.w = 0.0f;
 				s_Data.BloodEffectTimer = 0.0f;
 			}
 
@@ -225,5 +278,12 @@ void UIController_PlayHitIcon()
 void UIController_PlayBloodEffect()
 {
 	s_Data.IsBloodEffect = true;
-	s_Data.BloodEffectSpriteRenderer->Color.w = BLOOD_EFFECT_ALPHA;
+	s_Data.SpriteRenderer->Color = { 1.0f,0,0,BLOOD_EFFECT_ALPHA };
+	s_Data.RectTrans->Position = { 0.0f,0.0f };
+	s_Data.RectTrans->Size = { 1920.0f,1080.0f };
+}
+
+bool UIController_IsPaused()
+{
+	return s_Data.IsPaused;
 }

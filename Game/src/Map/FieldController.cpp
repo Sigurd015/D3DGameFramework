@@ -20,7 +20,7 @@ struct FieldControllerData
 {
 	Entity* Element1Ents[ENTITY_COUNT_PER_FILED_ELEMENT];
 	TransformComponent* Element1Trans[ENTITY_COUNT_PER_FILED_ELEMENT];
-	Vec3 Element1EnemySpawnPos = { 0,0,0 };
+	Vec2 Element1EnemySpawnPos = { 15.0f,30.0f };
 
 	Entity* Element2Ents[ENTITY_COUNT_PER_FILED_ELEMENT];
 	TransformComponent* Element2Trans[ENTITY_COUNT_PER_FILED_ELEMENT];
@@ -39,6 +39,7 @@ struct FieldControllerData
 
 	Entity* EnemyEntity[ENEMY_COUNT];
 	TransformComponent* EnemyTrans[ENEMY_COUNT];
+	Rigidbody2DComponent* EnemyRigidbody[ENEMY_COUNT];
 };
 static FieldControllerData s_Data;
 
@@ -140,6 +141,7 @@ void FieldController_OnCreate(Entity* entity, void* runtimeData)
 				s_Data.EnemyEntity[i] = Scene_GetEntityByName(entity->Scene, tempChar);
 				CORE_ASSERT(s_Data.EnemyEntity[i], "Cannot find Enemy entity!");
 				s_Data.EnemyTrans[i] = (TransformComponent*)Entity_GetComponent(s_Data.EnemyEntity[i], ComponentType_Transform);
+				s_Data.EnemyRigidbody[i] = (Rigidbody2DComponent*)Entity_GetComponent(s_Data.EnemyEntity[i], ComponentType_Rigidbody2D);
 			}
 		}
 	}

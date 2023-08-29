@@ -26,18 +26,7 @@ void OnCollide(void* entity1, void* entity2)
 
 void Scene_Ininialize(Scene& out)
 {
-	// Initialize all the scripts
 	uint32_t size = List_Size(out.Entities);
-	{
-		for (size_t i = 0; i < size; i++)
-		{
-			Entity* temp = (Entity*)List_Get(out.Entities, i);
-			if (Entity_HasComponent(temp, ComponentType_Script))
-			{
-				temp->Script->OnCreate(temp, temp->Script->RuntimeData);
-			}
-		}
-	}
 
 	// Initialize all the physics
 	PhysicsWorld2D_Create(out.PhysicsWorld, OnCollide);
@@ -87,6 +76,18 @@ void Scene_Ininialize(Scene& out)
 				}
 
 				rb2d->RuntimeBody = PhysicsWorld2D_AddRigidbody2D(out.PhysicsWorld, rigidbody2D);
+			}
+		}
+	}
+
+	// Initialize all the scripts
+	{
+		for (size_t i = 0; i < size; i++)
+		{
+			Entity* temp = (Entity*)List_Get(out.Entities, i);
+			if (Entity_HasComponent(temp, ComponentType_Script))
+			{
+				temp->Script->OnCreate(temp, temp->Script->RuntimeData);
 			}
 		}
 	}

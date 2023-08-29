@@ -254,7 +254,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		{
 			Entity enemy = {};
 			enemy.Tag.Name = "Enemy_Caco_Demon_1";
-			enemy.Transform.Translation = { 45.0f, -5.0f, 1.5f };
+			enemy.Transform.Translation = { 15.0f,20.0f, 1.5f };
 			enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
 			enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
 
@@ -297,7 +297,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		{
 			Entity enemy = {};
 			enemy.Tag.Name = "Enemy_Caco_Demon_2";
-			enemy.Transform.Translation = { 40.0f, -5.0f, 1.5f };
+			enemy.Transform.Translation = { 15.0f,20.0f, 1.5f };
 			enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
 			enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
 
@@ -340,7 +340,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		{
 			Entity enemy = {};
 			enemy.Tag.Name = "Enemy_Cyber_Demon_1";
-			enemy.Transform.Translation = { 35.0f, -10.0f, 2.0f };
+			enemy.Transform.Translation = { 15.0f,20.0f, 2.0f };
 			enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
 			enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
 
@@ -383,7 +383,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		{
 			Entity enemy = {};
 			enemy.Tag.Name = "Enemy_Cyber_Demon_2";
-			enemy.Transform.Translation = { 40.0f, -10.0f, 2.0f };
+			enemy.Transform.Translation = { 15.0f,20.0f, 2.0f };
 			enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
 			enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
 
@@ -426,7 +426,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		{
 			Entity enemy = {};
 			enemy.Tag.Name = "Enemy_Soldier_1";
-			enemy.Transform.Translation = { 35.0f, -15.0f, 2.0f };
+			enemy.Transform.Translation = { 15.0f,20.0f, 2.0f };
 			enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
 			enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
 
@@ -469,7 +469,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		{
 			Entity enemy = {};
 			enemy.Tag.Name = "Enemy_Soldier_2";
-			enemy.Transform.Translation = { 40.0f, -15.0f, 2.0f };
+			enemy.Transform.Translation = { 15.0f,20.0f, 2.0f };
 			enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
 			enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
 

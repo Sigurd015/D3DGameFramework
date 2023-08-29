@@ -12,3 +12,4 @@ void UIController_OnDisable(Entity* entity, void* runtimeData);
 void UIController_PlayShootAnimation();
 void UIController_PlayHitIcon();
 void UIController_PlayBloodEffect();
+bool UIController_IsPaused();

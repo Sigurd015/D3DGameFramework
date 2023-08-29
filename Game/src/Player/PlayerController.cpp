@@ -4,6 +4,7 @@
 
 #define ENEMY_DAMAGE 30.0f
 #define ATTACK_RANGE 100.0f
+#define WALK_SPEED 25.0f
 
 struct PlayerStats
 {
@@ -37,19 +38,21 @@ void PlayerController_OnCreate(Entity* entity, void* runtimeData)
 
 void PlayerController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 {
+	if (UIController_IsPaused())
+		return;
+
 	//Movement
 	{
 		Vec2 movement = Vec2(0, 0);
-		static float speed = 25.0f;
 
 		if (Input_GetKey(KeyMap_GetKey(MOVE_FORWARD)))
-			movement.y += speed;
+			movement.y += WALK_SPEED;
 		if (Input_GetKey(KeyMap_GetKey(MOVE_BACKWARD)))
-			movement.y -= speed;
+			movement.y -= WALK_SPEED;
 		if (Input_GetKey(KeyMap_GetKey(MOVE_LEFT)))
-			movement.x -= speed;
+			movement.x -= WALK_SPEED;
 		if (Input_GetKey(KeyMap_GetKey(MOVE_RIGHT)))
-			movement.x += speed;
+			movement.x += WALK_SPEED;
 
 		Rigidbody2DComponent_MovePosition(s_Data.Rigidbody2D, Vec2MulFloat(movement, timeStep));
 	}

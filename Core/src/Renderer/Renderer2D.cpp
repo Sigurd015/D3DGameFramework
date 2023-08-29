@@ -331,15 +331,14 @@ void Flush()
 		RendererAPI_DrawIndexed(s_Data.QuadVertexBuffer, s_Data.QuadIndexBuffer, s_Data.QuadPipeline, s_Data.QuadIndexCount);
 	}
 
-	// TODO: Crash with Access violation writing location
-	//if (s_Data.CircleIndexCount)
-	//{
-	//	uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.CircleVertexBufferPtr - (uint8_t*)s_Data.CircleVertexBufferBase);
-	//	VertexBuffer_SetData(s_Data.CircleVertexBuffer, s_Data.CircleVertexBufferBase, dataSize);
+	if (s_Data.CircleIndexCount)
+	{
+		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.CircleVertexBufferPtr - (uint8_t*)s_Data.CircleVertexBufferBase);
+		VertexBuffer_SetData(s_Data.CircleVertexBuffer, s_Data.CircleVertexBufferBase, dataSize);
 
-	//	// Use quad QuadIndexBuffer
-	//	RendererAPI_DrawIndexed(s_Data.CircleVertexBuffer, s_Data.QuadIndexBuffer, s_Data.CirclePipeline, s_Data.CircleIndexCount);
-	//}
+		// Use quad QuadIndexBuffer
+		RendererAPI_DrawIndexed(s_Data.CircleVertexBuffer, s_Data.QuadIndexBuffer, s_Data.CirclePipeline, s_Data.CircleIndexCount);
+	}
 
 	if (s_Data.LineVertexCount)
 	{

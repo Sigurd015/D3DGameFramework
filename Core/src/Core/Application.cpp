@@ -13,6 +13,7 @@ struct Application_State
 	bool IsRunning = true;
 	bool Minimized = false;
 
+	float TimeScale = 1.0f;
 	float LastFrameTime;
 };
 
@@ -69,6 +70,11 @@ void Application_Ininialize(Application* appInst)
 	s_AppState.AppInst->Ininialize(s_AppState.AppInst);
 }
 
+void Application_SetTimeScale(float timeScale)
+{
+	s_AppState.TimeScale = timeScale;
+}
+
 void Application_Run()
 {
 	while (s_AppState.IsRunning)
@@ -76,6 +82,8 @@ void Application_Run()
 		float currentTime = clock();
 		float timestep = (float)(currentTime - s_AppState.LastFrameTime) / CLOCKS_PER_SEC;
 		s_AppState.LastFrameTime = currentTime;
+
+		timestep *= s_AppState.TimeScale;
 
 		if (!s_AppState.Minimized)
 		{
