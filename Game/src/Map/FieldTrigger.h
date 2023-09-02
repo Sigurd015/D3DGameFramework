@@ -3,7 +3,7 @@
 
 enum FieldTriggerType
 {
-	GEN_MAP,OPEN_DOOR
+	GEN_MAP
 };
 struct FieldTriggerData
 {

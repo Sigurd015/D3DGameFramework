@@ -16,6 +16,7 @@ bool Entity_HasComponent(Entity* entity, ComponentType type)
 	case ComponentType_CircleCollider2D:  return entity->CircleCollider2D != nullptr;
 	case ComponentType_Text:              return entity->Text != nullptr;
 	case ComponentType_Script:            return entity->Script != nullptr;
+	case ComponentType_Audio:             return entity->Audio != nullptr;
 	}
 	CORE_ASSERT(false, "Unknown ComponentType!");
 	return false;
@@ -36,6 +37,7 @@ void* Entity_GetComponent(Entity* entity, ComponentType type)
 	case ComponentType_CircleCollider2D:  return entity->CircleCollider2D;
 	case ComponentType_Text:              return entity->Text;
 	case ComponentType_Script:            return entity->Script;
+	case ComponentType_Audio:             return entity->Audio;
 	}
 	CORE_ASSERT(false, "Unknown ComponentType!");
 	return nullptr;
@@ -124,6 +126,13 @@ void Entity_AddComponent(Entity* entity, ComponentType type, void* component)
 		memcpy(entity->Script, component, sizeof(ScriptComponent));
 		break;
 	}
+	case ComponentType_Audio:
+	{
+		CORE_ASSERT(!entity->Script, "Entity already has component!");
+		entity->Audio = (AudioComponent*)malloc(sizeof(AudioComponent));
+		memcpy(entity->Audio, component, sizeof(AudioComponent));
+		break;
+	}
 	}
 }
 
@@ -182,6 +191,15 @@ void Entity_RemoveComponent(Entity* entity, ComponentType type)
 		}
 		free(entity->Script);
 		entity->Script = nullptr;
+		return;
+	case ComponentType_Audio:
+		if (entity->Audio->Audio != nullptr)
+		{
+			delete entity->Audio->Audio;
+			entity->Audio->Audio = nullptr;
+		}
+		free(entity->Audio);
+		entity->Audio = nullptr;
 		return;
 	}
 	CORE_ASSERT(false, "Unknown ComponentType!");

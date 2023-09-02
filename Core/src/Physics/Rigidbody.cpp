@@ -89,6 +89,13 @@ void Rigidbody2D_ApplyRotation(void* rigidbody2D, float rotation)
 	rigidbody->UpdateRequired = true;
 }
 
+void Rigidbody2D_SetPosition(void* rigidbody2D, const Vec2& position)
+{
+	Rigidbody2D* rigidbody = (Rigidbody2D*)rigidbody2D;
+	rigidbody->Position = position;
+	rigidbody->UpdateRequired = true;
+}
+
 void Rigidbody2D_MovePosition(void* rigidbody2D, const Vec2& amount)
 {
 	Rigidbody2D* rigidbody = (Rigidbody2D*)rigidbody2D;

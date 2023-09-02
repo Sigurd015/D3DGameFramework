@@ -1,5 +1,8 @@
 #include "pch.h"
 #include "Components.h"
+#include "Scene.h"
+
+#include <Audio.h>
 
 Mat TransformComponent_GetTransform(const TransformComponent& transform)
 {
@@ -37,10 +40,42 @@ void Rigidbody2DComponent_ApplyRotation(Rigidbody2DComponent* rigidbody2D, float
 		Rigidbody2D_ApplyRotation(rigidbody2D->RuntimeBody, rotation);
 }
 
+void Rigidbody2DComponent_SetPosition(Rigidbody2DComponent* rigidbody2D, const Vec2& position)
+{
+	if (Vec2Equal(position, Vec2Zero))
+		return;
+
+	Rigidbody2D_SetPosition(rigidbody2D->RuntimeBody, position);
+}
+
 void Rigidbody2DComponent_MovePosition(Rigidbody2DComponent* rigidbody2D, const Vec2& position)
 {
 	if (Vec2Equal(position, Vec2Zero))
 		return;
 
 	Rigidbody2D_MovePosition(rigidbody2D->RuntimeBody, position);
+}
+
+void AudioComponent_Play(const Scene* scene, AudioComponent* audioComponent, void* soundEffect)
+{
+	// Sorry about using std::unique_ptr here, but for DirectXTK audio, it's only return std::unique_ptr
+	// RefPtr(Created by Me) is trash compared to std::unique_ptr OvO
+	DirectX::SoundEffect* se = (DirectX::SoundEffect*)soundEffect;
+
+	if (audioComponent->Type == AudioComponentType_Listener)
+	{
+		if (!se->IsInUse())
+			se->Play();
+	}
+	else
+	{
+		//TODO: Make 3D sound work
+		if (!se->IsInUse())
+			se->Play();
+		//auto effectInstance = se->CreateInstance(DirectX::SoundEffectInstance_Use3D | DirectX::SoundEffectInstance_ReverbUseFilters);
+		//DirectX::AudioListener* listener = (DirectX::AudioListener*)Scene_GetListener(scene);
+		//DirectX::AudioEmitter* emitter = (DirectX::AudioEmitter*)audioComponent->Audio;
+		//effectInstance->Apply3D(*listener, *emitter);
+		//effectInstance->Play();
+	}
 }

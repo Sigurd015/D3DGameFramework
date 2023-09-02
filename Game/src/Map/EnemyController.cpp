@@ -1,5 +1,6 @@
 #include "EnemyController.h"
 #include "FieldController.h"
+#include "UI/UIController.h"
 
 #define WALK_ANIMATION_FRAME_SPEED 0.25f
 #define ATTACK_ANIMATION_FRAME_SPEED 0.25f
@@ -8,18 +9,21 @@
 
 #define PLAYER_DAMAGE 10.0f
 
+#define CACO_DEMON_SCORE 100
 #define CACO_DEMON_WALK_SPEED 3.0f
 #define CACO_DEMON_ATTACK_DISTANCE 5.0f
 #define CACO_DEMON_ATTACK_RANGE 5.0f
 #define CACO_DEMON_MAX_HP 30.0f
 #define CACO_DEMON_ATTACK_COOLDOWN_TIME 5.0f
 
+#define CYBER_DEMON_SCORE 300
 #define CYBER_DEMON_WALK_SPEED 1.0f
 #define CYBER_DEMON_ATTACK_DISTANCE 15.0f
 #define CYBER_DEMON_ATTACK_RANGE 20.0f
 #define CYBER_DEMON_MAX_HP 50.0f
 #define CYBER_DEMON_ATTACK_COOLDOWN_TIME 3.0f
 
+#define SOLDIER_SCORE 200
 #define SOLDIER_WALK_SPEED 1.0f
 #define SOLDIER_ATTACK_DISTANCE 15.0f
 #define SOLDIER_ATTACK_RANGE 20.0f
@@ -46,10 +50,19 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 	data->Rigidbody = (Rigidbody2DComponent*)Entity_GetComponent(entity, ComponentType_Rigidbody2D);
 	CORE_ASSERT(data->Rigidbody, "Entity does not have Rigidbody2DComponent!");
 
+	data->Audio = (AudioComponent*)Entity_GetComponent(entity, ComponentType_Audio);
+	CORE_ASSERT(data->Audio, "Entity does not have AudioComponent!");
+
+
 	switch (data->Type)
 	{
 	case CACO_DEMON:
 	{
+		data->AttackSoundEffect = Application_CreateSoundEffect(L"assets/sounds/caco_demon/cacodemon_attack.wav");
+		data->PainSoundEffect = Application_CreateSoundEffect(L"assets/sounds/caco_demon/cacodemon_pain.wav");
+		data->DeathSoundEffect = Application_CreateSoundEffect(L"assets/sounds/caco_demon/cacodemon_death.wav");
+
+		data->Score = CACO_DEMON_SCORE;
 		data->Stats.MaxHP = CACO_DEMON_MAX_HP;
 		data->Stats.HP = data->Stats.MaxHP;
 		data->AttackCooldown = CACO_DEMON_ATTACK_COOLDOWN_TIME;
@@ -138,6 +151,12 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 	}
 	case CYBER_DEMON:
 	{
+		data->AttackSoundEffect = Application_CreateSoundEffect(L"assets/sounds/cyber_demon/cyberdemon_attack.wav");
+		data->PainSoundEffect = Application_CreateSoundEffect(L"assets/sounds/cyber_demon/cyberdemon_pain.wav");
+		data->DeathSoundEffect = Application_CreateSoundEffect(L"assets/sounds/cyber_demon/cyberdemon_death.wav");
+		data->WalkSoundEffect = Application_CreateSoundEffect(L"assets/sounds/cyber_demon/cyberdemon_walk.wav");
+
+		data->Score = CYBER_DEMON_SCORE;
 		data->Stats.MaxHP = CYBER_DEMON_MAX_HP;
 		data->Stats.HP = data->Stats.MaxHP;
 		data->AttackCooldown = CYBER_DEMON_ATTACK_COOLDOWN_TIME;
@@ -226,6 +245,11 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 	}
 	case SOLDIER:
 	{
+		data->AttackSoundEffect = Application_CreateSoundEffect(L"assets/sounds/soldier/soldier_attack.wav");
+		data->PainSoundEffect = Application_CreateSoundEffect(L"assets/sounds/soldier/soldier_pain.wav");
+		data->DeathSoundEffect = Application_CreateSoundEffect(L"assets/sounds/soldier/soldier_death.wav");
+
+		data->Score = SOLDIER_SCORE;
 		data->Stats.MaxHP = SOLDIER_MAX_HP;
 		data->Stats.HP = data->Stats.MaxHP;
 		data->AttackCooldown = SOLDIER_ATTACK_COOLDOWN_TIME;
@@ -353,6 +377,9 @@ void EnemyController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 			Vec2 temp = { cosf(angle) * data->WalkSpeed, sinf(angle) * data->WalkSpeed };
 
 			Rigidbody2DComponent_MovePosition(data->Rigidbody, Vec2MulFloat(temp, timeStep));
+
+			if (data->WalkSoundEffect)
+				AudioComponent_Play(entity->Scene, data->Audio, data->WalkSoundEffect);
 		}
 
 		//Walk animation
@@ -381,6 +408,7 @@ void EnemyController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 
 			if (currentFrame == data->AttackSpriteMaxAnimationFrames - 1)
 			{
+				AudioComponent_Play(entity->Scene, data->Audio, data->AttackSoundEffect);
 				if (Scene_Raycast(entity->Scene, entity, { 0.0f,-1.0f }, "Player", data->AttackRange))
 				{
 					data->CanAttack = false;
@@ -434,6 +462,7 @@ void EnemyController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 				SpriteTimer_Reset(data->DeathSpriteTimer);
 				Scene_SetEntityEnabled(entity, false);
 				FieldController_OnEnemyDead(data->Transform->Translation);
+				UIController_OnEnemyDead(data->Score);
 			}
 			break;
 		}
@@ -466,6 +495,10 @@ void EnemyController_OnDestroy(Entity* entity, void* runtimeData)
 	RefPtr_Release(data->IdleSpriteSheet, ReleaseFunc);
 	RefPtr_Release(data->PainSpriteSheet, ReleaseFunc);
 	RefPtr_Release(data->DeathSpriteSheet, ReleaseFunc);
+
+	delete data->AttackSoundEffect;
+	delete data->PainSoundEffect;
+	delete data->DeathSoundEffect;
 }
 
 void EnemyController_OnCollision(Entity* entity, Entity* other, void* runtimeData)
@@ -480,16 +513,21 @@ void EnemyController_OnRaycastHit(Entity* entity, Entity* other, void* runtimeDa
 		data->Stats.HP -= PLAYER_DAMAGE;
 
 		if (data->Stats.HP <= 0)
+		{
+			AudioComponent_Play(entity->Scene, data->Audio, data->DeathSoundEffect);
 			data->State = ENEMY_DEATH;
+		}
 		else
+		{
+			AudioComponent_Play(entity->Scene, data->Audio, data->PainSoundEffect);
 			data->State = ENEMY_PAIN;
+		}
 		//data->State = ENEMY_ATTACK;
 
 		#ifndef CORE_DIST
 		APP_LOG_INFO("Enemy hited by player: ");
 		APP_LOG_INFO(entity->Tag.Name);
 		#endif 
-
 	}
 }
 
@@ -497,6 +535,7 @@ void EnemyController_OnEnable(Entity* entity, void* runtimeData)
 {
 	EnemyData* data = (EnemyData*)runtimeData;
 	data->State = ENEMY_WALK;
+	data->Stats.HP = data->Stats.MaxHP;
 }
 
 void EnemyController_OnDisable(Entity* entity, void* runtimeData)

@@ -1,4 +1,4 @@
-#include "TitleMenuController.h"
+Ôªø#include "TitleMenuController.h"
 #include "ScreenEffect/Loading.h"
 #include "KeyMap/KeyMap.h"
 
@@ -12,19 +12,19 @@
 #define MENU_FONT_NAME L"Arial"
 #define MENU_FONT_SIZE 50.0f
 
-#define FORWARD_KEY_CONFIG_NODE_POS_Y 165.0f
-#define BACKWARD_KEY_CONFIG_NODE_POS_Y 265.0f
-#define LEFT_KEY_CONFIG_NODE_POS_Y 365.0f
-#define RIGHT_KEY_CONFIG_NODE_POS_Y 465.0f
-#define SHOOT_KEY_CONFIG_NODE_POS_Y 565.0f
-
 #define TIP_FONT_NAME L"Arial"
 #define TIP_FONT_SIZE 20.0f
-#define TIP_TEXT L"ëÄçÏÉKÉCÉhÅFï˚å¸ÉLÅ[ÅAÉGÉìÉ^Å[ÉLÅ[ÅAEscÉLÅ[ÅAÉ{É^ÉìïœçXÅiSettingsÅj"
+#define TIP_TEXT L"Êìç‰Ωú„Ç¨„Ç§„ÉâÔºöÊñπÂêë„Ç≠„Éº„ÄÅ„Ç®„É≥„Çø„Éº„Ç≠„Éº„ÄÅEsc„Ç≠„Éº„ÄÅ„Éú„Çø„É≥Â§âÊõ¥ÔºàSettingsÔºâ"
 #define TIP_POS_X 1290.0f
 #define TIP_POS_Y 1000.0f
 
-#define KEY_CHANGE_TEXT L"ïœçXÇµÇΩÇ¢É{É^ÉìÇâüÇµÇƒÇ≠ÇæÇ≥Ç¢"
+#define COPYRIGHT_FONT_NAME L"Arial"
+#define COPYRIGHT_FONT_SIZE 15.0f
+#define COPYRIGHT_TEXT L"All the resources used in this game are from the original game DOOM 1993. If you own the copyright of content showed in this game and would like it to be removed: yujiang015@gmail.com"
+#define COPYRIGHT_POS_X 290.0f
+#define COPYRIGHT_POS_Y 1050.0f
+
+#define KEY_CHANGE_TEXT L"Â§âÊõ¥„Åó„Åü„ÅÑ„Éú„Çø„É≥„ÇíÊäº„Åó„Å¶„Åè„Å†„Åï„ÅÑ"
 #define KEY_CHANGE_FONT_NAME L"Arial"
 #define KEY_CHANGE_FONT_SIZE 50.0f
 #define KEY_CHANGE_POS_X 800.0f
@@ -45,6 +45,7 @@ struct KeyConfigNode
 	const WCHAR* Text;
 
 	float yPos;
+	float yPosForD2D;
 
 	KeyType Type;
 
@@ -67,19 +68,10 @@ struct TitleMenuControllerData
 	RectTransformComponent* SelectionRectTrans = nullptr;
 	SpriteRendererComponent* SelectionSprite = nullptr;
 
-	MenuNode StartGameNode;
-	MenuNode SettingsNode;
-	MenuNode CreditsNode;
-	MenuNode ExitNode;
-
+	MenuNode MenuNodes[4];
 	MenuNode* CurrentMenuNode = nullptr;
 
-	KeyConfigNode WalkForwardNode;
-	KeyConfigNode WalkBackwardNode;
-	KeyConfigNode WalkLeftNode;
-	KeyConfigNode WalkRightNode;
-	KeyConfigNode ShootNode;
-
+	KeyConfigNode KeyConfigNodes[5];
 	KeyConfigNode* CurrentKeyConfigNode = nullptr;
 
 	RectTransformComponent KeyConfiglabelCanvas = {
@@ -114,17 +106,17 @@ struct TitleMenuControllerData
 		{ 150.0f, 150.0f },
 	};
 
+	RectTransformComponent CopyRightCanvas = {
+		{ COPYRIGHT_POS_X,COPYRIGHT_POS_Y },
+		{ 150.0f, 150.0f },
+	};
+
 	RectTransformComponent KeyChangeTipCanvas = {
 		{ KEY_CHANGE_POS_X,KEY_CHANGE_POS_Y },
 		{ 150.0f, 150.0f },
 	};
 };
 static TitleMenuControllerData s_Data;
-
-void ExitGame()
-{
-	Application_Close();
-}
 
 void StartGame()
 {
@@ -183,19 +175,19 @@ void TitleMenuController_OnCreate(Entity* entity, void* runtimeData)
 
 	//Init menu nodes
 	{
-		s_Data.StartGameNode = { 330.0f,&s_Data.SettingsNode,&s_Data.ExitNode,StartGame };
-		s_Data.SettingsNode = { 230.0f,&s_Data.CreditsNode,&s_Data.StartGameNode,Settings };
-		s_Data.CreditsNode = { 130.0f,&s_Data.ExitNode,&s_Data.SettingsNode,Credits };
-		s_Data.ExitNode = { 30.0f,&s_Data.StartGameNode,&s_Data.CreditsNode,ExitGame };
+		s_Data.MenuNodes[0] = { 330.0f,&s_Data.MenuNodes[1],&s_Data.MenuNodes[3],StartGame };
+		s_Data.MenuNodes[1] = { 230.0f,&s_Data.MenuNodes[2],&s_Data.MenuNodes[0],Settings };
+		s_Data.MenuNodes[2] = { 130.0f,&s_Data.MenuNodes[3],&s_Data.MenuNodes[1],Credits };
+		s_Data.MenuNodes[3] = { 30.0f,&s_Data.MenuNodes[0],&s_Data.MenuNodes[2],Application_Close };
 
-		s_Data.WalkForwardNode = { L"Forward : ", 830.0f, KeyType::MOVE_FORWARD,&s_Data.WalkBackwardNode,&s_Data.ShootNode };
-		s_Data.WalkBackwardNode = { L"Backward : ",730.0f, KeyType::MOVE_BACKWARD,&s_Data.WalkLeftNode,&s_Data.WalkForwardNode };
-		s_Data.WalkLeftNode = { L"Left : ",630.0f, KeyType::MOVE_LEFT,&s_Data.WalkRightNode,&s_Data.WalkBackwardNode };
-		s_Data.WalkRightNode = { L"Right : ",530.0f, KeyType::MOVE_RIGHT,&s_Data.ShootNode,&s_Data.WalkLeftNode };
-		s_Data.ShootNode = { L"Shoot : ",430.0f, KeyType::SHOOT,&s_Data.WalkForwardNode,&s_Data.WalkRightNode };
+		s_Data.KeyConfigNodes[0] = { L"Forward : ", 830.0f, 165.0f, KeyType::MOVE_FORWARD,&s_Data.KeyConfigNodes[1],&s_Data.KeyConfigNodes[4] };
+		s_Data.KeyConfigNodes[1] = { L"Backward : ",730.0f, 265.0f, KeyType::MOVE_BACKWARD,&s_Data.KeyConfigNodes[2],&s_Data.KeyConfigNodes[0] };
+		s_Data.KeyConfigNodes[2] = { L"Left : ",630.0f, 365.0f, KeyType::MOVE_LEFT,&s_Data.KeyConfigNodes[3],&s_Data.KeyConfigNodes[1] };
+		s_Data.KeyConfigNodes[3] = { L"Right : ",530.0f, 465.0f, KeyType::MOVE_RIGHT,&s_Data.KeyConfigNodes[4],&s_Data.KeyConfigNodes[2] };
+		s_Data.KeyConfigNodes[4] = { L"Shoot : ",430.0f, 565.0f,KeyType::SHOOT,&s_Data.KeyConfigNodes[0],&s_Data.KeyConfigNodes[3] };
 
-		s_Data.CurrentMenuNode = &s_Data.StartGameNode;
-		s_Data.CurrentKeyConfigNode = &s_Data.WalkForwardNode;
+		s_Data.CurrentMenuNode = &s_Data.MenuNodes[0];
+		s_Data.CurrentKeyConfigNode = &s_Data.KeyConfigNodes[0];
 	}
 
 	//Background
@@ -256,97 +248,26 @@ void TitleMenuController_OnUpdate(Entity* entity, float timeStep, void* runtimeD
 	}
 	case ::SETTINGS:
 	{
-		{
-			Vec2 position, size, ndcPos;
-			Vec2 viewPortSize = { (float)Window_GetWidth(),(float)Window_GetHeight() };
+		Vec2 position, size, ndcPos;
+		Vec2 viewPortSize = { (float)Window_GetWidth(),(float)Window_GetHeight() };
 
-			{
-				s_Data.KeyConfiglabelCanvas.Position.y = FORWARD_KEY_CONFIG_NODE_POS_Y;
-				RectTransformComponent_GetPositionAndSize(s_Data.KeyConfiglabelCanvas, viewPortSize, &ndcPos, &position, &size);
-				Renderer2D_DrawText(s_Data.WalkForwardNode.Text, MENU_FONT_NAME, position, { 1.0f,1.0f,1.0f,1.0f }, MENU_FONT_SIZE);
-			}
-			{
-				s_Data.KeyConfigNodeCanvas.Position.y = FORWARD_KEY_CONFIG_NODE_POS_Y;
-				RectTransformComponent_GetPositionAndSize(s_Data.KeyConfigNodeCanvas, viewPortSize, &ndcPos, &position, &size);
-				Renderer2D_DrawText(KeyMap_GetKeyName(s_Data.WalkForwardNode.Type),
-					MENU_FONT_NAME, position, { 1.0f,1.0f,1.0f,1.0f }, MENU_FONT_SIZE);
-			}
-		}
+		for (size_t i = 0; i < 5; i++)
 		{
-			Vec2 position, size, ndcPos;
-			Vec2 viewPortSize = { (float)Window_GetWidth(),(float)Window_GetHeight() };
+			s_Data.KeyConfiglabelCanvas.Position.y = s_Data.KeyConfigNodes[i].yPosForD2D;
+			RectTransformComponent_GetPositionAndSize(s_Data.KeyConfiglabelCanvas, viewPortSize, &ndcPos, &position, &size);
+			Renderer2D_DrawText(s_Data.KeyConfigNodes[i].Text, MENU_FONT_NAME, position, { 1.0f,1.0f,1.0f,1.0f }, MENU_FONT_SIZE);
 
-			{
-				s_Data.KeyConfiglabelCanvas.Position.y = BACKWARD_KEY_CONFIG_NODE_POS_Y;
-				RectTransformComponent_GetPositionAndSize(s_Data.KeyConfiglabelCanvas, viewPortSize, &ndcPos, &position, &size);
-				Renderer2D_DrawText(s_Data.WalkBackwardNode.Text, MENU_FONT_NAME, position, { 1.0f,1.0f,1.0f,1.0f }, MENU_FONT_SIZE);
-			}
-			{
-				s_Data.KeyConfigNodeCanvas.Position.y = BACKWARD_KEY_CONFIG_NODE_POS_Y;
-				RectTransformComponent_GetPositionAndSize(s_Data.KeyConfigNodeCanvas, viewPortSize, &ndcPos, &position, &size);
-				Renderer2D_DrawText(KeyMap_GetKeyName(s_Data.WalkBackwardNode.Type),
-					MENU_FONT_NAME, position, { 1.0f,1.0f,1.0f,1.0f }, MENU_FONT_SIZE);
-			}
-		}
-		{
-			Vec2 position, size, ndcPos;
-			Vec2 viewPortSize = { (float)Window_GetWidth(),(float)Window_GetHeight() };
-
-			{
-				s_Data.KeyConfiglabelCanvas.Position.y = LEFT_KEY_CONFIG_NODE_POS_Y;
-				RectTransformComponent_GetPositionAndSize(s_Data.KeyConfiglabelCanvas, viewPortSize, &ndcPos, &position, &size);
-				Renderer2D_DrawText(s_Data.WalkLeftNode.Text, MENU_FONT_NAME, position, { 1.0f,1.0f,1.0f,1.0f }, MENU_FONT_SIZE);
-			}
-			{
-				s_Data.KeyConfigNodeCanvas.Position.y = LEFT_KEY_CONFIG_NODE_POS_Y;
-				RectTransformComponent_GetPositionAndSize(s_Data.KeyConfigNodeCanvas, viewPortSize, &ndcPos, &position, &size);
-				Renderer2D_DrawText(KeyMap_GetKeyName(s_Data.WalkLeftNode.Type),
-					MENU_FONT_NAME, position, { 1.0f,1.0f,1.0f,1.0f }, MENU_FONT_SIZE);
-			}
-		}
-		{
-			Vec2 position, size, ndcPos;
-			Vec2 viewPortSize = { (float)Window_GetWidth(),(float)Window_GetHeight() };
-
-			{
-				s_Data.KeyConfiglabelCanvas.Position.y = RIGHT_KEY_CONFIG_NODE_POS_Y;
-				RectTransformComponent_GetPositionAndSize(s_Data.KeyConfiglabelCanvas, viewPortSize, &ndcPos, &position, &size);
-				Renderer2D_DrawText(s_Data.WalkRightNode.Text, MENU_FONT_NAME, position, { 1.0f,1.0f,1.0f,1.0f }, MENU_FONT_SIZE);
-			}
-			{
-				s_Data.KeyConfigNodeCanvas.Position.y = RIGHT_KEY_CONFIG_NODE_POS_Y;
-				RectTransformComponent_GetPositionAndSize(s_Data.KeyConfigNodeCanvas, viewPortSize, &ndcPos, &position, &size);
-				Renderer2D_DrawText(KeyMap_GetKeyName(s_Data.WalkRightNode.Type),
-					MENU_FONT_NAME, position, { 1.0f,1.0f,1.0f,1.0f }, MENU_FONT_SIZE);
-			}
-		}
-		{
-			Vec2 position, size, ndcPos;
-			Vec2 viewPortSize = { (float)Window_GetWidth(),(float)Window_GetHeight() };
-
-			{
-				s_Data.KeyConfiglabelCanvas.Position.y = SHOOT_KEY_CONFIG_NODE_POS_Y;
-				RectTransformComponent_GetPositionAndSize(s_Data.KeyConfiglabelCanvas, viewPortSize, &ndcPos, &position, &size);
-				Renderer2D_DrawText(s_Data.ShootNode.Text, MENU_FONT_NAME, position, { 1.0f,1.0f,1.0f,1.0f }, MENU_FONT_SIZE);
-			}
-			{
-				s_Data.KeyConfigNodeCanvas.Position.y = SHOOT_KEY_CONFIG_NODE_POS_Y;
-				RectTransformComponent_GetPositionAndSize(s_Data.KeyConfigNodeCanvas, viewPortSize, &ndcPos, &position, &size);
-				Renderer2D_DrawText(KeyMap_GetKeyName(s_Data.ShootNode.Type),
-					MENU_FONT_NAME, position, { 1.0f,1.0f,1.0f,1.0f }, MENU_FONT_SIZE);
-			}
+			s_Data.KeyConfigNodeCanvas.Position.y = s_Data.KeyConfigNodes[i].yPosForD2D;
+			RectTransformComponent_GetPositionAndSize(s_Data.KeyConfigNodeCanvas, viewPortSize, &ndcPos, &position, &size);
+			Renderer2D_DrawText(KeyMap_GetKeyName(s_Data.KeyConfigNodes[i].Type),
+				MENU_FONT_NAME, position, { 1.0f,1.0f,1.0f,1.0f }, MENU_FONT_SIZE);
 		}
 
 		if (s_Data.IsWaitingForKey)
 		{
-			Vec2 position, size, ndcPos;
-			Vec2 viewPortSize = { (float)Window_GetWidth(),(float)Window_GetHeight() };
-
-			{
-				s_Data.KeyChangeTipCanvas.Position = { KEY_CHANGE_POS_X,KEY_CHANGE_POS_Y };
-				RectTransformComponent_GetPositionAndSize(s_Data.KeyChangeTipCanvas, viewPortSize, &ndcPos, &position, &size);
-				Renderer2D_DrawText(KEY_CHANGE_TEXT, KEY_CHANGE_FONT_NAME, position, { 1.0f,1.0f,1.0f,1.0f }, KEY_CHANGE_FONT_SIZE);
-			}
+			s_Data.KeyChangeTipCanvas.Position = { KEY_CHANGE_POS_X,KEY_CHANGE_POS_Y };
+			RectTransformComponent_GetPositionAndSize(s_Data.KeyChangeTipCanvas, viewPortSize, &ndcPos, &position, &size);
+			Renderer2D_DrawText(KEY_CHANGE_TEXT, KEY_CHANGE_FONT_NAME, position, { 1.0f,1.0f,1.0f,1.0f }, KEY_CHANGE_FONT_SIZE);
 		}
 		else
 		{
@@ -393,10 +314,16 @@ void TitleMenuController_OnUpdate(Entity* entity, float timeStep, void* runtimeD
 	{
 		Vec2 position, size, ndcPos;
 		Vec2 viewPortSize = { (float)Window_GetWidth(),(float)Window_GetHeight() };
-
+		// Tip
 		{
 			RectTransformComponent_GetPositionAndSize(s_Data.TipCanvas, viewPortSize, &ndcPos, &position, &size);
 			Renderer2D_DrawText(TIP_TEXT, TIP_FONT_NAME, position, { 1.0f,1.0f,1.0f,1.0f }, TIP_FONT_SIZE);
+		}
+
+		// Copyright
+		{
+			RectTransformComponent_GetPositionAndSize(s_Data.CopyRightCanvas, viewPortSize, &ndcPos, &position, &size);
+			Renderer2D_DrawText(COPYRIGHT_TEXT, COPYRIGHT_FONT_NAME, position, { 1.0f,1.0f,1.0f,1.0f }, COPYRIGHT_FONT_SIZE);
 		}
 	}
 }

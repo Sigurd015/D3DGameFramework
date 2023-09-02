@@ -26,6 +26,8 @@ struct EnemyData
 	float AttackCooldown = 0.0f;
 	EnemyStats Stats;
 
+	uint32_t Score = 0;
+
 	float AttackDistance = 0.0f;
 	float WalkSpeed = 0.0f;
 	float AttackRange = 0.0f;
@@ -35,6 +37,12 @@ struct EnemyData
 
 	Rigidbody2DComponent* Rigidbody = nullptr;
 	SpriteRendererComponent* SpriteRenderer = nullptr;
+
+	AudioComponent* Audio = nullptr;
+	void* AttackSoundEffect = nullptr;
+	void* PainSoundEffect = nullptr;
+	void* DeathSoundEffect = nullptr;
+	void* WalkSoundEffect = nullptr;
 
 	RefPtr* WalkSpriteSheet = nullptr;
 	SpriteAnimator WalkSpriteAnimator;

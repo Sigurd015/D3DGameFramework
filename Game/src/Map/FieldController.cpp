@@ -1,4 +1,5 @@
 #include "FieldController.h"
+#include "Player/PlayerController.h"
 
 #include <stdio.h>
 
@@ -8,7 +9,9 @@
 #define FIELD_OFFSET_Y 120.0f
 
 // Make sure three type of enemy count is same
-#define ENEMY_COUNT 2*3
+#define ENEMY_COUNT 1*3
+
+#define MEDKIT_DROP_HP_PRECENT 0.4f
 
 enum FieldElementType
 {
@@ -20,7 +23,7 @@ struct FieldControllerData
 {
 	Entity* Element1Ents[ENTITY_COUNT_PER_FILED_ELEMENT];
 	TransformComponent* Element1Trans[ENTITY_COUNT_PER_FILED_ELEMENT];
-	Vec2 Element1EnemySpawnPos = { 15.0f,30.0f };
+	Vec2 EnemySpawnPos = { 15.0f,70.0f };
 
 	Entity* Element2Ents[ENTITY_COUNT_PER_FILED_ELEMENT];
 	TransformComponent* Element2Trans[ENTITY_COUNT_PER_FILED_ELEMENT];
@@ -38,8 +41,10 @@ struct FieldControllerData
 	FieldElementType CurrentType = FieldElementType::MAP_ELEMENT_1;
 
 	Entity* EnemyEntity[ENEMY_COUNT];
-	TransformComponent* EnemyTrans[ENEMY_COUNT];
 	Rigidbody2DComponent* EnemyRigidbody[ENEMY_COUNT];
+
+	Entity* ItemEntity;
+	Rigidbody2DComponent* ItemRigidbody;
 };
 static FieldControllerData s_Data;
 
@@ -140,10 +145,19 @@ void FieldController_OnCreate(Entity* entity, void* runtimeData)
 				}
 				s_Data.EnemyEntity[i] = Scene_GetEntityByName(entity->Scene, tempChar);
 				CORE_ASSERT(s_Data.EnemyEntity[i], "Cannot find Enemy entity!");
-				s_Data.EnemyTrans[i] = (TransformComponent*)Entity_GetComponent(s_Data.EnemyEntity[i], ComponentType_Transform);
 				s_Data.EnemyRigidbody[i] = (Rigidbody2DComponent*)Entity_GetComponent(s_Data.EnemyEntity[i], ComponentType_Rigidbody2D);
+
+				Scene_SetEntityEnabled(s_Data.EnemyEntity[i], false);
 			}
 		}
+	}
+
+	// Init Item
+	{
+		s_Data.ItemEntity = Scene_GetEntityByName(entity->Scene, "Item_1");
+		CORE_ASSERT(s_Data.ItemEntity, "Cannot find Item entity!");
+		s_Data.ItemRigidbody = (Rigidbody2DComponent*)Entity_GetComponent(s_Data.ItemEntity, ComponentType_Rigidbody2D);
+		//Scene_SetEntityEnabled(s_Data.ItemEntity, false);
 	}
 }
 
@@ -207,10 +221,7 @@ void FieldController_GenMap()
 				s_Data.Element1Trans[i]->Translation.y += FIELD_OFFSET_Y;
 			}
 		}
-		s_Data.Element1EnemySpawnPos.y += FIELD_OFFSET_Y;
 		Rigidbody2DComponent_MovePosition(s_Data.BackWallRigidbody, Vec2DivFloat(movement, 2.0f));
-		s_Data.FloorTrans->Translation.y += FIELD_OFFSET_Y / 2.0f;
-		s_Data.RoofTrans->Translation.y += FIELD_OFFSET_Y / 2.0f;
 		break;
 	}
 	case FieldElementType::MAP_ELEMENT_2:
@@ -229,14 +240,33 @@ void FieldController_GenMap()
 				s_Data.Element2Trans[i]->Translation.y += FIELD_OFFSET_Y;
 			}
 		}
-		s_Data.Element2EnemySpawnPos.y += FIELD_OFFSET_Y;
 		Rigidbody2DComponent_MovePosition(s_Data.BackWallRigidbody, Vec2DivFloat(movement, 2.0f));
-		s_Data.FloorTrans->Translation.y += FIELD_OFFSET_Y / 2.0f;
-		s_Data.RoofTrans->Translation.y += FIELD_OFFSET_Y / 2.0f;
 		break;
 	}
 	}
+
+	s_Data.FloorTrans->Translation.y += FIELD_OFFSET_Y / 2.0f;
+	s_Data.RoofTrans->Translation.y += FIELD_OFFSET_Y / 2.0f;
+	float offsetX = 0.0f;
+	for (size_t i = 0; i < ENEMY_COUNT; i++)
+	{
+		Scene_SetEntityEnabled(s_Data.EnemyEntity[i], true);
+		Vec2 tempPos = s_Data.EnemySpawnPos;
+		tempPos.x += offsetX;
+		offsetX += 5.0f;
+		Rigidbody2DComponent_SetPosition(s_Data.EnemyRigidbody[i], tempPos);
+	}
+	s_Data.EnemySpawnPos.y += FIELD_OFFSET_Y / 2.0f;
 }
 
 void FieldController_OnEnemyDead(const Vec3& pos)
-{}
+{
+	if (!s_Data.ItemEntity->Enabled)
+	{
+		if (PlayerController_GetHpPercent() < MEDKIT_DROP_HP_PRECENT)
+		{
+			Scene_SetEntityEnabled(s_Data.ItemEntity, true);
+			Rigidbody2DComponent_SetPosition(s_Data.ItemRigidbody, { pos.x,pos.y });
+		}
+	}
+}

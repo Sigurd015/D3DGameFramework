@@ -3,6 +3,9 @@
 #include "Entity.h"
 #include "Renderer/Renderer2D.h"
 #include "Renderer/RendererAPI.h"
+#include "Core/Application.h"
+
+#include <Audio.h>
 
 void Scene_Create(Scene& out)
 {
@@ -27,6 +30,35 @@ void OnCollide(void* entity1, void* entity2)
 void Scene_Ininialize(Scene& out)
 {
 	uint32_t size = List_Size(out.Entities);
+
+	// Initialize all the audio
+	{
+		for (size_t i = 0; i < size; i++)
+		{
+			Entity* temp = (Entity*)List_Get(out.Entities, i);
+			TransformComponent* tc = &temp->Transform;
+
+			if (Entity_HasComponent(temp, ComponentType_Audio))
+			{
+				AudioComponent* ac = temp->Audio;
+				switch (ac->Type)
+				{
+				case AudioComponentType_Listener:
+				{
+					DirectX::AudioListener* listener = new DirectX::AudioListener();
+					ac->Audio = listener;
+					break;
+				}
+				case AudioComponentType_Emitter:
+				{
+					DirectX::AudioEmitter* emitter = new DirectX::AudioEmitter();
+					ac->Audio = emitter;
+					break;
+				}
+				}
+			}
+		}
+	}
 
 	// Initialize all the physics
 	PhysicsWorld2D_Create(out.PhysicsWorld, OnCollide);
@@ -138,6 +170,10 @@ void Scene_Destroy(Scene& out)
 		{
 			Entity_RemoveComponent(temp, ComponentType_Text);
 		}
+		if (Entity_HasComponent(temp, ComponentType_Audio))
+		{
+			Entity_RemoveComponent(temp, ComponentType_Audio);
+		}
 	}
 
 	List_Free(out.Entities, true);
@@ -171,6 +207,30 @@ Entity* Scene_GetPrimaryCamera(const Scene& out)
 		if (Entity_HasComponent(temp, ComponentType_Camera))
 			if (temp->Camera->Primary)
 				return temp;
+	}
+	return nullptr;
+}
+
+// Notice: Make sure only one listener in the scene, that's player
+void* Scene_GetListener(const Scene* out)
+{
+	uint32_t size = List_Size(out->Entities);
+	for (size_t i = 0; i < size; i++)
+	{
+		Entity* temp = (Entity*)List_Get(out->Entities, i);
+		TransformComponent* tc = &temp->Transform;
+
+		if (Entity_HasComponent(temp, ComponentType_Audio))
+		{
+			AudioComponent* ac = temp->Audio;
+			switch (ac->Type)
+			{
+			case AudioComponentType_Listener:
+			{
+				return ac->Audio;
+			}
+			}
+		}
 	}
 	return nullptr;
 }
@@ -293,6 +353,39 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 					Rigidbody2D* rb = (Rigidbody2D*)rb2d->RuntimeBody;
 					tc->Translation = { rb->Position.x, rb->Position.y, tc->Translation.z };
 					tc->Rotation.z = rb->Rotation;
+				}
+			}
+		}
+	}
+
+	// Update audio
+	{
+		for (size_t i = 0; i < size; i++)
+		{
+			Entity* temp = (Entity*)List_Get(out.Entities, i);
+
+			if (!temp->Enabled)
+				continue;
+
+			TransformComponent* tc = &temp->Transform;
+
+			if (Entity_HasComponent(temp, ComponentType_Audio))
+			{
+				AudioComponent* ac = temp->Audio;
+				switch (ac->Type)
+				{
+				case AudioComponentType_Listener:
+				{
+					DirectX::AudioListener* listener = (DirectX::AudioListener*)ac->Audio;
+					listener->SetPosition(tc->Translation);
+					break;
+				}
+				case AudioComponentType_Emitter:
+				{
+					DirectX::AudioEmitter* emitter = (DirectX::AudioEmitter*)ac->Audio;
+					emitter->SetPosition(tc->Translation);
+					break;
+				}
 				}
 			}
 		}

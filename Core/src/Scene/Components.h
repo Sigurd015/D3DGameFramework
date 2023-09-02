@@ -18,6 +18,7 @@ enum ComponentType
 	ComponentType_CircleCollider2D,
 	ComponentType_Text,
 	ComponentType_Script,
+	ComponentType_Audio,
 	ComponentType_Count
 };
 
@@ -82,6 +83,7 @@ struct Rigidbody2DComponent
 
 void Rigidbody2DComponent_ApplyForce(Rigidbody2DComponent* rigidbody2D, const Vec2& force);
 void Rigidbody2DComponent_ApplyRotation(Rigidbody2DComponent* rigidbody2D, float rotation);
+void Rigidbody2DComponent_SetPosition(Rigidbody2DComponent* rigidbody2D, const Vec2& position);
 void Rigidbody2DComponent_MovePosition(Rigidbody2DComponent* rigidbody2D, const Vec2& position);
 
 struct BoxCollider2DComponent
@@ -122,9 +124,24 @@ struct TextComponent
 	float FontSize = 100.0f;
 };
 
+enum AudioComponentType
+{
+	AudioComponentType_Emitter,
+	AudioComponentType_Listener,
+};
+
+struct AudioComponent
+{
+	AudioComponentType Type;
+	void* Audio = nullptr;
+};
+
+// Forward declarations
+struct Scene;
+void AudioComponent_Play(const Scene* scene,AudioComponent* audioComponent, void* soundEffect);
+
 // Forward declarations
 struct Entity;
-
 struct ScriptComponent
 {
 	void (*OnCreate)(Entity* entity, void* runtimeData);

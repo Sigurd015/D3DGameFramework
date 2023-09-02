@@ -1,6 +1,7 @@
 #include "PlayerController.h"
 #include "KeyMap/KeyMap.h"
 #include "UI/UIController.h"
+#include "GameMode.h"
 
 #define ENEMY_DAMAGE 30.0f
 #define ATTACK_RANGE 100.0f
@@ -16,6 +17,11 @@ struct PlayerControllerData
 {
 	TransformComponent* Transform = nullptr;
 	Rigidbody2DComponent* Rigidbody2D = nullptr;
+
+	AudioComponent* Audio = nullptr;
+	void* ShotgunSoundEffect = nullptr;
+	void* PainSoundEffect = nullptr;
+	void* DeathSoundEffect = nullptr;
 
 	bool CanShoot = true;
 	float ShootCooldown = 1.0f;
@@ -34,6 +40,16 @@ void PlayerController_OnCreate(Entity* entity, void* runtimeData)
 
 	s_Data.Rigidbody2D = (Rigidbody2DComponent*)Entity_GetComponent(entity, ComponentType_Rigidbody2D);
 	CORE_ASSERT(s_Data.Rigidbody2D, "Entity does not have Rigidbody2DComponent!");
+
+	s_Data.Audio = (AudioComponent*)Entity_GetComponent(entity, ComponentType_Audio);
+	CORE_ASSERT(s_Data.Audio, "Entity does not have AudioComponent!");
+
+	s_Data.Stats = {};
+	s_Data.Stats.Hp -= 30.0f;
+
+	s_Data.ShotgunSoundEffect = Application_CreateSoundEffect(L"assets/sounds/player_attack.wav");
+	s_Data.PainSoundEffect = Application_CreateSoundEffect(L"assets/sounds/player_pain.wav");
+	s_Data.DeathSoundEffect = Application_CreateSoundEffect(L"assets/sounds/player_death.wav");
 }
 
 void PlayerController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
@@ -63,6 +79,7 @@ void PlayerController_OnUpdate(Entity* entity, float timeStep, void* runtimeData
 		{
 			if (s_Data.CanShoot)
 			{
+				AudioComponent_Play(entity->Scene, s_Data.Audio, s_Data.ShotgunSoundEffect);
 				s_Data.CanShoot = false;
 				UIController_PlayShootAnimation();
 				Vec2 direction = { 0.0f,1.0f };
@@ -89,7 +106,10 @@ void PlayerController_OnUpdate(Entity* entity, float timeStep, void* runtimeData
 }
 
 void PlayerController_OnDestroy(Entity* entity, void* runtimeData)
-{}
+{
+	delete s_Data.ShotgunSoundEffect;
+	delete s_Data.PainSoundEffect;
+}
 
 void PlayerController_OnCollision(Entity* entity, Entity* other, void* runtimeData)
 {
@@ -111,7 +131,16 @@ void PlayerController_OnRaycastHit(Entity* entity, Entity* other, void* runtimeD
 
 		s_Data.Stats.Hp -= ENEMY_DAMAGE;
 
-		UIController_PlayBloodEffect();
+		if (s_Data.Stats.Hp <= 0.0f)
+		{
+			AudioComponent_Play(entity->Scene, s_Data.Audio, s_Data.DeathSoundEffect);
+			UIController_OnPlayerDead();
+			return;
+		}
+
+		AudioComponent_Play(entity->Scene, s_Data.Audio, s_Data.PainSoundEffect);
+
+		UIController_PlayBloodEffect({ 1.0f,0,0 });
 	}
 }
 
@@ -123,4 +152,10 @@ void PlayerController_OnDisable(Entity* entity, void* runtimeData)
 float PlayerController_GetHpPercent()
 {
 	return s_Data.Stats.Hp / s_Data.Stats.MaxHp;
+}
+
+void PlayerController_AddHp(float hp)
+{
+	s_Data.Stats.Hp = FloatClamp(s_Data.Stats.Hp + hp, 0.0f, s_Data.Stats.MaxHp);
+	UIController_PlayBloodEffect({ 0,1.0f,0 });
 }

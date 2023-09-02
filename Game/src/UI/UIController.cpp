@@ -1,5 +1,10 @@
 #include "UIController.h"
 #include "Player/PlayerController.h"
+#include "ScreenEffect/Loading.h"
+#include "GameMode.h"
+
+#include <atlbase.h>
+#include <atlconv.h>
 
 #define BACKBAR_FOLLOW_COUNT_TIME 1.0f
 #define SHOOTING_ANIMATION_FRAME_SPEED 0.15f
@@ -10,7 +15,21 @@
 
 #define PAUSE_MENU_FONT_SIZE 40.0f
 #define PAUSE_MENU_FONT_NAME L"Arial"
-#define PAUSE_MENU_TEXT L"Exit Game"
+
+#define SCORE_FONT_SIZE 40.0f
+#define SCORE_FONT_NAME L"Arial"
+
+struct PauseMenuNode
+{
+	WCHAR* Text;
+	float yPos;
+	float yPosForD2D;
+
+	PauseMenuNode* Next = nullptr;
+	PauseMenuNode* Prev = nullptr;
+
+	void(*OnEnter)();
+};
 
 struct UIControllerData
 {
@@ -38,13 +57,45 @@ struct UIControllerData
 	float BloodEffectTimer = 0;
 	bool IsBloodEffect = false;
 
+	RectTransformComponent ScoreCanvas = {
+		{ 700.0f,50.0f },
+		{ 150.0f, 150.0f },
+	};
+	WCHAR* ScoreText = L"";
+
+	uint32_t Score = 0;
+	float Timer = 0;
+	float MaxTime = 120.0f;
+	bool TimerStarted = false;
+
 	bool IsPaused = false;
 	RectTransformComponent PauseMenuCanvas = {
 		{ 840.0f,465.0f },
 		{ 150.0f, 150.0f },
 	};
+
+	Entity* SelectionEntity = nullptr;
+	RectTransformComponent* SelectionRectTrans = nullptr;
+	SpriteRendererComponent* SelectionSprite = nullptr;
+
+	PauseMenuNode PauseMenuNodes[2];
+	PauseMenuNode* CurrentPauseMenuNode = nullptr;
+
+	bool IsPlayerDead = false;
+	bool IsTiemEnd = false;
+	#ifndef CORE_DIST
+	bool ShowPauseMenu = true;
+	#endif 
 };
 static UIControllerData s_Data;
+
+void BackToMenu()
+{
+	Application_SetTimeScale(1.0f);
+	Loading_Reset();
+	Loading_SetDepature(TITLE_MENU);
+	Game_SetMode(LOADING_SCENE);
+}
 
 void UIController_OnCreate(Entity* entity, void* runtimeData)
 {
@@ -127,6 +178,27 @@ void UIController_OnCreate(Entity* entity, void* runtimeData)
 		s_Data.RectTrans = (RectTransformComponent*)Entity_GetComponent(entity, ComponentType_RectTransform);
 		CORE_ASSERT(s_Data.RectTrans, "Entity does not have RectTransformComponent!");
 	}
+
+	{
+		s_Data.PauseMenuNodes[0] = { L"Back to Menu" ,770.0f,250.0f ,&s_Data.PauseMenuNodes[1],&s_Data.PauseMenuNodes[1], BackToMenu };
+		s_Data.PauseMenuNodes[1] = { L"Exit Game" ,620.0f,400.0f ,&s_Data.PauseMenuNodes[0],&s_Data.PauseMenuNodes[0], Application_Close };
+		s_Data.CurrentPauseMenuNode = &s_Data.PauseMenuNodes[0];
+	}
+
+	//Selection
+	{
+		s_Data.SelectionEntity = Scene_GetEntityByName(entity->Scene, "Selection");
+
+		CORE_ASSERT(s_Data.SelectionEntity, "Cannot find selection entity!");
+
+		s_Data.SelectionRectTrans = (RectTransformComponent*)Entity_GetComponent(s_Data.SelectionEntity, ComponentType_RectTransform);
+
+		CORE_ASSERT(s_Data.SelectionRectTrans, "Entity does not have RectTransformComponent!");
+
+		s_Data.SelectionSprite = (SpriteRendererComponent*)Entity_GetComponent(s_Data.SelectionEntity, ComponentType_SpriteRenderer);
+
+		CORE_ASSERT(s_Data.SelectionSprite, "Entity does not have RectTransformComponent!");
+	}
 }
 
 void PauseGame()
@@ -134,40 +206,77 @@ void PauseGame()
 	if (s_Data.IsPaused)
 	{
 		Application_SetTimeScale(1.0f);
-		s_Data.RectTrans->Position = { 0,0 };
-		s_Data.RectTrans->Size = { 1920.0f,1080.0f };
-		s_Data.SpriteRenderer->Color = { 1.0f,0,0,0 };
+		Scene_SetEntityEnabled(s_Data.SelectionEntity, false);
 	}
 	else
 	{
 		Application_SetTimeScale(0.0f);
-		s_Data.RectTrans->Position = { 800.0f,500.0f };
-		s_Data.RectTrans->Size = { 300.0f,500.0f };
-		s_Data.SpriteRenderer->Color = { 1.0f,1.0f,1.0f,0.5f };
+		Scene_SetEntityEnabled(s_Data.SelectionEntity, true);
 	}
 
 	s_Data.IsPaused = !s_Data.IsPaused;
 }
 
+void DrawScore()
+{
+	Vec2 position, size, ndcPos;
+	Vec2 viewPortSize = { (float)Window_GetWidth(),(float)Window_GetHeight() };
+
+	wchar_t text[256];
+	swprintf_s(text, 256, L"Score: %d    Time: %.1f", s_Data.Score, s_Data.Timer);
+	s_Data.ScoreText = wcsdup(text);
+	RectTransformComponent_GetPositionAndSize(s_Data.ScoreCanvas, viewPortSize, &ndcPos, &position, &size);
+	Renderer2D_DrawText(s_Data.ScoreText, SCORE_FONT_NAME, position, { 1.0f,1.0f,1.0f,1.0f }, SCORE_FONT_SIZE);
+}
+
 void UIController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 {
-	if (Input_GetKeyDown(KeyCode::Esc))
-	{
-		PauseGame();
-	}
-
 	if (s_Data.IsPaused)
 	{
+		#ifndef CORE_DIST
+		if (Input_GetKeyDown(KeyCode::Numpad5))
+			s_Data.ShowPauseMenu = !s_Data.ShowPauseMenu;
+
+		if (!s_Data.ShowPauseMenu)
+		{
+			Scene_SetEntityEnabled(s_Data.SelectionEntity, false);
+			return;
+		}
+		else
+		{
+			Scene_SetEntityEnabled(s_Data.SelectionEntity, true);
+		}
+		#endif
+
 		Vec2 position, size, ndcPos;
 		Vec2 viewPortSize = { (float)Window_GetWidth(),(float)Window_GetHeight() };
 
+		for (size_t i = 0; i < 2; i++)
 		{
+			s_Data.PauseMenuCanvas.Position.y = s_Data.PauseMenuNodes[i].yPosForD2D;
 			RectTransformComponent_GetPositionAndSize(s_Data.PauseMenuCanvas, viewPortSize, &ndcPos, &position, &size);
-			Renderer2D_DrawText(PAUSE_MENU_TEXT, PAUSE_MENU_FONT_NAME, position, { 1.0f,1.0f,1.0f,1.0f }, PAUSE_MENU_FONT_SIZE);
+			Renderer2D_DrawText(s_Data.PauseMenuNodes[i].Text, PAUSE_MENU_FONT_NAME, position, { 1.0f,1.0f,1.0f,1.0f }, PAUSE_MENU_FONT_SIZE);
 		}
 
+		//Score
+		if (s_Data.IsPlayerDead || s_Data.IsTiemEnd)
+			DrawScore();
+
 		if (Input_GetKeyDown(KeyCode::Enter))
-			Application_Close();
+		{
+			s_Data.CurrentPauseMenuNode->OnEnter();
+		}
+
+		if (Input_GetKeyDown(KeyCode::UpArrow))
+		{
+			s_Data.CurrentPauseMenuNode = s_Data.CurrentPauseMenuNode->Prev;
+		}
+		else if (Input_GetKeyDown(KeyCode::DownArrow))
+		{
+			s_Data.CurrentPauseMenuNode = s_Data.CurrentPauseMenuNode->Next;
+		}
+
+		s_Data.SelectionRectTrans->Position.y = s_Data.CurrentPauseMenuNode->yPos;
 	}
 
 	//HP Bar
@@ -192,6 +301,14 @@ void UIController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 			s_Data.HPBarBackRectTrans->Size.x = FloatLerp(s_Data.HPBarBackRectTrans->Size.x, s_Data.HPBarFrontRectTrans->Size.x, timeStep);
 		}
 		s_Data.LastHPBarFrontWidth = targetHPBarFrontWidth;
+	}
+
+	if (s_Data.IsTiemEnd || s_Data.IsPlayerDead)
+		return;
+
+	if (Input_GetKeyDown(KeyCode::Esc))
+	{
+		PauseGame();
 	}
 
 	//Sight Icon
@@ -252,6 +369,20 @@ void UIController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 			s_Data.BloodEffectTimer += timeStep;
 		}
 	}
+
+	// Score
+	{
+		DrawScore();
+
+		if (s_Data.TimerStarted)
+			s_Data.Timer += timeStep;
+
+		if (s_Data.Timer > s_Data.MaxTime)
+		{
+			s_Data.IsTiemEnd = true;
+			PauseGame();
+		}
+	}
 }
 
 void UIController_OnDestroy(Entity* entity, void* runtimeData)
@@ -265,6 +396,17 @@ void UIController_OnEnable(Entity* entity, void* runtimeData)
 void UIController_OnDisable(Entity* entity, void* runtimeData)
 {}
 
+void UIController_OnEnemyDead(uint32_t score)
+{
+	s_Data.Score += score;
+}
+
+void UIController_OnPlayerDead()
+{
+	s_Data.IsPlayerDead = true;
+	PauseGame();
+}
+
 void UIController_PlayShootAnimation()
 {
 	s_Data.IsShooting = true;
@@ -275,15 +417,19 @@ void UIController_PlayHitIcon()
 	s_Data.IsHit = true;
 }
 
-void UIController_PlayBloodEffect()
+void UIController_PlayBloodEffect(const Vec3& color)
 {
 	s_Data.IsBloodEffect = true;
-	s_Data.SpriteRenderer->Color = { 1.0f,0,0,BLOOD_EFFECT_ALPHA };
-	s_Data.RectTrans->Position = { 0.0f,0.0f };
-	s_Data.RectTrans->Size = { 1920.0f,1080.0f };
+	s_Data.SpriteRenderer->Color = { color.x,color.y,color.z,BLOOD_EFFECT_ALPHA };
 }
 
 bool UIController_IsPaused()
 {
 	return s_Data.IsPaused;
+}
+
+void UIController_StartTimer()
+{
+	s_Data.Timer = 0.0f;
+	s_Data.TimerStarted = true;
 }

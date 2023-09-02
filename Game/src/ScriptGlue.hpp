@@ -8,13 +8,23 @@
 #include "Map/FieldController.h"
 #include "Map/FieldTrigger.h"
 #include "Map/LightController.h"
+#include "Map/ItemTrigger.h"
+
+static RefPtr* s_RefLight;
+static RefPtr* s_GreenLight;
 
 // Hardcoded scene
 void ScriptGlue_CreateTitleScene(Scene& scene)
 {
-	Texture2D backgroundTex;
-	Texture2D_Create(&backgroundTex, "assets/textures/title.png");
-	RefPtr* refPtr = RefPtr_Create(sizeof(Texture2D), &backgroundTex);
+	Texture2D texture;
+	Texture2D_Create(&texture, "assets/textures/title.png");
+	RefPtr* refPtr = RefPtr_Create(sizeof(Texture2D), &texture);
+
+	Texture2D_Create(&texture, "assets/textures/animated_sprites/red_light/spritesheet.png");
+	s_RefLight = RefPtr_Create(sizeof(Texture2D), &texture);
+
+	Texture2D_Create(&texture, "assets/textures/animated_sprites/green_light/spritesheet.png");
+	s_GreenLight = RefPtr_Create(sizeof(Texture2D), &texture);
 
 	//Main Camera
 	{
@@ -80,6 +90,68 @@ void ScriptGlue_CreateTitleScene(Scene& scene)
 
 		Scene_AddEntity(scene, selection);
 	}
+
+	{
+		Entity light = {};
+		light.Tag.Name = "Light_Red";
+
+		RectTransformComponent rectTransform = {};
+		rectTransform.Position = { 270.0f, 200.0f };
+		rectTransform.Size = { 150.0f, 250.0f };
+		Entity_AddComponent(&light, ComponentType::ComponentType_RectTransform, &rectTransform);
+
+		SpriteRendererComponent spriteRenderer = {};
+		spriteRenderer.Texture = RefPtr_AddRef(s_RefLight);
+		Entity_AddComponent(&light, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+		ScriptComponent scriptComponent = {};
+		scriptComponent.OnCreate = LightController_OnCreate;
+		scriptComponent.OnUpdate = LightController_OnUpdate;
+		scriptComponent.OnDestroy = LightController_OnDestroy;
+		scriptComponent.OnCollision = LightController_OnCollision;
+		scriptComponent.OnRaycastHit = LightController_OnRaycastHit;
+		scriptComponent.OnEnable = LightController_OnEnable;
+		scriptComponent.OnDisable = LightController_OnDisable;
+
+		LightData* data = (LightData*)malloc(sizeof(LightData));
+		data->Type = LightType::RED;
+		scriptComponent.RuntimeData = data;
+
+		Entity_AddComponent(&light, ComponentType::ComponentType_Script, &scriptComponent);
+
+		Scene_AddEntity(scene, light);
+	}
+
+	{
+		Entity light = {};
+		light.Tag.Name = "Light_Green";
+
+		RectTransformComponent rectTransform = {};
+		rectTransform.Position = { 1450.0f, 200.0f };
+		rectTransform.Size = { 150.0f, 250.0f };
+		Entity_AddComponent(&light, ComponentType::ComponentType_RectTransform, &rectTransform);
+
+		SpriteRendererComponent spriteRenderer = {};
+		spriteRenderer.Texture = RefPtr_AddRef(s_GreenLight);
+		Entity_AddComponent(&light, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+		ScriptComponent scriptComponent = {};
+		scriptComponent.OnCreate = LightController_OnCreate;
+		scriptComponent.OnUpdate = LightController_OnUpdate;
+		scriptComponent.OnDestroy = LightController_OnDestroy;
+		scriptComponent.OnCollision = LightController_OnCollision;
+		scriptComponent.OnRaycastHit = LightController_OnRaycastHit;
+		scriptComponent.OnEnable = LightController_OnEnable;
+		scriptComponent.OnDisable = LightController_OnDisable;
+
+		LightData* data = (LightData*)malloc(sizeof(LightData));
+		data->Type = LightType::GREEN;
+		scriptComponent.RuntimeData = data;
+
+		Entity_AddComponent(&light, ComponentType::ComponentType_Script, &scriptComponent);
+
+		Scene_AddEntity(scene, light);
+	}
 }
 
 void ScriptGlue_CreatePlayScene(Scene& scene)
@@ -103,12 +175,6 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 	Texture2D_Create(&texture, "assets/textures/roof.png");
 	RefPtr* roofTex = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/animated_sprites/red_light/spritesheet.png");
-	RefPtr* redLight = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/animated_sprites/green_light/spritesheet.png");
-	RefPtr* greenLight = RefPtr_Create(sizeof(Texture2D), &texture);
 
 	Texture2D_Create(&texture, "assets/textures/weapon/shotgun/spritesheet.png");
 	RefPtr* shotgunSprite = RefPtr_Create(sizeof(Texture2D), &texture);
@@ -151,6 +217,9 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 	Texture2D_Create(&texture, "assets/textures/npc/soldier/pain/0.png");
 	RefPtr* soldierPainSprite = RefPtr_Create(sizeof(Texture2D), &texture);
+
+	Texture2D_Create(&texture, "assets/textures/medkit.png");
+	RefPtr* medkitIcon = RefPtr_Create(sizeof(Texture2D), &texture);
 	#pragma endregion
 
 	#pragma region Camera
@@ -235,6 +304,10 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		boxCollider2D.Size = { 3.0f,1.0f };
 		Entity_AddComponent(&player, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
+		AudioComponent audioComponent = {};
+		audioComponent.Type = AudioComponentType::AudioComponentType_Listener;
+		Entity_AddComponent(&player, ComponentType::ComponentType_Audio, &audioComponent);
+
 		ScriptComponent scriptComponent = {};
 		scriptComponent.OnCreate = PlayerController_OnCreate;
 		scriptComponent.OnUpdate = PlayerController_OnUpdate;
@@ -246,6 +319,52 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		Entity_AddComponent(&player, ComponentType::ComponentType_Script, &scriptComponent);
 
 		Scene_AddEntity(scene, player);
+	}
+	#pragma endregion
+
+	#pragma region Pickable Items
+	{
+		{
+			Entity enemy = {};
+			enemy.Tag.Name = "Item_1";
+			enemy.Transform.Translation = { 15.0f,20.0f, 3.5f };
+			enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
+			enemy.Transform.Scale = { 2.5f, 2.5f, 1.0f };
+
+			SpriteRendererComponent spriteRenderer = {};
+			spriteRenderer.Texture = RefPtr_AddRef(medkitIcon);
+			Entity_AddComponent(&enemy, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+			Rigidbody2DComponent rigidbody2D = {};
+			rigidbody2D.Type = Rigidbody2D::BodyType::Static;
+			Entity_AddComponent(&enemy, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
+
+			BoxCollider2DComponent boxCollider2D = {};
+			boxCollider2D.Restitution = 0.0f;
+			boxCollider2D.Offset = { 0,0 };
+			boxCollider2D.Size = { 0.6f,0.2f };
+			boxCollider2D.IsTrigger = true;
+			Entity_AddComponent(&enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+
+			ScriptComponent scriptComponent = {};
+			scriptComponent.OnCreate = ItemTrigger_OnCreate;
+			scriptComponent.OnUpdate = ItemTrigger_OnUpdate;
+			scriptComponent.OnDestroy = ItemTrigger_OnDestroy;
+			scriptComponent.OnCollision = ItemTrigger_OnCollision;
+			scriptComponent.OnRaycastHit = ItemTrigger_OnRaycastHit;
+			scriptComponent.OnEnable = ItemTrigger_OnEnable;
+			scriptComponent.OnDisable = ItemTrigger_OnDisable;
+
+			ItemTriggerData* itemData = (ItemTriggerData*)malloc(sizeof(EnemyData));
+			*itemData = {};
+			itemData->Type = ItemTriggerType::MEDKIT;
+
+			scriptComponent.RuntimeData = itemData;
+
+			Entity_AddComponent(&enemy, ComponentType::ComponentType_Script, &scriptComponent);
+
+			Scene_AddEntity(scene, enemy);
+		}
 	}
 	#pragma endregion
 
@@ -271,48 +390,9 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			boxCollider2D.Size = { 0.6f,0.2f };
 			Entity_AddComponent(&enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
-			ScriptComponent scriptComponent = {};
-			scriptComponent.OnCreate = EnemyController_OnCreate;
-			scriptComponent.OnUpdate = EnemyController_OnUpdate;
-			scriptComponent.OnDestroy = EnemyController_OnDestroy;
-			scriptComponent.OnCollision = EnemyController_OnCollision;
-			scriptComponent.OnRaycastHit = EnemyController_OnRaycastHit;
-			scriptComponent.OnEnable = EnemyController_OnEnable;
-			scriptComponent.OnDisable = EnemyController_OnDisable;
-
-			EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
-			*enemyData = {};
-			enemyData->Type = EnemyType::CACO_DEMON;
-			enemyData->WalkSpriteSheet = RefPtr_AddRef(cacoDemonWalkSprite);
-			enemyData->AttackSpriteSheet = RefPtr_AddRef(cacoDemonAttackSprite);
-			enemyData->DeathSpriteSheet = RefPtr_AddRef(cacoDemonDeathSprite);
-			enemyData->PainSpriteSheet = RefPtr_AddRef(cacoDemonPainSprite);
-
-			scriptComponent.RuntimeData = enemyData;
-
-			Entity_AddComponent(&enemy, ComponentType::ComponentType_Script, &scriptComponent);
-
-			Scene_AddEntity(scene, enemy);
-		}
-		{
-			Entity enemy = {};
-			enemy.Tag.Name = "Enemy_Caco_Demon_2";
-			enemy.Transform.Translation = { 15.0f,20.0f, 1.5f };
-			enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
-			enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
-
-			SpriteRendererComponent spriteRenderer = {};
-			Entity_AddComponent(&enemy, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-			Rigidbody2DComponent rigidbody2D = {};
-			rigidbody2D.Type = Rigidbody2D::BodyType::Kinematic;
-			Entity_AddComponent(&enemy, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
-
-			BoxCollider2DComponent boxCollider2D = {};
-			boxCollider2D.Restitution = 0.0f;
-			boxCollider2D.Offset = { 0,0 };
-			boxCollider2D.Size = { 0.6f,0.2f };
-			Entity_AddComponent(&enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+			AudioComponent audioComponent = {};
+			audioComponent.Type = AudioComponentType::AudioComponentType_Emitter;
+			Entity_AddComponent(&enemy, ComponentType::ComponentType_Audio, &audioComponent);
 
 			ScriptComponent scriptComponent = {};
 			scriptComponent.OnCreate = EnemyController_OnCreate;
@@ -357,48 +437,9 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			boxCollider2D.Size = { 0.6f,0.2f };
 			Entity_AddComponent(&enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
-			ScriptComponent scriptComponent = {};
-			scriptComponent.OnCreate = EnemyController_OnCreate;
-			scriptComponent.OnUpdate = EnemyController_OnUpdate;
-			scriptComponent.OnDestroy = EnemyController_OnDestroy;
-			scriptComponent.OnCollision = EnemyController_OnCollision;
-			scriptComponent.OnRaycastHit = EnemyController_OnRaycastHit;
-			scriptComponent.OnEnable = EnemyController_OnEnable;
-			scriptComponent.OnDisable = EnemyController_OnDisable;
-
-			EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
-			*enemyData = {};
-			enemyData->Type = EnemyType::CYBER_DEMON;
-			enemyData->WalkSpriteSheet = RefPtr_AddRef(cyberDemonWalkSprite);
-			enemyData->AttackSpriteSheet = RefPtr_AddRef(cyberDemonAttackSprite);
-			enemyData->DeathSpriteSheet = RefPtr_AddRef(cyberDemonDeathSprite);
-			enemyData->PainSpriteSheet = RefPtr_AddRef(cyberDemonPainSprite);
-
-			scriptComponent.RuntimeData = enemyData;
-
-			Entity_AddComponent(&enemy, ComponentType::ComponentType_Script, &scriptComponent);
-
-			Scene_AddEntity(scene, enemy);
-		}
-		{
-			Entity enemy = {};
-			enemy.Tag.Name = "Enemy_Cyber_Demon_2";
-			enemy.Transform.Translation = { 15.0f,20.0f, 2.0f };
-			enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
-			enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
-
-			SpriteRendererComponent spriteRenderer = {};
-			Entity_AddComponent(&enemy, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-			Rigidbody2DComponent rigidbody2D = {};
-			rigidbody2D.Type = Rigidbody2D::BodyType::Kinematic;
-			Entity_AddComponent(&enemy, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
-
-			BoxCollider2DComponent boxCollider2D = {};
-			boxCollider2D.Restitution = 0.0f;
-			boxCollider2D.Offset = { 0,0 };
-			boxCollider2D.Size = { 0.6f,0.2f };
-			Entity_AddComponent(&enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+			AudioComponent audioComponent = {};
+			audioComponent.Type = AudioComponentType::AudioComponentType_Emitter;
+			Entity_AddComponent(&enemy, ComponentType::ComponentType_Audio, &audioComponent);
 
 			ScriptComponent scriptComponent = {};
 			scriptComponent.OnCreate = EnemyController_OnCreate;
@@ -443,48 +484,9 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			boxCollider2D.Size = { 0.6f,0.2f };
 			Entity_AddComponent(&enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
-			ScriptComponent scriptComponent = {};
-			scriptComponent.OnCreate = EnemyController_OnCreate;
-			scriptComponent.OnUpdate = EnemyController_OnUpdate;
-			scriptComponent.OnDestroy = EnemyController_OnDestroy;
-			scriptComponent.OnCollision = EnemyController_OnCollision;
-			scriptComponent.OnRaycastHit = EnemyController_OnRaycastHit;
-			scriptComponent.OnEnable = EnemyController_OnEnable;
-			scriptComponent.OnDisable = EnemyController_OnDisable;
-
-			EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
-			*enemyData = {};
-			enemyData->Type = EnemyType::SOLDIER;
-			enemyData->WalkSpriteSheet = RefPtr_AddRef(soldierWalkSprite);
-			enemyData->AttackSpriteSheet = RefPtr_AddRef(soldierAttackSprite);
-			enemyData->DeathSpriteSheet = RefPtr_AddRef(soldierDeathSprite);
-			enemyData->PainSpriteSheet = RefPtr_AddRef(soldierPainSprite);
-
-			scriptComponent.RuntimeData = enemyData;
-
-			Entity_AddComponent(&enemy, ComponentType::ComponentType_Script, &scriptComponent);
-
-			Scene_AddEntity(scene, enemy);
-		}
-		{
-			Entity enemy = {};
-			enemy.Tag.Name = "Enemy_Soldier_2";
-			enemy.Transform.Translation = { 15.0f,20.0f, 2.0f };
-			enemy.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
-			enemy.Transform.Scale = { 5.0f, 5.0f, 1.0f };
-
-			SpriteRendererComponent spriteRenderer = {};
-			Entity_AddComponent(&enemy, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
-
-			Rigidbody2DComponent rigidbody2D = {};
-			rigidbody2D.Type = Rigidbody2D::BodyType::Kinematic;
-			Entity_AddComponent(&enemy, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
-
-			BoxCollider2DComponent boxCollider2D = {};
-			boxCollider2D.Restitution = 0.0f;
-			boxCollider2D.Offset = { 0,0 };
-			boxCollider2D.Size = { 0.6f,0.2f };
-			Entity_AddComponent(&enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+			AudioComponent audioComponent = {};
+			audioComponent.Type = AudioComponentType::AudioComponentType_Emitter;
+			Entity_AddComponent(&enemy, ComponentType::ComponentType_Audio, &audioComponent);
 
 			ScriptComponent scriptComponent = {};
 			scriptComponent.OnCreate = EnemyController_OnCreate;
@@ -539,6 +541,23 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			Entity_AddComponent(&background, ComponentType::ComponentType_Script, &scriptComponent);
 
 			Scene_AddEntity(scene, background);
+		}
+		//Selection
+		{
+			Entity selection = {};
+			selection.Tag.Name = "Selection";
+			selection.Enabled = false;
+
+			RectTransformComponent rectTransform = {};
+			rectTransform.Position = { 790.0f, 430.0f };
+			rectTransform.Size = { 400.0f, 70.0f };
+			Entity_AddComponent(&selection, ComponentType::ComponentType_RectTransform, &rectTransform);
+
+			SpriteRendererComponent spriteRenderer = {};
+			spriteRenderer.Color = { 0.4f, 0.4f, 0.4f, 0.5f };
+			Entity_AddComponent(&selection, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+			Scene_AddEntity(scene, selection);
 		}
 		{
 			Entity weapon = {};
@@ -695,7 +714,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity_AddComponent(&light, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = redLight;
+				spriteRenderer.Texture = RefPtr_AddRef(s_RefLight);
 				Entity_AddComponent(&light, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				ScriptComponent scriptComponent = {};
@@ -732,7 +751,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity_AddComponent(&light, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(greenLight);
+				spriteRenderer.Texture = RefPtr_AddRef(s_GreenLight);
 				Entity_AddComponent(&light, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				ScriptComponent scriptComponent = {};
@@ -760,7 +779,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = wallTex5;
+				spriteRenderer.Texture = RefPtr_AddRef(wallTex5);
 				spriteRenderer.Color = { 1.0f,1.0f,1.0f,1.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
@@ -1129,7 +1148,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity_AddComponent(&light, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(greenLight);
+				spriteRenderer.Texture = RefPtr_AddRef(s_GreenLight);
 				Entity_AddComponent(&light, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				ScriptComponent scriptComponent = {};
@@ -1166,7 +1185,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity_AddComponent(&light, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = redLight;
+				spriteRenderer.Texture = RefPtr_AddRef(s_RefLight);
 				Entity_AddComponent(&light, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				ScriptComponent scriptComponent = {};

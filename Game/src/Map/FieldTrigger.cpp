@@ -28,10 +28,5 @@ void FieldTrigger_OnCollision(Entity* entity, Entity* other, void* runtimeData)
 		}
 		break;
 	}
-	case FieldTriggerType::OPEN_DOOR:
-	{
-
-		break;
-	}
 	}
 }

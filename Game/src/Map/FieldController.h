@@ -10,4 +10,5 @@ void FieldController_OnEnable(Entity* entity, void* runtimeData);
 void FieldController_OnDisable(Entity* entity, void* runtimeData);
 
 void FieldController_GenMap();
+void FieldController_GenMedkit();
 void FieldController_OnEnemyDead(const Vec3& pos);

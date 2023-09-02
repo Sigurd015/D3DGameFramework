@@ -13,19 +13,19 @@ struct GameData
 	Scene PlayScene;
 	Scene TitleScene;
 
+	bool PlaySceneDestroyRequested = false;
+
 	GameMode Mode = LOADING_SCENE;
 };
 static GameData s_Data;
 
 void Game_Ininialize(Application* appInst)
 {
+	s_Data = {};
+
 	Scene_Create(s_Data.TitleScene);
 	ScriptGlue_CreateTitleScene(s_Data.TitleScene);
 	Scene_Ininialize(s_Data.TitleScene);
-
-	Scene_Create(s_Data.PlayScene);
-	ScriptGlue_CreatePlayScene(s_Data.PlayScene);
-	Scene_Ininialize(s_Data.PlayScene);
 
 	KeyMap_Init();
 
@@ -33,11 +33,21 @@ void Game_Ininialize(Application* appInst)
 	Loading_Initialize();
 	Loading_SetDepature(STARTUP_TITLE);
 	//TODO: Set back to LOADING_SCENE when testing is done
-	Game_SetMode(PLAY_SCENE);
+	Game_SetMode(TITLE_MENU);
 }
 
 void Game_Update(float timeStep)
 {
+	if (s_Data.PlaySceneDestroyRequested)
+	{
+		Scene_Destroy(s_Data.PlayScene);
+		s_Data.PlaySceneDestroyRequested = false;
+
+		Scene_Create(s_Data.PlayScene);
+		ScriptGlue_CreatePlayScene(s_Data.PlayScene);
+		Scene_Ininialize(s_Data.PlayScene);
+	}
+
 	switch (s_Data.Mode)
 	{
 	case LOADING_SCENE:
@@ -85,7 +95,6 @@ void Game_Update(float timeStep)
 
 void Game_Shutdown(Application* appInst)
 {
-	Scene_Destroy(s_Data.PlayScene);
 	Scene_Destroy(s_Data.TitleScene);
 
 	Loading_Destroy();
@@ -93,6 +102,26 @@ void Game_Shutdown(Application* appInst)
 
 void Game_SetMode(GameMode mode)
 {
+	switch (s_Data.Mode)
+	{
+	case PLAY_SCENE:
+	{
+		s_Data.PlaySceneDestroyRequested = true;
+		break;
+	}
+	}
+
+	switch (mode)
+	{
+	case PLAY_SCENE:
+	{
+		Scene_Create(s_Data.PlayScene);
+		ScriptGlue_CreatePlayScene(s_Data.PlayScene);
+		Scene_Ininialize(s_Data.PlayScene);
+		break;
+	}
+	}
+
 	s_Data.Mode = mode;
 }
 
@@ -114,7 +143,7 @@ void CreateApplication(Application* appInst, ApplicationCommandLineArgs args)
 	if (appInst->Spec.CommandLineArgs.Count > 1)
 	{
 		appInst->Spec.FullScreen = false;
-		char* temp = "nofullscreen";
+		char* temp = "nonfullscreen";
 		for (size_t i = 0; i < strlen(temp); i++)
 		{
 			if (tolower(appInst->Spec.CommandLineArgs.Args[1][i]) != temp[i])

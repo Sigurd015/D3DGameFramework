@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-
+#include <Esent.h>
 // Forward declarations
 struct Application;
 
@@ -27,6 +27,7 @@ struct ApplicationSpecification
 
 void Application_Ininialize(Application* appInst);
 void Application_SetTimeScale(float timeScale);
+void* Application_CreateSoundEffect(const WCHAR* path);
 void Application_Run();
 void Application_Close();
 void Application_Shutdown();

@@ -20,6 +20,7 @@ struct Entity
 	CircleCollider2DComponent* CircleCollider2D = nullptr;
 	TextComponent* Text = nullptr;
 	ScriptComponent* Script = nullptr;
+	AudioComponent* Audio = nullptr;
 };
 
 bool Entity_HasComponent(Entity* entity, ComponentType type);

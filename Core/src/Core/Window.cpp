@@ -48,7 +48,6 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	}
 	case WM_CLOSE:
 	{
-		Window_Shutdown();
 		WindowProps& data = s_WindowState.Props;
 		data.WindowClose();
 		return 0;

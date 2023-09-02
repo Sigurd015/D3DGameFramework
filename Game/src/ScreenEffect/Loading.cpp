@@ -18,7 +18,7 @@ struct StartUpData
 	SpriteTimer SpriteTimer;
 
 	float CurrentTime = 0.0f;
-	float MaxTime = 5.0f;
+	float MaxTime = 3.0f;
 
 	GameMode Depature = STARTUP_TITLE;
 };

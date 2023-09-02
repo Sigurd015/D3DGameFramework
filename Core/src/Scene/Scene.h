@@ -18,6 +18,7 @@ void Scene_Destroy(Scene& out);
 void Scene_AddEntity(Scene& out, Entity& entity);
 Entity* Scene_GetEntityByName(const Scene* out, const char* name);
 Entity* Scene_GetPrimaryCamera(const Scene& out);
+void* Scene_GetListener(const Scene* out);
 void Scene_SetEntityEnabled(Entity* entity, bool enabled);
 void Scene_OnUpdate(Scene& out, float timeStep);
 void Scene_OnViewportResize(Scene& out, uint32_t width, uint32_t height);

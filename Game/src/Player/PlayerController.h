@@ -10,3 +10,4 @@ void PlayerController_OnEnable(Entity* entity, void* runtimeData);
 void PlayerController_OnDisable(Entity* entity, void* runtimeData);
 
 float PlayerController_GetHpPercent();
+void PlayerController_AddHp(float hp);
