@@ -33,7 +33,7 @@ void Game_Ininialize(Application* appInst)
 	Loading_Initialize();
 	Loading_SetDepature(STARTUP_TITLE);
 	//TODO: Set back to LOADING_SCENE when testing is done
-	Game_SetMode(TITLE_MENU);
+	Game_SetMode(LOADING_SCENE);
 }
 
 void Game_Update(float timeStep)
@@ -42,10 +42,6 @@ void Game_Update(float timeStep)
 	{
 		Scene_Destroy(s_Data.PlayScene);
 		s_Data.PlaySceneDestroyRequested = false;
-
-		Scene_Create(s_Data.PlayScene);
-		ScriptGlue_CreatePlayScene(s_Data.PlayScene);
-		Scene_Ininialize(s_Data.PlayScene);
 	}
 
 	switch (s_Data.Mode)
@@ -96,7 +92,11 @@ void Game_Update(float timeStep)
 void Game_Shutdown(Application* appInst)
 {
 	Scene_Destroy(s_Data.TitleScene);
-
+	if (s_Data.PlaySceneDestroyRequested)
+	{
+		Scene_Destroy(s_Data.PlayScene);
+		s_Data.PlaySceneDestroyRequested = false;
+	}
 	Loading_Destroy();
 }
 

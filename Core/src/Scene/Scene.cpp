@@ -46,12 +46,14 @@ void Scene_Ininialize(Scene& out)
 				case AudioComponentType_Listener:
 				{
 					DirectX::AudioListener* listener = new DirectX::AudioListener();
+					listener->SetPosition(tc->Translation);
 					ac->Audio = listener;
 					break;
 				}
 				case AudioComponentType_Emitter:
 				{
 					DirectX::AudioEmitter* emitter = new DirectX::AudioEmitter();
+					emitter->SetPosition(tc->Translation);
 					ac->Audio = emitter;
 					break;
 				}
@@ -377,13 +379,13 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 				case AudioComponentType_Listener:
 				{
 					DirectX::AudioListener* listener = (DirectX::AudioListener*)ac->Audio;
-					listener->SetPosition(tc->Translation);
+					listener->Update({ tc->Translation.x,tc->Translation.y,tc->Translation.z }, { 0,0,-1.0f }, timeStep);
 					break;
 				}
 				case AudioComponentType_Emitter:
 				{
 					DirectX::AudioEmitter* emitter = (DirectX::AudioEmitter*)ac->Audio;
-					emitter->SetPosition(tc->Translation);
+					emitter->Update({ tc->Translation.x,tc->Translation.y,tc->Translation.z }, { 0,0,-1.0f }, timeStep);
 					break;
 				}
 				}

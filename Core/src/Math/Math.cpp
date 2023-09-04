@@ -170,6 +170,18 @@ Vec2 Vec3ToVec2(const Vec3& vec)
 	return { vec.x,vec.y };
 }
 
+float Vec3Distance(const Vec3& a, const Vec3& b)
+{
+	return Vec3Length({ a.x - b.x, a.y - b.y, a.z - b.z });
+}
+
+float Vec3Length(const Vec3& vec)
+{
+	float result;
+	DirectX::XMStoreFloat(&result, DirectX::XMVector3Length(DirectX::XMLoadFloat3(&vec)));
+	return result;
+}
+
 float FloatMax(float a, float b)
 {
 	if (a > b)

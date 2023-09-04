@@ -85,6 +85,12 @@ struct UIControllerData
 	bool IsTiemEnd = false;
 	#ifndef CORE_DIST
 	bool ShowPauseMenu = true;
+	CameraComponent* Camera = nullptr;
+	Entity* HPBarFront = nullptr;
+	Entity* HPBarBack = nullptr;
+	Entity* HPBackground = nullptr;
+	Entity* Weapon = nullptr;
+	Entity* SightIcon = nullptr;
 	#endif 
 };
 static UIControllerData s_Data;
@@ -95,6 +101,12 @@ void BackToMenu()
 	Loading_Reset();
 	Loading_SetDepature(TITLE_MENU);
 	Game_SetMode(LOADING_SCENE);
+}
+
+void ExitGame()
+{
+	Game_SetMode(LOADING_SCENE);
+	Application_Close();
 }
 
 void UIController_OnCreate(Entity* entity, void* runtimeData)
@@ -181,7 +193,7 @@ void UIController_OnCreate(Entity* entity, void* runtimeData)
 
 	{
 		s_Data.PauseMenuNodes[0] = { L"Back to Menu" ,770.0f,250.0f ,&s_Data.PauseMenuNodes[1],&s_Data.PauseMenuNodes[1], BackToMenu };
-		s_Data.PauseMenuNodes[1] = { L"Exit Game" ,620.0f,400.0f ,&s_Data.PauseMenuNodes[0],&s_Data.PauseMenuNodes[0], Application_Close };
+		s_Data.PauseMenuNodes[1] = { L"Exit Game" ,620.0f,400.0f ,&s_Data.PauseMenuNodes[0],&s_Data.PauseMenuNodes[0], ExitGame };
 		s_Data.CurrentPauseMenuNode = &s_Data.PauseMenuNodes[0];
 	}
 
@@ -199,6 +211,19 @@ void UIController_OnCreate(Entity* entity, void* runtimeData)
 
 		CORE_ASSERT(s_Data.SelectionSprite, "Entity does not have RectTransformComponent!");
 	}
+
+	#ifndef CORE_DIST
+	{
+		Entity* camera = Scene_GetEntityByName(entity->Scene, "MainCamera");
+		s_Data.Camera = (CameraComponent*)Entity_GetComponent(camera, ComponentType_Camera);
+
+		s_Data.HPBarFront = Scene_GetEntityByName(entity->Scene, "HPBarFront");
+		s_Data.HPBarBack = Scene_GetEntityByName(entity->Scene, "HPBarBack");
+		s_Data.HPBackground = Scene_GetEntityByName(entity->Scene, "HPBarBackground");
+		s_Data.Weapon = Scene_GetEntityByName(entity->Scene, "Weapon");
+		s_Data.SightIcon = Scene_GetEntityByName(entity->Scene, "SightIcon");
+	}
+	#endif 
 }
 
 void PauseGame()
@@ -231,6 +256,29 @@ void DrawScore()
 
 void UIController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 {
+	#ifndef CORE_DIST
+	{
+		if (!s_Data.Camera->Primary)
+		{
+			Scene_SetEntityEnabled(s_Data.Weapon, false);
+			Scene_SetEntityEnabled(s_Data.SightIcon, false);
+			Scene_SetEntityEnabled(s_Data.HPBarFront, false);
+			Scene_SetEntityEnabled(s_Data.HPBarBack, false);
+			Scene_SetEntityEnabled(s_Data.HPBackground, false);
+
+			return;
+		}
+		else
+		{
+			Scene_SetEntityEnabled(s_Data.Weapon, true);
+			Scene_SetEntityEnabled(s_Data.SightIcon, true);
+			Scene_SetEntityEnabled(s_Data.HPBarFront, true);
+			Scene_SetEntityEnabled(s_Data.HPBarBack, true);
+			Scene_SetEntityEnabled(s_Data.HPBackground, true);
+		}
+	}
+	#endif 
+
 	if (s_Data.IsPaused)
 	{
 		#ifndef CORE_DIST
@@ -403,6 +451,13 @@ void UIController_OnEnemyDead(uint32_t score)
 
 void UIController_OnPlayerDead()
 {
+	#ifndef CORE_DIST
+	{
+		if (!s_Data.Camera->Primary)
+			return;
+	}
+	#endif
+
 	s_Data.IsPlayerDead = true;
 	PauseGame();
 }
@@ -430,6 +485,9 @@ bool UIController_IsPaused()
 
 void UIController_StartTimer()
 {
-	s_Data.Timer = 0.0f;
-	s_Data.TimerStarted = true;
+	if (!s_Data.TimerStarted)
+	{
+		s_Data.Timer = 0.0f;
+		s_Data.TimerStarted = true;
+	}
 }

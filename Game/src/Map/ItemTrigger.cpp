@@ -29,12 +29,7 @@ void ItemTrigger_OnCollision(Entity* entity, Entity* other, void* runtimeData)
 		{
 			PlayerController_AddHp(HEAL_AMOUNT);
 
-			static bool firstEnter = true;
-			if (firstEnter)
-			{
-				UIController_StartTimer();
-				firstEnter = false;
-			}
+			UIController_StartTimer();
 
 			Scene_SetEntityEnabled(entity, false);
 		}

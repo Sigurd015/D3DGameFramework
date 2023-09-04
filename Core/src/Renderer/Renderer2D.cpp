@@ -348,7 +348,7 @@ void Flush()
 		RendererAPI_DrawLines(s_Data.LineVertexBuffer, s_Data.LinePipeline, s_Data.LineVertexCount);
 	}
 
-	//RendererAPI_SetDepthTest(false);
+	RendererAPI_SetDepthTest(false);
 	RendererAPI_SetBlendingState(BlendMode_Alpha);
 	if (s_Data.UIIndexCount)
 	{
@@ -360,7 +360,7 @@ void Flush()
 
 		RendererAPI_DrawIndexed(s_Data.UIVertexBuffer, s_Data.QuadIndexBuffer, s_Data.UIPipeline, s_Data.UIIndexCount);
 	}
-	//RendererAPI_SetDepthTest(true);
+	RendererAPI_SetDepthTest(true);
 	RendererAPI_SetBlendingState(BlendMode_Disabled);
 
 	// Rendering Text after all d3d11 draw calls, to make sure text is always on top (beacuse text is rendered by d2d)

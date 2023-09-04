@@ -58,8 +58,6 @@ void Rigidbody2DComponent_MovePosition(Rigidbody2DComponent* rigidbody2D, const 
 
 void AudioComponent_Play(const Scene* scene, AudioComponent* audioComponent, void* soundEffect)
 {
-	// Sorry about using std::unique_ptr here, but for DirectXTK audio, it's only return std::unique_ptr
-	// RefPtr(Created by Me) is trash compared to std::unique_ptr OvO
 	DirectX::SoundEffect* se = (DirectX::SoundEffect*)soundEffect;
 
 	if (audioComponent->Type == AudioComponentType_Listener)
@@ -69,13 +67,34 @@ void AudioComponent_Play(const Scene* scene, AudioComponent* audioComponent, voi
 	}
 	else
 	{
+
+		if (se->IsInUse())
+			return;
+
+		se->Play();
+
 		//TODO: Make 3D sound work
-		if (!se->IsInUse())
-			se->Play();
-		//auto effectInstance = se->CreateInstance(DirectX::SoundEffectInstance_Use3D | DirectX::SoundEffectInstance_ReverbUseFilters);
 		//DirectX::AudioListener* listener = (DirectX::AudioListener*)Scene_GetListener(scene);
 		//DirectX::AudioEmitter* emitter = (DirectX::AudioEmitter*)audioComponent->Audio;
-		//effectInstance->Apply3D(*listener, *emitter);
-		//effectInstance->Play();
+
+		//Vec3 listenerPos = listener->Position;
+		//Vec3 emitterPos = emitter->Position;
+
+		//float distance = Vec3Distance(listenerPos, emitterPos);
+
+		//float volume = 1.0f - (distance / 10.0f);
+		//if (volume < 0.0f)
+		//	volume = 0.0f;
+
+		//auto effectInstance = se->CreateInstance(DirectX::SoundEffectInstance_Use3D);
+		//effectInstance->SetVolume(volume);
+		//effectInstance->Play(true);
+
+		//auto effectInstance = se->CreateInstance(DirectX::SoundEffectInstance_Use3D
+		//	| DirectX::SoundEffectInstance_ReverbUseFilters);
+		//DirectX::AudioListener* listener = (DirectX::AudioListener*)Scene_GetListener(scene);
+		//DirectX::AudioEmitter* emitter = (DirectX::AudioEmitter*)audioComponent->Audio;
+		//effectInstance->Play(false);
+		//effectInstance->Apply3D(*listener, *emitter, false);
 	}
 }

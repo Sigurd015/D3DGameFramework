@@ -41,6 +41,8 @@ Vec3 Vec3MulFloat(const Vec3& vec, float f);
 Vec3 Vec3MulVec3(const Vec3& a, const Vec3& b);
 Vec3 Vec3Lerp(const Vec3& a, const Vec3& b, float t);
 Vec2 Vec3ToVec2(const Vec3& vec);
+float Vec3Distance(const Vec3& a, const Vec3& b);
+float Vec3Length(const Vec3& vec);
 
 float FloatMax(float a, float b);
 float FloatMin(float a, float b);

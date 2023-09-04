@@ -117,6 +117,7 @@ void Application_Run()
 void Application_Shutdown()
 {
 	s_AppState.AppInst->Shutdown(s_AppState.AppInst);
+	s_AppState.AudioEngine->Suspend();
 	delete s_AppState.AudioEngine;
 	RendererAPI_Shutdown();
 }

@@ -165,27 +165,17 @@ void FieldController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 {
 	#ifndef CORE_DIST
 	{
-		uint32_t perTypeEnemyCount = ENEMY_COUNT / 3;
 		if (Input_GetKeyDown(KeyCode::Numpad1))
 		{
-			for (size_t i = 0; i < perTypeEnemyCount; i++)
-			{
-				Scene_SetEntityEnabled(s_Data.EnemyEntity[i], !s_Data.EnemyEntity[i]->Enabled);
-			}
+			Scene_SetEntityEnabled(s_Data.EnemyEntity[0], !s_Data.EnemyEntity[0]->Enabled);
 		}
 		if (Input_GetKeyDown(KeyCode::Numpad2))
 		{
-			for (size_t i = perTypeEnemyCount; i < perTypeEnemyCount * 2; i++)
-			{
-				Scene_SetEntityEnabled(s_Data.EnemyEntity[i], !s_Data.EnemyEntity[i]->Enabled);
-			}
+			Scene_SetEntityEnabled(s_Data.EnemyEntity[1], !s_Data.EnemyEntity[1]->Enabled);
 		}
 		if (Input_GetKeyDown(KeyCode::Numpad3))
 		{
-			for (size_t i = perTypeEnemyCount * 2; i < ENEMY_COUNT; i++)
-			{
-				Scene_SetEntityEnabled(s_Data.EnemyEntity[i], !s_Data.EnemyEntity[i]->Enabled);
-			}
+			Scene_SetEntityEnabled(s_Data.EnemyEntity[1], !s_Data.EnemyEntity[1]->Enabled);
 		}
 	}
 	#endif 

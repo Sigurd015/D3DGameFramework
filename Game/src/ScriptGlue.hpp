@@ -10,7 +10,7 @@
 #include "Map/LightController.h"
 #include "Map/ItemTrigger.h"
 
-static RefPtr* s_RefLight;
+static RefPtr* s_RedLight;
 static RefPtr* s_GreenLight;
 
 // Hardcoded scene
@@ -21,7 +21,7 @@ void ScriptGlue_CreateTitleScene(Scene& scene)
 	RefPtr* refPtr = RefPtr_Create(sizeof(Texture2D), &texture);
 
 	Texture2D_Create(&texture, "assets/textures/animated_sprites/red_light/spritesheet.png");
-	s_RefLight = RefPtr_Create(sizeof(Texture2D), &texture);
+	s_RedLight = RefPtr_Create(sizeof(Texture2D), &texture);
 
 	Texture2D_Create(&texture, "assets/textures/animated_sprites/green_light/spritesheet.png");
 	s_GreenLight = RefPtr_Create(sizeof(Texture2D), &texture);
@@ -101,7 +101,7 @@ void ScriptGlue_CreateTitleScene(Scene& scene)
 		Entity_AddComponent(&light, ComponentType::ComponentType_RectTransform, &rectTransform);
 
 		SpriteRendererComponent spriteRenderer = {};
-		spriteRenderer.Texture = RefPtr_AddRef(s_RefLight);
+		spriteRenderer.Texture = RefPtr_AddRef(s_RedLight);
 		Entity_AddComponent(&light, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 		ScriptComponent scriptComponent = {};
@@ -588,18 +588,18 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			Scene_AddEntity(scene, sightIcon);
 		}
 		{
-			Entity hpBarFront = {};
-			hpBarFront.Tag.Name = "HPBarFront";
+			Entity hpBarBackground = {};
+			hpBarBackground.Tag.Name = "HPBarBackground";
 			RectTransformComponent rectTransform = {};
 			rectTransform.Position = { 100.0f, 990.0f };
 			rectTransform.Size = { 500.0f, 25.0f };
-			Entity_AddComponent(&hpBarFront, ComponentType::ComponentType_RectTransform, &rectTransform);
+			Entity_AddComponent(&hpBarBackground, ComponentType::ComponentType_RectTransform, &rectTransform);
 
 			SpriteRendererComponent spriteRenderer = {};
-			spriteRenderer.Color = { 191.0f / 255.0f, 50.0f / 255.0f, 50.0f / 255.0f,0.8f };
-			Entity_AddComponent(&hpBarFront, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+			spriteRenderer.Color = { 64.0f / 255.0f, 60.0f / 255.0f, 60.0f / 255.0f,0.8f };
+			Entity_AddComponent(&hpBarBackground, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
-			Scene_AddEntity(scene, hpBarFront);
+			Scene_AddEntity(scene, hpBarBackground);
 		}
 		{
 			Entity hpBarBack = {};
@@ -616,18 +616,18 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			Scene_AddEntity(scene, hpBarBack);
 		}
 		{
-			Entity hpBarBackground = {};
-			hpBarBackground.Tag.Name = "HPBarBackground";
+			Entity hpBarFront = {};
+			hpBarFront.Tag.Name = "HPBarFront";
 			RectTransformComponent rectTransform = {};
 			rectTransform.Position = { 100.0f, 990.0f };
 			rectTransform.Size = { 500.0f, 25.0f };
-			Entity_AddComponent(&hpBarBackground, ComponentType::ComponentType_RectTransform, &rectTransform);
+			Entity_AddComponent(&hpBarFront, ComponentType::ComponentType_RectTransform, &rectTransform);
 
 			SpriteRendererComponent spriteRenderer = {};
-			spriteRenderer.Color = { 64.0f / 255.0f, 60.0f / 255.0f, 60.0f / 255.0f,0.8f };
-			Entity_AddComponent(&hpBarBackground, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+			spriteRenderer.Color = { 191.0f / 255.0f, 50.0f / 255.0f, 50.0f / 255.0f,0.8f };
+			Entity_AddComponent(&hpBarFront, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
-			Scene_AddEntity(scene, hpBarBackground);
+			Scene_AddEntity(scene, hpBarFront);
 		}
 	}
 	#pragma endregion
@@ -714,7 +714,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity_AddComponent(&light, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(s_RefLight);
+				spriteRenderer.Texture = RefPtr_AddRef(s_RedLight);
 				Entity_AddComponent(&light, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				ScriptComponent scriptComponent = {};
@@ -1185,7 +1185,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity_AddComponent(&light, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(s_RefLight);
+				spriteRenderer.Texture = RefPtr_AddRef(s_RedLight);
 				Entity_AddComponent(&light, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				ScriptComponent scriptComponent = {};
