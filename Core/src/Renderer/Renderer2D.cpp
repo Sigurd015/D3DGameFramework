@@ -446,7 +446,9 @@ void Renderer2D_DrawQuad(const Mat& transform, RefPtr* texture, const Vec2& uv0,
 	if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
 		NextBatch();
 
-	Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
+	// Filp uv
+	//Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
+	Vec2 textureCoords[] = { { uv0.x, uv1.y }, uv1, { uv1.x, uv0.y }, uv0  };
 	Texture2D* tex = (Texture2D*)RefPtr_Get(texture);
 	SetQuadVertex(transform, tintColor, textureCoords, GetTextureID(tex), tilingFactor);
 }
@@ -534,7 +536,9 @@ void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, const Vec4& color)
 
 void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, RefPtr* texture, const Vec2& uv0, const Vec2& uv1, const Vec4& tintColor, float tilingFactor)
 {
-	Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
+	// Filp uv
+	//Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
+	Vec2 textureCoords[] = { { uv0.x, uv1.y }, uv1, { uv1.x, uv0.y }, uv0 };
 	Texture2D* tex = (Texture2D*)RefPtr_Get(texture);
 	SetUIVertex(pos, size, tintColor, textureCoords, GetTextureID(tex), tilingFactor);
 }

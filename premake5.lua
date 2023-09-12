@@ -1,6 +1,6 @@
-workspace "Gunslayer"
+workspace "HAL_SchoolProjects"
 	architecture "x86_64"
-	startproject "Game"
+	startproject "Gunslayer"
 
 	configurations
 	{
@@ -16,6 +16,7 @@ workspace "Gunslayer"
 
 outputdir = "%{wks.location}/build/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 intdir = "%{wks.location}/build/int/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+workingdir = "%{wks.location}"
 
 IncludeDir = {}
 IncludeDir["DirectXTK"] = "%{wks.location}/Core/vendor/DirectXTK_Desktop_2022_Win10/include"
@@ -24,7 +25,7 @@ LibraryDir["DirectXTK"] = "%{wks.location}/Core/vendor/DirectXTK_Desktop_2022_Wi
 Library = {}
 Library["DirectXTK_Debug"] = "%{LibraryDir.DirectXTK}/Debug/DirectXTK.lib"
 Library["DirectXTK_Release"] = "%{LibraryDir.DirectXTK}/Release/DirectXTK.lib"
-IncludeDir["stb_image"] = "%{wks.location}/Core/vendor/stb_image"
 
 include "Core"
-include "Game"
+include "Gunslayer"
+include "Sandbox"

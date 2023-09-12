@@ -1,4 +1,4 @@
-project "Game"
+project "Sandbox"
 	language "C"
 	staticruntime "on"
 
@@ -34,6 +34,8 @@ project "Game"
 	{
 		"Core",
 	}
+
+	debugdir (workingdir)
 
 	postbuildcommands 
 	{

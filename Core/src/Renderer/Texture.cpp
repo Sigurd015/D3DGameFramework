@@ -4,7 +4,7 @@
 #include "Texture.h"
 #include "RendererAPI.h"
 
-#include <stb_image.h>
+#include <WICTextureLoader.h>
 
 DXGI_FORMAT ImageFormatToDXDataFormat(ImageFormat format)
 {
@@ -58,25 +58,27 @@ void CreateSamplerState(ID3D11SamplerState** ppSamplerState)
 
 void Texture2D_Create(Texture2D* out, const char* path)
 {
-	int width, height, channels;
-	stbi_set_flip_vertically_on_load(1);
-	stbi_uc* data = stbi_load(path, &width, &height, &channels, 4);
+	size_t newsize = strlen(path) + 1;
 
-	if (data)
-	{
-		out->Spec.Width = width;
-		out->Spec.Height = height;
-		out->Spec.Format = ImageFormat::RGBA8;
-		out->DataFormat = ImageFormatToDXDataFormat(out->Spec.Format);
+	wchar_t* wcstring = new wchar_t[newsize];
 
-		D3D11_SUBRESOURCE_DATA subresourceData = {};
-		subresourceData.pSysMem = data;
-		subresourceData.SysMemPitch = width * 4;
-		CreateTexture(D3D11_USAGE_DEFAULT, 0, width, height, out->DataFormat, &subresourceData, &out->Texture);
-		CreateShaderView(out->DataFormat, out->Texture, &out->TextureView);
-		CreateSamplerState(&out->SamplerState);
-		stbi_image_free(data);
-	}
+	// Convert char* string to a wchar_t* string.
+	size_t convertedChars = 0;
+	mbstowcs_s(&convertedChars, wcstring, newsize, path, _TRUNCATE);
+
+	CORE_CHECK_DX_RESULT(DirectX::CreateWICTextureFromFileEx(RendererContext_GetDevice(), wcstring, 0, D3D11_USAGE_DEFAULT,
+		D3D11_BIND_SHADER_RESOURCE, 0, 0, DirectX::WIC_LOADER_IGNORE_SRGB, reinterpret_cast<ID3D11Resource**>(&out->Texture), &out->TextureView));
+
+	delete[]wcstring;
+
+	D3D11_TEXTURE2D_DESC desc;
+	out->Texture->GetDesc(&desc);
+	out->DataFormat = desc.Format;
+	out->Spec.Width = desc.Width;
+	out->Spec.Height = desc.Height;
+	out->Spec.Format = ImageFormat::RGBA8;
+
+	CreateSamplerState(&out->SamplerState);
 }
 
 void Texture2D_Create(Texture2D* out, const TextureSpecification& spec)
