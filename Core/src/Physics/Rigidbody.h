@@ -47,4 +47,6 @@ void Rigidbody2D_ApplyForce(void* rigidbody2D, const Vec2& force);
 void Rigidbody2D_ApplyRotation(void* rigidbody2D, float rotation);
 void Rigidbody2D_SetPosition(void* rigidbody2D, const Vec2& position);
 void Rigidbody2D_MovePosition(void* rigidbody2D, const Vec2& amount);
+void Rigidbody2D_SetRotation(void* rigidbody2D, float rotation);
+void Rigidbody2D_Rotate(void* rigidbody2D, float amount);
 void Rigidbody2D_Step(Rigidbody2D& rigidbody2D, float timeStep);

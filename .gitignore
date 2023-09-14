@@ -6,5 +6,5 @@ packages/
 *.vcxproj
 *.sln
 *.config
-Game/assets/shaders/cache
+assets/shaders/cache
 Game/log.txt

@@ -22,15 +22,18 @@ void Rigidbody2D_ReCalculBoxColliderVerticesAndAABB(Rigidbody2D& rigidbody2D)
 	rigidbody2D.BoxCollider.Vertices[2] = { boxRightBottom.x, boxRightBottom.y };
 	rigidbody2D.BoxCollider.Vertices[3] = { boxLeftTop.x, boxRightBottom.y };
 
-	// Rotate by pivot point(position)
-	Mat translationToPivot = DirectX::XMMatrixTranslation(position.x, position.y, 0.0f);
-	Mat rotation = DirectX::XMMatrixRotationZ(rigidbody2D.Rotation);
-	Mat translationBack = DirectX::XMMatrixTranslation(-position.x, -position.y, 0.0f);
-	Mat finalTransform = translationBack * rotation * translationToPivot;
+	//// Rotate by pivot point(position)
+	//Mat translationToPivot = DirectX::XMMatrixTranslation(position.x, position.y, 0.0f);
+	//Mat rotation = DirectX::XMMatrixRotationZ(rigidbody2D.Rotation);
+	//Mat translationBack = DirectX::XMMatrixTranslation(-position.x, -position.y, 0.0f);
+	//Mat finalTransform = translationBack * rotation * translationToPivot;
 
 	for (size_t i = 0; i < 4; i++)
 	{
-		rigidbody2D.BoxCollider.Vertices[i] = Vec2MulMat(rigidbody2D.BoxCollider.Vertices[i], finalTransform);
+		// Matrix version
+		//rigidbody2D.BoxCollider.Vertices[i] = Vec2MulMat(rigidbody2D.BoxCollider.Vertices[i], finalTransform);
+		// Normal version
+		rigidbody2D.BoxCollider.Vertices[i] = Vec2RotateByPivot(rigidbody2D.BoxCollider.Vertices[i], position, rigidbody2D.Rotation);
 
 		if (rigidbody2D.BoxCollider.Vertices[i].x < rigidbody2D.AABB.Min.x)
 		{
@@ -100,6 +103,20 @@ void Rigidbody2D_MovePosition(void* rigidbody2D, const Vec2& amount)
 {
 	Rigidbody2D* rigidbody = (Rigidbody2D*)rigidbody2D;
 	rigidbody->Position = Vec2Add(rigidbody->Position, amount);
+	rigidbody->UpdateRequired = true;
+}
+
+void Rigidbody2D_SetRotation(void* rigidbody2D, float rotation)
+{
+	Rigidbody2D* rigidbody = (Rigidbody2D*)rigidbody2D;
+	rigidbody->Rotation = rotation;
+	rigidbody->UpdateRequired = true;
+}
+
+void Rigidbody2D_Rotate(void* rigidbody2D, float amount)
+{
+	Rigidbody2D* rigidbody = (Rigidbody2D*)rigidbody2D;
+	rigidbody->Rotation += amount;
 	rigidbody->UpdateRequired = true;
 }
 

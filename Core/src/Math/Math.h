@@ -19,6 +19,7 @@ Vec4 Vec4MulFloat(const Vec4& vec, float f);
 Vec4 Vec4MulMat(const Vec4& vec, const Mat& mat);
 Vec4 Vec4Lerp(const Vec4& a, const Vec4& b, float t);
 
+Vec2 Vec2RotateByPivot(const Vec2& vec, const Vec2& pivot, float angle);
 float Vec2Dot(const Vec2& a, const Vec2& b);
 float Vec2Cross(const Vec2& a, const Vec2& b);
 bool Vec2Equal(const Vec2& a, const Vec2& b);

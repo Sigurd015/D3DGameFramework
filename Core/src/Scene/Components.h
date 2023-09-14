@@ -41,6 +41,7 @@ struct RectTransformComponent
 	//Notice: Position is left bottom, [0,0] is left bottom, [1,1] is right top
 	//but for Text, [0,0] is left top, [1,1] is right bottom (Text handled by D2D)
 	Vec2 Position = { 0.0f, 0.0f };
+	float Rotation = 0.0f;
 	Vec2 Size = { 1.0f, 1.0f };
 	Vec2 Scale = { 1.0f, 1.0f };
 };
@@ -83,8 +84,11 @@ struct Rigidbody2DComponent
 
 void Rigidbody2DComponent_ApplyForce(Rigidbody2DComponent* rigidbody2D, const Vec2& force);
 void Rigidbody2DComponent_ApplyRotation(Rigidbody2DComponent* rigidbody2D, float rotation);
+// No physics effect
 void Rigidbody2DComponent_SetPosition(Rigidbody2DComponent* rigidbody2D, const Vec2& position);
 void Rigidbody2DComponent_MovePosition(Rigidbody2DComponent* rigidbody2D, const Vec2& position);
+void Rigidbody2DComponent_SetRotation(Rigidbody2DComponent* rigidbody2D, float rotation);
+void Rigidbody2DCmponent_Rotate(Rigidbody2DComponent* rigidbody2D, float amount);
 
 struct BoxCollider2DComponent
 {
@@ -138,7 +142,7 @@ struct AudioComponent
 
 // Forward declarations
 struct Scene;
-void AudioComponent_Play(const Scene* scene,AudioComponent* audioComponent, void* soundEffect);
+void AudioComponent_Play(const Scene* scene, AudioComponent* audioComponent, void* soundEffect);
 
 // Forward declarations
 struct Entity;

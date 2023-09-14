@@ -56,6 +56,22 @@ void Rigidbody2DComponent_MovePosition(Rigidbody2DComponent* rigidbody2D, const 
 	Rigidbody2D_MovePosition(rigidbody2D->RuntimeBody, position);
 }
 
+void Rigidbody2DComponent_SetRotation(Rigidbody2DComponent* rigidbody2D, float rotation)
+{
+	if (rotation == 0.0f)
+		return;
+
+	Rigidbody2D_SetRotation(rigidbody2D->RuntimeBody, rotation);
+}
+
+void Rigidbody2DCmponent_Rotate(Rigidbody2DComponent* rigidbody2D, float amount)
+{
+	if (amount == 0.0f)
+		return;
+
+	Rigidbody2D_Rotate(rigidbody2D->RuntimeBody, amount);
+}
+
 void AudioComponent_Play(const Scene* scene, AudioComponent* audioComponent, void* soundEffect)
 {
 	DirectX::SoundEffect* se = (DirectX::SoundEffect*)soundEffect;

@@ -300,7 +300,6 @@ void ColliderVisualiztion(const Scene& out)
 				Renderer2D_DrawRect(transform, Vec4(0, 1, 0, 1));
 			}
 		}
-
 	}
 }
 #endif
@@ -454,6 +453,7 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 						Renderer2D_DrawUI(
 							ndcPos,
 							size,
+							rect->Rotation,
 							sprite->Texture,
 							sprite->UVStart,
 							sprite->UVEnd,
@@ -463,7 +463,7 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 					}
 					else
 					{
-						Renderer2D_DrawUI(ndcPos, size, sprite->Color);
+						Renderer2D_DrawUI(ndcPos, size, rect->Rotation, sprite->Color);
 					}
 				}
 

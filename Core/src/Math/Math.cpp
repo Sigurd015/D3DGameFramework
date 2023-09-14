@@ -27,6 +27,20 @@ Vec4 Vec4Lerp(const Vec4& a, const Vec4& b, float t)
 	return result;
 }
 
+Vec2 Vec2RotateByPivot(const Vec2& vec, const Vec2& pivot, float angle)
+{
+	float cos = cosf(angle);
+	float sin = sinf(angle);
+
+	float x = vec.x - pivot.x;
+	float y = vec.y - pivot.y;
+	float targetX = x * cos - y * sin;
+	float targetY = x * sin + y * cos;
+	targetX += pivot.x;
+	targetY += pivot.y;
+	return Vec2(targetX, targetY);
+}
+
 float Vec2Dot(const Vec2& a, const Vec2& b)
 {
 	DirectX::XMVECTOR dotProduct = DirectX::XMVector2Dot(DirectX::XMLoadFloat2(&a), DirectX::XMLoadFloat2(&b));

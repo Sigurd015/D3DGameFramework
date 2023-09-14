@@ -1,6 +1,6 @@
 workspace "HAL_SchoolProjects"
 	architecture "x86_64"
-	startproject "Gunslayer"
+	startproject "Sandbox"
 
 	configurations
 	{

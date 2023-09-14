@@ -10,7 +10,7 @@ Visual Studio 2022 is recommended
 git clone https://github.com/Sigurd015/HAL_SchoolProjects
 ```
 
-<ins>**2. Run the [Win-GenProjects.bat](https://github.com/Sigurd015/Gunslayer/blob/main/Win-GenProjects.bat)**</ins>
+<ins>**2. Run the [Win-GenProjects.bat](https://github.com/Sigurd015/HAL_SchoolProjects/blob/main/Win-GenProjects.bat)**</ins>
 
 You can change the .bat file to generate a different version project file, but that is not tested.
 

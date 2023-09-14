@@ -10,19 +10,7 @@ project "Gunslayer"
 		"src/**.h",
 		"src/**.hpp",
 		"src/**.cpp",
-		"assets/shaders/**.hlsl"
 	}
-
-	filter { "files:**.hlsl" }
-		flags "ExcludeFromBuild"
-		shadermodel "5.0"
- 	filter { "files:**_p.hlsl" }
-		removeflags "ExcludeFromBuild"
-		shadertype "Pixel"
- 	filter { "files:**_v.hlsl" }
-		removeflags "ExcludeFromBuild"
-		shadertype "Vertex"
- 	filter {}
 
 	includedirs
 	{
@@ -36,11 +24,6 @@ project "Gunslayer"
 	}
 
 	debugdir (workingdir)
-
-	postbuildcommands 
-	{
-		'{COPY} "%{cfg.targetdir}"/*.cso assets/shaders/cache/'
-	}
 
 	filter "system:windows"
 		systemversion "latest"

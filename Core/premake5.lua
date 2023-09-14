@@ -13,7 +13,24 @@ project "Core"
 	{
 		"src/**.h",
 		"src/**.cpp",
+		"resources/shaders/**.hlsl"
 	}
+
+	filter { "files:**.hlsl" }
+		flags "ExcludeFromBuild"
+		shadermodel "5.0"
+ 	filter { "files:**_p.hlsl" }
+		removeflags "ExcludeFromBuild"
+		shadertype "Pixel"
+ 	filter { "files:**_v.hlsl" }
+		removeflags "ExcludeFromBuild"
+		shadertype "Vertex"
+ 	filter {}
+
+	 postbuildcommands 
+	 {
+		 '{COPY} "%{cfg.targetdir}"/*.cso %{wks.location}/assets/shaders/cache/'
+	 }
 
 	includedirs
 	{

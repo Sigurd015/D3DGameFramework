@@ -348,10 +348,11 @@ void Flush()
 		RendererAPI_DrawLines(s_Data.LineVertexBuffer, s_Data.LinePipeline, s_Data.LineVertexCount);
 	}
 
-	RendererAPI_SetDepthTest(false);
-	RendererAPI_SetBlendingState(BlendMode_Alpha);
 	if (s_Data.UIIndexCount)
 	{
+		RendererAPI_SetDepthTest(false);
+		RendererAPI_SetBlendingState(BlendMode_Alpha);
+
 		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.UIVertexBufferPtr - (uint8_t*)s_Data.UIVertexBufferBase);
 		VertexBuffer_SetData(s_Data.UIVertexBuffer, s_Data.UIVertexBufferBase, dataSize);
 
@@ -359,9 +360,10 @@ void Flush()
 			Texture2D_Bind(s_Data.Textures[i], i);
 
 		RendererAPI_DrawIndexed(s_Data.UIVertexBuffer, s_Data.QuadIndexBuffer, s_Data.UIPipeline, s_Data.UIIndexCount);
+
+		RendererAPI_SetDepthTest(true);
+		RendererAPI_SetBlendingState(BlendMode_Disabled);
 	}
-	RendererAPI_SetDepthTest(true);
-	RendererAPI_SetBlendingState(BlendMode_Disabled);
 
 	// Rendering Text after all d3d11 draw calls, to make sure text is always on top (beacuse text is rendered by d2d)
 	if (s_Data.TextRenderCommandCount)
@@ -448,7 +450,7 @@ void Renderer2D_DrawQuad(const Mat& transform, RefPtr* texture, const Vec2& uv0,
 
 	// Filp uv
 	//Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
-	Vec2 textureCoords[] = { { uv0.x, uv1.y }, uv1, { uv1.x, uv0.y }, uv0  };
+	Vec2 textureCoords[] = { { uv0.x, uv1.y }, uv1, { uv1.x, uv0.y }, uv0 };
 	Texture2D* tex = (Texture2D*)RefPtr_Get(texture);
 	SetQuadVertex(transform, tintColor, textureCoords, GetTextureID(tex), tilingFactor);
 }
@@ -509,14 +511,19 @@ void Renderer2D_DrawRect(const Mat& transform, const Vec4& color)
 	Renderer2D_DrawLine(lineVertices[3], lineVertices[0], color);
 }
 
-void SetUIVertex(const Vec2& pos, const Vec2& size,
+void SetUIVertex(const Vec2& pos, const Vec2& size, float rotation,
 	const Vec4& color, const Vec2* texCoord, float texIndex, float tilingFactor)
 {
 	Vec2 Vertices[] = { { pos.x, pos.y }, { pos.x + size.x, pos.y }, { pos.x + size.x, pos.y + size.y }, { pos.x, pos.y + size.y } };
-
+	Vec2 center = { pos.x + size.x * 0.5f, pos.y + size.y * 0.5f };
 	for (size_t i = 0; i < 4; i++)
 	{
-		s_Data.UIVertexBufferPtr->Position = { Vertices[i].x, Vertices[i].y, 0.0f };
+		// No rotation version
+		//s_Data.UIVertexBufferPtr->Position = { Vertices[i].x, Vertices[i].y, 0.0f };
+		
+		Vec2 tempPos = Vec2RotateByPivot(Vertices[i], center, rotation);
+		s_Data.UIVertexBufferPtr->Position = { tempPos.x, tempPos.y, 0.0f };
+
 		s_Data.UIVertexBufferPtr->Color = color;
 		s_Data.UIVertexBufferPtr->TexCoord = texCoord[i];
 		s_Data.UIVertexBufferPtr->TexIndex = texIndex;
@@ -526,21 +533,21 @@ void SetUIVertex(const Vec2& pos, const Vec2& size,
 	s_Data.UIIndexCount += 6;
 }
 
-void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, const Vec4& color)
+void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, float rotation, const Vec4& color)
 {
 	const float texIndex = 0.0f; // White Texture
 	const float tilingFactor = 1.0f;
 
-	SetUIVertex(pos, size, color, s_Data.QuadTexCoord, texIndex, tilingFactor);
+	SetUIVertex(pos, size, rotation, color, s_Data.QuadTexCoord, texIndex, tilingFactor);
 }
 
-void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, RefPtr* texture, const Vec2& uv0, const Vec2& uv1, const Vec4& tintColor, float tilingFactor)
+void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, float rotation, RefPtr* texture, const Vec2& uv0, const Vec2& uv1, const Vec4& tintColor, float tilingFactor)
 {
 	// Filp uv
 	//Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
 	Vec2 textureCoords[] = { { uv0.x, uv1.y }, uv1, { uv1.x, uv0.y }, uv0 };
 	Texture2D* tex = (Texture2D*)RefPtr_Get(texture);
-	SetUIVertex(pos, size, tintColor, textureCoords, GetTextureID(tex), tilingFactor);
+	SetUIVertex(pos, size, rotation, tintColor, textureCoords, GetTextureID(tex), tilingFactor);
 }
 
 void Renderer2D_DrawText(const WCHAR* str, const WCHAR* fontFamilyName, const Vec2& pos, const Vec4& color, float fontSize)
