@@ -54,75 +54,74 @@ void* PhysicsWorld2D_AddRigidbody2D(PhysicsWorld2D& world, Rigidbody2D& rigidbod
 	return rigidbody;
 }
 
-bool Collide(Rigidbody2D& body1, Rigidbody2D& body2, Vec2* normal, float* depth, Vec2* contactPoint, uint32_t* contactPointCount)
+bool Collide(Rigidbody2D* body1, Rigidbody2D* body2, ContactParams& contactParams)
 {
-	Rigidbody2D::ShapeType shape1 = body1.Shape;
-	Rigidbody2D::ShapeType shape2 = body2.Shape;
+	Rigidbody2D::ShapeType shape1 = body1->Shape;
+	Rigidbody2D::ShapeType shape2 = body2->Shape;
 
 	if (shape1 == Rigidbody2D::ShapeType::Box)
 	{
-		Vec2 box1Center = Vec2Add(body1.Position, body1.BoxCollider.Offset);
+		Vec2 box1Center = Vec2Add(body1->Position, body1->BoxCollider.Offset);
 
 		if (shape2 == Rigidbody2D::ShapeType::Circle)
 		{
-			Vec2 circleCenter = Vec2Add(body2.Position, body2.CircleCollider.Offset);
+			Vec2 circleCenter = Vec2Add(body2->Position, body2->CircleCollider.Offset);
 
-			bool result = Collisions_IntersectCirclePolygon(circleCenter, body2.CircleCollider.Radius,
-				body1.BoxCollider.Vertices, 4, box1Center, normal, depth, contactPoint, contactPointCount);
-			*normal = Vec2MulFloat(*normal, -1);
+			bool result = Collisions_IntersectCirclePolygon(circleCenter, body2->CircleCollider.Radius,
+				body1->BoxCollider.Vertices, 4, box1Center, contactParams);
+			contactParams.Normal = Vec2MulFloat(contactParams.Normal, -1);
 			return result;
 		}
 		else if (shape2 == Rigidbody2D::ShapeType::Box)
 		{
-			Vec2 box2Center = Vec2Add(body2.Position, body2.BoxCollider.Offset);
+			Vec2 box2Center = Vec2Add(body2->Position, body2->BoxCollider.Offset);
 
-			return Collisions_IntersectPolygons(body1.BoxCollider.Vertices, 4, box1Center,
-				body2.BoxCollider.Vertices, 4, box2Center, normal, depth, contactPoint, contactPointCount);
+			return Collisions_IntersectPolygons(body1->BoxCollider.Vertices, 4, box1Center,
+				body2->BoxCollider.Vertices, 4, box2Center, contactParams);
 		}
 	}
 	else if (shape1 == Rigidbody2D::ShapeType::Circle)
 	{
-		Vec2 circle1Center = Vec2Add(body1.Position, body1.CircleCollider.Offset);
+		Vec2 circle1Center = Vec2Add(body1->Position, body1->CircleCollider.Offset);
 
 		if (shape2 == Rigidbody2D::ShapeType::Circle)
 		{
-			Vec2 circle2Center = Vec2Add(body2.Position, body2.CircleCollider.Offset);
+			Vec2 circle2Center = Vec2Add(body2->Position, body2->CircleCollider.Offset);
 
-			return Collisions_IntersectCircles(circle1Center, body1.CircleCollider.Radius,
-				circle2Center, body2.CircleCollider.Radius, normal, depth, contactPoint, contactPointCount);
+			return Collisions_IntersectCircles(circle1Center, body1->CircleCollider.Radius,
+				circle2Center, body2->CircleCollider.Radius, contactParams);
 		}
 		else if (shape2 == Rigidbody2D::ShapeType::Box)
 		{
-			Vec2 box2Center = Vec2Add(body2.Position, body2.BoxCollider.Offset);
-			
-			return Collisions_IntersectCirclePolygon(circle1Center, body1.CircleCollider.Radius,
-				body2.BoxCollider.Vertices, 4, box2Center, normal, depth, contactPoint, contactPointCount);
+			Vec2 box2Center = Vec2Add(body2->Position, body2->BoxCollider.Offset);
+
+			return Collisions_IntersectCirclePolygon(circle1Center, body1->CircleCollider.Radius,
+				body2->BoxCollider.Vertices, 4, box2Center, contactParams);
 		}
 	}
 
 	return false;
 }
 
-void ResolveCollision(Rigidbody2D& body1, Rigidbody2D& body2, Vec2& normal, float depth,
-	Vec2* contactPoint, uint32_t contactPointCount)
+void ResolveCollision(Rigidbody2D* body1, Rigidbody2D* body2, ContactParams& contactParams)
 {
 	// No rotation and friction version
-	Vec2 relativeVelocity = Vec2Sub(body2.Velocity, body1.Velocity);
+	Vec2 relativeVelocity = Vec2Sub(body2->Velocity, body1->Velocity);
 
-	if (Vec2Dot(relativeVelocity, normal) > 0)
+	if (Vec2Dot(relativeVelocity, contactParams.Normal) > 0)
 	{
 		return;
 	}
 
-	float e = FloatMin(body1.Restitution, body2.Restitution);
+	float e = FloatMin(body1->Restitution, body2->Restitution);
 
-	float j = -(1.0f + e) * Vec2Dot(relativeVelocity, normal);
-	j /= body1.InvMass + body2.InvMass;
+	float j = -(1.0f + e) * Vec2Dot(relativeVelocity, contactParams.Normal);
+	j /= body1->InvMass + body2->InvMass;
 
-	Vec2 impulse = Vec2MulFloat(normal, j);
+	Vec2 impulse = Vec2MulFloat(contactParams.Normal, j);
 
-	body1.Velocity = Vec2Sub(body1.Velocity, Vec2MulFloat(impulse, body1.InvMass));
-	body2.Velocity = Vec2Add(body2.Velocity, Vec2MulFloat(impulse, body2.InvMass));
+	body1->Velocity = Vec2Sub(body1->Velocity, Vec2MulFloat(impulse, body1->InvMass));
+	body2->Velocity = Vec2Add(body2->Velocity, Vec2MulFloat(impulse, body2->InvMass));
 }
 
 void BroadPhase(PhysicsWorld2D& world)
@@ -151,17 +150,17 @@ void BroadPhase(PhysicsWorld2D& world)
 			if (body1->UpdateRequired)
 			{
 				if (body1->Shape == Rigidbody2D::ShapeType::Box)
-					Rigidbody2D_ReCalculBoxColliderVerticesAndAABB(*body1);
+					Rigidbody2D_ReCalculBoxColliderVerticesAndAABB(body1);
 				else if (body1->Shape == Rigidbody2D::ShapeType::Circle)
-					Rigidbody2D_ReCalculCircleColliderAABB(*body1);
+					Rigidbody2D_ReCalculCircleColliderAABB(body1);
 			}
 
 			if (body2->UpdateRequired)
 			{
 				if (body2->Shape == Rigidbody2D::ShapeType::Box)
-					Rigidbody2D_ReCalculBoxColliderVerticesAndAABB(*body2);
+					Rigidbody2D_ReCalculBoxColliderVerticesAndAABB(body2);
 				else if (body2->Shape == Rigidbody2D::ShapeType::Circle)
-					Rigidbody2D_ReCalculCircleColliderAABB(*body2);
+					Rigidbody2D_ReCalculCircleColliderAABB(body2);
 			}
 
 			if (!Collisions_IntersectAABB(body1->AABB, body2->AABB))
@@ -178,11 +177,11 @@ void BroadPhase(PhysicsWorld2D& world)
 }
 #ifndef CORE_DIST
 #include "Renderer/Renderer2D.h"
-void ContactPointVisualiztion(const Vec2* contactPoint, uint32_t contactPointCount)
+void ContactPointVisualiztion(ContactParams& contactParams)
 {
-	for (size_t i = 0; i < contactPointCount; i++)
+	for (size_t i = 0; i < contactParams.ContactPointCount; i++)
 	{
-		Vec3 pos = { contactPoint[i].x,contactPoint[i].y,-0.1f };
+		Vec3 pos = { contactParams.ContactPoint[i].x,contactParams.ContactPoint[i].y,-0.1f };
 		Vec3 rot = { 0,0,0 };
 		Vec3 scale = { 0.5f,0.5f,1.0f };
 
@@ -210,15 +209,12 @@ void NarrowPhase(PhysicsWorld2D& world)
 		Rigidbody2D* body1 = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, contactPair->Body1);
 		Rigidbody2D* body2 = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, contactPair->Body2);
 
-		float depth = FLT_MAX;
-		Vec2 normal = Vec2Zero;
-		Vec2 contactPoint[2] = { Vec2Zero,Vec2Zero };
-		uint32_t contactPointCount = 0;
-		if (Collide(*body1, *body2, &normal, &depth, contactPoint, &contactPointCount))
+		ContactParams contactParams = {};
+		if (Collide(body1, body2, contactParams))
 		{
 
 			#ifndef CORE_DIST
-			ContactPointVisualiztion(contactPoint, contactPointCount);
+			ContactPointVisualiztion(contactParams);
 			#endif 
 
 			if (body1->IsTrigger || body2->IsTrigger)
@@ -230,19 +226,19 @@ void NarrowPhase(PhysicsWorld2D& world)
 
 			if (body1->Type == Rigidbody2D::BodyType::Static)
 			{
-				Rigidbody2D_MovePosition(body2, Vec2MulFloat(normal, depth));
+				Rigidbody2D_MovePosition(body2, Vec2MulFloat(contactParams.Normal, contactParams.Depth));
 			}
 			else if (body2->Type == Rigidbody2D::BodyType::Static)
 			{
-				Rigidbody2D_MovePosition(body1, Vec2MulFloat(normal, -depth));
+				Rigidbody2D_MovePosition(body1, Vec2MulFloat(contactParams.Normal, -contactParams.Depth));
 			}
 			else
 			{
-				Rigidbody2D_MovePosition(body1, Vec2MulFloat(normal, -depth / 2.0f));
-				Rigidbody2D_MovePosition(body2, Vec2MulFloat(normal, depth / 2.0f));
+				Rigidbody2D_MovePosition(body1, Vec2MulFloat(contactParams.Normal, -contactParams.Depth / 2.0f));
+				Rigidbody2D_MovePosition(body2, Vec2MulFloat(contactParams.Normal, contactParams.Depth / 2.0f));
 			}
 
-			ResolveCollision(*body1, *body2, normal, depth, contactPoint, contactPointCount);
+			ResolveCollision(body1, body2, contactParams);
 		}
 	}
 }
@@ -257,7 +253,7 @@ void PhysicsWorld2D_Update(PhysicsWorld2D& world, float timeStep, uint32_t itera
 			{
 				Rigidbody2D* rigidbody = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, i);
 
-				Rigidbody2D_Step(*rigidbody, timeStep / (float)iterations);
+				Rigidbody2D_Step(rigidbody, timeStep / (float)iterations);
 			}
 		}
 
@@ -270,10 +266,10 @@ void PhysicsWorld2D_Update(PhysicsWorld2D& world, float timeStep, uint32_t itera
 	}
 }
 
-void* PhysicsWorld2D_Raycast(PhysicsWorld2D& world, const Vec2& rayOrigin, const Vec2& rayDirection, float* minDistance)
+void* PhysicsWorld2D_Raycast(PhysicsWorld2D& world, const Vec2& rayOrigin, const Vec2& rayDirection, float& minDistance)
 {
 	void* result = nullptr;
-	*minDistance = FLT_MAX;
+	minDistance = FLT_MAX;
 
 	for (size_t i = 0; i < world.Rigidbody2DCount; i++)
 	{
@@ -287,22 +283,22 @@ void* PhysicsWorld2D_Raycast(PhysicsWorld2D& world, const Vec2& rayOrigin, const
 		if (rigidbody->UpdateRequired)
 		{
 			if (rigidbody->Shape == Rigidbody2D::ShapeType::Box)
-				Rigidbody2D_ReCalculBoxColliderVerticesAndAABB(*rigidbody);
+				Rigidbody2D_ReCalculBoxColliderVerticesAndAABB(rigidbody);
 			else if (rigidbody->Shape == Rigidbody2D::ShapeType::Circle)
-				Rigidbody2D_ReCalculCircleColliderAABB(*rigidbody);
+				Rigidbody2D_ReCalculCircleColliderAABB(rigidbody);
 		}
 
 		float distance = 0.0f;
 		if (rigidbody->Shape == Rigidbody2D::ShapeType::Box)
 		{
 			Vec2 boxCenter = Vec2Add(rigidbody->Position, rigidbody->BoxCollider.Offset);
-			if (Collisions_RayCastPolygons(rayOrigin, rayDirection, rigidbody->BoxCollider.Vertices, 4, boxCenter, &distance))
+			if (Collisions_RayCastPolygons(rayOrigin, rayDirection, rigidbody->BoxCollider.Vertices, 4, boxCenter, distance))
 			{
 				if (distance != 0.0f)
 				{
-					if (distance < *minDistance)
+					if (distance < minDistance)
 					{
-						*minDistance = distance;
+						minDistance = distance;
 						result = rigidbody->Entity;
 					}
 				}
@@ -311,13 +307,13 @@ void* PhysicsWorld2D_Raycast(PhysicsWorld2D& world, const Vec2& rayOrigin, const
 		else if (rigidbody->Shape == Rigidbody2D::ShapeType::Circle)
 		{
 			Vec2 circleCenter = Vec2Add(rigidbody->Position, rigidbody->CircleCollider.Offset);
-			if (Collisions_RayCastCircles(rayOrigin, rayDirection, circleCenter, rigidbody->CircleCollider.Radius, &distance))
+			if (Collisions_RayCastCircles(rayOrigin, rayDirection, circleCenter, rigidbody->CircleCollider.Radius, distance))
 			{
 				if (distance != 0.0f)
 				{
-					if (distance < *minDistance)
+					if (distance < minDistance)
 					{
-						*minDistance = distance;
+						minDistance = distance;
 						result = rigidbody->Entity;
 					}
 				}
@@ -326,7 +322,7 @@ void* PhysicsWorld2D_Raycast(PhysicsWorld2D& world, const Vec2& rayOrigin, const
 	}
 
 	#ifndef CORE_DIST
-	RayVisualiztion(rayOrigin, rayDirection, *minDistance);
+	RayVisualiztion(rayOrigin, rayDirection, minDistance);
 	#endif 
 
 	return result;

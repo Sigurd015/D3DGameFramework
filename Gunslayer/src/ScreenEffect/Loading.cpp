@@ -6,7 +6,7 @@
 struct StartUpData
 {
 	RectTransformComponent CanvasRect = {
-		{ 1820.0f,50.0f },
+		{ 1820.0f,50.0f },0,
 		{ 50.0f, 50.0f },
 	};
 	SpriteRendererComponent CanvasSprite = {
@@ -73,7 +73,7 @@ void Loading_Draw(float timeStep)
 	s_Data.CanvasSprite.UVStart = spriteElement->UVStart;
 	s_Data.CanvasSprite.UVEnd = spriteElement->UVEnd;
 
-	Renderer2D_DrawUI(ndcPos, size, s_Data.CanvasSprite.Texture,
+	Renderer2D_DrawUI(ndcPos, size, s_Data.CanvasRect.Rotation, s_Data.CanvasSprite.Texture,
 		s_Data.CanvasSprite.UVStart, s_Data.CanvasSprite.UVEnd,
 		s_Data.CanvasSprite.Color, s_Data.CanvasSprite.TilingFactor);
 

@@ -525,8 +525,7 @@ void EnemyController_OnRaycastHit(Entity* entity, Entity* other, void* runtimeDa
 		//data->State = ENEMY_ATTACK;
 
 		#ifndef CORE_DIST
-		APP_LOG_INFO("Enemy hited by player: ");
-		APP_LOG_INFO(entity->Tag.Name);
+		APP_LOG_INFO("Enemy hited by player: %s", entity->Tag.Name);
 		#endif 
 	}
 }

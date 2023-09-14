@@ -58,7 +58,7 @@ struct UIControllerData
 	bool IsBloodEffect = false;
 
 	RectTransformComponent ScoreCanvas = {
-		{ 700.0f,50.0f },
+		{ 700.0f,50.0f },0,
 		{ 150.0f, 150.0f },
 	};
 	WCHAR* ScoreText = L"";
@@ -70,7 +70,7 @@ struct UIControllerData
 
 	bool IsPaused = false;
 	RectTransformComponent PauseMenuCanvas = {
-		{ 840.0f,465.0f },
+		{ 840.0f,465.0f },0,
 		{ 150.0f, 150.0f },
 	};
 

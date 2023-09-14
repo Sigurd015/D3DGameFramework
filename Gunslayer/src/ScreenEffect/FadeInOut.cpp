@@ -4,7 +4,7 @@
 struct FadeInOutData
 {
 	RectTransformComponent CanvasRect = {
-		{ 0.0f,0.0f },
+		{ 0.0f,0.0f },0,
 		{ 1920.0f, 1080.0f },
 	};
 	SpriteRendererComponent CanvasSprite = {
@@ -53,6 +53,6 @@ void FadeInOut_Draw(float timeStep)
 		Vec2 position, size, ndcPos;
 		Vec2 viewPortSize = { (float)Window_GetWidth(),(float)Window_GetHeight() };
 		RectTransformComponent_GetPositionAndSize(s_Data.CanvasRect, viewPortSize, &ndcPos, &position, &size);
-		Renderer2D_DrawUI(ndcPos, size, s_Data.CanvasSprite.Color);
+		Renderer2D_DrawUI(ndcPos, size, s_Data.CanvasRect.Rotation, s_Data.CanvasSprite.Color);
 	}
 }

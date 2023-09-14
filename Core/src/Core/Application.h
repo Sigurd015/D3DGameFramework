@@ -1,9 +1,9 @@
 #pragma once
+#include "Input/Keycode.h"
+#include "Events/Event.h"
 
 #include <stdint.h>
 #include <Esent.h>
-// Forward declarations
-struct Application;
 
 struct ApplicationCommandLineArgs
 {
@@ -23,6 +23,16 @@ struct ApplicationSpecification
 	bool VSync = true;
 
 	ApplicationCommandLineArgs CommandLineArgs;
+};
+
+struct Application
+{
+	ApplicationSpecification Spec;
+
+	void(*Ininialize)(Application* appInst);
+	void(*Shutdown)();
+	void(*Update)(float timeStep);
+	void(*OnEvent)(Event* e);
 };
 
 void Application_Ininialize(Application* appInst);

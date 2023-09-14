@@ -53,16 +53,14 @@ void PlayerController_OnDestroy(Entity* entity, void* runtimeData)
 void PlayerController_OnCollision(Entity* entity, Entity* other, void* runtimeData)
 {
 	#ifndef CORE_DIST
-	APP_LOG_INFO("OnCollision: ");
-	APP_LOG_INFO(other->Tag.Name);
+	APP_LOG_INFO("OnCollision: %s", other->Tag.Name);
 	#endif 
 }
 
 void PlayerController_OnRaycastHit(Entity* entity, Entity* other, void* runtimeData)
 {
 	#ifndef CORE_DIST
-	APP_LOG_INFO("Player hited by :");
-	APP_LOG_INFO(other->Tag.Name);
+	APP_LOG_INFO("Player hited by : %s", other->Tag.Name);
 	#endif 
 }
 

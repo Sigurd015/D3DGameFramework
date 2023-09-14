@@ -1,6 +1,5 @@
 ﻿#include "pch.h"
 #include "Application.h"
-#include "ApplicationTypes.h"
 #include "Window.h"
 #include "Renderer/RendererAPI.h"
 
@@ -27,21 +26,35 @@ void Application_Close()
 	s_AppState.IsRunning = false;
 }
 
-void Application_Resize(float width, float height)
+bool OnWndResize(const Event* e)
 {
-	if (width == 0.0f || height == 0.0f)
+	WndResizeEvnet* resizeEvent = (WndResizeEvnet*)e->Data;
+	if (resizeEvent->Width == 0.0f || resizeEvent->Height == 0.0f)
 	{
 		s_AppState.Minimized = true;
-		return;
+		return true;
 	}
 
 	s_AppState.Minimized = false;
-	RendererAPI_SetViewport(width, height);
+	RendererAPI_SetViewport(resizeEvent->Width, resizeEvent->Height);
+	return true;
 }
 
-void Application_OnKeyPressed(KeyCode key)
+bool OnWndClose(const Event* e)
 {
-	s_AppState.AppInst->OnKeyPressed(s_AppState.AppInst, key);
+	Application_Close();
+	return true;
+}
+
+void Application_OnEvent(Event* e)
+{
+	Event_Dispatcher(EventType_WindowClose, e, OnWndClose);
+	Event_Dispatcher(EventType_WindowResize, e, OnWndResize);
+
+	if (!e->handled)
+		s_AppState.AppInst->OnEvent(e);
+
+	Event_Release(e);
 }
 
 void Application_Ininialize(Application* appInst)
@@ -56,9 +69,7 @@ void Application_Ininialize(Application* appInst)
 		appInst->Spec.Resizable,
 		appInst->Spec.Maximizable,
 		appInst->Spec.Minimizable,
-		Application_Resize,
-		Application_Close,
-		Application_OnKeyPressed,
+		Application_OnEvent,
 	};
 
 	Window_Create(props);
@@ -116,7 +127,7 @@ void Application_Run()
 
 void Application_Shutdown()
 {
-	s_AppState.AppInst->Shutdown(s_AppState.AppInst);
+	s_AppState.AppInst->Shutdown();
 	s_AppState.AudioEngine->Suspend();
 	delete s_AppState.AudioEngine;
 	RendererAPI_Shutdown();

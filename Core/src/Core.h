@@ -5,8 +5,10 @@
 
 //-------Core-----------
 #include "Core/Application.h"
-#include "Core/ApplicationTypes.h"
 #include "Core/Window.h"
+
+//-------Events---------
+#include "Events/Event.h"
 
 //-------Renderer-------
 #include "Renderer/RendererAPI.h"

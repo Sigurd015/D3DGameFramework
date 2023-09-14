@@ -75,11 +75,11 @@ struct TitleMenuControllerData
 	KeyConfigNode* CurrentKeyConfigNode = nullptr;
 
 	RectTransformComponent KeyConfiglabelCanvas = {
-		{ 790.0f,465.0f },
+		{ 790.0f,465.0f },0,
 		{ 150.0f, 150.0f },
 	};
 	RectTransformComponent KeyConfigNodeCanvas = {
-		{ 1120.0f,465.0f },
+		{ 1120.0f,465.0f },0,
 		{ 150.0f, 150.0f },
 	};
 
@@ -88,7 +88,7 @@ struct TitleMenuControllerData
 	MenuState State = IDLE;
 
 	RectTransformComponent CreditsCanvas = {
-		{ 655.0f,465.0f },
+		{ 655.0f,465.0f },0,
 		{ 150.0f, 150.0f },
 	};
 	float CreditsSpeed = 100.0f;
@@ -102,17 +102,17 @@ struct TitleMenuControllerData
 	};
 
 	RectTransformComponent TipCanvas = {
-		{ TIP_POS_X,TIP_POS_Y },
+		{ TIP_POS_X,TIP_POS_Y },0,
 		{ 150.0f, 150.0f },
 	};
 
 	RectTransformComponent CopyRightCanvas = {
-		{ COPYRIGHT_POS_X,COPYRIGHT_POS_Y },
+		{ COPYRIGHT_POS_X,COPYRIGHT_POS_Y },0,
 		{ 150.0f, 150.0f },
 	};
 
 	RectTransformComponent KeyChangeTipCanvas = {
-		{ KEY_CHANGE_POS_X,KEY_CHANGE_POS_Y },
+		{ KEY_CHANGE_POS_X,KEY_CHANGE_POS_Y },0,
 		{ 150.0f, 150.0f },
 	};
 };

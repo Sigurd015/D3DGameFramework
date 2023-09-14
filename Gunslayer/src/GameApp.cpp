@@ -33,7 +33,7 @@ void Game_Ininialize(Application* appInst)
 	Loading_Initialize();
 	Loading_SetDepature(STARTUP_TITLE);
 	//TODO: Set back to LOADING_SCENE when testing is done
-	Game_SetMode(LOADING_SCENE);
+	Game_SetMode(TITLE_MENU);
 }
 
 void Game_Update(float timeStep)
@@ -89,7 +89,7 @@ void Game_Update(float timeStep)
 	}
 }
 
-void Game_Shutdown(Application* appInst)
+void Game_Shutdown()
 {
 	Scene_Destroy(s_Data.TitleScene);
 	if (s_Data.PlaySceneDestroyRequested)
@@ -125,9 +125,16 @@ void Game_SetMode(GameMode mode)
 	s_Data.Mode = mode;
 }
 
-void Game_OnKeyPressed(Application* appInst, KeyCode key)
+bool OnKeyPressed(const Event* e)
 {
-	TitleMenuController_OnKeyPressed(key);
+	KeyPressedEvent* event = (KeyPressedEvent*)e->Data;
+	TitleMenuController_OnKeyPressed(event->Keycode);
+	return true;
+}
+
+void Game_OnEvent(Event* e)
+{
+	Event_Dispatcher(EventType_KeyPressed, e, OnKeyPressed);
 }
 
 void CreateApplication(Application* appInst, ApplicationCommandLineArgs args)
@@ -160,5 +167,5 @@ void CreateApplication(Application* appInst, ApplicationCommandLineArgs args)
 	appInst->Ininialize = Game_Ininialize;
 	appInst->Shutdown = Game_Shutdown;
 	appInst->Update = Game_Update;
-	appInst->OnKeyPressed = Game_OnKeyPressed;
+	appInst->OnEvent = Game_OnEvent;
 }

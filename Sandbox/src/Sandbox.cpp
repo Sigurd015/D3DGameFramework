@@ -25,19 +25,38 @@ void Game_Update(float timeStep)
 	Scene_OnUpdate(s_Data.TestScene, timeStep);
 }
 
-void Game_Shutdown(Application* appInst)
-{}
+void Game_Shutdown()
+{
+	Scene_Destroy(s_Data.TestScene);
+}
 
-void Game_OnKeyPressed(Application* appInst, KeyCode key)
-{}
+bool OnKeyPressed(const Event* e)
+{
+	KeyPressedEvent* event = (KeyPressedEvent*)e->Data;
+	APP_LOG_INFO("Key Pressed: %c , IsRepeat : %d", (char)event->Keycode, event->IsRepeat);
+	return true;
+}
+
+bool OnMouseMoved(const Event* e)
+{
+	MouseMovedEvent* event = (MouseMovedEvent*)e->Data;
+	//APP_LOG_INFO("Mouse Moved: X: %f, Y: %f", event->x, event->y);
+	return true;
+}
+
+void Game_OnEvent(Event* e)
+{
+	Event_Dispatcher(EventType_KeyPressed, e, OnKeyPressed);
+	Event_Dispatcher(EventType_MouseMoved, e, OnMouseMoved);
+}
 
 void CreateApplication(Application* appInst, ApplicationCommandLineArgs args)
 {
 	appInst->Spec.Name = "Sandbox";
 	appInst->Spec.Width = 800;
 	appInst->Spec.Height = 600;
-	appInst->Spec.Resizable = false;
-	appInst->Spec.Maximizable = false;
+	appInst->Spec.Resizable = true;
+	appInst->Spec.Maximizable = true;
 	appInst->Spec.Minimizable = true;
 	appInst->Spec.VSync = true;
 	appInst->Spec.CommandLineArgs = args;
@@ -61,5 +80,5 @@ void CreateApplication(Application* appInst, ApplicationCommandLineArgs args)
 	appInst->Ininialize = Game_Ininialize;
 	appInst->Shutdown = Game_Shutdown;
 	appInst->Update = Game_Update;
-	appInst->OnKeyPressed = Game_OnKeyPressed;
+	appInst->OnEvent = Game_OnEvent;
 }

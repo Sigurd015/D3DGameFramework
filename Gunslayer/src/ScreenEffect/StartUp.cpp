@@ -12,7 +12,7 @@
 struct StartUpData
 {
 	RectTransformComponent Canvas = {
-		{ 655.0f,465.0f },
+		{ 655.0f,465.0f },0,
 		{ 150.0f, 150.0f },
 	};
 	Vec4 Color = { 1.0f, 1.0f, 1.0f, 0.0f };

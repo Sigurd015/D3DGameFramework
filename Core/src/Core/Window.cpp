@@ -37,19 +37,107 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			data.Height = HIWORD(lParam);
 		}
 
-		data.WindowResize(data.Width, data.Height);
-		return 0;
-	}
-	case WM_KEYDOWN:
-	{
-		WindowProps& data = s_WindowState.Props;
-		data.OnKeyPressed((KeyCode)wParam);
+		WndResizeEvnet size = { data.Width, data.Height };
+		Event* e = Event_Create(EventType_WindowResize, &size);
+		data.EventCallback(e);
 		return 0;
 	}
 	case WM_CLOSE:
 	{
 		WindowProps& data = s_WindowState.Props;
-		data.WindowClose();
+		Event* e = Event_Create(EventType_WindowClose);
+		data.EventCallback(e);
+		return 0;
+	}
+	case WM_SYSKEYDOWN:
+	case WM_KEYDOWN:
+	{
+		WindowProps& data = s_WindowState.Props;
+		KeyPressedEvent key = { (KeyCode)wParam, lParam & 0x40000000 ? true : false };
+		Event* e = Event_Create(EventType_KeyPressed, &key);
+		data.EventCallback(e);
+		return 0;
+	}
+	case WM_SYSKEYUP:
+	case WM_KEYUP:
+	{
+		WindowProps& data = s_WindowState.Props;
+		KeyReleasedEvent key = { (KeyCode)wParam };
+		Event* e = Event_Create(EventType_KeyReleased, &key);
+		data.EventCallback(e);
+		return 0;
+	}
+	case WM_CHAR:
+	{
+		WindowProps& data = s_WindowState.Props;
+		KeyTypedEvent key = { (KeyCode)wParam };
+		Event* e = Event_Create(EventType_KeyTyped, &key);
+		data.EventCallback(e);
+		return 0;
+	}
+	case WM_MOUSEMOVE:
+	{
+		WindowProps& data = s_WindowState.Props;
+		auto point = MAKEPOINTS(lParam);
+		MouseMovedEvent mouse = { (float)point.x, (float)point.y };
+		Event* e = Event_Create(EventType_MouseMoved, &mouse);
+		data.EventCallback(e);
+		return 0;
+	}
+	case WM_MOUSEWHEEL:
+	{
+		WindowProps& data = s_WindowState.Props;
+		MouseScrolledEvent mouse = { (float)GET_WHEEL_DELTA_WPARAM(wParam) / (float)WHEEL_DELTA };
+		Event* e = Event_Create(EventType_MouseScrolled, &mouse);
+		data.EventCallback(e);
+		return 0;
+	}
+	case WM_RBUTTONDOWN:
+	{
+		WindowProps& data = s_WindowState.Props;
+		MouseButtonPressedEvent mouse = { MouseCode::ButtonRight };
+		Event* e = Event_Create(EventType_MouseButtonPressed, &mouse);
+		data.EventCallback(e);
+		return 0;
+	}
+	case WM_MBUTTONDOWN:
+	{
+		WindowProps& data = s_WindowState.Props;
+		MouseButtonPressedEvent mouse = { MouseCode::ButtonMiddle };
+		Event* e = Event_Create(EventType_MouseButtonPressed, &mouse);
+		data.EventCallback(e);
+		return 0;
+	}
+	case WM_LBUTTONDOWN:
+	{
+		WindowProps& data = s_WindowState.Props;
+		MouseButtonPressedEvent mouse = { MouseCode::ButtonLeft };
+		Event* e = Event_Create(EventType_MouseButtonPressed, &mouse);
+		data.EventCallback(e);
+		return 0;
+	}
+	case WM_RBUTTONUP:
+	{
+		WindowProps& data = s_WindowState.Props;
+		MouseButtonReleasedEvent mouse = { MouseCode::ButtonRight };
+		Event* e = Event_Create(EventType_MouseButtonReleased, &mouse);
+		data.EventCallback(e);
+		return 0;
+	}
+	case WM_MBUTTONUP:
+	{
+		WindowProps& data = s_WindowState.Props;
+		MouseButtonReleasedEvent mouse = { MouseCode::ButtonMiddle };
+		Event* e = Event_Create(EventType_MouseButtonReleased, &mouse);
+		data.EventCallback(e);
+		return 0;
+	}
+	case WM_LBUTTONUP:
+	{
+		WindowProps& data = s_WindowState.Props;
+		MouseButtonReleasedEvent mouse = { MouseCode::ButtonLeft };
+		Event* e = Event_Create(EventType_MouseButtonReleased, &mouse);
+		data.EventCallback(e);
 		return 0;
 	}
 	default:
@@ -62,10 +150,9 @@ void Window_Create(const WindowProps& props)
 	s_WindowState.Props = props;
 	WNDCLASSEX wndClass = { sizeof(WNDCLASSEX), CS_OWNDC,
 			WndProc, 0, 0, GetModuleHandle(nullptr), nullptr,
-			nullptr, nullptr, nullptr, L"DXR", nullptr };
+			nullptr, nullptr, nullptr, L"GMAE_CORE", nullptr };
 
-	if (!RegisterClassEx(&wndClass))
-		CORE_LOG_ERROR("RegisterClass - Failed");
+	CORE_ASSERT(RegisterClassEx(&wndClass), "RegisterClass - Failed");
 
 	DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU;
 
@@ -85,8 +172,7 @@ void Window_Create(const WindowProps& props)
 		style, CW_USEDEFAULT, CW_USEDEFAULT,
 		rect.right - rect.left, rect.bottom - rect.top, nullptr, nullptr, wndClass.hInstance, nullptr);
 
-	if (!s_WindowState.WndHandle)
-		CORE_LOG_ERROR("CreateWindow - Failed");
+	CORE_ASSERT(s_WindowState.WndHandle, "CreateWindow - Failed");
 
 	RendererContext_Initialize(&s_WindowState.WndHandle);
 

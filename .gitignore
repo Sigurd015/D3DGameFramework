@@ -7,4 +7,4 @@ packages/
 *.sln
 *.config
 assets/shaders/cache
-Game/log.txt
+log.txt

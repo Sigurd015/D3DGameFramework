@@ -24,8 +24,8 @@ static DXGI_FORMAT ShaderDataTypeToDX11BaseType(ShaderDataType type)
 void Pipeline_Create(Pipeline& out, const PipelineSpecification& spec)
 {
 	out.Spec = spec;
-	out.Layout = *spec.Layout;
-	out.Shader = *spec.Shader;
+	out.Layout = *out.Spec.Layout;
+	out.Shader = *out.Spec.Shader;
 
 	D3D11_INPUT_ELEMENT_DESC* tempList = (D3D11_INPUT_ELEMENT_DESC*)malloc(sizeof(D3D11_INPUT_ELEMENT_DESC) * out.Layout.ElementCount);
 	for (size_t i = 0; i < out.Layout.ElementCount; i++)

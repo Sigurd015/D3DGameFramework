@@ -1,13 +1,17 @@
 ﻿#include "pch.h"
 #include "Log.h"
 
+#include <cstdarg>
+
+#define LOG_BUFFER_SIZE 256
+
 FILE* LogFile = nullptr;
 
 void Log_Initialize()
 {
-#ifdef CORE_DIST
+	#ifdef CORE_DIST
 	LogFile = fopen("log.txt", "w");
-#endif 
+	#endif 
 }
 
 void Log_Shutdown()
@@ -54,20 +58,32 @@ void Log_OutputToFile(Log_Level level, const char* type, const char* message)
 	}
 }
 
-void Log_Core_Output(Log_Level level, const char* message)
+void Log_Core_Output(Log_Level level, const char* format, ...)
 {
-#ifdef CORE_DIST
-	Log_OutputToFile(level, "[CORE]", message);
-#else
-	Log_Output(level, "[CORE]", message);
-#endif
+	va_list args;
+	va_start(args, format);
+	char logMessage[LOG_BUFFER_SIZE];
+	vsnprintf(logMessage, sizeof(logMessage), format, args);
+	va_end(args);
+
+	#ifdef CORE_DIST
+	Log_OutputToFile(level, "[CORE]", logMessage);
+	#else
+	Log_Output(level, "[CORE]", logMessage);
+	#endif
 }
 
-void Log_APP_Output(Log_Level level, const char* message)
+void Log_APP_Output(Log_Level level, const char* format, ...)
 {
-#ifdef CORE_DIST
-	Log_OutputToFile(level, "[APP]", message);
-#else
-	Log_Output(level, "[APP]", message);
-#endif
+	va_list args;
+	va_start(args, format);
+	char logMessage[LOG_BUFFER_SIZE];
+	vsnprintf(logMessage, sizeof(logMessage), format, args);
+	va_end(args);
+
+	#ifdef CORE_DIST
+	Log_OutputToFile(level, "[APP]", logMessage);
+	#else
+	Log_Output(level, "[APP]", logMessage);
+	#endif
 }

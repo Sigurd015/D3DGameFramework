@@ -1,4 +1,5 @@
 #include "Input/Keycode.h"
+#include "Events/Event.h"
 
 #include <stdint.h>
 
@@ -13,9 +14,7 @@ struct WindowProps
 	bool Maximizable = false;
 	bool Minimizable = false;
 
-	void (*WindowResize)(float width, float height);
-	void (*WindowClose)();
-	void (*OnKeyPressed)(KeyCode key);
+	void (*EventCallback)(Event* e);
 };
 
 void Window_Create(const WindowProps& props);

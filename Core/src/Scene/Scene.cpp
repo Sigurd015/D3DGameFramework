@@ -312,8 +312,8 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 		if (!mainCamera)
 			return;
 
-		SceneCamera* camera = &mainCamera->Camera->Camera;
-		Mat viewProjection = DirectX::XMMatrixInverse(nullptr, TransformComponent_GetTransform(mainCamera->Transform)) * camera->Projection;
+		Mat viewProjection = DirectX::XMMatrixInverse(nullptr, TransformComponent_GetTransform(mainCamera->Transform))
+			* SceneCamera_GetProjectionMatrix(mainCamera->Camera->Camera);
 		Renderer2D_BeginScene(viewProjection);
 	}
 
@@ -403,7 +403,7 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 
 			if (!Entity_HasComponent(temp, ComponentType_RectTransform))
 			{
-				TransformComponent* tc = &temp->Transform;
+				TransformComponent& tc = temp->Transform;
 				if (Entity_HasComponent(temp, ComponentType_SpriteRenderer))
 				{
 					SpriteRendererComponent* sprite = temp->SpriteRenderer;
@@ -411,7 +411,7 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 					if (sprite->Texture)
 					{
 						Renderer2D_DrawQuad(
-							TransformComponent_GetTransform(*tc),
+							TransformComponent_GetTransform(tc),
 							sprite->Texture,
 							sprite->UVStart,
 							sprite->UVEnd,
@@ -421,7 +421,7 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 					}
 					else
 					{
-						Renderer2D_DrawQuad(TransformComponent_GetTransform(*tc), sprite->Color);
+						Renderer2D_DrawQuad(TransformComponent_GetTransform(tc), sprite->Color);
 					}
 				}
 
@@ -430,7 +430,7 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 					CircleRendererComponent* circle = temp->CircleRenderer;
 
 					Renderer2D_DrawCircle(
-						TransformComponent_GetTransform(*tc),
+						TransformComponent_GetTransform(tc),
 						circle->Color,
 						circle->Thickness,
 						circle->Fade
@@ -519,7 +519,7 @@ bool Scene_Raycast(Scene* out, Entity* entity, const Vec2& rayDirection, const c
 		rigidbody2D->Enabled = false;
 	}
 	float distance;
-	void* ent = PhysicsWorld2D_Raycast(out->PhysicsWorld, rayOrigin, rayDirection, &distance);
+	void* ent = PhysicsWorld2D_Raycast(out->PhysicsWorld, rayOrigin, rayDirection, distance);
 	if (rigidbody2D != nullptr)
 		rigidbody2D->Enabled = true;
 
