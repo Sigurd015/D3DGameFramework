@@ -234,38 +234,3 @@ bool FloatNearlyEqual(float a, float b, float smallAmount)
 {
 	return fabs(a - b) < smallAmount;
 }
-
-const char* ToString(const Vec2& vec)
-{
-	char tempChar[256];
-	sprintf_s(tempChar, 256, "{x : %f, y : %f}", vec.x, vec.y);
-	return tempChar;
-}
-
-const char* ToString(const Vec3& vec)
-{
-	char tempChar[256];
-	sprintf_s(tempChar, 256, "{x : %f, y : %f z : %f}", vec.x, vec.y, vec.z);
-	return tempChar;
-}
-
-const char* ToString(const Vec4& vec)
-{
-	char tempChar[256];
-	sprintf_s(tempChar, 256, "{x : %f, y : %f z : %f w : %f}", vec.x, vec.y, vec.z, vec.w);
-	return tempChar;
-}
-
-const char* ToString(float f)
-{
-	char tempChar[256];
-	sprintf_s(tempChar, 256, "{number : %f}", f);
-	return tempChar;
-}
-
-const char* ToString(uint32_t i)
-{
-	char tempChar[256];
-	sprintf_s(tempChar, 256, "{number : %d}", i);
-	return tempChar;
-}

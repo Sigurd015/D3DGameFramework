@@ -21,20 +21,20 @@ static uint32_t ShaderDataTypeSize(ShaderDataType type)
 	return 0;
 }
 
-void VertexBufferLayout_CalculateOffsetsAndStride(VertexBufferLayout& out)
+void VertexBufferLayout_CalculateOffsetsAndStride(VertexBufferLayout& layout)
 {
 	uint32_t offset = 0;
-	out.Stride = 0;
-	for (uint32_t i = 0; i < out.ElementCount; i++)
+	layout.Stride = 0;
+	for (uint32_t i = 0; i < layout.ElementCount; i++)
 	{
-		out.Elements[i].Size = ShaderDataTypeSize(out.Elements[i].Type);
-		out.Elements[i].Offset = offset;
-		offset += out.Elements[i].Size;
-		out.Stride += out.Elements[i].Size;
+		layout.Elements[i].Size = ShaderDataTypeSize(layout.Elements[i].Type);
+		layout.Elements[i].Offset = offset;
+		offset += layout.Elements[i].Size;
+		layout.Stride += layout.Elements[i].Size;
 	}
 }
 
-void VertexBuffer_Create(VertexBuffer& out, uint32_t size)
+void VertexBuffer_Create(VertexBuffer& vertexBuffer, uint32_t size)
 {
 	D3D11_BUFFER_DESC bufferDesc = { 0 };
 	bufferDesc.ByteWidth = size;
@@ -42,36 +42,35 @@ void VertexBuffer_Create(VertexBuffer& out, uint32_t size)
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	bufferDesc.MiscFlags = 0;
-	bufferDesc.StructureByteStride = out.Stride;
-	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateBuffer(&bufferDesc, nullptr, &out.Buffer));
+	bufferDesc.StructureByteStride = vertexBuffer.Stride;
+	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateBuffer(&bufferDesc, nullptr, &vertexBuffer.Buffer));
 }
 
-void VertexBuffer_SetData(VertexBuffer& out, void* data, uint32_t size)
+void VertexBuffer_SetData(VertexBuffer& vertexBuffer, void* data, uint32_t size)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	CORE_CHECK_DX_RESULT(RendererContext_GetDeviceContext()->Map(out.Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+	CORE_CHECK_DX_RESULT(RendererContext_GetDeviceContext()->Map(vertexBuffer.Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
 	memcpy(mappedResource.pData, data, size);
-	RendererContext_GetDeviceContext()->Unmap(out.Buffer, 0);
+	RendererContext_GetDeviceContext()->Unmap(vertexBuffer.Buffer, 0);
 }
 
-void VertexBuffer_SetLayout(VertexBuffer& out, VertexBufferLayout& layout)
+void VertexBuffer_SetLayout(VertexBuffer& vertexBuffer, VertexBufferLayout& layout)
 {
-	out.Layout = layout;
-	out.Stride = layout.Stride;
+	vertexBuffer.Stride = layout.Stride;
 }
 
-void VertexBuffer_Bind(const VertexBuffer& out)
+void VertexBuffer_Bind(const VertexBuffer& vertexBuffer)
 {
 	const UINT offset = 0;
-	RendererContext_GetDeviceContext()->IASetVertexBuffers(0, 1, &out.Buffer, &out.Stride, &offset);
+	RendererContext_GetDeviceContext()->IASetVertexBuffers(0, 1, &vertexBuffer.Buffer, &vertexBuffer.Stride, &offset);
 }
 
-void VertexBuffer_Release(VertexBuffer& out)
+void VertexBuffer_Release(VertexBuffer& vertexBuffer)
 {
-	if (out.Buffer)
+	if (vertexBuffer.Buffer)
 	{
-		out.Buffer->Release();
-		out.Buffer = nullptr;
+		vertexBuffer.Buffer->Release();
+		vertexBuffer.Buffer = nullptr;
 	}
 }

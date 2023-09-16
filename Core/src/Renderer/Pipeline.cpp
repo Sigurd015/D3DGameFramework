@@ -4,6 +4,21 @@
 
 #include "Pipeline.h"
 
+static D3D11_PRIMITIVE_TOPOLOGY PrimitiveTopologyTypeToD3D(PrimitiveTopology type)
+{
+	switch (type)
+	{
+	case PrimitiveTopology::PrimitiveTopology_Points:
+		return D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
+	case PrimitiveTopology::PrimitiveTopology_Lines:
+		return D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
+	case PrimitiveTopology::PrimitiveTopology_Triangles:
+		return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	}
+
+	CORE_ASSERT(false, "Unknown Primitive Topology!");
+}
+
 static DXGI_FORMAT ShaderDataTypeToDX11BaseType(ShaderDataType type)
 {
 	switch (type)
@@ -21,51 +36,43 @@ static DXGI_FORMAT ShaderDataTypeToDX11BaseType(ShaderDataType type)
 	return DXGI_FORMAT_UNKNOWN;
 }
 
-void Pipeline_Create(Pipeline& out, const PipelineSpecification& spec)
+void Pipeline_Create(Pipeline& pipeline, const PipelineSpecification& spec)
 {
-	out.Spec = spec;
-	out.Layout = *out.Spec.Layout;
-	out.Shader = *out.Spec.Shader;
+	pipeline.Spec = spec;
 
-	D3D11_INPUT_ELEMENT_DESC* tempList = (D3D11_INPUT_ELEMENT_DESC*)malloc(sizeof(D3D11_INPUT_ELEMENT_DESC) * out.Layout.ElementCount);
-	for (size_t i = 0; i < out.Layout.ElementCount; i++)
+	D3D11_INPUT_ELEMENT_DESC* tempList = (D3D11_INPUT_ELEMENT_DESC*)malloc(sizeof(D3D11_INPUT_ELEMENT_DESC) * pipeline.Spec.Layout.ElementCount);
+	for (size_t i = 0; i < pipeline.Spec.Layout.ElementCount; i++)
 	{
 		tempList[i] = {
-			out.Layout.Elements[i].Name,0,ShaderDataTypeToDX11BaseType(out.Layout.Elements[i].Type),
-			0,(UINT)out.Layout.Elements[i].Offset ,D3D11_INPUT_PER_VERTEX_DATA ,0 };
+			pipeline.Spec.Layout.Elements[i].Name,0,ShaderDataTypeToDX11BaseType(pipeline.Spec.Layout.Elements[i].Type),
+			0,(UINT)pipeline.Spec.Layout.Elements[i].Offset ,D3D11_INPUT_PER_VERTEX_DATA ,0 };
 	}
 
 	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateInputLayout(
-		tempList, (UINT)out.Layout.ElementCount, out.Shader.VertexShaderBlob->GetBufferPointer(),
-		out.Shader.VertexShaderBlob->GetBufferSize(), &out.InputLayout));
+		tempList, (UINT)pipeline.Spec.Layout.ElementCount, pipeline.Spec.Shader.VertexShaderBlob->GetBufferPointer(),
+		pipeline.Spec.Shader.VertexShaderBlob->GetBufferSize(), &pipeline.InputLayout));
 
 	free(tempList);
 }
 
-void Pipeline_SetConstantBuffer(Pipeline& out, ConstantBuffer& constantBuffer)
+void Pipeline_Bind(const Pipeline& pipeline)
 {
-	out.ConstantBuffer = &constantBuffer;
+	RendererContext_GetDeviceContext()->IASetInputLayout(pipeline.InputLayout);
+	RendererContext_GetDeviceContext()->IASetPrimitiveTopology(PrimitiveTopologyTypeToD3D(pipeline.Spec.Topology));
+	Shader_Bind(pipeline.Spec.Shader);
 }
 
-void Pipeline_Bind(const Pipeline& out)
+const PipelineSpecification& Pipeline_GetSpecification(const Pipeline& pipeline)
 {
-	RendererContext_GetDeviceContext()->IASetInputLayout(out.InputLayout);
-
-	Shader_Bind(out.Shader);
-
-	if (out.ConstantBuffer)
-		ConstantBuffer_Bind(out.ConstantBuffer);
+	return pipeline.Spec;
 }
 
-void Pipeline_Release(Pipeline& out)
+void Pipeline_Release(Pipeline& pipeline)
 {
-	if (out.InputLayout)
+	if (pipeline.InputLayout)
 	{
-		out.InputLayout->Release();
-		out.InputLayout = nullptr;
+		pipeline.InputLayout->Release();
+		pipeline.InputLayout = nullptr;
 	}
-	Shader_Release(out.Shader);
-
-	if (out.ConstantBuffer)
-		ConstantBuffer_Release(out.ConstantBuffer);
+	Shader_Release(pipeline.Spec.Shader);
 }

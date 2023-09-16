@@ -5,7 +5,7 @@ void Event_Dispatcher(EventType type, Event* event, bool(*Callback)(const Event*
 {
 	if (event->Type == type)
 	{
-		event->handled |= Callback(event);
+		event->Handled |= Callback(event);
 	}
 }
 
@@ -14,7 +14,7 @@ Event* Event_Create(EventType type, void* data)
 	Event* e = (Event*)malloc(sizeof(Event));
 	e->Data = nullptr;
 	e->Type = type;
-	e->handled = false;
+	e->Handled = false;
 	if (data)
 	{
 		switch (type)

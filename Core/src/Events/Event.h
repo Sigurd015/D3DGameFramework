@@ -58,7 +58,7 @@ struct MouseScrolledEvent
 struct Event
 {
 	EventType Type;
-	bool handled = false;
+	bool Handled = false;
 	void* Data = nullptr;
 };
 

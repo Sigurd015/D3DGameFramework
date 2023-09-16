@@ -26,15 +26,14 @@ struct Texture2D
 
 	ID3D11Texture2D* Texture;
 	ID3D11ShaderResourceView* TextureView;
-	ID3D11SamplerState* SamplerState;
 	DXGI_FORMAT DataFormat;
 };
 
-void Texture2D_Create(Texture2D* out, const char* path);
-void Texture2D_Create(Texture2D* out, const TextureSpecification& spec);
-void Texture2D_SetData(Texture2D* out, void* data, uint32_t size);
-void Texture2D_Bind(const Texture2D* out, uint32_t slot);
-bool Texture2D_IsSame(const Texture2D* out, const Texture2D* other);
-void Texture2D_Release(Texture2D* out);
-uint32_t Texture2D_GetWidth(const Texture2D* out);
-uint32_t Texture2D_GetHeight(const Texture2D* out);
+void Texture2D_Create(Texture2D* texture2D, const char* path);
+void Texture2D_Create(Texture2D* texture2D, const TextureSpecification& spec);
+void Texture2D_SetData(Texture2D* texture2D, void* data, uint32_t size);
+void Texture2D_Bind(const Texture2D* texture2D, uint32_t slot);
+bool Texture2D_IsSame(const Texture2D* texture2D, const Texture2D* other);
+void Texture2D_Release(Texture2D* texture2D);
+uint32_t Texture2D_GetWidth(const Texture2D* texture2D);
+uint32_t Texture2D_GetHeight(const Texture2D* texture2D);

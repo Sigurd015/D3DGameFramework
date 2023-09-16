@@ -51,7 +51,7 @@ void Application_OnEvent(Event* e)
 	Event_Dispatcher(EventType_WindowClose, e, OnWndClose);
 	Event_Dispatcher(EventType_WindowResize, e, OnWndResize);
 
-	if (!e->handled)
+	if (!e->Handled)
 		s_AppState.AppInst->OnEvent(e);
 
 	Event_Release(e);

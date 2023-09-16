@@ -17,14 +17,14 @@ void PhysicsWorld2D_Create(PhysicsWorld2D& world, void(*CollisionCallback)(void*
 		Rigidbody2D rigidbody2D;
 		for (size_t i = 0; i < PHYSICS_POOL_SIZE; i++)
 		{
-			List_Add(world.Rigidbody2Ds, sizeof(Rigidbody2D), &rigidbody2D);
+			List_Add(world.Rigidbody2Ds, &rigidbody2D, sizeof(Rigidbody2D));
 		}
 	}
 	{
 		ContactPair contactPair;
 		for (size_t i = 0; i < PHYSICS_POOL_SIZE; i++)
 		{
-			List_Add(world.ContactPairs, sizeof(ContactPair), &contactPair);
+			List_Add(world.ContactPairs, &contactPair, sizeof(ContactPair));
 		}
 	}
 	world.Rigidbody2DCount = 0;

@@ -8,104 +8,8 @@ struct RendererContextState
 	IDXGISwapChain* SwapChain;
 	ID3D11Device* Device;
 	ID3D11DeviceContext* DeviceContext;
-
-	ID3D11DepthStencilState* DSSNoDepthTest;
-	ID3D11DepthStencilState* DSSLess;
-
-	ID3D11BlendState* BSDisabled;
-	ID3D11BlendState* BSAlpha;
-	ID3D11BlendState* BSAdditive;
-	ID3D11BlendState* BSSubtractive;
 };
 static RendererContextState s_RendererContextState;
-
-ID3D11DepthStencilState* CreateDepthStencilState(bool enable)
-{
-	ID3D11DepthStencilState* depthStencilState = nullptr;
-
-	D3D11_DEPTH_STENCIL_DESC depthTestingDesc = {};
-
-	if (!enable)
-	{
-		depthTestingDesc.DepthEnable = false;
-		depthTestingDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-	}
-	else
-	{
-		depthTestingDesc.DepthEnable = true;
-		depthTestingDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	}
-
-	depthTestingDesc.DepthFunc = D3D11_COMPARISON_LESS;
-	CORE_CHECK_DX_RESULT(s_RendererContextState.Device->CreateDepthStencilState(&depthTestingDesc, &depthStencilState));
-
-	return depthStencilState;
-}
-
-ID3D11BlendState* CreateBlendState(BlendMode type)
-{
-	ID3D11BlendState* blendState = nullptr;
-
-	D3D11_BLEND_DESC blendDesc = {};
-	blendDesc.AlphaToCoverageEnable = FALSE;
-	blendDesc.IndependentBlendEnable = FALSE;
-
-	switch (type)
-	{
-	case BlendMode_Disabled:
-	{
-		blendDesc.RenderTarget[0].BlendEnable = false;
-		blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-		blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
-		blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-		blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-		blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-		blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-		blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-		break;
-	}
-	case BlendMode_Alpha:
-	{
-		blendDesc.RenderTarget[0].BlendEnable = true;
-		blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-		blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-		blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-		blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-		blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-		blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-		blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-		break;
-	}
-	case BlendMode_Additive:
-	{
-		blendDesc.RenderTarget[0].BlendEnable = true;
-		blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-		blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
-		blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-		blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-		blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-		blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-		blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-		break;
-	}
-	case BlendMode_Subtractive:
-	{
-		blendDesc.RenderTarget[0].BlendEnable = true;
-		blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-		blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
-		blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_REV_SUBTRACT;
-		blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-		blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-		blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-		blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-		break;
-	}
-	}
-
-	CORE_CHECK_DX_RESULT(s_RendererContextState.Device->CreateBlendState(&blendDesc, &blendState));
-
-	return blendState;
-}
 
 void RendererContext_Initialize(HWND* windowHandle)
 {
@@ -130,28 +34,11 @@ void RendererContext_Initialize(HWND* windowHandle)
 
 	CORE_CHECK_DX_RESULT(D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_BGRA_SUPPORT, nullptr, 0, D3D11_SDK_VERSION, &swapChainDesc,
 		&s_RendererContextState.SwapChain, &s_RendererContextState.Device, nullptr, &s_RendererContextState.DeviceContext));
-
-	s_RendererContextState.DSSNoDepthTest = CreateDepthStencilState(false);
-	s_RendererContextState.DSSLess = CreateDepthStencilState(true);
-	s_RendererContextState.BSDisabled = CreateBlendState(BlendMode_Disabled);
-	s_RendererContextState.BSAlpha = CreateBlendState(BlendMode_Alpha);
-	s_RendererContextState.BSAdditive = CreateBlendState(BlendMode_Additive);
-	s_RendererContextState.BSSubtractive = CreateBlendState(BlendMode_Subtractive);
 }
 
 void RendererContext_SwapBuffer(bool VSync)
 {
 	s_RendererContextState.SwapChain->Present(VSync, 0);
-}
-
-void RendererContext_Shutdown()
-{
-	s_RendererContextState.DSSNoDepthTest->Release();
-	s_RendererContextState.DSSLess->Release();
-	s_RendererContextState.BSDisabled->Release();
-	s_RendererContextState.BSAlpha->Release();
-	s_RendererContextState.BSAdditive->Release();
-	s_RendererContextState.BSSubtractive->Release();
 }
 
 IDXGISwapChain* RendererContext_GetSwapChain()
@@ -167,35 +54,4 @@ ID3D11Device* RendererContext_GetDevice()
 ID3D11DeviceContext* RendererContext_GetDeviceContext()
 {
 	return s_RendererContextState.DeviceContext;
-}
-
-ID3D11DepthStencilState* RendererContext_GetDepthStencilState(bool enable)
-{
-	if (!enable)
-	{
-		return s_RendererContextState.DSSNoDepthTest;
-	}
-	else
-	{
-		return s_RendererContextState.DSSLess;
-	}
-}
-
-ID3D11BlendState* RendererContext_GetBlendState(BlendMode type)
-{
-	switch (type)
-	{
-	case BlendMode_Disabled:
-		return s_RendererContextState.BSDisabled;
-	case BlendMode_Alpha:
-		return s_RendererContextState.BSAlpha;
-	case BlendMode_Additive:
-		return s_RendererContextState.BSAdditive;
-	case BlendMode_Subtractive:
-		return s_RendererContextState.BSSubtractive;
-	}
-
-	CORE_ASSERT(false, "Unknown blend mode type");
-
-	return nullptr;
 }

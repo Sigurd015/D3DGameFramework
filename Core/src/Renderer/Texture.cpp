@@ -46,17 +46,7 @@ void CreateShaderView(DXGI_FORMAT format, ID3D11Resource* pResource, ID3D11Shade
 	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateShaderResourceView(pResource, &resourceView, ppSRView));
 }
 
-void CreateSamplerState(ID3D11SamplerState** ppSamplerState)
-{
-	D3D11_SAMPLER_DESC samplerDesc = {};
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateSamplerState(&samplerDesc, ppSamplerState));
-}
-
-void Texture2D_Create(Texture2D* out, const char* path)
+void Texture2D_Create(Texture2D* texture2D, const char* path)
 {
 	size_t newsize = strlen(path) + 1;
 
@@ -67,36 +57,33 @@ void Texture2D_Create(Texture2D* out, const char* path)
 	mbstowcs_s(&convertedChars, wcstring, newsize, path, _TRUNCATE);
 
 	CORE_CHECK_DX_RESULT(DirectX::CreateWICTextureFromFileEx(RendererContext_GetDevice(), wcstring, 0, D3D11_USAGE_DEFAULT,
-		D3D11_BIND_SHADER_RESOURCE, 0, 0, DirectX::WIC_LOADER_IGNORE_SRGB, reinterpret_cast<ID3D11Resource**>(&out->Texture), &out->TextureView));
+		D3D11_BIND_SHADER_RESOURCE, 0, 0, DirectX::WIC_LOADER_IGNORE_SRGB, reinterpret_cast<ID3D11Resource**>(&texture2D->Texture), &texture2D->TextureView));
 
 	delete[]wcstring;
 
 	D3D11_TEXTURE2D_DESC desc;
-	out->Texture->GetDesc(&desc);
-	out->DataFormat = desc.Format;
-	out->Spec.Width = desc.Width;
-	out->Spec.Height = desc.Height;
-	out->Spec.Format = ImageFormat::RGBA8;
-
-	CreateSamplerState(&out->SamplerState);
+	texture2D->Texture->GetDesc(&desc);
+	texture2D->DataFormat = desc.Format;
+	texture2D->Spec.Width = desc.Width;
+	texture2D->Spec.Height = desc.Height;
+	texture2D->Spec.Format = ImageFormat::RGBA8;
 }
 
-void Texture2D_Create(Texture2D* out, const TextureSpecification& spec)
+void Texture2D_Create(Texture2D* texture2D, const TextureSpecification& spec)
 {
-	out->Spec = spec;
-	out->DataFormat = ImageFormatToDXDataFormat(spec.Format);
-	CreateTexture(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, spec.Width, spec.Height, out->DataFormat, nullptr, &out->Texture);
-	CreateShaderView(out->DataFormat, out->Texture, &out->TextureView);
-	CreateSamplerState(&out->SamplerState);
+	texture2D->Spec = spec;
+	texture2D->DataFormat = ImageFormatToDXDataFormat(spec.Format);
+	CreateTexture(D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE, spec.Width, spec.Height, texture2D->DataFormat, nullptr, &texture2D->Texture);
+	CreateShaderView(texture2D->DataFormat, texture2D->Texture, &texture2D->TextureView);
 }
 
-void Texture2D_SetData(Texture2D* out, void* data, uint32_t size)
+void Texture2D_SetData(Texture2D* texture2D, void* data, uint32_t size)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	CORE_CHECK_DX_RESULT(RendererContext_GetDeviceContext()->Map(out->Texture, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+	CORE_CHECK_DX_RESULT(RendererContext_GetDeviceContext()->Map(texture2D->Texture, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
 
-	if (out->Spec.Format == ImageFormat::RGB8)
+	if (texture2D->Spec.Format == ImageFormat::RGB8)
 	{
 		uint8_t* targetData = static_cast<uint8_t*>(mappedResource.pData);
 		uint8_t* srcData = static_cast<uint8_t*>(data);
@@ -113,49 +100,43 @@ void Texture2D_SetData(Texture2D* out, void* data, uint32_t size)
 	else
 		memcpy(mappedResource.pData, data, size);
 
-	RendererContext_GetDeviceContext()->Unmap(out->Texture, 0);
+	RendererContext_GetDeviceContext()->Unmap(texture2D->Texture, 0);
 }
 
-void Texture2D_Bind(const Texture2D* out, uint32_t slot)
+void Texture2D_Bind(const Texture2D* texture2D, uint32_t slot)
 {
-	RendererContext_GetDeviceContext()->PSSetSamplers(slot, 1, &out->SamplerState);
-	RendererContext_GetDeviceContext()->PSSetShaderResources(slot, 1, &out->TextureView);
+	RendererContext_GetDeviceContext()->PSSetShaderResources(slot, 1, &texture2D->TextureView);
 }
 
-bool Texture2D_IsSame(const Texture2D* out, const Texture2D* other)
+bool Texture2D_IsSame(const Texture2D* texture2D, const Texture2D* other)
 {
 	ID3D11Resource* resource1;
 	ID3D11Resource* resource2;
-	out->TextureView->GetResource(&resource1);
+	texture2D->TextureView->GetResource(&resource1);
 	other->TextureView->GetResource(&resource2);
 	return resource1 == resource2;
 }
 
-uint32_t Texture2D_GetWidth(const Texture2D* out)
+uint32_t Texture2D_GetWidth(const Texture2D* texture2D)
 {
-	return out->Spec.Width;
+	return texture2D->Spec.Width;
 }
 
-uint32_t Texture2D_GetHeight(const Texture2D* out)
+uint32_t Texture2D_GetHeight(const Texture2D* texture2D)
 {
-	return out->Spec.Height;
+	return texture2D->Spec.Height;
 }
 
-void Texture2D_Release(Texture2D* out)
+void Texture2D_Release(Texture2D* texture2D)
 {
-	if (out->Texture)
+	if (texture2D->Texture)
 	{
-		out->Texture->Release();
-		out->Texture = nullptr;
+		texture2D->Texture->Release();
+		texture2D->Texture = nullptr;
 	}
-	if (out->TextureView)
+	if (texture2D->TextureView)
 	{
-		out->TextureView->Release();
-		out->TextureView = nullptr;
-	}
-	if (out->SamplerState)
-	{
-		out->SamplerState->Release();
-		out->SamplerState = nullptr;
+		texture2D->TextureView->Release();
+		texture2D->TextureView = nullptr;
 	}
 }

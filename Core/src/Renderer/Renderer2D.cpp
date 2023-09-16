@@ -7,11 +7,8 @@
 #include "Pipeline.h"
 #include "ConstantBuffer.h"
 #include "Texture.h"
-
-enum CBBingSlot
-{
-	CAMERA = 0,
-};
+#include "RendererResource.h"
+#include "Material.h"
 
 struct QuadVertex
 {
@@ -58,29 +55,29 @@ struct Renderer2DData
 	static const uint32_t MaxQuads = 10000;
 	static const uint32_t MaxVertices = MaxQuads * 4;
 	static const uint32_t MaxIndices = MaxQuads * 6;
-	static const uint32_t MaxTextureSlots = 32;
+	static const uint32_t MaxTextureSlots = 16;
 
-	Pipeline QuadPipeline;
+	RenderPass QuadRenderPass;
 	VertexBuffer QuadVertexBuffer;
 	IndexBuffer QuadIndexBuffer;
 	uint32_t QuadIndexCount = 0;
 	QuadVertex* QuadVertexBufferBase = nullptr;
 	QuadVertex* QuadVertexBufferPtr = nullptr;
 
-	Pipeline CirclePipeline;
+	RenderPass CircleRenderPass;
 	VertexBuffer CircleVertexBuffer;
 	uint32_t CircleIndexCount = 0;
 	CircleVertex* CircleVertexBufferBase = nullptr;
 	CircleVertex* CircleVertexBufferPtr = nullptr;
 
-	Pipeline LinePipeline;
+	RenderPass LineRenderPass;
 	VertexBuffer LineVertexBuffer;
 	uint32_t LineVertexCount = 0;
 	LineVertex* LineVertexBufferBase = nullptr;
 	LineVertex* LineVertexBufferPtr = nullptr;
 	float LineWidth = 2.0f;
 
-	Pipeline UIPipeline;
+	RenderPass UIRenderPass;
 	VertexBuffer UIVertexBuffer;
 	uint32_t UIIndexCount = 0;
 	QuadVertex* UIVertexBufferBase = nullptr;
@@ -89,7 +86,9 @@ struct Renderer2DData
 	List TextRenderCommands;
 	uint32_t TextRenderCommandCount = 0;
 
-	Texture2D* Textures[32];// 0 is white texture
+	Material DefaultMaterial;
+	Texture2D* Textures[MaxTextureSlots];// 0 is white texture
+	char* TextureSlotsNames[MaxTextureSlots];
 	Texture2D WhiteTexture;
 	uint32_t TextureSlotIndex = 1;
 
@@ -110,7 +109,9 @@ struct Renderer2DData
 	};
 	CameraData SceneBuffer;
 	ConstantBuffer CameraConstantBuffer;
+	RendererResource CameraCBResource;
 	ConstantBuffer IdentityConstantBuffer;
+	RendererResource IdentityCBResource;
 };
 static Renderer2DData s_Data;
 
@@ -118,6 +119,8 @@ void Renderer2D_Initialize()
 {
 	//Quad
 	{
+		PipelineSpecification pipelineSpec;
+
 		VertexBufferLayoutEmelent layoutEmelent[5] = {
 		   { ShaderDataType::Float3, "a_Position"     },
 		   { ShaderDataType::Float4, "a_Color"        },
@@ -125,10 +128,13 @@ void Renderer2D_Initialize()
 		   { ShaderDataType::Int,    "a_TexIndex"     },
 		   { ShaderDataType::Float,  "a_TilingFactor" },
 		};
-		VertexBufferLayout layout = { layoutEmelent, 5 };
-		VertexBufferLayout_CalculateOffsetsAndStride(layout);
+
+		// Notice: The layoutEmelent not copyed, it's just a pointer.
+		// When the pipeline created, the layoutEmelent should never be used again.
+		pipelineSpec.Layout = { layoutEmelent, 5 };
+		VertexBufferLayout_CalculateOffsetsAndStride(pipelineSpec.Layout);
 		VertexBuffer_Create(s_Data.QuadVertexBuffer, s_Data.MaxVertices * sizeof(QuadVertex));
-		VertexBuffer_SetLayout(s_Data.QuadVertexBuffer, layout);
+		VertexBuffer_SetLayout(s_Data.QuadVertexBuffer, pipelineSpec.Layout);
 
 		uint32_t* indices = new uint32_t[s_Data.MaxIndices];
 		uint32_t offset = 0;
@@ -147,19 +153,25 @@ void Renderer2D_Initialize()
 		IndexBuffer_Create(s_Data.QuadIndexBuffer, indices, s_Data.MaxIndices);
 		delete[] indices;
 
-		Shader shader;
-		Shader_Create(shader, "Renderer2D_Quad");
+		Shader_Create(pipelineSpec.Shader, "Renderer2D_Quad");
+		pipelineSpec.DepthTest = true;
+		pipelineSpec.BackfaceCulling = true;
+		pipelineSpec.DepthOperator = DepthCompareOperator_Less;
+		pipelineSpec.Topology = PrimitiveTopology_Triangles;
+		pipelineSpec.Blend = BlendMode_Disabled;
 
-		PipelineSpecification spec;
-		spec.Layout = &layout;
-		spec.Shader = &shader;
-		Pipeline_Create(s_Data.QuadPipeline, spec);
+		RenderPassSpecification renderPassSpec;
+		Pipeline_Create(renderPassSpec.Pipeline, pipelineSpec);
+		RenderPass_Create(s_Data.QuadRenderPass, renderPassSpec);
+		Material_Create(s_Data.DefaultMaterial, pipelineSpec.Shader);
 
 		s_Data.QuadVertexBufferBase = new QuadVertex[s_Data.MaxVertices];
 	}
 
 	// Circles
 	{
+		PipelineSpecification pipelineSpec;
+
 		VertexBufferLayoutEmelent layoutEmelent[5] = {
 		  { ShaderDataType::Float3, "a_WorldPosition" },
 		  { ShaderDataType::Float3, "a_LocalPosition" },
@@ -167,46 +179,56 @@ void Renderer2D_Initialize()
 		  { ShaderDataType::Float,  "a_Thickness"     },
 		  { ShaderDataType::Float,  "a_Fade"          },
 		};
-		VertexBufferLayout layout = { layoutEmelent, 5 };
-		VertexBufferLayout_CalculateOffsetsAndStride(layout);
+		pipelineSpec.Layout = { layoutEmelent, 5 };
+		VertexBufferLayout_CalculateOffsetsAndStride(pipelineSpec.Layout);
 		VertexBuffer_Create(s_Data.CircleVertexBuffer, s_Data.MaxVertices * sizeof(CircleVertex));
-		VertexBuffer_SetLayout(s_Data.CircleVertexBuffer, layout);
+		VertexBuffer_SetLayout(s_Data.CircleVertexBuffer, pipelineSpec.Layout);
 
-		Shader shader;
-		Shader_Create(shader, "Renderer2D_Circle");
+		Shader_Create(pipelineSpec.Shader, "Renderer2D_Circle");
+		pipelineSpec.DepthTest = true;
+		pipelineSpec.BackfaceCulling = true;
+		pipelineSpec.DepthOperator = DepthCompareOperator_Less;
+		pipelineSpec.Topology = PrimitiveTopology_Triangles;
+		pipelineSpec.Blend = BlendMode_Disabled;
 
-		PipelineSpecification spec;
-		spec.Layout = &layout;
-		spec.Shader = &shader;
-		Pipeline_Create(s_Data.CirclePipeline, spec);
+		RenderPassSpecification renderPassSpec;
+		Pipeline_Create(renderPassSpec.Pipeline, pipelineSpec);
+		RenderPass_Create(s_Data.CircleRenderPass, renderPassSpec);
 
 		s_Data.CircleVertexBufferBase = new CircleVertex[s_Data.MaxVertices];
 	}
 
 	// Lines
 	{
+		PipelineSpecification pipelineSpec;
+
 		VertexBufferLayoutEmelent layoutEmelent[2] = {
 		  { ShaderDataType::Float3, "a_Position" },
 		  { ShaderDataType::Float4, "a_Color"    },
 		};
-		VertexBufferLayout layout = { layoutEmelent, 2 };
-		VertexBufferLayout_CalculateOffsetsAndStride(layout);
+		pipelineSpec.Layout = { layoutEmelent, 2 };
+		VertexBufferLayout_CalculateOffsetsAndStride(pipelineSpec.Layout);
 		VertexBuffer_Create(s_Data.LineVertexBuffer, s_Data.MaxVertices * sizeof(LineVertex));
-		VertexBuffer_SetLayout(s_Data.LineVertexBuffer, layout);
+		VertexBuffer_SetLayout(s_Data.LineVertexBuffer, pipelineSpec.Layout);
 
-		Shader shader;
-		Shader_Create(shader, "Renderer2D_Line");
+		Shader_Create(pipelineSpec.Shader, "Renderer2D_Line");
+		pipelineSpec.DepthTest = true;
+		pipelineSpec.BackfaceCulling = true;
+		pipelineSpec.DepthOperator = DepthCompareOperator_Less;
+		pipelineSpec.Topology = PrimitiveTopology_Lines;
+		pipelineSpec.Blend = BlendMode_Disabled;
 
-		PipelineSpecification spec;
-		spec.Layout = &layout;
-		spec.Shader = &shader;
-		Pipeline_Create(s_Data.LinePipeline, spec);
+		RenderPassSpecification renderPassSpec;
+		Pipeline_Create(renderPassSpec.Pipeline, pipelineSpec);
+		RenderPass_Create(s_Data.LineRenderPass, renderPassSpec);
 
 		s_Data.LineVertexBufferBase = new LineVertex[s_Data.MaxVertices];
 	}
 
 	// UI
 	{
+		PipelineSpecification pipelineSpec;
+
 		VertexBufferLayoutEmelent layoutEmelent[5] = {
 		   { ShaderDataType::Float3, "a_Position"     },
 		   { ShaderDataType::Float4, "a_Color"        },
@@ -214,20 +236,23 @@ void Renderer2D_Initialize()
 		   { ShaderDataType::Int,    "a_TexIndex"     },
 		   { ShaderDataType::Float,  "a_TilingFactor" },
 		};
-		VertexBufferLayout layout = { layoutEmelent, 5 };
-		VertexBufferLayout_CalculateOffsetsAndStride(layout);
+		pipelineSpec.Layout = { layoutEmelent, 5 };
+		VertexBufferLayout_CalculateOffsetsAndStride(pipelineSpec.Layout);
 		VertexBuffer_Create(s_Data.UIVertexBuffer, s_Data.MaxVertices * sizeof(TextVertex));
-		VertexBuffer_SetLayout(s_Data.UIVertexBuffer, layout);
+		VertexBuffer_SetLayout(s_Data.UIVertexBuffer, pipelineSpec.Layout);
 
 		// Using the same shader as quads, but binding a identity viewProjection matrix.
 		// Because UI position is already in screen space.
-		Shader shader;
-		Shader_Create(shader, "Renderer2D_Quad");
+		Shader_Create(pipelineSpec.Shader, "Renderer2D_Quad");
+		pipelineSpec.DepthTest = false;
+		pipelineSpec.BackfaceCulling = true;
+		pipelineSpec.DepthOperator = DepthCompareOperator_Less;
+		pipelineSpec.Topology = PrimitiveTopology_Triangles;
+		pipelineSpec.Blend = BlendMode_Alpha;
 
-		PipelineSpecification spec;
-		spec.Layout = &layout;
-		spec.Shader = &shader;
-		Pipeline_Create(s_Data.UIPipeline, spec);
+		RenderPassSpecification renderPassSpec;
+		Pipeline_Create(renderPassSpec.Pipeline, pipelineSpec);
+		RenderPass_Create(s_Data.UIRenderPass, renderPassSpec);
 
 		s_Data.UIVertexBufferBase = new QuadVertex[s_Data.MaxVertices];
 	}
@@ -243,23 +268,30 @@ void Renderer2D_Initialize()
 	Texture2D_SetData(&s_Data.WhiteTexture, &whiteTextureData, sizeof(uint32_t));
 	s_Data.Textures[0] = &s_Data.WhiteTexture;
 
-	ConstantBuffer_Create(s_Data.CameraConstantBuffer, sizeof(Renderer2DData::CameraData), CBBingSlot::CAMERA);
-	ConstantBuffer_Create(s_Data.IdentityConstantBuffer, sizeof(Renderer2DData::CameraData), CBBingSlot::CAMERA);
+	for (size_t i = 0; i < s_Data.MaxTextureSlots; i++)
+	{
+		s_Data.TextureSlotsNames[i] = new char[256];
+		sprintf_s(s_Data.TextureSlotsNames[i], 256, "u_Textures[%d]", i);
+	}
 
+	ConstantBuffer_Create(s_Data.CameraConstantBuffer, sizeof(Renderer2DData::CameraData));
+	RendererResource_Create(s_Data.CameraCBResource, RendererResourceType_ConstantBuffer, &s_Data.CameraConstantBuffer);
+	RenderPass_SetInput(s_Data.QuadRenderPass, "Camera", &s_Data.CameraCBResource);
+	RenderPass_SetInput(s_Data.CircleRenderPass, "Camera", &s_Data.CameraCBResource);
+	RenderPass_SetInput(s_Data.LineRenderPass, "Camera", &s_Data.CameraCBResource);
+
+	ConstantBuffer_Create(s_Data.IdentityConstantBuffer, sizeof(Renderer2DData::CameraData));
+	RendererResource_Create(s_Data.IdentityCBResource, RendererResourceType_ConstantBuffer, &s_Data.IdentityConstantBuffer);
 	static Mat identity = DirectX::XMMatrixIdentity();
 	ConstantBuffer_SetData(s_Data.IdentityConstantBuffer, &identity);
-	Pipeline_SetConstantBuffer(s_Data.UIPipeline, s_Data.IdentityConstantBuffer);
-
-	Pipeline_SetConstantBuffer(s_Data.QuadPipeline, s_Data.CameraConstantBuffer);
-	Pipeline_SetConstantBuffer(s_Data.CirclePipeline, s_Data.CameraConstantBuffer);
-	Pipeline_SetConstantBuffer(s_Data.LinePipeline, s_Data.CameraConstantBuffer);
+	RenderPass_SetInput(s_Data.UIRenderPass, "Camera", &s_Data.IdentityCBResource);
 
 	List_Create(s_Data.TextRenderCommands, COMMAND_BUFFER_SIZE);
 	{
 		TextRenderCommand command;
 		for (size_t i = 0; i < COMMAND_BUFFER_SIZE; i++)
 		{
-			List_Add(s_Data.TextRenderCommands, sizeof(TextRenderCommand), &command);
+			List_Add(s_Data.TextRenderCommands, &command, sizeof(TextRenderCommand));
 		}
 	}
 }
@@ -273,10 +305,10 @@ void Renderer2D_Shutdown()
 
 	IndexBuffer_Release(s_Data.QuadIndexBuffer);
 
-	Pipeline_Release(s_Data.QuadPipeline);
-	Pipeline_Release(s_Data.CirclePipeline);
-	Pipeline_Release(s_Data.LinePipeline);
-	Pipeline_Release(s_Data.UIPipeline);
+	RenderPass_Release(s_Data.QuadRenderPass);
+	RenderPass_Release(s_Data.CircleRenderPass);
+	RenderPass_Release(s_Data.LineRenderPass);
+	RenderPass_Release(s_Data.UIRenderPass);
 
 	ConstantBuffer_Release(&s_Data.CameraConstantBuffer);
 	ConstantBuffer_Release(&s_Data.IdentityConstantBuffer);
@@ -287,6 +319,11 @@ void Renderer2D_Shutdown()
 	delete[] s_Data.CircleVertexBufferBase;
 	delete[] s_Data.LineVertexBufferBase;
 	delete[] s_Data.UIVertexBufferBase;
+
+	for (size_t i = 0; i < s_Data.MaxTextureSlots; i++)
+	{
+		delete[] s_Data.TextureSlotsNames[i];
+	}
 }
 
 void StartBatch()
@@ -319,51 +356,52 @@ void Renderer2D_BeginScene(const Mat& viewProjection)
 
 void Flush()
 {
+	// Bind textures
+	for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
+	{
+		Material_SetTexture(s_Data.DefaultMaterial, s_Data.TextureSlotsNames[i], s_Data.Textures[i]);
+	}
+
+	RendererAPI_BeginRenderPass(s_Data.QuadRenderPass, false);
 	if (s_Data.QuadIndexCount)
 	{
 		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase);
 		VertexBuffer_SetData(s_Data.QuadVertexBuffer, s_Data.QuadVertexBufferBase, dataSize);
 
-		// Bind textures
-		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
-			Texture2D_Bind(s_Data.Textures[i], i);
-
-		RendererAPI_DrawIndexed(s_Data.QuadVertexBuffer, s_Data.QuadIndexBuffer, s_Data.QuadPipeline, s_Data.QuadIndexCount);
+		RendererAPI_DrawIndexed(s_Data.QuadVertexBuffer, s_Data.QuadIndexBuffer, s_Data.DefaultMaterial, s_Data.QuadIndexCount);
 	}
+	RendererAPI_EndRenderPass();
 
+	RendererAPI_BeginRenderPass(s_Data.CircleRenderPass, false);
 	if (s_Data.CircleIndexCount)
 	{
 		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.CircleVertexBufferPtr - (uint8_t*)s_Data.CircleVertexBufferBase);
 		VertexBuffer_SetData(s_Data.CircleVertexBuffer, s_Data.CircleVertexBufferBase, dataSize);
 
 		// Use quad QuadIndexBuffer
-		RendererAPI_DrawIndexed(s_Data.CircleVertexBuffer, s_Data.QuadIndexBuffer, s_Data.CirclePipeline, s_Data.CircleIndexCount);
+		RendererAPI_DrawIndexed(s_Data.CircleVertexBuffer, s_Data.QuadIndexBuffer, s_Data.CircleIndexCount);
 	}
+	RendererAPI_EndRenderPass();
 
+	RendererAPI_BeginRenderPass(s_Data.LineRenderPass, false);
 	if (s_Data.LineVertexCount)
 	{
 		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.LineVertexBufferPtr - (uint8_t*)s_Data.LineVertexBufferBase);
 		VertexBuffer_SetData(s_Data.LineVertexBuffer, s_Data.LineVertexBufferBase, dataSize);
 
-		RendererAPI_DrawLines(s_Data.LineVertexBuffer, s_Data.LinePipeline, s_Data.LineVertexCount);
+		RendererAPI_DrawLines(s_Data.LineVertexBuffer, s_Data.LineVertexCount);
 	}
+	RendererAPI_EndRenderPass();
 
+	RendererAPI_BeginRenderPass(s_Data.UIRenderPass, false);
 	if (s_Data.UIIndexCount)
 	{
-		RendererAPI_SetDepthTest(false);
-		RendererAPI_SetBlendingState(BlendMode_Alpha);
-
 		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.UIVertexBufferPtr - (uint8_t*)s_Data.UIVertexBufferBase);
 		VertexBuffer_SetData(s_Data.UIVertexBuffer, s_Data.UIVertexBufferBase, dataSize);
 
-		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
-			Texture2D_Bind(s_Data.Textures[i], i);
-
-		RendererAPI_DrawIndexed(s_Data.UIVertexBuffer, s_Data.QuadIndexBuffer, s_Data.UIPipeline, s_Data.UIIndexCount);
-
-		RendererAPI_SetDepthTest(true);
-		RendererAPI_SetBlendingState(BlendMode_Disabled);
+		RendererAPI_DrawIndexed(s_Data.UIVertexBuffer, s_Data.QuadIndexBuffer, s_Data.DefaultMaterial, s_Data.UIIndexCount);
 	}
+	RendererAPI_EndRenderPass();
 
 	// Rendering Text after all d3d11 draw calls, to make sure text is always on top (beacuse text is rendered by d2d)
 	if (s_Data.TextRenderCommandCount)
@@ -520,7 +558,7 @@ void SetUIVertex(const Vec2& pos, const Vec2& size, float rotation,
 	{
 		// No rotation version
 		//s_Data.UIVertexBufferPtr->Position = { Vertices[i].x, Vertices[i].y, 0.0f };
-		
+
 		Vec2 tempPos = Vec2RotateByPivot(Vertices[i], center, rotation);
 		s_Data.UIVertexBufferPtr->Position = { tempPos.x, tempPos.y, 0.0f };
 

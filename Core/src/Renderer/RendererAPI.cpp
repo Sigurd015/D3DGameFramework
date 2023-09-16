@@ -4,6 +4,8 @@
 #include "DXTrace.h"
 #include "Renderer2D.h"
 #include "RendererContext.h"
+#include "FrameBuffer.h"
+#include "RenderStates.h"
 
 #include <d2d1.h>
 #include <dwrite.h>
@@ -18,6 +20,7 @@ struct RendererAPIState
 	IDWriteFactory* DWriteFactory;
 	ID2D1RenderTarget* D2DRenderTarget;
 
+	uint32_t Width, Height;
 	Vec4 ClearColor = { 0,0,0,0 };
 	ID3D11RenderTargetView* RenderTargetView;
 	ID3D11DepthStencilView* DepthStencilView;
@@ -45,14 +48,8 @@ void SetBuffer(uint32_t width, uint32_t height)
 	CORE_CHECK_DX_RESULT(s_RendererAPIState.Device->CreateDepthStencilView(depthTexture, nullptr, &s_RendererAPIState.DepthStencilView));
 	s_RendererAPIState.DeviceContext->OMSetRenderTargets(1, &s_RendererAPIState.RenderTargetView, s_RendererAPIState.DepthStencilView);
 
-	D3D11_VIEWPORT viewPort{};
-	viewPort.Width = width;
-	viewPort.Height = height;
-	viewPort.MinDepth = 0;
-	viewPort.MaxDepth = 1.0f;
-	viewPort.TopLeftX = 0;
-	viewPort.TopLeftY = 0;
-	s_RendererAPIState.DeviceContext->RSSetViewports(1, &viewPort);
+	s_RendererAPIState.Width = width;
+	s_RendererAPIState.Height = height;
 
 	// D2D
 	{
@@ -79,12 +76,15 @@ void RendererAPI_Initialize()
 		reinterpret_cast<IUnknown**>(&s_RendererAPIState.DWriteFactory)));
 
 	SetBuffer(Window_GetWidth(), Window_GetHeight());
+	CommonStates_Init();
 	Renderer2D_Initialize();
 }
 
 void RendererAPI_Shutdown()
 {
 	Renderer2D_Shutdown();
+
+	CommonStates_Release();
 
 	s_RendererAPIState.RenderTargetView->Release();
 	s_RendererAPIState.DepthStencilView->Release();
@@ -95,8 +95,6 @@ void RendererAPI_Shutdown()
 	s_RendererAPIState.D2DFactory->Release();
 	s_RendererAPIState.DWriteFactory->Release();
 	s_RendererAPIState.D2DRenderTarget->Release();
-
-	RendererContext_Shutdown();
 }
 
 void RendererAPI_SetViewport(uint32_t width, uint32_t height)
@@ -114,39 +112,132 @@ void RendererAPI_SetClearColor(const Vec4& color)
 
 void RendererAPI_Clear()
 {
+	D3D11_VIEWPORT viewPort{};
+	viewPort.Width = s_RendererAPIState.Width;
+	viewPort.Height = s_RendererAPIState.Height;
+	viewPort.MinDepth = 0;
+	viewPort.MaxDepth = 1.0f;
+	viewPort.TopLeftX = 0;
+	viewPort.TopLeftY = 0;
+	s_RendererAPIState.DeviceContext->RSSetViewports(1, &viewPort);
+
 	s_RendererAPIState.DeviceContext->ClearRenderTargetView(s_RendererAPIState.RenderTargetView, &s_RendererAPIState.ClearColor.x);
 	s_RendererAPIState.DeviceContext->ClearDepthStencilView(s_RendererAPIState.DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
 	s_RendererAPIState.DeviceContext->OMSetRenderTargets(1, &s_RendererAPIState.RenderTargetView, s_RendererAPIState.DepthStencilView);
 }
 
-void RendererAPI_DrawIndexed(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, const Pipeline& pipeline, uint32_t indexCount)
+void RendererAPI_BeginRenderPass(const RenderPass& renderPass, bool clear)
+{
+	const Framebuffer& framebuffer = RenderPass_GetTargetFramebuffer(renderPass);
+	const Pipeline& pipeline = RenderPass_GetPipeline(renderPass);
+	const PipelineSpecification& pipelineSpec = Pipeline_GetSpecification(pipeline);
+	const FrameBufferSpecification& framebufferSpec = Framebuffer_GetSpecification(framebuffer);
+
+	//if (clear)
+	//{
+	//	if (!framebufferSpec.UseUniqueClearColor)
+	//		Framebuffer_ClearAttachment(framebuffer, s_RendererAPIState.ClearColor);
+	//	else
+	//		Framebuffer_ClearAttachment(framebuffer);
+	//}
+	//Framebuffer_Bind(framebuffer);
+	Pipeline_Bind(pipeline);
+
+	if (!pipelineSpec.DepthTest)
+		s_RendererAPIState.DeviceContext->OMSetDepthStencilState(s_CommonStates.DSSNoDepthTest, 0);
+	else
+	{
+		switch (pipelineSpec.DepthOperator)
+		{
+		case DepthCompareOperator_Less:
+			s_RendererAPIState.DeviceContext->OMSetDepthStencilState(s_CommonStates.DSSLess, 0);
+			break;
+		case DepthCompareOperator_LessEqual:
+			s_RendererAPIState.DeviceContext->OMSetDepthStencilState(s_CommonStates.DSSLessEqual, 0);
+			break;
+		}
+	}
+
+	if (pipelineSpec.BackfaceCulling)
+		s_RendererAPIState.DeviceContext->RSSetState(s_CommonStates.RSCullBack);
+	else
+		s_RendererAPIState.DeviceContext->RSSetState(s_CommonStates.RSNoCull);
+
+	switch (pipelineSpec.Blend)
+	{
+	case BlendMode_Alpha:
+	{
+		static float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+		s_RendererAPIState.DeviceContext->OMSetBlendState(s_CommonStates.BSAlpha, blendFactor, 0xffffffff);
+		break;
+	}
+	case BlendMode_Additive:
+	{
+		static float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+		s_RendererAPIState.DeviceContext->OMSetBlendState(s_CommonStates.BSAdditive, blendFactor, 0xffffffff);
+		break;
+	}
+	case BlendMode_Subtractive:
+	{
+		static float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+		s_RendererAPIState.DeviceContext->OMSetBlendState(s_CommonStates.BSSubtractive, blendFactor, 0xffffffff);
+		break;
+	}
+	case BlendMode_Disabled:
+	{
+		static float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+		s_RendererAPIState.DeviceContext->OMSetBlendState(s_CommonStates.BSNoBlend, blendFactor, 0xffffffff);
+		break;
+	}
+	}
+
+	//D3D11_VIEWPORT viewPort{};
+	//viewPort.MinDepth = 0;
+	//viewPort.MaxDepth = 1.0f;
+	//viewPort.TopLeftX = 0;
+	//viewPort.TopLeftY = 0;
+
+	//if (framebufferSpec.SwapChainTarget)
+	//{
+	//	viewPort.Width = s_RendererAPIState.Width;
+	//	viewPort.Height = s_RendererAPIState.Height;
+	//}
+	//else
+	//{
+	//	viewPort.Width = framebufferSpec.Width;
+	//	viewPort.Height = framebufferSpec.Height;
+	//}
+
+	//s_RendererAPIState.DeviceContext->RSSetViewports(1, &viewPort);
+	RnederPass_BindInputs(renderPass);
+}
+
+void RendererAPI_EndRenderPass()
+{
+	//s_RendererAPIState.DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+	//RendererAPI_Clear();
+}
+
+void RendererAPI_DrawIndexed(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, const Material& material, uint32_t indexCount)
+{
+	Material_Bind(material);
+
+	RendererAPI_DrawIndexed(vertexBuffer, indexBuffer, indexCount);
+}
+
+void RendererAPI_DrawIndexed(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, uint32_t indexCount)
 {
 	VertexBuffer_Bind(vertexBuffer);
 	IndexBuffer_Bind(indexBuffer);
-	Pipeline_Bind(pipeline);
 
-	s_RendererAPIState.DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	s_RendererAPIState.DeviceContext->DrawIndexed(indexCount, 0, 0);
 }
 
-void RendererAPI_DrawLines(const VertexBuffer& vertexBuffer, const Pipeline& pipeline, uint32_t vertexCount)
+void RendererAPI_DrawLines(const VertexBuffer& vertexBuffer, uint32_t vertexCount)
 {
 	VertexBuffer_Bind(vertexBuffer);
-	Pipeline_Bind(pipeline);
 
-	s_RendererAPIState.DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 	s_RendererAPIState.DeviceContext->Draw(vertexCount, 0);
-}
-
-void RendererAPI_SetDepthTest(bool enable)
-{
-	s_RendererAPIState.DeviceContext->OMSetDepthStencilState(RendererContext_GetDepthStencilState(enable), 0);
-}
-
-void RendererAPI_SetBlendingState(BlendMode type)
-{
-	static float blendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	s_RendererAPIState.DeviceContext->OMSetBlendState(RendererContext_GetBlendState(type), blendFactor, 0xffffffff);
 }
 
 void RendererAPI_DrawText(const WCHAR* str, const WCHAR* fontFamilyName, const Vec2& pos, const Vec4& color, float fontSize)

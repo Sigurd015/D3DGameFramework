@@ -3,107 +3,100 @@
 
 #include <corecrt_malloc.h>
 
-void List_Create(List& out, uint32_t capacity)
+void List_Create(List& list, uint32_t capacity)
 {
-	out.Capacity = capacity;
-	out.Data = (void**)malloc(out.Capacity * sizeof(void*));
+	list.Capacity = capacity;
+	list.Data = (void**)malloc(list.Capacity * sizeof(void*));
 
-	CORE_ASSERT(out.Data != nullptr, "List_Create: Memory allocation failed");
+	CORE_ASSERT(list.Data != nullptr, "List_Create: Memory allocation failed");
 
-	out.Index = 0;
+	list.Index = 0;
 }
 
-const void* List_Get(const List& out, uint32_t index)
+const void* List_Get(const List& list, uint32_t index)
 {
-	if (index >= out.Index)
+	if (index >= list.Index)
 	{
 		return nullptr;
 	}
-	return out.Data[index];
+	return list.Data[index];
 }
 
-void List_Set(List& out, uint32_t index, void* data)
+void List_Set(List& list, uint32_t index, void* data)
 {
-	if (index >= out.Index)
+	if (index >= list.Index)
 	{
 		return;
 	}
-	out.Data[index] = data;
+	list.Data[index] = data;
 }
 
-void List_Add(List& out, uint32_t size, void* data)
+void List_Add(List& list, void* data, uint32_t size)
 {
-	if (out.Index + 1 > out.Capacity)
+	if (list.Index + 1 > list.Capacity)
 	{
-		out.Capacity *= 2;
-		out.Data = (void**)realloc(out.Data, out.Capacity * sizeof(void*));
+		list.Capacity *= 2;
+		list.Data = (void**)realloc(list.Data, list.Capacity * sizeof(void*));
 
-		CORE_ASSERT(out.Data != nullptr, "List_Add: Memory allocation failed");
+		CORE_ASSERT(list.Data != nullptr, "List_Add: Memory allocation failed");
 	}
 
-	out.Data[out.Index] = (void*)malloc(size);
-	memcpy(out.Data[out.Index], data, size);
-	out.Index++;
-}
-
-void List_Add(List& out, void* data)
-{
-	if (out.Index + 1 > out.Capacity)
+	if (size != 0)
 	{
-		out.Capacity *= 2;
-		out.Data = (void**)realloc(out.Data, out.Capacity * sizeof(void*));
-
-		CORE_ASSERT(out.Data != nullptr, "List_Add: Memory allocation failed");
+		list.Data[list.Index] = (void*)malloc(size);
+		memcpy(list.Data[list.Index], data, size);
 	}
-
-	out.Data[out.Index] = data;
-	out.Index++;
+	else
+	{
+		list.Data[list.Index] = data;
+	}
+	list.Index++;
 }
 
-void List_RemoveAt(List& out, uint32_t index)
+void List_RemoveAt(List& list, uint32_t index)
 {
-	if (index >= out.Index)
+	if (index >= list.Index)
 	{
 		return;
 	}
 
-	for (uint32_t i = index; i < out.Index - 1; i++)
+	for (uint32_t i = index; i < list.Index - 1; i++)
 	{
-		out.Data[i] = out.Data[i + 1];
+		list.Data[i] = list.Data[i + 1];
 	}
 
-	out.Index--;
+	list.Index--;
 }
 
-void List_Clear(List& out, bool freeEachElement)
+void List_Clear(List& list, bool freeEachElement)
 {
 	if (freeEachElement)
 	{
-		for (size_t i = 0; i < out.Index; i++)
+		for (size_t i = 0; i < list.Index; i++)
 		{
-			if (out.Data[i] != nullptr)
-				free(out.Data[i]);
+			if (list.Data[i] != nullptr)
+				free(list.Data[i]);
 		}
 	}
 
-	out.Index = 0;
+	list.Index = 0;
 }
 
-void List_Free(List& out, bool freeEachElement)
+void List_Free(List& list, bool freeEachElement)
 {
 	if (freeEachElement)
 	{
-		for (size_t i = 0; i < out.Index; i++)
+		for (size_t i = 0; i < list.Index; i++)
 		{
-			if (out.Data[i] != nullptr)
-				free(out.Data[i]);
+			if (list.Data[i] != nullptr)
+				free(list.Data[i]);
 		}
 	}
 
-	free(out.Data);
+	free(list.Data);
 }
 
-uint32_t List_Size(const List& out)
+uint32_t List_Size(const List& list)
 {
-	return out.Index;
+	return list.Index;
 }

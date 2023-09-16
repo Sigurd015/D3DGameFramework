@@ -23,7 +23,7 @@ void Log_Shutdown()
 	}
 }
 
-void Log_Output(Log_Level level, const char* type, const char* message)
+void Output(Log_Level level, const char* type, const char* message)
 {
 	switch (level)
 	{
@@ -39,7 +39,7 @@ void Log_Output(Log_Level level, const char* type, const char* message)
 	}
 }
 
-void Log_OutputToFile(Log_Level level, const char* type, const char* message)
+void OutputToFile(Log_Level level, const char* type, const char* message)
 {
 	if (LogFile != nullptr)
 	{
@@ -58,7 +58,7 @@ void Log_OutputToFile(Log_Level level, const char* type, const char* message)
 	}
 }
 
-void Log_Core_Output(Log_Level level, const char* format, ...)
+void Log_Output(Log_Level level, const char* type, const char* format, ...)
 {
 	va_list args;
 	va_start(args, format);
@@ -67,23 +67,8 @@ void Log_Core_Output(Log_Level level, const char* format, ...)
 	va_end(args);
 
 	#ifdef CORE_DIST
-	Log_OutputToFile(level, "[CORE]", logMessage);
+	OutputToFile(level, type, logMessage);
 	#else
-	Log_Output(level, "[CORE]", logMessage);
-	#endif
-}
-
-void Log_APP_Output(Log_Level level, const char* format, ...)
-{
-	va_list args;
-	va_start(args, format);
-	char logMessage[LOG_BUFFER_SIZE];
-	vsnprintf(logMessage, sizeof(logMessage), format, args);
-	va_end(args);
-
-	#ifdef CORE_DIST
-	Log_OutputToFile(level, "[APP]", logMessage);
-	#else
-	Log_Output(level, "[APP]", logMessage);
+	Output(level, type, logMessage);
 	#endif
 }

@@ -7,9 +7,9 @@
 
 #include <Audio.h>
 
-void Scene_Create(Scene& out)
+void Scene_Create(Scene& scene)
 {
-	List_Create(out.Entities);
+	List_Create(scene.Entities);
 }
 
 void OnCollide(void* entity1, void* entity2)
@@ -27,15 +27,15 @@ void OnCollide(void* entity1, void* entity2)
 	}
 }
 
-void Scene_Ininialize(Scene& out)
+void Scene_Ininialize(Scene& scene)
 {
-	uint32_t size = List_Size(out.Entities);
+	uint32_t size = List_Size(scene.Entities);
 
 	// Initialize all the audio
 	{
 		for (size_t i = 0; i < size; i++)
 		{
-			Entity* temp = (Entity*)List_Get(out.Entities, i);
+			Entity* temp = (Entity*)List_Get(scene.Entities, i);
 			TransformComponent* tc = &temp->Transform;
 
 			if (Entity_HasComponent(temp, ComponentType_Audio))
@@ -63,11 +63,11 @@ void Scene_Ininialize(Scene& out)
 	}
 
 	// Initialize all the physics
-	PhysicsWorld2D_Create(out.PhysicsWorld, OnCollide);
+	PhysicsWorld2D_Create(scene.PhysicsWorld, OnCollide);
 	{
 		for (size_t i = 0; i < size; i++)
 		{
-			Entity* temp = (Entity*)List_Get(out.Entities, i);
+			Entity* temp = (Entity*)List_Get(scene.Entities, i);
 			TransformComponent* tc = &temp->Transform;
 
 			if (Entity_HasComponent(temp, ComponentType_Rigidbody2D))
@@ -109,7 +109,7 @@ void Scene_Ininialize(Scene& out)
 					Rigidbody2D_CreateBoxCollider(rigidbody2D, bc2d->Offset, { bc2d->Size.x * tc->Scale.x, bc2d->Size.y * tc->Scale.y });
 				}
 
-				rb2d->RuntimeBody = PhysicsWorld2D_AddRigidbody2D(out.PhysicsWorld, rigidbody2D);
+				rb2d->RuntimeBody = PhysicsWorld2D_AddRigidbody2D(scene.PhysicsWorld, rigidbody2D);
 			}
 		}
 	}
@@ -118,7 +118,7 @@ void Scene_Ininialize(Scene& out)
 	{
 		for (size_t i = 0; i < size; i++)
 		{
-			Entity* temp = (Entity*)List_Get(out.Entities, i);
+			Entity* temp = (Entity*)List_Get(scene.Entities, i);
 			if (Entity_HasComponent(temp, ComponentType_Script))
 			{
 				temp->Script->OnCreate(temp, temp->Script->RuntimeData);
@@ -127,13 +127,13 @@ void Scene_Ininialize(Scene& out)
 	}
 }
 
-void Scene_Destroy(Scene& out)
+void Scene_Destroy(Scene& scene)
 {
 	// Destroy all the entities and their components
-	uint32_t size = List_Size(out.Entities);
+	uint32_t size = List_Size(scene.Entities);
 	for (size_t i = 0; i < size; i++)
 	{
-		Entity* temp = (Entity*)List_Get(out.Entities, i);
+		Entity* temp = (Entity*)List_Get(scene.Entities, i);
 
 		if (Entity_HasComponent(temp, ComponentType_RectTransform))
 		{
@@ -178,34 +178,34 @@ void Scene_Destroy(Scene& out)
 		}
 	}
 
-	List_Free(out.Entities, true);
-	PhysicsWorld2D_Destory(out.PhysicsWorld);
+	List_Free(scene.Entities, true);
+	PhysicsWorld2D_Destory(scene.PhysicsWorld);
 }
 
-void Scene_AddEntity(Scene& out, Entity& entity)
+void Scene_AddEntity(Scene& scene, Entity& entity)
 {
-	entity.Scene = &out;
-	List_Add(out.Entities, sizeof(Entity), &entity);
+	entity.Scene = &scene;
+	List_Add(scene.Entities, &entity, sizeof(Entity));
 }
 
-Entity* Scene_GetEntityByName(const Scene* out, const char* name)
+Entity* Scene_GetEntityByName(const Scene* scene, const char* name)
 {
-	uint32_t size = List_Size(out->Entities);
+	uint32_t size = List_Size(scene->Entities);
 	for (size_t i = 0; i < size; i++)
 	{
-		Entity* temp = (Entity*)List_Get(out->Entities, i);
+		Entity* temp = (Entity*)List_Get(scene->Entities, i);
 		if (!strcmp(temp->Tag.Name, name))
 			return temp;
 	}
 	return nullptr;
 }
 
-Entity* Scene_GetPrimaryCamera(const Scene& out)
+Entity* Scene_GetPrimaryCamera(const Scene& scene)
 {
-	uint32_t size = List_Size(out.Entities);
+	uint32_t size = List_Size(scene.Entities);
 	for (size_t i = 0; i < size; i++)
 	{
-		Entity* temp = (Entity*)List_Get(out.Entities, i);
+		Entity* temp = (Entity*)List_Get(scene.Entities, i);
 		if (Entity_HasComponent(temp, ComponentType_Camera))
 			if (temp->Camera->Primary)
 				return temp;
@@ -214,12 +214,12 @@ Entity* Scene_GetPrimaryCamera(const Scene& out)
 }
 
 // Notice: Make sure only one listener in the scene, that's player
-void* Scene_GetListener(const Scene* out)
+void* Scene_GetListener(const Scene* scene)
 {
-	uint32_t size = List_Size(out->Entities);
+	uint32_t size = List_Size(scene->Entities);
 	for (size_t i = 0; i < size; i++)
 	{
-		Entity* temp = (Entity*)List_Get(out->Entities, i);
+		Entity* temp = (Entity*)List_Get(scene->Entities, i);
 		TransformComponent* tc = &temp->Transform;
 
 		if (Entity_HasComponent(temp, ComponentType_Audio))
@@ -256,12 +256,12 @@ void Scene_SetEntityEnabled(Entity* entity, bool enabled)
 }
 
 #ifndef CORE_DIST
-void ColliderVisualiztion(const Scene& out)
+void ColliderVisualiztion(const Scene& scene)
 {
-	uint32_t size = List_Size(out.Entities);
+	uint32_t size = List_Size(scene.Entities);
 	for (size_t i = 0; i < size; i++)
 	{
-		Entity* temp = (Entity*)List_Get(out.Entities, i);
+		Entity* temp = (Entity*)List_Get(scene.Entities, i);
 		TransformComponent* tc = &temp->Transform;
 
 		if (!temp->Enabled)
@@ -304,11 +304,11 @@ void ColliderVisualiztion(const Scene& out)
 }
 #endif
 
-void Scene_OnUpdate(Scene& out, float timeStep)
+void Scene_OnUpdate(Scene& scene, float timeStep)
 {
 	// Find primary camera
 	{
-		Entity* mainCamera = Scene_GetPrimaryCamera(out);
+		Entity* mainCamera = Scene_GetPrimaryCamera(scene);
 		if (!mainCamera)
 			return;
 
@@ -317,13 +317,13 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 		Renderer2D_BeginScene(viewProjection);
 	}
 
-	uint32_t size = List_Size(out.Entities);
+	uint32_t size = List_Size(scene.Entities);
 
 	// Update scripts
 	{
 		for (size_t i = 0; i < size; i++)
 		{
-			Entity* temp = (Entity*)List_Get(out.Entities, i);
+			Entity* temp = (Entity*)List_Get(scene.Entities, i);
 
 			if (Entity_HasComponent(temp, ComponentType_Script) && temp->Enabled)
 			{
@@ -337,11 +337,11 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 	{
 		static const uint32_t iterations = 10;
 
-		PhysicsWorld2D_Update(out.PhysicsWorld, timeStep, iterations);
+		PhysicsWorld2D_Update(scene.PhysicsWorld, timeStep, iterations);
 		{
 			for (size_t i = 0; i < size; i++)
 			{
-				Entity* temp = (Entity*)List_Get(out.Entities, i);
+				Entity* temp = (Entity*)List_Get(scene.Entities, i);
 
 				if (!temp->Enabled)
 					continue;
@@ -363,7 +363,7 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 	{
 		for (size_t i = 0; i < size; i++)
 		{
-			Entity* temp = (Entity*)List_Get(out.Entities, i);
+			Entity* temp = (Entity*)List_Get(scene.Entities, i);
 
 			if (!temp->Enabled)
 				continue;
@@ -396,7 +396,7 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 	{
 		for (size_t i = 0; i < size; i++)
 		{
-			Entity* temp = (Entity*)List_Get(out.Entities, i);
+			Entity* temp = (Entity*)List_Get(scene.Entities, i);
 
 			if (!temp->Enabled)
 				continue;
@@ -441,7 +441,7 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 			{
 				RectTransformComponent* rect = temp->RectTransform;
 				Vec2 position, size, ndcPos;
-				Vec2 viewPortSize = { (float)out.ViewportWidth,(float)out.ViewportHeight };
+				Vec2 viewPortSize = { (float)scene.ViewportWidth,(float)scene.ViewportHeight };
 				RectTransformComponent_GetPositionAndSize(*rect, viewPortSize, &ndcPos, &position, &size);
 
 				if (Entity_HasComponent(temp, ComponentType_SpriteRenderer))
@@ -477,24 +477,24 @@ void Scene_OnUpdate(Scene& out, float timeStep)
 	}
 
 	#ifndef CORE_DIST
-	ColliderVisualiztion(out);
+	ColliderVisualiztion(scene);
 	#endif
 
 	Renderer2D_EndScene();
 }
 
-void Scene_OnViewportResize(Scene& out, uint32_t width, uint32_t height)
+void Scene_OnViewportResize(Scene& scene, uint32_t width, uint32_t height)
 {
-	if (out.ViewportWidth == width && out.ViewportHeight == height)
+	if (scene.ViewportWidth == width && scene.ViewportHeight == height)
 		return;
 
-	out.ViewportWidth = width;
-	out.ViewportHeight = height;
+	scene.ViewportWidth = width;
+	scene.ViewportHeight = height;
 
-	uint32_t size = List_Size(out.Entities);
+	uint32_t size = List_Size(scene.Entities);
 	for (size_t i = 0; i < size; i++)
 	{
-		Entity* temp = (Entity*)List_Get(out.Entities, i);
+		Entity* temp = (Entity*)List_Get(scene.Entities, i);
 		if (Entity_HasComponent(temp, ComponentType_Camera))
 			if (!temp->Camera->FixedAspectRatio)
 				SceneCamera_SetViewportSize(temp->Camera->Camera, width, height);
@@ -507,7 +507,7 @@ bool LayerMask(void* entity, const char* mask)
 	return strstr(ent->Tag.Name, mask) != NULL;
 }
 
-bool Scene_Raycast(Scene* out, Entity* entity, const Vec2& rayDirection, const char* mask, float maxDistance)
+bool Scene_Raycast(Scene* scene, Entity* entity, const Vec2& rayDirection, const char* mask, float maxDistance)
 {
 	Vec2 rayOrigin = Vec3ToVec2(entity->Transform.Translation);
 
@@ -519,7 +519,7 @@ bool Scene_Raycast(Scene* out, Entity* entity, const Vec2& rayDirection, const c
 		rigidbody2D->Enabled = false;
 	}
 	float distance;
-	void* ent = PhysicsWorld2D_Raycast(out->PhysicsWorld, rayOrigin, rayDirection, distance);
+	void* ent = PhysicsWorld2D_Raycast(scene->PhysicsWorld, rayOrigin, rayDirection, distance);
 	if (rigidbody2D != nullptr)
 		rigidbody2D->Enabled = true;
 
