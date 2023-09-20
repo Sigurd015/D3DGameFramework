@@ -7,6 +7,9 @@
 #include "Core/Application.h"
 #include "Core/Window.h"
 
+//-------Audio----------
+#include "Audio/Audio.h"
+
 //-------Events---------
 #include "Events/Event.h"
 

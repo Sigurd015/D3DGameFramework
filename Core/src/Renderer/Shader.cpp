@@ -4,6 +4,7 @@
 #include "DXTrace.h"
 
 #include <d3dcompiler.h>
+#include <d3d11Shader.h>
 #include <atlbase.h>
 #include <atlconv.h>
 

@@ -258,14 +258,15 @@ void Renderer2D_Initialize()
 	}
 
 	// Set WhiteTexture slots to 0
+	uint32_t whiteTextureData = 0xffffffff;
 	TextureSpecification spec;
 	spec.Width = 1;
 	spec.Height = 1;
 	spec.Format = ImageFormat::RGBA8;
+	spec.Data = &whiteTextureData;
+	spec.DataSize = sizeof(uint32_t);
 
 	Texture2D_Create(&s_Data.WhiteTexture, spec);
-	uint32_t whiteTextureData = 0xffffffff;
-	Texture2D_SetData(&s_Data.WhiteTexture, &whiteTextureData, sizeof(uint32_t));
 	s_Data.Textures[0] = &s_Data.WhiteTexture;
 
 	for (size_t i = 0; i < s_Data.MaxTextureSlots; i++)

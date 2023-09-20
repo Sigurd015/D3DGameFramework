@@ -23,6 +23,39 @@ void Game_Update(float timeStep)
 
 	Scene_OnViewportResize(s_Data.TestScene, Window_GetWidth(), Window_GetHeight());
 	Scene_OnUpdate(s_Data.TestScene, timeStep);
+
+	if (Input_GetKey(GamePadCode::ButtonA))
+		APP_LOG_INFO("GamePad : A Pressed");
+	if (Input_GetKey(GamePadCode::ButtonB))
+		APP_LOG_INFO("GamePad : B Pressed");
+	if (Input_GetKey(GamePadCode::ButtonX))
+		APP_LOG_INFO("GamePad : X Pressed");
+	if (Input_GetKey(GamePadCode::ButtonY))
+		APP_LOG_INFO("GamePad : Y Pressed");
+	if (Input_GetKey(GamePadCode::LeftShoulder))
+		APP_LOG_INFO("GamePad : LB Pressed");
+	if (Input_GetKey(GamePadCode::RightShoulder))
+		APP_LOG_INFO("GamePad : RB Pressed");
+	if (Input_GetKey(GamePadCode::Back))
+		APP_LOG_INFO("GamePad : Back Pressed");
+	if (Input_GetKey(GamePadCode::Start))
+		APP_LOG_INFO("GamePad : Start Pressed");
+	if (Input_GetKey(GamePadCode::LeftThumbStick))
+		APP_LOG_INFO("GamePad : LS Pressed");
+	if (Input_GetKey(GamePadCode::RightThumbStick))
+		APP_LOG_INFO("GamePad : RS Pressed");
+	if (Input_GetKey(GamePadCode::DPadUp))
+		APP_LOG_INFO("GamePad : DPadUp Pressed");
+	if (Input_GetKey(GamePadCode::DPadRight))
+		APP_LOG_INFO("GamePad : DPadRight Pressed");
+	if (Input_GetKey(GamePadCode::DPadDown))
+		APP_LOG_INFO("GamePad : DPadDown Pressed");
+	if (Input_GetKey(GamePadCode::DPadLeft))
+		APP_LOG_INFO("GamePad : DPadLeft Pressed");
+	if (Input_GetKey(GamePadCode::LeftTrigger))
+		APP_LOG_INFO("GamePad : LTrigger Pressed");
+	if (Input_GetKey(GamePadCode::RightTrigger))
+		APP_LOG_INFO("GamePad : RTrigger Pressed");
 }
 
 void Game_Shutdown()

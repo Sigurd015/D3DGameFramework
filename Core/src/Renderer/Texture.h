@@ -18,6 +18,10 @@ struct TextureSpecification
 	uint32_t Width = 1;
 	uint32_t Height = 1;
 	ImageFormat Format = ImageFormat::NoneFormat;
+
+	// Notice: When the texture is created, never use this data again!(it may be deleted)
+	void* Data = nullptr;
+	uint32_t DataSize = 0;
 };
 
 struct Texture2D
@@ -31,7 +35,6 @@ struct Texture2D
 
 void Texture2D_Create(Texture2D* texture2D, const char* path);
 void Texture2D_Create(Texture2D* texture2D, const TextureSpecification& spec);
-void Texture2D_SetData(Texture2D* texture2D, void* data, uint32_t size);
 void Texture2D_Bind(const Texture2D* texture2D, uint32_t slot);
 bool Texture2D_IsSame(const Texture2D* texture2D, const Texture2D* other);
 void Texture2D_Release(Texture2D* texture2D);

@@ -2,15 +2,14 @@
 #include "Application.h"
 #include "Window.h"
 #include "Renderer/RendererAPI.h"
+#include "Input/Input.h"
+#include "Audio/Audio.h"
 
-#include <Audio.h>
 #include <time.h>
 
 struct Application_State
 {
 	Application* AppInst;
-
-	DirectX::AudioEngine* AudioEngine;
 
 	bool IsRunning = true;
 	bool Minimized = false;
@@ -81,7 +80,8 @@ void Application_Ininialize(Application* appInst)
 		Window_SetFullScreen();
 	}
 
-	s_AppState.AudioEngine = new DirectX::AudioEngine();
+	Audio_Init();
+	Input_Init();
 
 	s_AppState.AppInst->Ininialize(s_AppState.AppInst);
 }
@@ -91,15 +91,15 @@ void Application_SetTimeScale(float timeScale)
 	s_AppState.TimeScale = timeScale;
 
 	if (timeScale == 0)
-		s_AppState.AudioEngine->Suspend();
+	{
+		Audio_Suspend();
+		Input_Suspend();
+	}
 	else
-		s_AppState.AudioEngine->Resume();
-}
-
-void* Application_CreateSoundEffect(const WCHAR* path)
-{
-	DirectX::SoundEffect* soundEffect = new DirectX::SoundEffect(s_AppState.AudioEngine, path);
-	return soundEffect;
+	{
+		Audio_Resume();
+		Input_Resume();
+	}
 }
 
 void Application_Run()
@@ -112,10 +112,11 @@ void Application_Run()
 
 		timestep *= s_AppState.TimeScale;
 
-		s_AppState.AudioEngine->Update();
-
 		if (!s_AppState.Minimized)
 		{
+			Input_Update();
+			Audio_Update();
+
 			s_AppState.AppInst->Update(timestep);
 		}
 
@@ -128,7 +129,7 @@ void Application_Run()
 void Application_Shutdown()
 {
 	s_AppState.AppInst->Shutdown();
-	s_AppState.AudioEngine->Suspend();
-	delete s_AppState.AudioEngine;
+	Audio_Shutdown();
+	Input_Shutdown();
 	RendererAPI_Shutdown();
 }

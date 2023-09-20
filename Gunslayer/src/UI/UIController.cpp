@@ -6,6 +6,8 @@
 #include <atlbase.h>
 #include <atlconv.h>
 
+#define MAX_TIME 120.0f
+
 #define BACKBAR_FOLLOW_COUNT_TIME 1.0f
 #define SHOOTING_ANIMATION_FRAME_SPEED 0.15f
 #define HIT_ICON_HOLD_TIME 0.5f
@@ -64,8 +66,7 @@ struct UIControllerData
 	WCHAR* ScoreText = L"";
 
 	uint32_t Score = 0;
-	float Timer = 0;
-	float MaxTime = 120.0f;
+	float Timer = MAX_TIME;
 	bool TimerStarted = false;
 
 	bool IsPaused = false;
@@ -423,9 +424,9 @@ void UIController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 		DrawScore();
 
 		if (s_Data.TimerStarted)
-			s_Data.Timer += timeStep;
+			s_Data.Timer -= timeStep;
 
-		if (s_Data.Timer > s_Data.MaxTime)
+		if (s_Data.Timer < 0)
 		{
 			s_Data.IsTiemEnd = true;
 			PauseGame();
@@ -487,7 +488,7 @@ void UIController_StartTimer()
 {
 	if (!s_Data.TimerStarted)
 	{
-		s_Data.Timer = 0.0f;
+		s_Data.Timer = MAX_TIME;
 		s_Data.TimerStarted = true;
 	}
 }

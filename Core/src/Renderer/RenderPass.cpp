@@ -15,6 +15,7 @@ void RenderPass_Create(RenderPass& renderPass, const RenderPassSpecification& sp
 void RenderPass_Release(RenderPass& renderPass)
 {
 	HashMap_Free(renderPass.Inputs, false);
+	Pipeline_Release(renderPass.Specification.Pipeline);
 }
 
 void RenderPass_SetInput(RenderPass& renderPass, const char* name, const RendererResource* resource)

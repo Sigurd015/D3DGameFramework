@@ -44,6 +44,7 @@ project "Core"
 		"d3dCompiler.lib",
 		"d2d1.lib",
 		"dwrite.lib",
+		"dxguid.lib",
 	}
 
 	filter "system:windows"

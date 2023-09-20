@@ -58,9 +58,9 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 	{
 	case CACO_DEMON:
 	{
-		data->AttackSoundEffect = Application_CreateSoundEffect(L"assets/sounds/caco_demon/cacodemon_attack.wav");
-		data->PainSoundEffect = Application_CreateSoundEffect(L"assets/sounds/caco_demon/cacodemon_pain.wav");
-		data->DeathSoundEffect = Application_CreateSoundEffect(L"assets/sounds/caco_demon/cacodemon_death.wav");
+		data->AttackSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/caco_demon/cacodemon_attack.wav");
+		data->PainSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/caco_demon/cacodemon_pain.wav");
+		data->DeathSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/caco_demon/cacodemon_death.wav");
 
 		data->Score = CACO_DEMON_SCORE;
 		data->Stats.MaxHP = CACO_DEMON_MAX_HP;
@@ -151,10 +151,10 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 	}
 	case CYBER_DEMON:
 	{
-		data->AttackSoundEffect = Application_CreateSoundEffect(L"assets/sounds/cyber_demon/cyberdemon_attack.wav");
-		data->PainSoundEffect = Application_CreateSoundEffect(L"assets/sounds/cyber_demon/cyberdemon_pain.wav");
-		data->DeathSoundEffect = Application_CreateSoundEffect(L"assets/sounds/cyber_demon/cyberdemon_death.wav");
-		data->WalkSoundEffect = Application_CreateSoundEffect(L"assets/sounds/cyber_demon/cyberdemon_walk.wav");
+		data->AttackSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/cyber_demon/cyberdemon_attack.wav");
+		data->PainSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/cyber_demon/cyberdemon_pain.wav");
+		data->DeathSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/cyber_demon/cyberdemon_death.wav");
+		data->WalkSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/cyber_demon/cyberdemon_walk.wav");
 
 		data->Score = CYBER_DEMON_SCORE;
 		data->Stats.MaxHP = CYBER_DEMON_MAX_HP;
@@ -245,9 +245,9 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 	}
 	case SOLDIER:
 	{
-		data->AttackSoundEffect = Application_CreateSoundEffect(L"assets/sounds/soldier/soldier_attack.wav");
-		data->PainSoundEffect = Application_CreateSoundEffect(L"assets/sounds/soldier/soldier_pain.wav");
-		data->DeathSoundEffect = Application_CreateSoundEffect(L"assets/sounds/soldier/soldier_death.wav");
+		data->AttackSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/soldier/soldier_attack.wav");
+		data->PainSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/soldier/soldier_pain.wav");
+		data->DeathSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/soldier/soldier_death.wav");
 
 		data->Score = SOLDIER_SCORE;
 		data->Stats.MaxHP = SOLDIER_MAX_HP;
