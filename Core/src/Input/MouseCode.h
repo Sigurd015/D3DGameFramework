@@ -1,7 +1,7 @@
 #pragma once
 enum MouseCode
 {
-	ButtonLeft = 0x0001,
-	ButtonRight = 0x0002,
-	ButtonMiddle = 0x0004,
+	MouseCode_ButtonLeft = 0x0001,
+	MouseCode_ButtonRight = 0x0002,
+	MouseCode_ButtonMiddle = 0x0004,
 };

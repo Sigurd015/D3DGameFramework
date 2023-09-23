@@ -2,6 +2,7 @@
 #include "Player/PlayerController.h"
 #include "ScreenEffect/Loading.h"
 #include "GameMode.h"
+#include "KeyMap/KeyMap.h"
 
 #include <atlbase.h>
 #include <atlconv.h>
@@ -283,7 +284,7 @@ void UIController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 	if (s_Data.IsPaused)
 	{
 		#ifndef CORE_DIST
-		if (Input_GetKeyDown(KeyCode::Numpad5))
+		if (Input_GetKeyDown(KeyCode_Numpad5))
 			s_Data.ShowPauseMenu = !s_Data.ShowPauseMenu;
 
 		if (!s_Data.ShowPauseMenu)
@@ -311,16 +312,16 @@ void UIController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 		if (s_Data.IsPlayerDead || s_Data.IsTiemEnd)
 			DrawScore();
 
-		if (Input_GetKeyDown(KeyCode::Enter))
+		if (KeyMap_GetKey(MENU_SELECT))
 		{
 			s_Data.CurrentPauseMenuNode->OnEnter();
 		}
 
-		if (Input_GetKeyDown(KeyCode::UpArrow))
+		if (KeyMap_GetKey(MENU_UP))
 		{
 			s_Data.CurrentPauseMenuNode = s_Data.CurrentPauseMenuNode->Prev;
 		}
-		else if (Input_GetKeyDown(KeyCode::DownArrow))
+		else if (KeyMap_GetKey(MENU_DOWN))
 		{
 			s_Data.CurrentPauseMenuNode = s_Data.CurrentPauseMenuNode->Next;
 		}
@@ -355,7 +356,7 @@ void UIController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 	if (s_Data.IsTiemEnd || s_Data.IsPlayerDead)
 		return;
 
-	if (Input_GetKeyDown(KeyCode::Esc))
+	if (KeyMap_GetKey(MENU_BACK))
 	{
 		PauseGame();
 	}

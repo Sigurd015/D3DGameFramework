@@ -8,6 +8,12 @@ enum ItemTriggerType
 struct ItemTriggerData
 {
 	ItemTriggerType Type;
+	TransformComponent* PlayerTransform = nullptr;
+	TransformComponent* Transform = nullptr;
+
+	Rigidbody2DComponent* Rigidbody = nullptr;
+
+	Vec2 Forward = { 0.0f, -1.0f };
 };
 
 void ItemTrigger_OnCreate(Entity* entity, void* runtimeData);

@@ -104,6 +104,12 @@ void Rigidbody2D_SetRotation(void* rigidbody2D, float rotation)
 	rigidbody->UpdateRequired = true;
 }
 
+float Rigidbody2D_GetRotation(void* rigidbody2D)
+{
+	Rigidbody2D* rigidbody = (Rigidbody2D*)rigidbody2D;
+	return rigidbody->Rotation;
+}
+
 void Rigidbody2D_Rotate(void* rigidbody2D, float amount)
 {
 	Rigidbody2D* rigidbody = (Rigidbody2D*)rigidbody2D;

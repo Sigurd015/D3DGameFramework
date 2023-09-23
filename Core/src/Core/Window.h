@@ -1,4 +1,4 @@
-#include "Input/Keycode.h"
+#include "Input/KeyCode.h"
 #include "Events/Event.h"
 
 #include <stdint.h>
@@ -14,13 +14,12 @@ struct WindowProps
 	bool Maximizable = false;
 	bool Minimizable = false;
 
-	void (*EventCallback)(Event* e);
+	void (*EventCallback)(Event e);
 };
 
 void Window_Create(const WindowProps& props);
 void Window_Update();
 void Window_Shutdown();
-void Window_SetFullScreen();
 uint32_t Window_GetWidth();
 uint32_t Window_GetHeight();
 void Window_SetWindowTitle(const char* title);

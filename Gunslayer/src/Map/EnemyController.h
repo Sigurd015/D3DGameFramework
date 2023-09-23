@@ -35,6 +35,8 @@ struct EnemyData
 	TransformComponent* PlayerTransform = nullptr;
 	TransformComponent* Transform = nullptr;
 
+	Vec2 Forward = { 0.0f, -1.0f };
+
 	Rigidbody2DComponent* Rigidbody = nullptr;
 	SpriteRendererComponent* SpriteRenderer = nullptr;
 

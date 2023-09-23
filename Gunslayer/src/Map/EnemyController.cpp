@@ -30,6 +30,8 @@
 #define SOLDIER_MAX_HP 50.0f
 #define SOLDIER_ATTACK_COOLDOWN_TIME 3.0f
 
+#define ANGLE_OFFSET DirectX::XMConvertToRadians(90.0f)
+
 void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 {
 	EnemyData* data = (EnemyData*)runtimeData;
@@ -373,10 +375,12 @@ void EnemyController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 			}
 
 			float angle = atan2f(dir.y, dir.x);
-
-			Vec2 temp = { cosf(angle) * data->WalkSpeed, sinf(angle) * data->WalkSpeed };
+			data->Forward = { cosf(angle), sinf(angle) };
+			Vec2 temp = Vec2MulFloat(data->Forward, data->WalkSpeed);
 
 			Rigidbody2DComponent_MovePosition(data->Rigidbody, Vec2MulFloat(temp, timeStep));
+			angle += ANGLE_OFFSET;
+			Rigidbody2DComponent_SetRotation(data->Rigidbody, angle);
 
 			if (data->WalkSoundEffect)
 				AudioComponent_Play(entity->Scene, data->Audio, data->WalkSoundEffect);
@@ -409,7 +413,7 @@ void EnemyController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 			if (currentFrame == data->AttackSpriteMaxAnimationFrames - 1)
 			{
 				AudioComponent_Play(entity->Scene, data->Audio, data->AttackSoundEffect);
-				if (Scene_Raycast(entity->Scene, entity, { 0.0f,-1.0f }, "Player", data->AttackRange))
+				if (Scene_Raycast(entity->Scene, entity, data->Forward, "Player", data->AttackRange))
 				{
 					data->CanAttack = false;
 				}

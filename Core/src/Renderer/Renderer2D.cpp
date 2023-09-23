@@ -358,6 +358,7 @@ void Renderer2D_BeginScene(const Mat& viewProjection)
 void Flush()
 {
 	// Bind textures
+	Material_Clear(s_Data.DefaultMaterial);
 	for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
 	{
 		Material_SetTexture(s_Data.DefaultMaterial, s_Data.TextureSlotsNames[i], s_Data.Textures[i]);

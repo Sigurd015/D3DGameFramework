@@ -5,6 +5,7 @@
 
 void RendererContext_Initialize(HWND* windowHandle);
 void RendererContext_SwapBuffer(bool VSync);
+void RendererContext_SetFullscreen(bool fullscreen);
 IDXGISwapChain* RendererContext_GetSwapChain();
 ID3D11Device* RendererContext_GetDevice();
 ID3D11DeviceContext* RendererContext_GetDeviceContext();

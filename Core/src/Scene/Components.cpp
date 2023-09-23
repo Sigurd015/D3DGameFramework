@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Components.h"
 #include "Scene.h"
 
@@ -6,8 +6,14 @@
 
 Mat TransformComponent_GetTransform(const TransformComponent& transform)
 {
+	// TODO: Why quaternion rotation has gimbal lock problem?
+	Mat xRotation = DirectX::XMMatrixRotationX(transform.Rotation.x);
+	Mat yRotation = DirectX::XMMatrixRotationY(transform.Rotation.y);
+	Mat zRotation = DirectX::XMMatrixRotationZ(transform.Rotation.z);
+
 	return DirectX::XMMatrixScaling(transform.Scale.x, transform.Scale.y, transform.Scale.z)
-		* DirectX::XMMatrixRotationQuaternion(DirectX::XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&transform.Rotation)))
+		* xRotation * yRotation * zRotation
+		//* DirectX::XMMatrixRotationQuaternion(DirectX::XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&transform.Rotation)))
 		* DirectX::XMMatrixTranslation(transform.Translation.x, transform.Translation.y, transform.Translation.z);
 }
 
@@ -62,6 +68,11 @@ void Rigidbody2DComponent_SetRotation(Rigidbody2DComponent* rigidbody2D, float r
 		return;
 
 	Rigidbody2D_SetRotation(rigidbody2D->RuntimeBody, rotation);
+}
+
+float Rigidbody2DComponent_GetRotation(Rigidbody2DComponent* rigidbody2D)
+{
+	return Rigidbody2D_GetRotation(rigidbody2D->RuntimeBody);
 }
 
 void Rigidbody2DCmponent_Rotate(Rigidbody2DComponent* rigidbody2D, float amount)

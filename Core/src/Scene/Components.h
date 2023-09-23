@@ -88,6 +88,7 @@ void Rigidbody2DComponent_ApplyRotation(Rigidbody2DComponent* rigidbody2D, float
 void Rigidbody2DComponent_SetPosition(Rigidbody2DComponent* rigidbody2D, const Vec2& position);
 void Rigidbody2DComponent_MovePosition(Rigidbody2DComponent* rigidbody2D, const Vec2& position);
 void Rigidbody2DComponent_SetRotation(Rigidbody2DComponent* rigidbody2D, float rotation);
+float Rigidbody2DComponent_GetRotation(Rigidbody2DComponent* rigidbody2D);
 void Rigidbody2DCmponent_Rotate(Rigidbody2DComponent* rigidbody2D, float amount);
 
 struct BoxCollider2DComponent

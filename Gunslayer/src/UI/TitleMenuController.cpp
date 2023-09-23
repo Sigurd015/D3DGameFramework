@@ -217,7 +217,7 @@ void TitleMenuController_OnCreate(Entity* entity, void* runtimeData)
 
 void TitleMenuController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 {
-	if (Input_GetKeyDown(KeyCode::Esc))
+	if (KeyMap_GetKey(MENU_BACK))
 	{
 		if (s_Data.IsWaitingForKey)
 			s_Data.IsWaitingForKey = false;
@@ -229,16 +229,16 @@ void TitleMenuController_OnUpdate(Entity* entity, float timeStep, void* runtimeD
 	{
 	case ::IDLE:
 	{
-		if (Input_GetKeyDown(KeyCode::Enter))
+		if (KeyMap_GetKey(MENU_SELECT))
 		{
 			s_Data.CurrentMenuNode->OnEnter();
 		}
 
-		if (Input_GetKeyDown(KeyCode::UpArrow))
+		if (KeyMap_GetKey(MENU_UP))
 		{
 			s_Data.CurrentMenuNode = s_Data.CurrentMenuNode->Prev;
 		}
-		else if (Input_GetKeyDown(KeyCode::DownArrow))
+		else if (KeyMap_GetKey(MENU_DOWN))
 		{
 			s_Data.CurrentMenuNode = s_Data.CurrentMenuNode->Next;
 		}
@@ -271,22 +271,22 @@ void TitleMenuController_OnUpdate(Entity* entity, float timeStep, void* runtimeD
 		}
 		else
 		{
-			if (Input_GetKeyDown(KeyCode::Enter))
+			if (KeyMap_GetKey(MENU_SELECT))
 			{
 				s_Data.IsWaitingForKey = true;
 			}
 
-			if (Input_GetKeyDown(KeyCode::UpArrow))
+			if (KeyMap_GetKey(MENU_UP))
 			{
 				s_Data.CurrentKeyConfigNode = s_Data.CurrentKeyConfigNode->Prev;
 			}
-			else if (Input_GetKeyDown(KeyCode::DownArrow))
+			else if (KeyMap_GetKey(MENU_DOWN))
 			{
 				s_Data.CurrentKeyConfigNode = s_Data.CurrentKeyConfigNode->Next;
 			}
 			s_Data.SelectionRectTrans->Position.y = s_Data.CurrentKeyConfigNode->yPos;
 		}
-
+		
 		break;
 	}
 	case ::CREDITS:

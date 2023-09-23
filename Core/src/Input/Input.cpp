@@ -7,7 +7,12 @@
 struct InputData
 {
 	DirectX::GamePad* GamePad;
-	DirectX::GamePad::State GamePadState;
+
+	DirectX::GamePad::State PrevGamePadState;
+	DirectX::GamePad::State CurrentGamePadState;
+
+	bool PrevKeyState[256];
+	bool CurrentKeyState[256];
 };
 static InputData s_InputData;
 
@@ -19,14 +24,24 @@ void Input_Init()
 
 void Input_Update()
 {
-	s_InputData.GamePadState = s_InputData.GamePad->GetState(0);
+	// GamePad
+	s_InputData.PrevGamePadState = s_InputData.CurrentGamePadState;
+	s_InputData.CurrentGamePadState = s_InputData.GamePad->GetState(0);
+
+	// Keyboard & Mouse
+	for (int KeyCode = 0; KeyCode < 256; ++KeyCode)
+	{
+		s_InputData.PrevKeyState[KeyCode] = s_InputData.CurrentKeyState[KeyCode];
+		s_InputData.CurrentKeyState[KeyCode] = (GetAsyncKeyState(KeyCode) & 0x8000) != 0;
+	}
 }
 
 void Input_Shutdown()
 {
-	s_InputData.GamePad->Suspend();
-	delete s_InputData.GamePad;
-	s_InputData.GamePad = nullptr;
+	// TODO: Fix this(random crash when shutting down)
+	//s_InputData.GamePad->Suspend();
+	//delete s_InputData.GamePad;
+	//s_InputData.GamePad = nullptr;
 }
 
 void Input_Suspend()
@@ -41,43 +56,59 @@ void Input_Resume()
 
 bool Input_GetKey(GamePadCode key)
 {
-	if (!s_InputData.GamePadState.IsConnected())
+	if (!s_InputData.CurrentGamePadState.IsConnected())
 		return false;
 
 	switch (key)
 	{
-	case GamePadCode::ButtonA:
-		return s_InputData.GamePadState.IsAPressed();
-	case GamePadCode::ButtonB:
-		return s_InputData.GamePadState.IsBPressed();
-	case GamePadCode::ButtonX:
-		return s_InputData.GamePadState.IsXPressed();
-	case GamePadCode::ButtonY:
-		return s_InputData.GamePadState.IsYPressed();
-	case GamePadCode::DPadUp:
-		return s_InputData.GamePadState.IsDPadUpPressed();
-	case GamePadCode::DPadDown:
-		return s_InputData.GamePadState.IsDPadDownPressed();
-	case GamePadCode::DPadLeft:
-		return s_InputData.GamePadState.IsDPadLeftPressed();
-	case GamePadCode::DPadRight:
-		return s_InputData.GamePadState.IsDPadRightPressed();
-	case GamePadCode::LeftShoulder:
-		return s_InputData.GamePadState.IsLeftShoulderPressed();
-	case GamePadCode::RightShoulder:
-		return s_InputData.GamePadState.IsRightShoulderPressed();
-	case GamePadCode::LeftThumbStick:
-		return s_InputData.GamePadState.IsLeftStickPressed();
-	case GamePadCode::RightThumbStick:
-		return s_InputData.GamePadState.IsRightStickPressed();
-	case GamePadCode::Start:
-		return s_InputData.GamePadState.IsStartPressed();
-	case GamePadCode::Back:
-		return s_InputData.GamePadState.IsBackPressed();
-	case GamePadCode::LeftTrigger:
-		return s_InputData.GamePadState.IsLeftTriggerPressed();
-	case GamePadCode::RightTrigger:
-		return s_InputData.GamePadState.IsRightTriggerPressed();
+	case GamePadCode_A:
+		return s_InputData.CurrentGamePadState.IsAPressed()
+			&& s_InputData.PrevGamePadState.IsAPressed();
+	case GamePadCode_B:
+		return s_InputData.CurrentGamePadState.IsBPressed()
+			&& s_InputData.PrevGamePadState.IsBPressed();
+	case GamePadCode_X:
+		return s_InputData.CurrentGamePadState.IsXPressed()
+			&& s_InputData.PrevGamePadState.IsXPressed();
+	case GamePadCode_Y:
+		return s_InputData.CurrentGamePadState.IsYPressed()
+			&& s_InputData.PrevGamePadState.IsYPressed();
+	case GamePadCode_DPadUp:
+		return s_InputData.CurrentGamePadState.IsDPadUpPressed()
+			&& s_InputData.PrevGamePadState.IsDPadUpPressed();
+	case GamePadCode_DPadDown:
+		return s_InputData.CurrentGamePadState.IsDPadDownPressed()
+			&& s_InputData.PrevGamePadState.IsDPadDownPressed();
+	case GamePadCode_DPadLeft:
+		return s_InputData.CurrentGamePadState.IsDPadLeftPressed()
+			&& s_InputData.PrevGamePadState.IsDPadLeftPressed();
+	case GamePadCode_DPadRight:
+		return s_InputData.CurrentGamePadState.IsDPadRightPressed()
+			&& s_InputData.PrevGamePadState.IsDPadRightPressed();
+	case GamePadCode_LeftShoulder:
+		return s_InputData.CurrentGamePadState.IsLeftShoulderPressed()
+			&& s_InputData.PrevGamePadState.IsLeftShoulderPressed();
+	case GamePadCode_RightShoulder:
+		return s_InputData.CurrentGamePadState.IsRightShoulderPressed()
+			&& s_InputData.PrevGamePadState.IsRightShoulderPressed();
+	case GamePadCode_LeftThumbStick:
+		return s_InputData.CurrentGamePadState.IsLeftStickPressed()
+			&& s_InputData.PrevGamePadState.IsLeftStickPressed();
+	case GamePadCode_RightThumbStick:
+		return s_InputData.CurrentGamePadState.IsRightStickPressed()
+			&& s_InputData.PrevGamePadState.IsRightStickPressed();
+	case GamePadCode_Start:
+		return s_InputData.CurrentGamePadState.IsStartPressed()
+			&& s_InputData.PrevGamePadState.IsStartPressed();
+	case GamePadCode_Back:
+		return s_InputData.CurrentGamePadState.IsBackPressed()
+			&& s_InputData.PrevGamePadState.IsBackPressed();
+	case GamePadCode_LeftTrigger:
+		return s_InputData.CurrentGamePadState.IsLeftTriggerPressed()
+			&& s_InputData.PrevGamePadState.IsLeftTriggerPressed();
+	case GamePadCode_RightTrigger:
+		return s_InputData.CurrentGamePadState.IsRightTriggerPressed()
+			&& s_InputData.PrevGamePadState.IsRightTriggerPressed();
 	}
 
 	return false;
@@ -85,30 +116,100 @@ bool Input_GetKey(GamePadCode key)
 
 bool Input_GetKeyDown(GamePadCode key)
 {
-	if (!s_InputData.GamePadState.IsConnected())
+	if (!s_InputData.CurrentGamePadState.IsConnected())
 		return false;
+
+	switch (key)
+	{
+	case GamePadCode_A:
+		return s_InputData.CurrentGamePadState.IsAPressed()
+			&& !s_InputData.PrevGamePadState.IsAPressed();
+	case GamePadCode_B:
+		return s_InputData.CurrentGamePadState.IsBPressed()
+			&& !s_InputData.PrevGamePadState.IsBPressed();
+	case GamePadCode_X:
+		return s_InputData.CurrentGamePadState.IsXPressed()
+			&& !s_InputData.PrevGamePadState.IsXPressed();
+	case GamePadCode_Y:
+		return s_InputData.CurrentGamePadState.IsYPressed()
+			&& !s_InputData.PrevGamePadState.IsYPressed();
+	case GamePadCode_DPadUp:
+		return s_InputData.CurrentGamePadState.IsDPadUpPressed()
+			&& !s_InputData.PrevGamePadState.IsDPadUpPressed();
+	case GamePadCode_DPadDown:
+		return s_InputData.CurrentGamePadState.IsDPadDownPressed()
+			&& !s_InputData.PrevGamePadState.IsDPadDownPressed();
+	case GamePadCode_DPadLeft:
+		return s_InputData.CurrentGamePadState.IsDPadLeftPressed()
+			&& !s_InputData.PrevGamePadState.IsDPadLeftPressed();
+	case GamePadCode_DPadRight:
+		return s_InputData.CurrentGamePadState.IsDPadRightPressed()
+			&& !s_InputData.PrevGamePadState.IsDPadRightPressed();
+	case GamePadCode_LeftShoulder:
+		return s_InputData.CurrentGamePadState.IsLeftShoulderPressed()
+			&& !s_InputData.PrevGamePadState.IsLeftShoulderPressed();
+	case GamePadCode_RightShoulder:
+		return s_InputData.CurrentGamePadState.IsRightShoulderPressed()
+			&& !s_InputData.PrevGamePadState.IsRightShoulderPressed();
+	case GamePadCode_LeftThumbStick:
+		return s_InputData.CurrentGamePadState.IsLeftStickPressed()
+			&& !s_InputData.PrevGamePadState.IsLeftStickPressed();
+	case GamePadCode_RightThumbStick:
+		return s_InputData.CurrentGamePadState.IsRightStickPressed()
+			&& !s_InputData.PrevGamePadState.IsRightStickPressed();
+	case GamePadCode_Start:
+		return s_InputData.CurrentGamePadState.IsStartPressed()
+			&& !s_InputData.PrevGamePadState.IsStartPressed();
+	case GamePadCode_Back:
+		return s_InputData.CurrentGamePadState.IsBackPressed()
+			&& !s_InputData.PrevGamePadState.IsBackPressed();
+	case GamePadCode_LeftTrigger:
+		return s_InputData.CurrentGamePadState.IsLeftTriggerPressed()
+			&& !s_InputData.PrevGamePadState.IsLeftTriggerPressed();
+	case GamePadCode_RightTrigger:
+		return s_InputData.CurrentGamePadState.IsRightTriggerPressed()
+			&& !s_InputData.PrevGamePadState.IsRightTriggerPressed();
+	}
 
 	return false;
 }
 
+Vec2 Input_GetLeftStick()
+{
+	if (!s_InputData.CurrentGamePadState.IsConnected())
+		return Vec2Zero;
+
+	return { s_InputData.CurrentGamePadState.thumbSticks.leftX,
+			s_InputData.CurrentGamePadState.thumbSticks.leftY };
+}
+
+Vec2 Input_GetRightStick()
+{
+	if (!s_InputData.CurrentGamePadState.IsConnected())
+		return Vec2Zero;
+
+	return { s_InputData.CurrentGamePadState.thumbSticks.rightX,
+			s_InputData.CurrentGamePadState.thumbSticks.rightY };
+}
+
 bool Input_GetKey(KeyCode key)
 {
-	return GetAsyncKeyState(key) & 0x8000;
+	return s_InputData.CurrentKeyState[key] && s_InputData.PrevKeyState[key];
 }
 
 bool Input_GetKeyDown(KeyCode key)
 {
-	return GetAsyncKeyState(key) & 0x01;
-}
-
-bool Input_GetMouseDown(MouseCode button)
-{
-	return GetAsyncKeyState(button) & 0x01;
+	return s_InputData.CurrentKeyState[key] && !s_InputData.PrevKeyState[key];
 }
 
 bool Input_GetMouseButton(MouseCode button)
 {
-	return GetAsyncKeyState(button) & 0x8000;
+	return s_InputData.CurrentKeyState[button] && s_InputData.PrevKeyState[button];
+}
+
+bool Input_GetMouseButtonDown(MouseCode button)
+{
+	return s_InputData.CurrentKeyState[button] && !s_InputData.PrevKeyState[button];
 }
 
 Vec2 Input_GetMousePosition()

@@ -8,3 +8,6 @@ void CameraController_OnCollision(Entity* entity, Entity* other, void* runtimeDa
 void CameraController_OnRaycastHit(Entity* entity, Entity* other, void* runtimeData);
 void CameraController_OnEnable(Entity* entity, void* runtimeData);
 void CameraController_OnDisable(Entity* entity, void* runtimeData);
+
+Vec2 CameraController_GetForward();
+Vec2 CameraController_GetRight();

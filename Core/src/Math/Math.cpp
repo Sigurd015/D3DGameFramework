@@ -27,6 +27,11 @@ Vec4 Vec4Lerp(const Vec4& a, const Vec4& b, float t)
 	return result;
 }
 
+Vec2 Vec2Rotate(const Vec2& vec, float angle)
+{
+	return Vec2MulMat(vec, DirectX::XMMatrixRotationZ(angle));
+}
+
 Vec2 Vec2RotateByPivot(const Vec2& vec, const Vec2& pivot, float angle)
 {
 	float cos = cosf(angle);

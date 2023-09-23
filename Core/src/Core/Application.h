@@ -1,5 +1,5 @@
 #pragma once
-#include "Input/Keycode.h"
+#include "Input/KeyCode.h"
 #include "Events/Event.h"
 
 #include <stdint.h>
@@ -32,11 +32,12 @@ struct Application
 	void(*Ininialize)(Application* appInst);
 	void(*Shutdown)();
 	void(*Update)(float timeStep);
-	void(*OnEvent)(Event* e);
+	void(*OnEvent)(Event e);
 };
 
 void Application_Ininialize(Application* appInst);
 void Application_SetTimeScale(float timeScale);
+void Application_SetFullScreen(bool fullscreen);
 void Application_Run();
 void Application_Close();
 void Application_Shutdown();

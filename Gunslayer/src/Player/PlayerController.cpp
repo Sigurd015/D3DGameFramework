@@ -2,6 +2,7 @@
 #include "KeyMap/KeyMap.h"
 #include "UI/UIController.h"
 #include "GameMode.h"
+#include "Camera/CameraController.h"
 
 #define ENEMY_DAMAGE 30.0f
 #define ATTACK_RANGE 100.0f
@@ -59,31 +60,50 @@ void PlayerController_OnUpdate(Entity* entity, float timeStep, void* runtimeData
 
 	//Movement
 	{
-		Vec2 movement = Vec2(0, 0);
+		Vec2 movementForward = Vec2(0, 0);
+		Vec2 movementRight = Vec2(0, 0);
 
-		if (Input_GetKey(KeyMap_GetKey(MOVE_FORWARD)))
-			movement.y += WALK_SPEED;
-		if (Input_GetKey(KeyMap_GetKey(MOVE_BACKWARD)))
-			movement.y -= WALK_SPEED;
-		if (Input_GetKey(KeyMap_GetKey(MOVE_LEFT)))
-			movement.x -= WALK_SPEED;
-		if (Input_GetKey(KeyMap_GetKey(MOVE_RIGHT)))
-			movement.x += WALK_SPEED;
+		Vec2 forward = CameraController_GetForward();
+		Vec2 right = CameraController_GetRight();
 
-		Rigidbody2DComponent_MovePosition(s_Data.Rigidbody2D, Vec2MulFloat(movement, timeStep));
+		forward = Vec2MulFloat(forward, WALK_SPEED);
+		right = Vec2MulFloat(right, WALK_SPEED);
+
+		switch (KeyMap_GetInputDeviceType())
+		{
+		case InputDeviceType_Keyboard:
+		{
+			if (KeyMap_GetKey(MOVE_FORWARD))
+				movementForward = forward;
+			else if (KeyMap_GetKey(MOVE_BACKWARD))
+				movementForward = Vec2MulFloat(forward, -1);
+			if (KeyMap_GetKey(MOVE_LEFT))
+				movementRight = right;
+			else if (KeyMap_GetKey(MOVE_RIGHT))
+				movementRight = Vec2MulFloat(right, -1);
+			break;
+		}
+		case InputDeviceType_Controller:
+		{
+			Vec2 joyStick = KeyMap_GetJoyStick(JOY_MOVE);
+			movementForward = Vec2MulFloat(forward, joyStick.y);
+			movementRight = Vec2MulFloat(right, -joyStick.x);
+			break;
+		}
+		}
+		Rigidbody2DComponent_MovePosition(s_Data.Rigidbody2D, Vec2MulFloat(Vec2Add(movementForward, movementRight), timeStep));
 	}
 
 	//Shooting
 	{
-		if (Input_GetKeyDown(KeyMap_GetKey(SHOOT)))
+		if (KeyMap_GetKey(SHOOT))
 		{
 			if (s_Data.CanShoot)
 			{
 				AudioComponent_Play(entity->Scene, s_Data.Audio, s_Data.ShotgunSoundEffect);
 				s_Data.CanShoot = false;
 				UIController_PlayShootAnimation();
-				Vec2 direction = { 0.0f,1.0f };
-				if (Scene_Raycast(entity->Scene, entity, direction, "Enemy", ATTACK_RANGE))
+				if (Scene_Raycast(entity->Scene, entity, CameraController_GetForward(), "Enemy", ATTACK_RANGE))
 				{
 					UIController_PlayHitIcon();
 				}

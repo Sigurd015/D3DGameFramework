@@ -30,7 +30,8 @@ void RendererContext_Initialize(HWND* windowHandle)
 	swapChainDesc.OutputWindow = *windowHandle;
 	swapChainDesc.Windowed = true;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-	swapChainDesc.Flags = 0;
+	//swapChainDesc.Flags = 0;
+	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 	CORE_CHECK_DX_RESULT(D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_BGRA_SUPPORT, nullptr, 0, D3D11_SDK_VERSION, &swapChainDesc,
 		&s_RendererContextState.SwapChain, &s_RendererContextState.Device, nullptr, &s_RendererContextState.DeviceContext));
@@ -39,6 +40,11 @@ void RendererContext_Initialize(HWND* windowHandle)
 void RendererContext_SwapBuffer(bool VSync)
 {
 	s_RendererContextState.SwapChain->Present(VSync, 0);
+}
+
+void RendererContext_SetFullscreen(bool fullscreen)
+{
+	s_RendererContextState.SwapChain->SetFullscreenState(fullscreen, nullptr);
 }
 
 IDXGISwapChain* RendererContext_GetSwapChain()

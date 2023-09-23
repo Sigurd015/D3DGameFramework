@@ -26,21 +26,21 @@ void PlayerController_OnUpdate(Entity* entity, float timeStep, void* runtimeData
 	{
 		Vec2 movement = Vec2(0, 0);
 
-		if (Input_GetKey(KeyCode::W))
+		if (Input_GetKey(KeyCode_W))
 			movement.y += WALK_SPEED;
-		if (Input_GetKey(KeyCode::S))
+		if (Input_GetKey(KeyCode_S))
 			movement.y -= WALK_SPEED;
-		if (Input_GetKey(KeyCode::A))
+		if (Input_GetKey(KeyCode_A))
 			movement.x -= WALK_SPEED;
-		if (Input_GetKey(KeyCode::D))
+		if (Input_GetKey(KeyCode_D))
 			movement.x += WALK_SPEED;
 
 		Rigidbody2DComponent_MovePosition(s_Data.Rigidbody2D, Vec2MulFloat(movement, timeStep));
 
 		float rotation = 0.0f;
-		if (Input_GetKeyDown(KeyCode::Q))
+		if (Input_GetKeyDown(KeyCode_Q))
 			rotation -= DirectX::XMConvertToRadians(45);
-		if (Input_GetKeyDown(KeyCode::E))
+		if (Input_GetKeyDown(KeyCode_E))
 			rotation += DirectX::XMConvertToRadians(45);
 
 		Rigidbody2DCmponent_Rotate(s_Data.Rigidbody2D, rotation);

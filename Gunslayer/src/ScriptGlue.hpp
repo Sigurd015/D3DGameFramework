@@ -228,6 +228,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		camera.Tag.Name = "MainCamera";
 		camera.Transform.Translation = { 45.0f, -15.0f, 3.0f };
 		camera.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f), 0, 0 };
+		//camera.Transform.Rotation = { 0, 0, 0 };
 		camera.Transform.Scale = { 1.0f, 1.0f, 1.0f };
 
 		CameraSpecification spec = {};
@@ -298,11 +299,11 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 		rigidbody2D.GravityScale = 0.0f;
 		Entity_AddComponent(&player, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
 
-		BoxCollider2DComponent boxCollider2D = {};
-		boxCollider2D.Restitution = 0.0f;
-		boxCollider2D.Offset = { 0,0 };
-		boxCollider2D.Size = { 3.0f,1.0f };
-		Entity_AddComponent(&player, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+		CircleCollider2DComponent circleCollider2D = {};
+		circleCollider2D.Restitution = 0.0f;
+		circleCollider2D.Offset = { 0,0 };
+		circleCollider2D.Radius = 2.0f;
+		Entity_AddComponent(&player, ComponentType::ComponentType_CircleCollider2D, &circleCollider2D);
 
 		AudioComponent audioComponent = {};
 		audioComponent.Type = AudioComponentType::AudioComponentType_Listener;
@@ -384,11 +385,11 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			rigidbody2D.Type = Rigidbody2D::BodyType::Kinematic;
 			Entity_AddComponent(&enemy, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
 
-			BoxCollider2DComponent boxCollider2D = {};
-			boxCollider2D.Restitution = 0.0f;
-			boxCollider2D.Offset = { 0,0 };
-			boxCollider2D.Size = { 0.6f,0.2f };
-			Entity_AddComponent(&enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+			CircleCollider2DComponent circleCollider2D = {};
+			circleCollider2D.Restitution = 0.0f;
+			circleCollider2D.Offset = { 0,0 };
+			circleCollider2D.Radius = 0.5f;
+			Entity_AddComponent(&enemy, ComponentType::ComponentType_CircleCollider2D, &circleCollider2D);
 
 			AudioComponent audioComponent = {};
 			audioComponent.Type = AudioComponentType::AudioComponentType_Emitter;
@@ -431,11 +432,11 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			rigidbody2D.Type = Rigidbody2D::BodyType::Kinematic;
 			Entity_AddComponent(&enemy, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
 
-			BoxCollider2DComponent boxCollider2D = {};
-			boxCollider2D.Restitution = 0.0f;
-			boxCollider2D.Offset = { 0,0 };
-			boxCollider2D.Size = { 0.6f,0.2f };
-			Entity_AddComponent(&enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+			CircleCollider2DComponent circleCollider2D = {};
+			circleCollider2D.Restitution = 0.0f;
+			circleCollider2D.Offset = { 0,0 };
+			circleCollider2D.Radius = 0.5f;
+			Entity_AddComponent(&enemy, ComponentType::ComponentType_CircleCollider2D, &circleCollider2D);
 
 			AudioComponent audioComponent = {};
 			audioComponent.Type = AudioComponentType::AudioComponentType_Emitter;
@@ -478,11 +479,11 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			rigidbody2D.Type = Rigidbody2D::BodyType::Kinematic;
 			Entity_AddComponent(&enemy, ComponentType::ComponentType_Rigidbody2D, &rigidbody2D);
 
-			BoxCollider2DComponent boxCollider2D = {};
-			boxCollider2D.Restitution = 0.0f;
-			boxCollider2D.Offset = { 0,0 };
-			boxCollider2D.Size = { 0.6f,0.2f };
-			Entity_AddComponent(&enemy, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+			CircleCollider2DComponent circleCollider2D = {};
+			circleCollider2D.Restitution = 0.0f;
+			circleCollider2D.Offset = { 0,0 };
+			circleCollider2D.Radius = 0.5f;
+			Entity_AddComponent(&enemy, ComponentType::ComponentType_CircleCollider2D, &circleCollider2D);
 
 			AudioComponent audioComponent = {};
 			audioComponent.Type = AudioComponentType::AudioComponentType_Emitter;
@@ -649,11 +650,12 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 			Scene_AddEntity(scene, fieldManager);
 		}
+		// BackWall
 		{
 			Entity wall = {};
-			wall.Tag.Name = "BackWall";
+			wall.Tag.Name = "BackWall_01";
 			wall.Transform.Translation = { 15.0f,-30.0f,0 };
-			wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,0 };
+			wall.Transform.Rotation = { DirectX::XMConvertToRadians(90.0f),0,0 };
 			wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 			Rigidbody2DComponent rigidbody2D = {};
@@ -664,6 +666,102 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			boxCollider2D.Restitution = 0.0f;
 			boxCollider2D.Size = { 3.5f,0.1f };
 			Entity_AddComponent(&wall, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
+
+			SpriteRendererComponent spriteRenderer = {};
+			spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+			spriteRenderer.UVStart = { 1.0f,1.0f };
+			spriteRenderer.UVEnd = { 0.0f,0.0f };
+			Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+			Scene_AddEntity(scene, wall);
+		}
+		{
+			Entity wall = {};
+			wall.Tag.Name = "BackWall_02";
+			wall.Transform.Translation = { 5.0f,-30.0f,0 };
+			wall.Transform.Rotation = { DirectX::XMConvertToRadians(90.0f),0,0 };
+			wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+			SpriteRendererComponent spriteRenderer = {};
+			spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+			spriteRenderer.UVStart = { 1.0f,1.0f };
+			spriteRenderer.UVEnd = { 0.0f,0.0f };
+			Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+			Scene_AddEntity(scene, wall);
+		}
+		{
+			Entity wall = {};
+			wall.Tag.Name = "BackWall_03";
+			wall.Transform.Translation = { -5.0f,-30.0f,0 };
+			wall.Transform.Rotation = { DirectX::XMConvertToRadians(90.0f),0,0 };
+			wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+			SpriteRendererComponent spriteRenderer = {};
+			spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+			spriteRenderer.UVStart = { 1.0f,1.0f };
+			spriteRenderer.UVEnd = { 0.0f,0.0f };
+			Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+			Scene_AddEntity(scene, wall);
+		}
+		{
+			Entity wall = {};
+			wall.Tag.Name = "BackWall_04";
+			wall.Transform.Translation = { -15.0f,-30.0f,0 };
+			wall.Transform.Rotation = { DirectX::XMConvertToRadians(90.0f),0,0 };
+			wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+			SpriteRendererComponent spriteRenderer = {};
+			spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+			spriteRenderer.UVStart = { 1.0f,1.0f };
+			spriteRenderer.UVEnd = { 0.0f,0.0f };
+			Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+			Scene_AddEntity(scene, wall);
+		}
+		{
+			Entity wall = {};
+			wall.Tag.Name = "BackWall_05";
+			wall.Transform.Translation = { 25.0f,-30.0f,0 };
+			wall.Transform.Rotation = { DirectX::XMConvertToRadians(90.0f),0,0 };
+			wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+			SpriteRendererComponent spriteRenderer = {};
+			spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+			spriteRenderer.UVStart = { 1.0f,1.0f };
+			spriteRenderer.UVEnd = { 0.0f,0.0f };
+			Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+			Scene_AddEntity(scene, wall);
+		}
+		{
+			Entity wall = {};
+			wall.Tag.Name = "BackWall_06";
+			wall.Transform.Translation = { 35.0f,-30.0f,0 };
+			wall.Transform.Rotation = { DirectX::XMConvertToRadians(90.0f),0,0 };
+			wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+			SpriteRendererComponent spriteRenderer = {};
+			spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+			spriteRenderer.UVStart = { 1.0f,1.0f };
+			spriteRenderer.UVEnd = { 0.0f,0.0f };
+			Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
+
+			Scene_AddEntity(scene, wall);
+		}
+		{
+			Entity wall = {};
+			wall.Tag.Name = "BackWall_07";
+			wall.Transform.Translation = { 45.0f,-30.0f,0 };
+			wall.Transform.Rotation = { DirectX::XMConvertToRadians(90.0f),0,0 };
+			wall.Transform.Scale = { 10.0f,10.0f,1.0f };
+
+			SpriteRendererComponent spriteRenderer = {};
+			spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+			spriteRenderer.UVStart = { 1.0f,1.0f };
+			spriteRenderer.UVEnd = { 0.0f,0.0f };
+			Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 			Scene_AddEntity(scene, wall);
 		}
@@ -926,7 +1024,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity wall = {};
 				wall.Tag.Name = "MAP_Element_1_Wall_9";
 				wall.Transform.Translation = { -20.0f,25.0f,0 };
-				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -941,7 +1039,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity wall = {};
 				wall.Tag.Name = "MAP_Element_1_Wall_10";
 				wall.Transform.Translation = { -20.0f,15.0f,0 };
-				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -956,7 +1054,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity wall = {};
 				wall.Tag.Name = "MAP_Element_1_Wall_11";
 				wall.Transform.Translation = { -20.0f,5.0f,0 };
-				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -971,7 +1069,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity wall = {};
 				wall.Tag.Name = "MAP_Element_1_Wall_12";
 				wall.Transform.Translation = { -20.0f,-5.0f,0 };
-				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -986,7 +1084,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity wall = {};
 				wall.Tag.Name = "MAP_Element_1_Wall_13";
 				wall.Transform.Translation = { -20.0f,-15.0f,0 };
-				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -1001,7 +1099,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity wall = {};
 				wall.Tag.Name = "MAP_Element_1_Wall_14";
 				wall.Transform.Translation = { -20.0f,-25.0f,0 };
-				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -1035,7 +1133,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall = {};
 				wall.Tag.Name = "MAP_Element_1_Wall_16";
 				wall.Transform.Translation = { 50.0f,25.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -1051,7 +1149,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall = {};
 				wall.Tag.Name = "MAP_Element_1_Wall_17";
 				wall.Transform.Translation = { 50.0f,15.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -1067,7 +1165,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall = {};
 				wall.Tag.Name = "MAP_Element_1_Wall_18";
 				wall.Transform.Translation = { 50.0f,5.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -1083,7 +1181,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall = {};
 				wall.Tag.Name = "MAP_Element_1_Wall_19";
 				wall.Transform.Translation = { 50.0f,-5.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -1099,7 +1197,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall = {};
 				wall.Tag.Name = "MAP_Element_1_Wall_20";
 				wall.Transform.Translation = { 50.0f,-15.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -1115,7 +1213,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall = {};
 				wall.Tag.Name = "MAP_Element_1_Wall_21";
 				wall.Transform.Translation = { 50.0f,-25.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -1342,7 +1440,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity wall = {};
 				wall.Tag.Name = "MAP_Element_2_Wall_8";
 				wall.Transform.Translation = { -20.0f,60.0f,0 };
-				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				Rigidbody2DComponent rigidbody2D = {};
@@ -1360,7 +1458,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity wall = {};
 				wall.Tag.Name = "MAP_Element_2_Wall_9";
 				wall.Transform.Translation = { -20.0f,85.0f,0 };
-				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -1375,7 +1473,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity wall = {};
 				wall.Tag.Name = "MAP_Element_2_Wall_10";
 				wall.Transform.Translation = { -20.0f,75.0f,0 };
-				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -1390,7 +1488,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity wall = {};
 				wall.Tag.Name = "MAP_Element_2_Wall_11";
 				wall.Transform.Translation = { -20.0f,65.0f,0 };
-				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -1405,7 +1503,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity wall = {};
 				wall.Tag.Name = "MAP_Element_2_Wall_12";
 				wall.Transform.Translation = { -20.0f,55.0f,0 };
-				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -1420,7 +1518,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity wall = {};
 				wall.Tag.Name = "MAP_Element_2_Wall_13";
 				wall.Transform.Translation = { -20.0f,45.0f,0 };
-				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -1435,7 +1533,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity wall = {};
 				wall.Tag.Name = "MAP_Element_2_Wall_14";
 				wall.Transform.Translation = { -20.0f,35.0f,0 };
-				wall.Transform.Rotation = { 0,-DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { -DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -1469,7 +1567,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall = {};
 				wall.Tag.Name = "MAP_Element_2_Wall_16";
 				wall.Transform.Translation = { 50.0f,85.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -1485,7 +1583,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall = {};
 				wall.Tag.Name = "MAP_Element_2_Wall_17";
 				wall.Transform.Translation = { 50.0f,75.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -1501,7 +1599,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall = {};
 				wall.Tag.Name = "MAP_Element_2_Wall_18";
 				wall.Transform.Translation = { 50.0f,65.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -1517,7 +1615,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall = {};
 				wall.Tag.Name = "MAP_Element_2_Wall_19";
 				wall.Transform.Translation = { 50.0f,55.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -1533,7 +1631,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall = {};
 				wall.Tag.Name = "MAP_Element_2_Wall_20";
 				wall.Transform.Translation = { 50.0f,45.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
@@ -1549,7 +1647,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall = {};
 				wall.Tag.Name = "MAP_Element_2_Wall_21";
 				wall.Transform.Translation = { 50.0f,35.0f,0 };
-				wall.Transform.Rotation = { 0,DirectX::XMConvertToRadians(90.0f),DirectX::XMConvertToRadians(90.0f) };
+				wall.Transform.Rotation = { DirectX::XMConvertToRadians(90.0f),0,DirectX::XMConvertToRadians(90.0f) };
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};

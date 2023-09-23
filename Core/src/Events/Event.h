@@ -1,5 +1,5 @@
 #pragma once
-#include "Input/Keycode.h"
+#include "Input/KeyCode.h"
 #include "Input/MouseCode.h"
 
 #include <stdint.h>
@@ -26,22 +26,26 @@ struct KeyPressedEvent
 
 struct KeyReleasedEvent
 {
-	KeyCode keycode;
+	KeyCode Keycode;
+	float padding;
 };
 
 struct KeyTypedEvent
 {
-	KeyCode keycode;
+	KeyCode Keycode;
+	float padding;
 };
 
 struct MouseButtonPressedEvent
 {
 	MouseCode Button;
+	float padding;
 };
 
 struct MouseButtonReleasedEvent
 {
 	MouseCode Button;
+	float padding;
 };
 
 struct MouseMovedEvent
@@ -53,15 +57,30 @@ struct MouseMovedEvent
 struct MouseScrolledEvent
 {
 	float yOffset;
+	float padding;
+};
+
+struct EventContext
+{
+	union
+	{
+		WndResizeEvnet WndResize;
+		KeyPressedEvent KeyPressed;
+		KeyReleasedEvent KeyReleased;
+		KeyTypedEvent KeyTyped;
+		MouseButtonPressedEvent MouseButtonPressed;
+		MouseButtonReleasedEvent MouseButtonReleased;
+		MouseMovedEvent MouseMoved;
+		MouseScrolledEvent MouseScrolled;
+	};
 };
 
 struct Event
 {
 	EventType Type;
 	bool Handled = false;
-	void* Data = nullptr;
+	EventContext Context;
 };
 
-void Event_Dispatcher(EventType type, Event* event, bool(*Callback)(const Event* e));
-Event* Event_Create(EventType type, void* data = nullptr);
-void Event_Release(Event* event);
+void Event_Dispatcher(EventType type, Event& event, bool(*Callback)(Event e));
+Event Event_Create(EventType type, const EventContext& context);

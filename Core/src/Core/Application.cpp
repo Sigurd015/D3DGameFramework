@@ -17,7 +17,6 @@ struct Application_State
 	float TimeScale = 1.0f;
 	float LastFrameTime;
 };
-
 static Application_State s_AppState;
 
 void Application_Close()
@@ -25,35 +24,34 @@ void Application_Close()
 	s_AppState.IsRunning = false;
 }
 
-bool OnWndResize(const Event* e)
+bool OnWndResize(Event e)
 {
-	WndResizeEvnet* resizeEvent = (WndResizeEvnet*)e->Data;
-	if (resizeEvent->Width == 0.0f || resizeEvent->Height == 0.0f)
+	uint32_t width = e.Context.WndResize.Width;
+	uint32_t height = e.Context.WndResize.Height;
+	if (width == 0.0f || height == 0.0f)
 	{
 		s_AppState.Minimized = true;
 		return true;
 	}
 
 	s_AppState.Minimized = false;
-	RendererAPI_SetViewport(resizeEvent->Width, resizeEvent->Height);
+	RendererAPI_SetViewport(width, height);
 	return true;
 }
 
-bool OnWndClose(const Event* e)
+bool OnWndClose(Event e)
 {
 	Application_Close();
 	return true;
 }
 
-void Application_OnEvent(Event* e)
+void Application_OnEvent(Event e)
 {
 	Event_Dispatcher(EventType_WindowClose, e, OnWndClose);
 	Event_Dispatcher(EventType_WindowResize, e, OnWndResize);
 
-	if (!e->Handled)
+	if (!e.Handled)
 		s_AppState.AppInst->OnEvent(e);
-
-	Event_Release(e);
 }
 
 void Application_Ininialize(Application* appInst)
@@ -77,7 +75,7 @@ void Application_Ininialize(Application* appInst)
 
 	if (appInst->Spec.FullScreen)
 	{
-		Window_SetFullScreen();
+		RendererContext_SetFullscreen(true);
 	}
 
 	Audio_Init();
@@ -93,13 +91,17 @@ void Application_SetTimeScale(float timeScale)
 	if (timeScale == 0)
 	{
 		Audio_Suspend();
-		Input_Suspend();
 	}
 	else
 	{
 		Audio_Resume();
-		Input_Resume();
 	}
+}
+
+void Application_SetFullScreen(bool fullscreen)
+{
+	s_AppState.AppInst->Spec.FullScreen = fullscreen;
+	RendererContext_SetFullscreen(fullscreen);
 }
 
 void Application_Run()

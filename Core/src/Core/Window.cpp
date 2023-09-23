@@ -6,12 +6,12 @@
 #include <atlbase.h>
 #include <atlconv.h>
 
-struct Window_State
+struct WindowState
 {
 	WindowProps Props;
 	HWND WndHandle;
 };
-static Window_State s_WindowState;
+static WindowState s_WindowState;
 
 LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -37,15 +37,17 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			data.Height = HIWORD(lParam);
 		}
 
-		WndResizeEvnet size = { data.Width, data.Height };
-		Event* e = Event_Create(EventType_WindowResize, &size);
+		EventContext context;
+		context.WndResize = { data.Width, data.Height };
+		Event e = Event_Create(EventType_WindowResize, context);
 		data.EventCallback(e);
 		return 0;
 	}
 	case WM_CLOSE:
 	{
 		WindowProps& data = s_WindowState.Props;
-		Event* e = Event_Create(EventType_WindowClose);
+		EventContext context;
+		Event e = Event_Create(EventType_WindowClose, context);
 		data.EventCallback(e);
 		return 0;
 	}
@@ -53,8 +55,9 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_KEYDOWN:
 	{
 		WindowProps& data = s_WindowState.Props;
-		KeyPressedEvent key = { (KeyCode)wParam, lParam & 0x40000000 ? true : false };
-		Event* e = Event_Create(EventType_KeyPressed, &key);
+		EventContext context;
+		context.KeyPressed = { (KeyCode)wParam, lParam & 0x40000000 ? true : false };
+		Event e = Event_Create(EventType_KeyPressed, context);
 		data.EventCallback(e);
 		return 0;
 	}
@@ -62,16 +65,18 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_KEYUP:
 	{
 		WindowProps& data = s_WindowState.Props;
-		KeyReleasedEvent key = { (KeyCode)wParam };
-		Event* e = Event_Create(EventType_KeyReleased, &key);
+		EventContext context;
+		context.KeyReleased = { (KeyCode)wParam };
+		Event e = Event_Create(EventType_KeyReleased, context);
 		data.EventCallback(e);
 		return 0;
 	}
 	case WM_CHAR:
 	{
 		WindowProps& data = s_WindowState.Props;
-		KeyTypedEvent key = { (KeyCode)wParam };
-		Event* e = Event_Create(EventType_KeyTyped, &key);
+		EventContext context;
+		context.KeyTyped = { (KeyCode)wParam };
+		Event e = Event_Create(EventType_KeyTyped, context);
 		data.EventCallback(e);
 		return 0;
 	}
@@ -79,64 +84,72 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
 		WindowProps& data = s_WindowState.Props;
 		auto point = MAKEPOINTS(lParam);
-		MouseMovedEvent mouse = { (float)point.x, (float)point.y };
-		Event* e = Event_Create(EventType_MouseMoved, &mouse);
+		EventContext context;
+		context.MouseMoved = { (float)point.x, (float)point.y };
+		Event e = Event_Create(EventType_MouseMoved, context);
 		data.EventCallback(e);
 		return 0;
 	}
 	case WM_MOUSEWHEEL:
 	{
 		WindowProps& data = s_WindowState.Props;
-		MouseScrolledEvent mouse = { (float)GET_WHEEL_DELTA_WPARAM(wParam) / (float)WHEEL_DELTA };
-		Event* e = Event_Create(EventType_MouseScrolled, &mouse);
+		EventContext context;
+		context.MouseScrolled = { (float)GET_WHEEL_DELTA_WPARAM(wParam) / (float)WHEEL_DELTA };
+		Event e = Event_Create(EventType_MouseScrolled, context);
 		data.EventCallback(e);
 		return 0;
 	}
 	case WM_RBUTTONDOWN:
 	{
 		WindowProps& data = s_WindowState.Props;
-		MouseButtonPressedEvent mouse = { MouseCode::ButtonRight };
-		Event* e = Event_Create(EventType_MouseButtonPressed, &mouse);
+		EventContext context;
+		context.MouseButtonPressed = { MouseCode_ButtonRight };
+		Event e = Event_Create(EventType_MouseButtonPressed, context);
 		data.EventCallback(e);
 		return 0;
 	}
 	case WM_MBUTTONDOWN:
 	{
 		WindowProps& data = s_WindowState.Props;
-		MouseButtonPressedEvent mouse = { MouseCode::ButtonMiddle };
-		Event* e = Event_Create(EventType_MouseButtonPressed, &mouse);
+		EventContext context;
+		context.MouseButtonPressed = { MouseCode_ButtonMiddle };
+		Event e = Event_Create(EventType_MouseButtonPressed, context);
 		data.EventCallback(e);
 		return 0;
 	}
 	case WM_LBUTTONDOWN:
 	{
 		WindowProps& data = s_WindowState.Props;
-		MouseButtonPressedEvent mouse = { MouseCode::ButtonLeft };
-		Event* e = Event_Create(EventType_MouseButtonPressed, &mouse);
+		EventContext context;
+		context.MouseButtonPressed = { MouseCode_ButtonLeft };
+		Event e = Event_Create(EventType_MouseButtonPressed, context);
 		data.EventCallback(e);
 		return 0;
 	}
 	case WM_RBUTTONUP:
 	{
 		WindowProps& data = s_WindowState.Props;
-		MouseButtonReleasedEvent mouse = { MouseCode::ButtonRight };
-		Event* e = Event_Create(EventType_MouseButtonReleased, &mouse);
+		EventContext context;
+		context.MouseButtonReleased = { MouseCode_ButtonRight };
+		Event e = Event_Create(EventType_MouseButtonReleased, context);
 		data.EventCallback(e);
 		return 0;
 	}
 	case WM_MBUTTONUP:
 	{
 		WindowProps& data = s_WindowState.Props;
-		MouseButtonReleasedEvent mouse = { MouseCode::ButtonMiddle };
-		Event* e = Event_Create(EventType_MouseButtonReleased, &mouse);
+		EventContext context;
+		context.MouseButtonReleased = { MouseCode_ButtonMiddle };
+		Event e = Event_Create(EventType_MouseButtonReleased, context);
 		data.EventCallback(e);
 		return 0;
 	}
 	case WM_LBUTTONUP:
 	{
 		WindowProps& data = s_WindowState.Props;
-		MouseButtonReleasedEvent mouse = { MouseCode::ButtonLeft };
-		Event* e = Event_Create(EventType_MouseButtonReleased, &mouse);
+		EventContext context;
+		context.MouseButtonReleased = { MouseCode_ButtonLeft };
+		Event e = Event_Create(EventType_MouseButtonReleased, context);
 		data.EventCallback(e);
 		return 0;
 	}
@@ -199,31 +212,6 @@ void Window_Update()
 void Window_Shutdown()
 {
 	DestroyWindow(s_WindowState.WndHandle);
-}
-
-void Window_SetFullScreen()
-{
-	DEVMODE devMode = { 0 };
-
-	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
-		CORE_LOG_ERROR("EnumDisplaySettings - Failed");
-
-	devMode.dmPelsWidth = s_WindowState.Props.Width;
-	devMode.dmPelsHeight = s_WindowState.Props.Height;
-	devMode.dmFields |= DM_PELSWIDTH | DM_PELSHEIGHT;
-
-	if (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
-		CORE_LOG_ERROR("ChangeDisplaySettings - Failed");
-
-	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-
-	SetWindowLongPtr(s_WindowState.WndHandle, GWL_STYLE, WS_POPUP);
-	SetWindowPos(s_WindowState.WndHandle, HWND_TOP, 0, 0, screenWidth, screenHeight, SWP_FRAMECHANGED);
-
-	SetCursor(NULL);
-
-	ShowWindow(s_WindowState.WndHandle, SW_SHOW);
 }
 
 uint32_t Window_GetWidth()

@@ -33,7 +33,7 @@ void Game_Ininialize(Application* appInst)
 	Loading_Initialize();
 	Loading_SetDepature(STARTUP_TITLE);
 	//TODO: Set back to LOADING_SCENE when testing is done
-	Game_SetMode(TITLE_MENU);
+	Game_SetMode(LOADING_SCENE);
 }
 
 void Game_Update(float timeStep)
@@ -125,14 +125,13 @@ void Game_SetMode(GameMode mode)
 	s_Data.Mode = mode;
 }
 
-bool OnKeyPressed(const Event* e)
+bool OnKeyPressed(Event e)
 {
-	KeyPressedEvent* event = (KeyPressedEvent*)e->Data;
-	TitleMenuController_OnKeyPressed(event->Keycode);
+	TitleMenuController_OnKeyPressed(e.Context.KeyPressed.Keycode);
 	return true;
 }
 
-void Game_OnEvent(Event* e)
+void Game_OnEvent(Event e)
 {
 	Event_Dispatcher(EventType_KeyPressed, e, OnKeyPressed);
 }
@@ -152,7 +151,7 @@ void CreateApplication(Application* appInst, ApplicationCommandLineArgs args)
 		appInst->Spec.FullScreen = false;
 		char* temp = "nonfullscreen";
 		for (size_t i = 0; i < strlen(temp); i++)
-		{
+		{		
 			if (tolower(appInst->Spec.CommandLineArgs.Args[1][i]) != temp[i])
 			{
 				appInst->Spec.FullScreen = true;

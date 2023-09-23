@@ -1,41 +1,59 @@
 #include "pch.h"
 #include "Material.h"
 
+#define TEXTURE_SLOT_COUNT 16
+
+struct MaterialElement
+{
+	char* Name;
+	const Texture2D* Texture;
+};
+
 void Material_Create(Material& material, const Shader& shader)
 {
-	HashMap_Create(material.Textures);
 	material.ShaderReflectionData = Shader_GetReflectionData(shader);
+	List_Create(material.Textures, TEXTURE_SLOT_COUNT);
+	{
+		MaterialElement element;
+		for (size_t i = 0; i < TEXTURE_SLOT_COUNT; i++)
+		{
+			element.Name = nullptr;
+			element.Texture = nullptr;
+			List_Add(material.Textures, &element, sizeof(MaterialElement));
+		}
+	}
+	material.TextureCount = 0;
 }
 
 void Material_Release(Material& material)
 {
-	HashMap_Free(material.Textures, false);
+	List_Free(material.Textures, true);
 }
 
 void Material_SetTexture(Material& material, const char* name, const Texture2D* texture)
 {
-	HashMap_Set(material.Textures, name, (void*)texture);
+	MaterialElement* element = (MaterialElement*)List_Get(material.Textures, material.TextureCount);
+	element->Name = strdup(name);
+	element->Texture = texture;
+	material.TextureCount++;
 }
 
 void Material_Bind(const Material& material)
 {
-	for (size_t i = 0; i < HashMap_GetTableSize(); i++)
+	for (size_t i = 0; i < material.TextureCount; i++)
 	{
-		HashNode* currentNode = HashMap_Get(material.Textures, i);
-		if (currentNode == nullptr)
-		{
-			continue;
-		}
+		MaterialElement* element = (MaterialElement*)List_Get(material.Textures, i);
 
-		while (currentNode != nullptr)
+		HashNode* it = HashMap_Find(material.ShaderReflectionData, element->Name);
+		if (it != HashMapEnd)
 		{
-			HashNode* it = HashMap_Find(material.ShaderReflectionData, currentNode->Key);
-			if (it != HashMapEnd)
-			{
-				uint32_t bindingSlot = *(uint32_t*)it->Value;
-				Texture2D_Bind((Texture2D*)currentNode->Value, bindingSlot);
-			}
-			currentNode = currentNode->Next;
+			uint32_t bindingSlot = *(uint32_t*)it->Value;
+			Texture2D_Bind(element->Texture, bindingSlot);
 		}
 	}
+}
+
+void Material_Clear(Material& material)
+{
+	material.TextureCount = 0;
 }
