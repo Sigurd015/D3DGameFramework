@@ -8,6 +8,8 @@
 #include <atlbase.h>
 #include <atlconv.h>
 
+#define SHADER_CACHE_DIR "assets/shaders/cache/"
+
 void CreateReflectionData(Shader& shader, ID3DBlob* shaderBlob)
 {
 	ID3D11ShaderReflection* shaderReflection;
@@ -34,9 +36,9 @@ void Shader_Create(Shader& shader, const char* name)
 	HashMap_Create(shader.ReflectionData);
 
 	char vertexShaderName[256];
-	sprintf_s(vertexShaderName, 256, "assets/shaders/cache/%s_v.cso", name);
+	sprintf_s(vertexShaderName, 256, "%s%s_v.cso", SHADER_CACHE_DIR, name);
 	char pixelShaderName[256];
-	sprintf_s(pixelShaderName, 256, "assets/shaders/cache/%s_p.cso", name);
+	sprintf_s(pixelShaderName, 256, "%s%s_p.cso", SHADER_CACHE_DIR, name);
 
 	CORE_CHECK_DX_RESULT(D3DReadFileToBlob(CA2T(vertexShaderName), &shader.VertexShaderBlob));
 	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateVertexShader(shader.VertexShaderBlob->GetBufferPointer(),

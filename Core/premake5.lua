@@ -13,7 +13,7 @@ project "Core"
 	{
 		"src/**.h",
 		"src/**.cpp",
-		"resources/shaders/**.hlsl"
+		"Resources/Shaders/**.hlsl"
 	}
 
 	filter { "files:**.hlsl" }

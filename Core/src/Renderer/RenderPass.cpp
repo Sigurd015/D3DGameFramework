@@ -4,60 +4,75 @@
 #include "RendererContext.h"
 #include "RenderStates.h"
 
+#define MAX_RESOURCE_SLOT 16
+
+struct ResourceElement
+{
+	char* Name;
+	RendererResourceType Type;
+	const void* Resource;
+};
+
 void RenderPass_Create(RenderPass& renderPass, const RenderPassSpecification& specification)
 {
 	renderPass.Specification = specification;
-	HashMap_Create(renderPass.Inputs);
+	List_Create(renderPass.Inputs, MAX_RESOURCE_SLOT);
+	{
+		ResourceElement element;
+		for (size_t i = 0; i < MAX_RESOURCE_SLOT; i++)
+		{
+			element.Name = nullptr;
+			element.Resource = nullptr;
+			element.Type = RendererResourceType_Unknown;
+			List_Add(renderPass.Inputs, &element, sizeof(ResourceElement));
+		}
+	}
+	renderPass.InputCount = 0;
 	const auto& pipelineSpecification = Pipeline_GetSpecification(renderPass.Specification.Pipeline);
 	renderPass.ShaderReflectionData = Shader_GetReflectionData(pipelineSpecification.Shader);
 }
 
 void RenderPass_Release(RenderPass& renderPass)
 {
-	HashMap_Free(renderPass.Inputs, false);
+	List_Free(renderPass.Inputs, true);
 	Pipeline_Release(renderPass.Specification.Pipeline);
 }
 
-void RenderPass_SetInput(RenderPass& renderPass, const char* name, const RendererResource* resource)
+void RenderPass_SetInput(RenderPass& renderPass, const char* name, RendererResourceType type, const void* resource)
 {
-	HashMap_Set(renderPass.Inputs, name, (void*)resource);
+	ResourceElement* element = (ResourceElement*)List_Get(renderPass.Inputs, renderPass.InputCount);
+	element->Name = strdup(name);
+	element->Resource = resource;
+	element->Type = type;
+	renderPass.InputCount++;
 }
 
 void RnederPass_BindInputs(const RenderPass& renderPass)
 {
-	for (size_t i = 0; i < HashMap_GetTableSize(); i++)
+	for (size_t i = 0; i < renderPass.InputCount; i++)
 	{
-		HashNode* currentNode = HashMap_Get(renderPass.Inputs, i);
-		if (currentNode == nullptr)
-		{
-			continue;
-		}
+		ResourceElement* element = (ResourceElement*)List_Get(renderPass.Inputs, i);
 
-		while (currentNode != nullptr)
+		HashNode* it = HashMap_Find(renderPass.ShaderReflectionData, element->Name);
+		if (it != HashMapEnd)
 		{
-			HashNode* it = HashMap_Find(renderPass.ShaderReflectionData, currentNode->Key);
-			if (it != HashMapEnd)
+			switch (element->Type)
 			{
-				const RendererResource* resource = (const RendererResource*)currentNode->Value;
-				switch (resource->Type)
-				{
-				case RendererResourceType_ConstantBuffer:
-				{
-					uint32_t bindingSlot = *(uint32_t*)it->Value;
-					ConstantBuffer_Bind((ConstantBuffer*)resource->Data, bindingSlot);
-					break;
-				}
-				case RendererResourceType_Texture2D:
-				{
-					uint32_t bindingSlot = *(uint32_t*)it->Value;
-					Texture2D_Bind((Texture2D*)resource->Data, bindingSlot);
-					break;
-				}
-				case RendererResourceType_TextureCube:
-				{}
-				}
+			case RendererResourceType_ConstantBuffer:
+			{
+				uint32_t bindingSlot = *(uint32_t*)it->Value;
+				ConstantBuffer_Bind((ConstantBuffer*)element->Resource, bindingSlot);
+				break;
 			}
-			currentNode = currentNode->Next;
+			case RendererResourceType_Texture2D:
+			{
+				uint32_t bindingSlot = *(uint32_t*)it->Value;
+				Texture2D_Bind((Texture2D*)element->Resource, bindingSlot);
+				break;
+			}
+			case RendererResourceType_TextureCube:
+			{}
+			}
 		}
 	}
 

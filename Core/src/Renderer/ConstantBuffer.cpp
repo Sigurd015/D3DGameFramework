@@ -32,11 +32,11 @@ void ConstantBuffer_Bind(const ConstantBuffer* constantBuffer, uint32_t bindSlot
 	RendererContext_GetDeviceContext()->PSSetConstantBuffers(bindSlot, 1, &constantBuffer->Buffer);
 }
 
-void ConstantBuffer_Release(ConstantBuffer* constantBuffer)
+void ConstantBuffer_Release(ConstantBuffer& constantBuffer)
 {
-	if (constantBuffer->Buffer)
+	if (constantBuffer.Buffer)
 	{
-		constantBuffer->Buffer->Release();
-		constantBuffer->Buffer = nullptr;
+		constantBuffer.Buffer->Release();
+		constantBuffer.Buffer = nullptr;
 	}
 }

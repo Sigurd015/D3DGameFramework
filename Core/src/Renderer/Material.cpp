@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Material.h"
 
-#define TEXTURE_SLOT_COUNT 16
+#define MAX_TEXTURE_SLOT 16
 
 struct MaterialElement
 {
@@ -12,10 +12,10 @@ struct MaterialElement
 void Material_Create(Material& material, const Shader& shader)
 {
 	material.ShaderReflectionData = Shader_GetReflectionData(shader);
-	List_Create(material.Textures, TEXTURE_SLOT_COUNT);
+	List_Create(material.Textures, MAX_TEXTURE_SLOT);
 	{
 		MaterialElement element;
-		for (size_t i = 0; i < TEXTURE_SLOT_COUNT; i++)
+		for (size_t i = 0; i < MAX_TEXTURE_SLOT; i++)
 		{
 			element.Name = nullptr;
 			element.Texture = nullptr;

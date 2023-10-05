@@ -2,7 +2,6 @@
 #include "Utils/HashMap.h"
 #include "Texture.h"
 #include "Shader.h"
-#include "RendererResource.h"
 
 struct Material
 {

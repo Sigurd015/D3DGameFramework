@@ -13,4 +13,4 @@ struct ConstantBuffer
 void ConstantBuffer_Create(ConstantBuffer& constantBuffer, uint32_t size);
 void ConstantBuffer_SetData(ConstantBuffer& constantBuffer, void* data);
 void ConstantBuffer_Bind(const ConstantBuffer* constantBuffer, uint32_t bindSlot);
-void ConstantBuffer_Release(ConstantBuffer* constantBuffer);
+void ConstantBuffer_Release(ConstantBuffer& constantBuffer);

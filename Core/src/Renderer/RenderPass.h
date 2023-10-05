@@ -1,6 +1,14 @@
 #pragma once
 #include "Pipeline.h"
-#include "RendererResource.h"
+
+enum RendererResourceType
+{
+	RendererResourceType_Unknown = 0,
+	RendererResourceType_ConstantBuffer,
+	RendererResourceType_Texture2D,
+	RendererResourceType_TextureCube,
+	RendererResourceType_Count
+};
 
 struct RenderPassSpecification
 {
@@ -11,13 +19,14 @@ struct RenderPass
 {
 	RenderPassSpecification Specification;
 
-	HashMap Inputs;
+	uint32_t InputCount;
+	List Inputs;
 	HashMap ShaderReflectionData;
 };
 
 void RenderPass_Create(RenderPass& renderPass, const RenderPassSpecification& specification);
 void RenderPass_Release(RenderPass& renderPass);
-void RenderPass_SetInput(RenderPass& renderPass, const char* name, const RendererResource* resource);
+void RenderPass_SetInput(RenderPass& renderPass, const char* name, RendererResourceType type, const void* resource);
 void RnederPass_BindInputs(const RenderPass& renderPass);
 const Pipeline& RenderPass_GetPipeline(const RenderPass& renderPass);
 const Framebuffer& RenderPass_GetTargetFramebuffer(const RenderPass& renderPass);

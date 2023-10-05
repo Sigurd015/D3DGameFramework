@@ -7,7 +7,6 @@
 #include "Pipeline.h"
 #include "ConstantBuffer.h"
 #include "Texture.h"
-#include "RendererResource.h"
 #include "Material.h"
 
 struct QuadVertex
@@ -109,9 +108,7 @@ struct Renderer2DData
 	};
 	CameraData SceneBuffer;
 	ConstantBuffer CameraConstantBuffer;
-	RendererResource CameraCBResource;
 	ConstantBuffer IdentityConstantBuffer;
-	RendererResource IdentityCBResource;
 };
 static Renderer2DData s_Data;
 
@@ -276,16 +273,14 @@ void Renderer2D_Initialize()
 	}
 
 	ConstantBuffer_Create(s_Data.CameraConstantBuffer, sizeof(Renderer2DData::CameraData));
-	RendererResource_Create(s_Data.CameraCBResource, RendererResourceType_ConstantBuffer, &s_Data.CameraConstantBuffer);
-	RenderPass_SetInput(s_Data.QuadRenderPass, "Camera", &s_Data.CameraCBResource);
-	RenderPass_SetInput(s_Data.CircleRenderPass, "Camera", &s_Data.CameraCBResource);
-	RenderPass_SetInput(s_Data.LineRenderPass, "Camera", &s_Data.CameraCBResource);
+	RenderPass_SetInput(s_Data.QuadRenderPass, "Camera", RendererResourceType_ConstantBuffer, &s_Data.CameraConstantBuffer);
+	RenderPass_SetInput(s_Data.CircleRenderPass, "Camera", RendererResourceType_ConstantBuffer, &s_Data.CameraConstantBuffer);
+	RenderPass_SetInput(s_Data.LineRenderPass, "Camera", RendererResourceType_ConstantBuffer, &s_Data.CameraConstantBuffer);
 
 	ConstantBuffer_Create(s_Data.IdentityConstantBuffer, sizeof(Renderer2DData::CameraData));
-	RendererResource_Create(s_Data.IdentityCBResource, RendererResourceType_ConstantBuffer, &s_Data.IdentityConstantBuffer);
 	static Mat identity = DirectX::XMMatrixIdentity();
 	ConstantBuffer_SetData(s_Data.IdentityConstantBuffer, &identity);
-	RenderPass_SetInput(s_Data.UIRenderPass, "Camera", &s_Data.IdentityCBResource);
+	RenderPass_SetInput(s_Data.UIRenderPass, "Camera", RendererResourceType_ConstantBuffer, &s_Data.IdentityConstantBuffer);
 
 	List_Create(s_Data.TextRenderCommands, COMMAND_BUFFER_SIZE);
 	{
@@ -311,8 +306,8 @@ void Renderer2D_Shutdown()
 	RenderPass_Release(s_Data.LineRenderPass);
 	RenderPass_Release(s_Data.UIRenderPass);
 
-	ConstantBuffer_Release(&s_Data.CameraConstantBuffer);
-	ConstantBuffer_Release(&s_Data.IdentityConstantBuffer);
+	ConstantBuffer_Release(s_Data.CameraConstantBuffer);
+	ConstantBuffer_Release(s_Data.IdentityConstantBuffer);
 
 	List_Free(s_Data.TextRenderCommands, true);
 
@@ -325,6 +320,8 @@ void Renderer2D_Shutdown()
 	{
 		delete[] s_Data.TextureSlotsNames[i];
 	}
+
+	Texture2D_Release(&s_Data.WhiteTexture);
 }
 
 void StartBatch()
