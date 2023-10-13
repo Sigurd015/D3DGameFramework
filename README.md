@@ -1,4 +1,4 @@
-# HAL_SchoolProjects
+# D3DGameFramework
 
 ## Getting Started
 

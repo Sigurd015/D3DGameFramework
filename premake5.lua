@@ -1,4 +1,4 @@
-workspace "HAL_SchoolProjects"
+workspace "D3DGames"
 	architecture "x86_64"
 	startproject "Sandbox"
 

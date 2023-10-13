@@ -485,9 +485,7 @@ void Renderer2D_DrawQuad(const Mat& transform, RefPtr* texture, const Vec2& uv0,
 	if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
 		NextBatch();
 
-	// Filp uv
-	//Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
-	Vec2 textureCoords[] = { { uv0.x, uv1.y }, uv1, { uv1.x, uv0.y }, uv0 };
+	Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
 	Texture2D* tex = (Texture2D*)RefPtr_Get(texture);
 	SetQuadVertex(transform, tintColor, textureCoords, GetTextureID(tex), tilingFactor);
 }
@@ -555,9 +553,6 @@ void SetUIVertex(const Vec2& pos, const Vec2& size, float rotation,
 	Vec2 center = { pos.x + size.x * 0.5f, pos.y + size.y * 0.5f };
 	for (size_t i = 0; i < 4; i++)
 	{
-		// No rotation version
-		//s_Data.UIVertexBufferPtr->Position = { Vertices[i].x, Vertices[i].y, 0.0f };
-
 		Vec2 tempPos = Vec2RotateByPivot(Vertices[i], center, rotation);
 		s_Data.UIVertexBufferPtr->Position = { tempPos.x, tempPos.y, 0.0f };
 
@@ -580,9 +575,7 @@ void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, float rotation, const 
 
 void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, float rotation, RefPtr* texture, const Vec2& uv0, const Vec2& uv1, const Vec4& tintColor, float tilingFactor)
 {
-	// Filp uv
-	//Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
-	Vec2 textureCoords[] = { { uv0.x, uv1.y }, uv1, { uv1.x, uv0.y }, uv0 };
+	Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
 	Texture2D* tex = (Texture2D*)RefPtr_Get(texture);
 	SetUIVertex(pos, size, rotation, tintColor, textureCoords, GetTextureID(tex), tilingFactor);
 }
