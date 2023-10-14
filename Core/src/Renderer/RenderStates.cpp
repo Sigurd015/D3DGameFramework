@@ -30,11 +30,12 @@ void CommonStates_Init()
 	}
 
 	// Rasterizer States
+	// FrontCounterClockwise - Use CCW winding order for front faces
 	{
 		D3D11_RASTERIZER_DESC rasterizerDesc = {};
 		rasterizerDesc.FillMode = D3D11_FILL_SOLID;
 		rasterizerDesc.CullMode = D3D11_CULL_NONE;
-		rasterizerDesc.FrontCounterClockwise = false;
+		rasterizerDesc.FrontCounterClockwise = true;
 		rasterizerDesc.DepthClipEnable = true;
 		CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateRasterizerState(&rasterizerDesc, &s_CommonStates.RSNoCull));
 	}
@@ -42,7 +43,7 @@ void CommonStates_Init()
 		D3D11_RASTERIZER_DESC rasterizerDesc = {};
 		rasterizerDesc.FillMode = D3D11_FILL_SOLID;
 		rasterizerDesc.CullMode = D3D11_CULL_BACK;
-		rasterizerDesc.FrontCounterClockwise = false;
+		rasterizerDesc.FrontCounterClockwise = true;
 		rasterizerDesc.DepthClipEnable = true;
 		CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateRasterizerState(&rasterizerDesc, &s_CommonStates.RSCullBack));
 	}

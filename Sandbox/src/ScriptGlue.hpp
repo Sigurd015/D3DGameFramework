@@ -10,7 +10,7 @@ void ScriptGlue_CreateTestScene(Scene& scene)
 	{
 		Entity camera = {};
 		camera.Tag.Name = "MainCamera";
-		camera.Transform.Translation = { 0.0f, 0.0f, -10.0f };
+		camera.Transform.Translation = { 0.0f, 0.0f, 10.0f };
 
 		CameraSpecification spec = {};
 		spec.ProjectionType = ProjectionType::Orthographic;

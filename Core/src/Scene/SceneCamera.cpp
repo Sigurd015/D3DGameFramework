@@ -11,12 +11,12 @@ void RecalculateProjection(SceneCamera& out)
 		float orthoBottom = -out.Spec.OrthographicSize * 0.5f;
 		float orthoTop = -orthoBottom;
 
-		out.Projection = DirectX::XMMatrixOrthographicOffCenterLH(orthoLeft,
+		out.Projection = DirectX::XMMatrixOrthographicOffCenterRH(orthoLeft,
 			orthoRight, orthoBottom, orthoTop, out.Spec.OrthographicNear, out.Spec.OrthographicFar);
 	}
 	else
 	{
-		out.Projection = DirectX::XMMatrixPerspectiveFovLH(out.Spec.PerspectiveFOV,
+		out.Projection = DirectX::XMMatrixPerspectiveFovRH(out.Spec.PerspectiveFOV,
 			out.Spec.AspectRatio, out.Spec.PerspectiveNear, out.Spec.PerspectiveFar);
 	}
 }
