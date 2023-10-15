@@ -431,7 +431,7 @@ void NextBatch()
 }
 
 void SetQuadVertex(const Mat& transform,
-	const Vec4& color, const Vec2* texCoord, float texIndex, float tilingFactor)
+	const Vec4& color, const Vec2* texCoord, uint32_t texIndex, float tilingFactor)
 {
 	for (size_t i = 0; i < 4; i++)
 	{
@@ -456,38 +456,37 @@ void Renderer2D_DrawQuad(const Mat& transform, const Vec4& color)
 	SetQuadVertex(transform, color, s_Data.QuadTexCoord, texIndex, tilingFactor);
 }
 
-float GetTextureID(Texture2D* texture)
+uint32_t GetTextureID(Texture2D* texture)
 {
-	float texIndex = 0.0f;
+	uint32_t texIndex = 0;
 	for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
 	{
 		if (Texture2D_IsSame(s_Data.Textures[i], texture))
 		{
-			texIndex = (float)i;
+			texIndex = i;
 			break;
 		}
 	}
 
-	if (texIndex == 0.0f)
+	if (texIndex == 0)
 	{
 		if (s_Data.TextureSlotIndex >= Renderer2DData::MaxTextureSlots)
 			NextBatch();
 
-		texIndex = (float)s_Data.TextureSlotIndex;
+		texIndex = s_Data.TextureSlotIndex;
 		s_Data.Textures[s_Data.TextureSlotIndex] = texture;
 		s_Data.TextureSlotIndex++;
 	}
 	return texIndex;
 }
 
-void Renderer2D_DrawQuad(const Mat& transform, RefPtr* texture, const Vec2& uv0, const Vec2& uv1, const Vec4& tintColor, float tilingFactor)
+void Renderer2D_DrawQuad(const Mat& transform, Texture2D* texture, const Vec2& uv0, const Vec2& uv1, const Vec4& tintColor, float tilingFactor)
 {
 	if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
 		NextBatch();
 
 	Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
-	Texture2D* tex = (Texture2D*)RefPtr_Get(texture);
-	SetQuadVertex(transform, tintColor, textureCoords, GetTextureID(tex), tilingFactor);
+	SetQuadVertex(transform, tintColor, textureCoords, GetTextureID(texture), tilingFactor);
 }
 
 void Renderer2D_DrawCircle(const Mat& transform, const Vec4& color, float thickness, float fade)
@@ -547,7 +546,7 @@ void Renderer2D_DrawRect(const Mat& transform, const Vec4& color)
 }
 
 void SetUIVertex(const Vec2& pos, const Vec2& size, float rotation,
-	const Vec4& color, const Vec2* texCoord, float texIndex, float tilingFactor)
+	const Vec4& color, const Vec2* texCoord, uint32_t texIndex, float tilingFactor)
 {
 	Vec2 Vertices[] = { { pos.x, pos.y }, { pos.x + size.x, pos.y }, { pos.x + size.x, pos.y + size.y }, { pos.x, pos.y + size.y } };
 	Vec2 center = { pos.x + size.x * 0.5f, pos.y + size.y * 0.5f };
@@ -567,17 +566,16 @@ void SetUIVertex(const Vec2& pos, const Vec2& size, float rotation,
 
 void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, float rotation, const Vec4& color)
 {
-	const float texIndex = 0.0f; // White Texture
+	const uint32_t texIndex = 0; // White Texture
 	const float tilingFactor = 1.0f;
 
 	SetUIVertex(pos, size, rotation, color, s_Data.QuadTexCoord, texIndex, tilingFactor);
 }
 
-void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, float rotation, RefPtr* texture, const Vec2& uv0, const Vec2& uv1, const Vec4& tintColor, float tilingFactor)
+void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, float rotation, Texture2D* texture, const Vec2& uv0, const Vec2& uv1, const Vec4& tintColor, float tilingFactor)
 {
 	Vec2 textureCoords[] = { uv0, { uv1.x, uv0.y }, uv1, { uv0.x, uv1.y } };
-	Texture2D* tex = (Texture2D*)RefPtr_Get(texture);
-	SetUIVertex(pos, size, rotation, tintColor, textureCoords, GetTextureID(tex), tilingFactor);
+	SetUIVertex(pos, size, rotation, tintColor, textureCoords, GetTextureID(texture), tilingFactor);
 }
 
 void Renderer2D_DrawText(const WCHAR* str, const WCHAR* fontFamilyName, const Vec2& pos, const Vec4& color, float fontSize)

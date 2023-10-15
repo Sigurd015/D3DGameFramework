@@ -10,9 +10,8 @@ void LightController_OnCreate(Entity* entity, void* runtimeData)
 	CORE_ASSERT(data->SpriteRenderer, "Entity does not have SpriteRendererComponent!");
 
 	SpriteAnimatorSpecification spec;
-	Texture2D* texture = (Texture2D*)RefPtr_Get(data->SpriteRenderer->Texture);
-	spec.TextureWidth = Texture2D_GetWidth(texture);
-	spec.TextureHeight = Texture2D_GetHeight(texture);
+	spec.TextureWidth = Texture2D_GetWidth(data->SpriteRenderer->Texture);
+	spec.TextureHeight = Texture2D_GetHeight(data->SpriteRenderer->Texture);
 
 	switch (data->Type)
 	{

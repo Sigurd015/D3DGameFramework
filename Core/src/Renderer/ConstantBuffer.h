@@ -6,7 +6,7 @@
 
 struct ConstantBuffer
 {
-	ID3D11Buffer* Buffer;
+	ID3D11Buffer* Buffer = nullptr;
 	uint32_t Size;
 };
 

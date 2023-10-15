@@ -4,6 +4,7 @@
 #include "Renderer/RendererAPI.h"
 #include "Input/Input.h"
 #include "Audio/Audio.h"
+#include "Asset/AssetManager.h"
 
 #include <time.h>
 
@@ -80,6 +81,7 @@ void Application_Ininialize(Application* appInst)
 
 	Audio_Init();
 	Input_Init();
+	AssetManager_Init();
 
 	s_AppState.AppInst->Ininialize(s_AppState.AppInst);
 }
@@ -133,5 +135,6 @@ void Application_Shutdown()
 	s_AppState.AppInst->Shutdown();
 	Audio_Shutdown();
 	Input_Shutdown();
+	AssetManager_Shutdown();
 	RendererAPI_Shutdown();
 }

@@ -2,6 +2,8 @@
 #include "Audio.h"
 
 #include <Audio.h>
+#include <atlbase.h>
+#include <atlconv.h>
 
 struct AudioData
 {
@@ -36,8 +38,10 @@ void Audio_Resume()
 	s_AudioData.AudioEngine->Resume();
 }
 
-void* Audio_CreateSoundEffect(const WCHAR* path)
+void* Audio_CreateSoundEffect(const char* path)
 {
-	DirectX::SoundEffect* soundEffect = new DirectX::SoundEffect(s_AudioData.AudioEngine, path);
+	char vertexShaderName[256];
+	sprintf_s(vertexShaderName, 256, "%s", path);
+	DirectX::SoundEffect* soundEffect = new DirectX::SoundEffect(s_AudioData.AudioEngine, CA2T(path));
 	return soundEffect;
 }

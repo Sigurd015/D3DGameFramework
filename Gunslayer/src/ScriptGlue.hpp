@@ -10,22 +10,34 @@
 #include "Map/LightController.h"
 #include "Map/ItemTrigger.h"
 
-static RefPtr* s_RedLight;
-static RefPtr* s_GreenLight;
+static const char* s_TitleBg = "assets/textures/title.png";
+static const char* s_RedLight = "assets/textures/animated_sprites/red_light/spritesheet.png";
+static const char* s_GreenLight = "assets/textures/animated_sprites/green_light/spritesheet.png";
+static const char* s_WallTex2 = "assets/textures/2.png";
+static const char* s_WallTex3 = "assets/textures/3.png";
+static const char* s_WallTex4 = "assets/textures/4.png";
+static const char* s_WallTex5 = "assets/textures/5.png";
+static const char* s_FloorTex = "assets/textures/floor.png";
+static const char* s_RoofTex = "assets/textures/roof.png";
+static const char* s_ShotgunSprite = "assets/textures/weapon/shotgun/spritesheet.png";
+static const char* s_SightIconSprite = "assets/textures/sightIcon.png";
+static const char* s_CacoDemonWalkSprite = "assets/textures/npc/caco_demon/walk/spritesheet.png";
+static const char* s_CacoDemonAttackSprite = "assets/textures/npc/caco_demon/attack/spritesheet.png";
+static const char* s_CacoDemonDeathSprite = "assets/textures/npc/caco_demon/death/spritesheet.png";
+static const char* s_CacoDemonPainSprite = "assets/textures/npc/caco_demon/pain/spritesheet.png";
+static const char* s_CyberDemonWalkSprite = "assets/textures/npc/cyber_demon/walk/spritesheet.png";
+static const char* s_CyberDemonAttackSprite = "assets/textures/npc/cyber_demon/attack/spritesheet.png";
+static const char* s_CyberDemonDeathSprite = "assets/textures/npc/cyber_demon/death/spritesheet.png";
+static const char* s_CyberDemonPainSprite = "assets/textures/npc/cyber_demon/pain/spritesheet.png";
+static const char* s_SoldierWalkSprite = "assets/textures/npc/soldier/walk/spritesheet.png";
+static const char* s_SoldierAttackSprite = "assets/textures/npc/soldier/attack/spritesheet.png";
+static const char* s_SoldierDeathSprite = "assets/textures/npc/soldier/death/spritesheet.png";
+static const char* s_SoldierPainSprite = "assets/textures/npc/soldier/pain/0.png";
+static const char* s_MedkitIcon = "assets/textures/medkit.png";
 
 // Hardcoded scene
 void ScriptGlue_CreateTitleScene(Scene& scene)
 {
-	Texture2D texture;
-	Texture2D_Create(&texture, "assets/textures/title.png");
-	RefPtr* refPtr = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/animated_sprites/red_light/spritesheet.png");
-	s_RedLight = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/animated_sprites/green_light/spritesheet.png");
-	s_GreenLight = RefPtr_Create(sizeof(Texture2D), &texture);
-
 	//Main Camera
 	{
 		Entity camera = {};
@@ -57,7 +69,7 @@ void ScriptGlue_CreateTitleScene(Scene& scene)
 		Entity_AddComponent(&background, ComponentType::ComponentType_RectTransform, &rectTransform);
 
 		SpriteRendererComponent spriteRenderer = {};
-		spriteRenderer.Texture = RefPtr_AddRef(refPtr);
+		spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_TitleBg);
 		spriteRenderer.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		Entity_AddComponent(&background, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
@@ -101,7 +113,7 @@ void ScriptGlue_CreateTitleScene(Scene& scene)
 		Entity_AddComponent(&light, ComponentType::ComponentType_RectTransform, &rectTransform);
 
 		SpriteRendererComponent spriteRenderer = {};
-		spriteRenderer.Texture = RefPtr_AddRef(s_RedLight);
+		spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_RedLight);
 		Entity_AddComponent(&light, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 		ScriptComponent scriptComponent = {};
@@ -132,7 +144,7 @@ void ScriptGlue_CreateTitleScene(Scene& scene)
 		Entity_AddComponent(&light, ComponentType::ComponentType_RectTransform, &rectTransform);
 
 		SpriteRendererComponent spriteRenderer = {};
-		spriteRenderer.Texture = RefPtr_AddRef(s_GreenLight);
+		spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_GreenLight);
 		Entity_AddComponent(&light, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 		ScriptComponent scriptComponent = {};
@@ -156,72 +168,6 @@ void ScriptGlue_CreateTitleScene(Scene& scene)
 
 void ScriptGlue_CreatePlayScene(Scene& scene)
 {
-	#pragma region Textures
-	Texture2D texture;
-	Texture2D_Create(&texture, "assets/textures/2.png");
-	RefPtr* wallTex2 = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/3.png");
-	RefPtr* wallTex3 = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/4.png");
-	RefPtr* wallTex4 = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/5.png");
-	RefPtr* wallTex5 = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/floor.png");
-	RefPtr* floorTex = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/roof.png");
-	RefPtr* roofTex = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/weapon/shotgun/spritesheet.png");
-	RefPtr* shotgunSprite = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/sightIcon.png");
-	RefPtr* sightIconSprite = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/npc/caco_demon/walk/spritesheet.png");
-	RefPtr* cacoDemonWalkSprite = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/npc/caco_demon/attack/spritesheet.png");
-	RefPtr* cacoDemonAttackSprite = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/npc/caco_demon/death/spritesheet.png");
-	RefPtr* cacoDemonDeathSprite = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/npc/caco_demon/pain/spritesheet.png");
-	RefPtr* cacoDemonPainSprite = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/npc/cyber_demon/walk/spritesheet.png");
-	RefPtr* cyberDemonWalkSprite = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/npc/cyber_demon/attack/spritesheet.png");
-	RefPtr* cyberDemonAttackSprite = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/npc/cyber_demon/death/spritesheet.png");
-	RefPtr* cyberDemonDeathSprite = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/npc/cyber_demon/pain/spritesheet.png");
-	RefPtr* cyberDemonPainSprite = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/npc/soldier/walk/spritesheet.png");
-	RefPtr* soldierWalkSprite = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/npc/soldier/attack/spritesheet.png");
-	RefPtr* soldierAttackSprite = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/npc/soldier/death/spritesheet.png");
-	RefPtr* soldierDeathSprite = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/npc/soldier/pain/0.png");
-	RefPtr* soldierPainSprite = RefPtr_Create(sizeof(Texture2D), &texture);
-
-	Texture2D_Create(&texture, "assets/textures/medkit.png");
-	RefPtr* medkitIcon = RefPtr_Create(sizeof(Texture2D), &texture);
-	#pragma endregion
-
 	#pragma region Camera
 	{
 		Entity camera = {};
@@ -333,7 +279,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			enemy.Transform.Scale = { 2.5f, 2.5f, 1.0f };
 
 			SpriteRendererComponent spriteRenderer = {};
-			spriteRenderer.Texture = RefPtr_AddRef(medkitIcon);
+			spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_MedkitIcon);
 			Entity_AddComponent(&enemy, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 			Rigidbody2DComponent rigidbody2D = {};
@@ -407,10 +353,10 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
 			*enemyData = {};
 			enemyData->Type = EnemyType::CACO_DEMON;
-			enemyData->WalkSpriteSheet = RefPtr_AddRef(cacoDemonWalkSprite);
-			enemyData->AttackSpriteSheet = RefPtr_AddRef(cacoDemonAttackSprite);
-			enemyData->DeathSpriteSheet = RefPtr_AddRef(cacoDemonDeathSprite);
-			enemyData->PainSpriteSheet = RefPtr_AddRef(cacoDemonPainSprite);
+			enemyData->WalkSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_CacoDemonWalkSprite);
+			enemyData->AttackSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_CacoDemonAttackSprite);
+			enemyData->DeathSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_CacoDemonDeathSprite);
+			enemyData->PainSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_CacoDemonPainSprite);
 
 			scriptComponent.RuntimeData = enemyData;
 
@@ -454,10 +400,10 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
 			*enemyData = {};
 			enemyData->Type = EnemyType::CYBER_DEMON;
-			enemyData->WalkSpriteSheet = RefPtr_AddRef(cyberDemonWalkSprite);
-			enemyData->AttackSpriteSheet = RefPtr_AddRef(cyberDemonAttackSprite);
-			enemyData->DeathSpriteSheet = RefPtr_AddRef(cyberDemonDeathSprite);
-			enemyData->PainSpriteSheet = RefPtr_AddRef(cyberDemonPainSprite);
+			enemyData->WalkSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_CyberDemonWalkSprite);
+			enemyData->AttackSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_CyberDemonAttackSprite);
+			enemyData->DeathSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_CyberDemonDeathSprite);
+			enemyData->PainSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_CyberDemonPainSprite);
 
 			scriptComponent.RuntimeData = enemyData;
 
@@ -501,10 +447,10 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
 			*enemyData = {};
 			enemyData->Type = EnemyType::SOLDIER;
-			enemyData->WalkSpriteSheet = RefPtr_AddRef(soldierWalkSprite);
-			enemyData->AttackSpriteSheet = RefPtr_AddRef(soldierAttackSprite);
-			enemyData->DeathSpriteSheet = RefPtr_AddRef(soldierDeathSprite);
-			enemyData->PainSpriteSheet = RefPtr_AddRef(soldierPainSprite);
+			enemyData->WalkSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_SoldierWalkSprite);
+			enemyData->AttackSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_SoldierAttackSprite);
+			enemyData->DeathSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_SoldierDeathSprite);
+			enemyData->PainSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_SoldierPainSprite);
 
 			scriptComponent.RuntimeData = enemyData;
 
@@ -569,7 +515,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			Entity_AddComponent(&weapon, ComponentType::ComponentType_RectTransform, &rectTransform);
 
 			SpriteRendererComponent spriteRenderer = {};
-			spriteRenderer.Texture = RefPtr_AddRef(shotgunSprite);
+			spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_ShotgunSprite);
 			Entity_AddComponent(&weapon, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 			Scene_AddEntity(scene, weapon);
@@ -583,7 +529,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			Entity_AddComponent(&sightIcon, ComponentType::ComponentType_RectTransform, &rectTransform);
 
 			SpriteRendererComponent spriteRenderer = {};
-			spriteRenderer.Texture = RefPtr_AddRef(sightIconSprite);
+			spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_SightIconSprite);
 			Entity_AddComponent(&sightIcon, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 			Scene_AddEntity(scene, sightIcon);
@@ -668,7 +614,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			Entity_AddComponent(&wall, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
 			SpriteRendererComponent spriteRenderer = {};
-			spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+			spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 			spriteRenderer.UVStart = { 1.0f,1.0f };
 			spriteRenderer.UVEnd = { 0.0f,0.0f };
 			Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -683,7 +629,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 			SpriteRendererComponent spriteRenderer = {};
-			spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+			spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 			spriteRenderer.UVStart = { 1.0f,1.0f };
 			spriteRenderer.UVEnd = { 0.0f,0.0f };
 			Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -698,7 +644,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 			SpriteRendererComponent spriteRenderer = {};
-			spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+			spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 			spriteRenderer.UVStart = { 1.0f,1.0f };
 			spriteRenderer.UVEnd = { 0.0f,0.0f };
 			Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -713,7 +659,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 			SpriteRendererComponent spriteRenderer = {};
-			spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+			spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 			spriteRenderer.UVStart = { 1.0f,1.0f };
 			spriteRenderer.UVEnd = { 0.0f,0.0f };
 			Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -728,7 +674,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 			SpriteRendererComponent spriteRenderer = {};
-			spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+			spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 			spriteRenderer.UVStart = { 1.0f,1.0f };
 			spriteRenderer.UVEnd = { 0.0f,0.0f };
 			Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -743,7 +689,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 			SpriteRendererComponent spriteRenderer = {};
-			spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+			spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 			spriteRenderer.UVStart = { 1.0f,1.0f };
 			spriteRenderer.UVEnd = { 0.0f,0.0f };
 			Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -758,7 +704,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 			SpriteRendererComponent spriteRenderer = {};
-			spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+			spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 			spriteRenderer.UVStart = { 1.0f,1.0f };
 			spriteRenderer.UVEnd = { 0.0f,0.0f };
 			Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -772,7 +718,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			quad.Transform.Scale = { 150.0f,150.0f,1.0f };
 
 			SpriteRendererComponent spriteRenderer = {};
-			spriteRenderer.Texture = RefPtr_AddRef(floorTex);
+			spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_FloorTex);
 			spriteRenderer.TilingFactor = 5.0f;
 			Entity_AddComponent(&quad, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
@@ -786,7 +732,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			quad.Transform.Scale = { 150.0f,150.0f,1.0f };
 
 			SpriteRendererComponent spriteRenderer = {};
-			spriteRenderer.Texture = RefPtr_AddRef(roofTex);
+			spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_RoofTex);
 			spriteRenderer.TilingFactor = 5.0f;
 			Entity_AddComponent(&quad, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
@@ -812,7 +758,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity_AddComponent(&light, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(s_RedLight);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_RedLight);
 				Entity_AddComponent(&light, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				ScriptComponent scriptComponent = {};
@@ -849,7 +795,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity_AddComponent(&light, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(s_GreenLight);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_GreenLight);
 				Entity_AddComponent(&light, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				ScriptComponent scriptComponent = {};
@@ -877,7 +823,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex5);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex5);
 				spriteRenderer.Color = { 1.0f,1.0f,1.0f,1.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
@@ -891,7 +837,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				Scene_AddEntity(scene, wall);
@@ -939,7 +885,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				Rigidbody2DComponent rigidbody2D = {};
@@ -961,7 +907,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				Rigidbody2DComponent rigidbody2D = {};
@@ -983,7 +929,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				Scene_AddEntity(scene, wall);
@@ -997,7 +943,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				Scene_AddEntity(scene, wall);
@@ -1028,7 +974,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 				spriteRenderer.UVStart = { 0.0f,0.0f };
 				spriteRenderer.UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1043,7 +989,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 				spriteRenderer.UVStart = { 0.0f,0.0f };
 				spriteRenderer.UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1058,7 +1004,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 				spriteRenderer.UVStart = { 0.0f,0.0f };
 				spriteRenderer.UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1073,7 +1019,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 				spriteRenderer.UVStart = { 0.0f,0.0f };
 				spriteRenderer.UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1088,7 +1034,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 				spriteRenderer.UVStart = { 0.0f,0.0f };
 				spriteRenderer.UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1103,7 +1049,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 				spriteRenderer.UVStart = { 0.0f,0.0f };
 				spriteRenderer.UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1137,7 +1083,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 				spriteRenderer.UVStart = { 1.0f,1.0f };
 				spriteRenderer.UVEnd = { 0.0f,0.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1153,7 +1099,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 				spriteRenderer.UVStart = { 1.0f,1.0f };
 				spriteRenderer.UVEnd = { 0.0f,0.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1169,7 +1115,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 				spriteRenderer.UVStart = { 1.0f,1.0f };
 				spriteRenderer.UVEnd = { 0.0f,0.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1185,7 +1131,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 				spriteRenderer.UVStart = { 1.0f,1.0f };
 				spriteRenderer.UVEnd = { 0.0f,0.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1201,7 +1147,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 				spriteRenderer.UVStart = { 1.0f,1.0f };
 				spriteRenderer.UVEnd = { 0.0f,0.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1217,7 +1163,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex2);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex2);
 				spriteRenderer.UVStart = { 1.0f,1.0f };
 				spriteRenderer.UVEnd = { 0.0f,0.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1246,7 +1192,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity_AddComponent(&light, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(s_GreenLight);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_GreenLight);
 				Entity_AddComponent(&light, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				ScriptComponent scriptComponent = {};
@@ -1283,7 +1229,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Entity_AddComponent(&light, ComponentType::ComponentType_BoxCollider2D, &boxCollider2D);
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(s_RedLight);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_RedLight);
 				Entity_AddComponent(&light, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				ScriptComponent scriptComponent = {};
@@ -1311,7 +1257,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex4);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex4);
 				spriteRenderer.Color = { 1.0f,1.0f,1.0f,1.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
@@ -1325,7 +1271,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex3);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex3);
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				Rigidbody2DComponent rigidbody2D = {};
@@ -1347,7 +1293,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex3);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex3);
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				Scene_AddEntity(scene, wall);
@@ -1360,7 +1306,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex3);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex3);
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				Scene_AddEntity(scene, wall);
@@ -1373,7 +1319,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex3);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex3);
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				Scene_AddEntity(scene, wall);
@@ -1422,7 +1368,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex3);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex3);
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
 
 				Rigidbody2DComponent rigidbody2D = {};
@@ -1462,7 +1408,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex3);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex3);
 				spriteRenderer.UVStart = { 0.0f,0.0f };
 				spriteRenderer.UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1477,7 +1423,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex3);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex3);
 				spriteRenderer.UVStart = { 0.0f,0.0f };
 				spriteRenderer.UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1492,7 +1438,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex3);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex3);
 				spriteRenderer.UVStart = { 0.0f,0.0f };
 				spriteRenderer.UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1507,7 +1453,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex3);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex3);
 				spriteRenderer.UVStart = { 0.0f,0.0f };
 				spriteRenderer.UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1522,7 +1468,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex3);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex3);
 				spriteRenderer.UVStart = { 0.0f,0.0f };
 				spriteRenderer.UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1537,7 +1483,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex3);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex3);
 				spriteRenderer.UVStart = { 0.0f,0.0f };
 				spriteRenderer.UVEnd = { 1.0f,1.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1571,7 +1517,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex3);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex3);
 				spriteRenderer.UVStart = { 1.0f,1.0f };
 				spriteRenderer.UVEnd = { 0.0f,0.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1587,7 +1533,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex3);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex3);
 				spriteRenderer.UVStart = { 1.0f,1.0f };
 				spriteRenderer.UVEnd = { 0.0f,0.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1603,7 +1549,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex3);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex3);
 				spriteRenderer.UVStart = { 1.0f,1.0f };
 				spriteRenderer.UVEnd = { 0.0f,0.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1619,7 +1565,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex3);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex3);
 				spriteRenderer.UVStart = { 1.0f,1.0f };
 				spriteRenderer.UVEnd = { 0.0f,0.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1635,7 +1581,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex3);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex3);
 				spriteRenderer.UVStart = { 1.0f,1.0f };
 				spriteRenderer.UVEnd = { 0.0f,0.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);
@@ -1651,7 +1597,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				wall.Transform.Scale = { 10.0f,10.0f,1.0f };
 
 				SpriteRendererComponent spriteRenderer = {};
-				spriteRenderer.Texture = RefPtr_AddRef(wallTex3);
+				spriteRenderer.Texture = (Texture2D*)AssetManager_GetAsset(s_WallTex3);
 				spriteRenderer.UVStart = { 1.0f,1.0f };
 				spriteRenderer.UVEnd = { 0.0f,0.0f };
 				Entity_AddComponent(&wall, ComponentType::ComponentType_SpriteRenderer, &spriteRenderer);

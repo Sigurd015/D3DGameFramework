@@ -18,7 +18,7 @@ DXGI_FORMAT ImageFormatToDXDataFormat(ImageFormat format)
 	return DXGI_FORMAT_UNKNOWN;
 }
 
-void Texture2D_Create(Texture2D* texture2D, const char* path)
+void* Texture2D_Create(const char* path)
 {
 	size_t newsize = strlen(path) + 1;
 
@@ -27,6 +27,9 @@ void Texture2D_Create(Texture2D* texture2D, const char* path)
 	// Convert char* string to a wchar_t* string.
 	size_t convertedChars = 0;
 	mbstowcs_s(&convertedChars, wcstring, newsize, path, _TRUNCATE);
+
+	Texture2D* texture2D = (Texture2D*)malloc(sizeof(Texture2D));
+	*texture2D = {};
 
 	CORE_CHECK_DX_RESULT(DirectX::CreateWICTextureFromFileEx(RendererContext_GetDevice(), wcstring, 0, D3D11_USAGE_DEFAULT,
 		D3D11_BIND_SHADER_RESOURCE, 0, 0, DirectX::WIC_LOADER_DEFAULT, reinterpret_cast<ID3D11Resource**>(&texture2D->Texture), &texture2D->TextureView));
@@ -40,7 +43,9 @@ void Texture2D_Create(Texture2D* texture2D, const char* path)
 	texture2D->Spec.Height = desc.Height;
 	texture2D->Spec.Format = ImageFormat::RGBA8;
 
-	texture2D->DataFormat = desc.Format;
+	texture2D->NeedRelease = true;
+
+	return texture2D;
 }
 
 void Texture2D_Create(Texture2D* texture2D, const TextureSpecification& spec)
@@ -108,5 +113,9 @@ void Texture2D_Release(Texture2D* texture2D)
 	{
 		texture2D->TextureView->Release();
 		texture2D->TextureView = nullptr;
+	}
+	if (texture2D->NeedRelease)
+	{
+		free(texture2D);
 	}
 }

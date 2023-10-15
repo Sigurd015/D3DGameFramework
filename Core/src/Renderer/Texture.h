@@ -28,12 +28,14 @@ struct Texture2D
 {
 	TextureSpecification Spec;
 
-	ID3D11Texture2D* Texture;
-	ID3D11ShaderResourceView* TextureView;
+	ID3D11Texture2D* Texture = nullptr;
+	ID3D11ShaderResourceView* TextureView = nullptr;
 	DXGI_FORMAT DataFormat;
+
+	bool NeedRelease = false;
 };
 
-void Texture2D_Create(Texture2D* texture2D, const char* path);
+void* Texture2D_Create(const char* path);
 void Texture2D_Create(Texture2D* texture2D, const TextureSpecification& spec);
 void Texture2D_Bind(const Texture2D* texture2D, uint32_t slot);
 bool Texture2D_IsSame(const Texture2D* texture2D, const Texture2D* other);

@@ -31,29 +31,49 @@ void CreateReflectionData(Shader& shader, ID3DBlob* shaderBlob)
 	}
 }
 
-void Shader_Create(Shader& shader, const char* name)
+void Shader_Create(Shader& shader, const char* name, ShaderType type)
 {
 	HashMap_Create(shader.ReflectionData);
 
-	char vertexShaderName[256];
-	sprintf_s(vertexShaderName, 256, "%s%s_v.cso", SHADER_CACHE_DIR, name);
-	char pixelShaderName[256];
-	sprintf_s(pixelShaderName, 256, "%s%s_p.cso", SHADER_CACHE_DIR, name);
+	if (type & ShaderType_Vertex)
+	{
+		char vertexShaderName[256];
+		sprintf_s(vertexShaderName, 256, "%s%s_v.cso", SHADER_CACHE_DIR, name);
 
-	CORE_CHECK_DX_RESULT(D3DReadFileToBlob(CA2T(vertexShaderName), &shader.VertexShaderBlob));
-	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateVertexShader(shader.VertexShaderBlob->GetBufferPointer(),
-		shader.VertexShaderBlob->GetBufferSize(), nullptr, &shader.VertexShader));
+		CORE_CHECK_DX_RESULT(D3DReadFileToBlob(CA2T(vertexShaderName), &shader.VertexShaderBlob));
+		CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateVertexShader(shader.VertexShaderBlob->GetBufferPointer(),
+			shader.VertexShaderBlob->GetBufferSize(), nullptr, &shader.VertexShader));
 
-	CreateReflectionData(shader, shader.VertexShaderBlob);
+		CreateReflectionData(shader, shader.VertexShaderBlob);
+	}
 
-	ID3DBlob* blob;
-	CORE_CHECK_DX_RESULT(D3DReadFileToBlob(CA2T(pixelShaderName), &blob));
-	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreatePixelShader(blob->GetBufferPointer(),
-		blob->GetBufferSize(), nullptr, &shader.PixelShader));
+	if (type & ShaderType_Pixel)
+	{
+		char pixelShaderName[256];
+		sprintf_s(pixelShaderName, 256, "%s%s_p.cso", SHADER_CACHE_DIR, name);
 
-	CreateReflectionData(shader, blob);
+		ID3DBlob* blob;
+		CORE_CHECK_DX_RESULT(D3DReadFileToBlob(CA2T(pixelShaderName), &blob));
+		CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreatePixelShader(blob->GetBufferPointer(),
+			blob->GetBufferSize(), nullptr, &shader.PixelShader));
 
-	blob->Release();
+		CreateReflectionData(shader, blob);
+		blob->Release();
+	}
+
+	if (type & ShaderType_Compute)
+	{
+		char computeShaderName[256];
+		sprintf_s(computeShaderName, 256, "%s%s_c.cso", SHADER_CACHE_DIR, name);
+
+		ID3DBlob* blob;
+		CORE_CHECK_DX_RESULT(D3DReadFileToBlob(CA2T(computeShaderName), &blob));
+		CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateComputeShader(blob->GetBufferPointer(),
+			blob->GetBufferSize(), nullptr, &shader.ComputeShader));
+
+		CreateReflectionData(shader, blob);
+		blob->Release();
+	}
 }
 
 const HashMap& Shader_GetReflectionData(const Shader& shader)
@@ -65,6 +85,7 @@ void Shader_Bind(const Shader& shader)
 {
 	RendererContext_GetDeviceContext()->VSSetShader(shader.VertexShader, nullptr, 0);
 	RendererContext_GetDeviceContext()->PSSetShader(shader.PixelShader, nullptr, 0);
+	RendererContext_GetDeviceContext()->CSSetShader(shader.ComputeShader, nullptr, 0);
 }
 
 void Shader_Release(Shader& shader)
@@ -83,6 +104,11 @@ void Shader_Release(Shader& shader)
 	{
 		shader.PixelShader->Release();
 		shader.PixelShader = nullptr;
+	}
+	if (shader.ComputeShader)
+	{
+		shader.ComputeShader->Release();
+		shader.ComputeShader = nullptr;
 	}
 
 	HashMap_Free(shader.ReflectionData, true);

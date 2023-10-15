@@ -63,7 +63,7 @@ enum MenuState
 struct TitleMenuControllerData
 {
 	SpriteRendererComponent* BackgroundSprite = nullptr;
-	RefPtr* MenuBGTexture = nullptr;
+	Texture2D* MenuBGTexture = nullptr;
 	Entity* SelectionEntity = nullptr;
 	RectTransformComponent* SelectionRectTrans = nullptr;
 	SpriteRendererComponent* SelectionSprite = nullptr;
@@ -286,7 +286,7 @@ void TitleMenuController_OnUpdate(Entity* entity, float timeStep, void* runtimeD
 			}
 			s_Data.SelectionRectTrans->Position.y = s_Data.CurrentKeyConfigNode->yPos;
 		}
-		
+
 		break;
 	}
 	case ::CREDITS:

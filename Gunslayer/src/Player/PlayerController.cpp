@@ -48,9 +48,9 @@ void PlayerController_OnCreate(Entity* entity, void* runtimeData)
 	s_Data.Stats = {};
 	s_Data.Stats.Hp -= 30.0f;
 
-	s_Data.ShotgunSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/player_attack.wav");
-	s_Data.PainSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/player_pain.wav");
-	s_Data.DeathSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/player_death.wav");
+	s_Data.ShotgunSoundEffect = AssetManager_GetAsset("assets/sounds/player_attack.wav");
+	s_Data.PainSoundEffect = AssetManager_GetAsset("assets/sounds/player_pain.wav");
+	s_Data.DeathSoundEffect = AssetManager_GetAsset("assets/sounds/player_death.wav");
 }
 
 void PlayerController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
@@ -126,10 +126,7 @@ void PlayerController_OnUpdate(Entity* entity, float timeStep, void* runtimeData
 }
 
 void PlayerController_OnDestroy(Entity* entity, void* runtimeData)
-{
-	delete s_Data.ShotgunSoundEffect;
-	delete s_Data.PainSoundEffect;
-}
+{}
 
 void PlayerController_OnCollision(Entity* entity, Entity* other, void* runtimeData)
 {

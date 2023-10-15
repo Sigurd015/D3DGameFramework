@@ -60,9 +60,9 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 	{
 	case CACO_DEMON:
 	{
-		data->AttackSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/caco_demon/cacodemon_attack.wav");
-		data->PainSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/caco_demon/cacodemon_pain.wav");
-		data->DeathSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/caco_demon/cacodemon_death.wav");
+		data->AttackSoundEffect = AssetManager_GetAsset("assets/sounds/caco_demon/cacodemon_attack.wav");
+		data->PainSoundEffect = AssetManager_GetAsset("assets/sounds/caco_demon/cacodemon_pain.wav");
+		data->DeathSoundEffect = AssetManager_GetAsset("assets/sounds/caco_demon/cacodemon_death.wav");
 
 		data->Score = CACO_DEMON_SCORE;
 		data->Stats.MaxHP = CACO_DEMON_MAX_HP;
@@ -75,9 +75,8 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 		data->WalkSpriteMaxAnimationFrames = 3;
 		{
 			SpriteAnimatorSpecification spec;
-			Texture2D* texture = (Texture2D*)RefPtr_Get(data->WalkSpriteSheet);
-			spec.TextureWidth = Texture2D_GetWidth(texture);
-			spec.TextureHeight = Texture2D_GetHeight(texture);
+			spec.TextureWidth = Texture2D_GetWidth(data->WalkSpriteSheet);
+			spec.TextureHeight = Texture2D_GetHeight(data->WalkSpriteSheet);
 			spec.ElementsCount = 3;
 			spec.ElementsPerColumn = 3;
 			spec.ElementsPerRow = 1;
@@ -92,9 +91,8 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 		data->PainSpriteMaxAnimationFrames = 2;
 		{
 			SpriteAnimatorSpecification spec;
-			Texture2D* texture = (Texture2D*)RefPtr_Get(data->PainSpriteSheet);
-			spec.TextureWidth = Texture2D_GetWidth(texture);
-			spec.TextureHeight = Texture2D_GetHeight(texture);
+			spec.TextureWidth = Texture2D_GetWidth(data->PainSpriteSheet);
+			spec.TextureHeight = Texture2D_GetHeight(data->PainSpriteSheet);
 			spec.ElementsCount = 2;
 			spec.ElementsPerColumn = 2;
 			spec.ElementsPerRow = 1;
@@ -109,9 +107,8 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 		data->DeathSpriteMaxAnimationFrames = 6;
 		{
 			SpriteAnimatorSpecification spec;
-			Texture2D* texture = (Texture2D*)RefPtr_Get(data->DeathSpriteSheet);
-			spec.TextureWidth = Texture2D_GetWidth(texture);
-			spec.TextureHeight = Texture2D_GetHeight(texture);
+			spec.TextureWidth = Texture2D_GetWidth(data->DeathSpriteSheet);
+			spec.TextureHeight = Texture2D_GetHeight(data->DeathSpriteSheet);
 			spec.ElementsCount = 6;
 			spec.ElementsPerColumn = 6;
 			spec.ElementsPerRow = 1;
@@ -126,9 +123,8 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 		data->AttackSpriteMaxAnimationFrames = 5;
 		{
 			SpriteAnimatorSpecification spec;
-			Texture2D* texture = (Texture2D*)RefPtr_Get(data->AttackSpriteSheet);
-			spec.TextureWidth = Texture2D_GetWidth(texture);
-			spec.TextureHeight = Texture2D_GetHeight(texture);
+			spec.TextureWidth = Texture2D_GetWidth(data->AttackSpriteSheet);
+			spec.TextureHeight = Texture2D_GetHeight(data->AttackSpriteSheet);
 			spec.ElementsCount = 5;
 			spec.ElementsPerColumn = 5;
 			spec.ElementsPerRow = 1;
@@ -153,10 +149,10 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 	}
 	case CYBER_DEMON:
 	{
-		data->AttackSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/cyber_demon/cyberdemon_attack.wav");
-		data->PainSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/cyber_demon/cyberdemon_pain.wav");
-		data->DeathSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/cyber_demon/cyberdemon_death.wav");
-		data->WalkSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/cyber_demon/cyberdemon_walk.wav");
+		data->AttackSoundEffect = AssetManager_GetAsset("assets/sounds/cyber_demon/cyberdemon_attack.wav");
+		data->PainSoundEffect = AssetManager_GetAsset("assets/sounds/cyber_demon/cyberdemon_pain.wav");
+		data->DeathSoundEffect = AssetManager_GetAsset("assets/sounds/cyber_demon/cyberdemon_death.wav");
+		data->WalkSoundEffect = AssetManager_GetAsset("assets/sounds/cyber_demon/cyberdemon_walk.wav");
 
 		data->Score = CYBER_DEMON_SCORE;
 		data->Stats.MaxHP = CYBER_DEMON_MAX_HP;
@@ -169,9 +165,8 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 		data->WalkSpriteMaxAnimationFrames = 4;
 		{
 			SpriteAnimatorSpecification spec;
-			Texture2D* texture = (Texture2D*)RefPtr_Get(data->WalkSpriteSheet);
-			spec.TextureWidth = Texture2D_GetWidth(texture);
-			spec.TextureHeight = Texture2D_GetHeight(texture);
+			spec.TextureWidth = Texture2D_GetWidth(data->WalkSpriteSheet);
+			spec.TextureHeight = Texture2D_GetHeight(data->WalkSpriteSheet);
 			spec.ElementsCount = 4;
 			spec.ElementsPerColumn = 4;
 			spec.ElementsPerRow = 1;
@@ -186,9 +181,8 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 		data->PainSpriteMaxAnimationFrames = 2;
 		{
 			SpriteAnimatorSpecification spec;
-			Texture2D* texture = (Texture2D*)RefPtr_Get(data->PainSpriteSheet);
-			spec.TextureWidth = Texture2D_GetWidth(texture);
-			spec.TextureHeight = Texture2D_GetHeight(texture);
+			spec.TextureWidth = Texture2D_GetWidth(data->PainSpriteSheet);
+			spec.TextureHeight = Texture2D_GetHeight(data->PainSpriteSheet);
 			spec.ElementsCount = 2;
 			spec.ElementsPerColumn = 2;
 			spec.ElementsPerRow = 1;
@@ -203,9 +197,8 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 		data->DeathSpriteMaxAnimationFrames = 9;
 		{
 			SpriteAnimatorSpecification spec;
-			Texture2D* texture = (Texture2D*)RefPtr_Get(data->DeathSpriteSheet);
-			spec.TextureWidth = Texture2D_GetWidth(texture);
-			spec.TextureHeight = Texture2D_GetHeight(texture);
+			spec.TextureWidth = Texture2D_GetWidth(data->DeathSpriteSheet);
+			spec.TextureHeight = Texture2D_GetHeight(data->DeathSpriteSheet);
 			spec.ElementsCount = 9;
 			spec.ElementsPerColumn = 9;
 			spec.ElementsPerRow = 1;
@@ -220,9 +213,8 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 		data->AttackSpriteMaxAnimationFrames = 2;
 		{
 			SpriteAnimatorSpecification spec;
-			Texture2D* texture = (Texture2D*)RefPtr_Get(data->AttackSpriteSheet);
-			spec.TextureWidth = Texture2D_GetWidth(texture);
-			spec.TextureHeight = Texture2D_GetHeight(texture);
+			spec.TextureWidth = Texture2D_GetWidth(data->AttackSpriteSheet);
+			spec.TextureHeight = Texture2D_GetHeight(data->AttackSpriteSheet);
 			spec.ElementsCount = 2;
 			spec.ElementsPerColumn = 2;
 			spec.ElementsPerRow = 1;
@@ -247,9 +239,9 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 	}
 	case SOLDIER:
 	{
-		data->AttackSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/soldier/soldier_attack.wav");
-		data->PainSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/soldier/soldier_pain.wav");
-		data->DeathSoundEffect = Audio_CreateSoundEffect(L"assets/sounds/soldier/soldier_death.wav");
+		data->AttackSoundEffect = AssetManager_GetAsset("assets/sounds/soldier/soldier_attack.wav");
+		data->PainSoundEffect = AssetManager_GetAsset("assets/sounds/soldier/soldier_pain.wav");
+		data->DeathSoundEffect = AssetManager_GetAsset("assets/sounds/soldier/soldier_death.wav");
 
 		data->Score = SOLDIER_SCORE;
 		data->Stats.MaxHP = SOLDIER_MAX_HP;
@@ -262,9 +254,8 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 		data->WalkSpriteMaxAnimationFrames = 4;
 		{
 			SpriteAnimatorSpecification spec;
-			Texture2D* texture = (Texture2D*)RefPtr_Get(data->WalkSpriteSheet);
-			spec.TextureWidth = Texture2D_GetWidth(texture);
-			spec.TextureHeight = Texture2D_GetHeight(texture);
+			spec.TextureWidth = Texture2D_GetWidth(data->WalkSpriteSheet);
+			spec.TextureHeight = Texture2D_GetHeight(data->WalkSpriteSheet);
 			spec.ElementsCount = 4;
 			spec.ElementsPerColumn = 4;
 			spec.ElementsPerRow = 1;
@@ -279,9 +270,8 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 		data->PainSpriteMaxAnimationFrames = 1;
 		{
 			SpriteAnimatorSpecification spec;
-			Texture2D* texture = (Texture2D*)RefPtr_Get(data->PainSpriteSheet);
-			spec.TextureWidth = Texture2D_GetWidth(texture);
-			spec.TextureHeight = Texture2D_GetHeight(texture);
+			spec.TextureWidth = Texture2D_GetWidth(data->PainSpriteSheet);
+			spec.TextureHeight = Texture2D_GetHeight(data->PainSpriteSheet);
 			spec.ElementsCount = 1;
 			spec.ElementsPerColumn = 1;
 			spec.ElementsPerRow = 1;
@@ -296,9 +286,8 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 		data->DeathSpriteMaxAnimationFrames = 9;
 		{
 			SpriteAnimatorSpecification spec;
-			Texture2D* texture = (Texture2D*)RefPtr_Get(data->DeathSpriteSheet);
-			spec.TextureWidth = Texture2D_GetWidth(texture);
-			spec.TextureHeight = Texture2D_GetHeight(texture);
+			spec.TextureWidth = Texture2D_GetWidth(data->DeathSpriteSheet);
+			spec.TextureHeight = Texture2D_GetHeight(data->DeathSpriteSheet);
 			spec.ElementsCount = 9;
 			spec.ElementsPerColumn = 9;
 			spec.ElementsPerRow = 1;
@@ -313,9 +302,8 @@ void EnemyController_OnCreate(Entity* entity, void* runtimeData)
 		data->AttackSpriteMaxAnimationFrames = 2;
 		{
 			SpriteAnimatorSpecification spec;
-			Texture2D* texture = (Texture2D*)RefPtr_Get(data->AttackSpriteSheet);
-			spec.TextureWidth = Texture2D_GetWidth(texture);
-			spec.TextureHeight = Texture2D_GetHeight(texture);
+			spec.TextureWidth = Texture2D_GetWidth(data->AttackSpriteSheet);
+			spec.TextureHeight = Texture2D_GetHeight(data->AttackSpriteSheet);
 			spec.ElementsCount = 2;
 			spec.ElementsPerColumn = 2;
 			spec.ElementsPerRow = 1;
@@ -486,24 +474,7 @@ void EnemyController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 }
 
 void EnemyController_OnDestroy(Entity* entity, void* runtimeData)
-{
-	EnemyData* data = (EnemyData*)runtimeData;
-
-	void(*ReleaseFunc)(void* ptr) = [](void* ptr)
-		{
-			Texture2D_Release((Texture2D*)ptr);
-		};
-
-	RefPtr_Release(data->AttackSpriteSheet, ReleaseFunc);
-	RefPtr_Release(data->WalkSpriteSheet, ReleaseFunc);
-	RefPtr_Release(data->IdleSpriteSheet, ReleaseFunc);
-	RefPtr_Release(data->PainSpriteSheet, ReleaseFunc);
-	RefPtr_Release(data->DeathSpriteSheet, ReleaseFunc);
-
-	delete data->AttackSoundEffect;
-	delete data->PainSoundEffect;
-	delete data->DeathSoundEffect;
-}
+{}
 
 void EnemyController_OnCollision(Entity* entity, Entity* other, void* runtimeData)
 {}

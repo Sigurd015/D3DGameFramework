@@ -66,7 +66,7 @@ struct CircleRendererComponent
 struct SpriteRendererComponent
 {
 	Vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
-	RefPtr* Texture;
+	Texture2D* Texture;
 	float TilingFactor = 1.0f;
 	Vec2 UVStart = { 0.0f, 0.0f };
 	Vec2 UVEnd = { 1.0f,1.0f };

@@ -13,7 +13,6 @@ struct StartUpData
 		{ 1.0f, 1.0f, 1.0f, 1.0f },
 	};
 
-	RefPtr* LoadingTexture;
 	SpriteAnimator SpriteAnimator;
 	SpriteTimer SpriteTimer;
 
@@ -28,15 +27,11 @@ void Loading_Initialize()
 {
 	s_Data = {};
 
-	Texture2D texture;
-	Texture2D_Create(&texture, "assets/textures/loading.png");
-	RefPtr* loadingTexture = RefPtr_Create(sizeof(Texture2D), &texture);
-	s_Data.LoadingTexture = RefPtr_AddRef(loadingTexture);
-	s_Data.CanvasSprite.Texture = s_Data.LoadingTexture;
+	s_Data.CanvasSprite.Texture = (Texture2D*)AssetManager_GetAsset("assets/textures/loading.png");
 
 	SpriteAnimatorSpecification spec;
-	spec.TextureWidth = Texture2D_GetWidth(&texture);
-	spec.TextureHeight = Texture2D_GetHeight(&texture);
+	spec.TextureWidth = Texture2D_GetWidth(s_Data.CanvasSprite.Texture);
+	spec.TextureHeight = Texture2D_GetHeight(s_Data.CanvasSprite.Texture);
 	spec.ElementsCount = 4;
 	spec.ElementsPerColumn = 4;
 	spec.ElementsPerRow = 1;
@@ -86,9 +81,4 @@ void Loading_SetDepature(GameMode depature)
 }
 
 void Loading_Destroy()
-{
-	RefPtr_Release(s_Data.LoadingTexture, [](void* ptr)
-		{
-			Texture2D_Release((Texture2D*)ptr);
-		});
-}
+{}

@@ -13,6 +13,9 @@
 //-------Events---------
 #include "Events/Event.h"
 
+//-------Asset----------
+#include "Asset/AssetManager.h"
+
 //-------Renderer-------
 #include "Renderer/RendererAPI.h"
 #include "Renderer/Renderer2D.h"

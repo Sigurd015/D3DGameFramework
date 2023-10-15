@@ -153,13 +153,6 @@ void Entity_RemoveComponent(Entity* entity, ComponentType type)
 		entity->Camera = nullptr;
 		return;
 	case ComponentType_SpriteRenderer:
-		if (entity->SpriteRenderer->Texture)
-		{
-			RefPtr_Release(entity->SpriteRenderer->Texture, [](void* ptr)
-				{
-					Texture2D_Release((Texture2D*)ptr);
-				});
-		}
 		free(entity->SpriteRenderer);
 		entity->SpriteRenderer = nullptr;
 		return;

@@ -139,9 +139,8 @@ void UIController_OnCreate(Entity* entity, void* runtimeData)
 		CORE_ASSERT(s_Data.SightIconSpriteRenderer, "Entity does not have SpriteRendererComponent!");
 
 		SpriteAnimatorSpecification spec;
-		Texture2D* texture = (Texture2D*)RefPtr_Get(s_Data.SightIconSpriteRenderer->Texture);
-		spec.TextureWidth = Texture2D_GetWidth(texture);
-		spec.TextureHeight = Texture2D_GetHeight(texture);
+		spec.TextureWidth = Texture2D_GetWidth(s_Data.SightIconSpriteRenderer->Texture);
+		spec.TextureHeight = Texture2D_GetHeight(s_Data.SightIconSpriteRenderer->Texture);
 		spec.ElementsCount = 2;
 		spec.ElementsPerColumn = 2;
 		spec.ElementsPerRow = 1;
@@ -165,9 +164,8 @@ void UIController_OnCreate(Entity* entity, void* runtimeData)
 		CORE_ASSERT(s_Data.WeaponSpriteRenderer, "Entity does not have SpriteRendererComponent!");
 
 		SpriteAnimatorSpecification spec;
-		Texture2D* texture = (Texture2D*)RefPtr_Get(s_Data.WeaponSpriteRenderer->Texture);
-		spec.TextureWidth = Texture2D_GetWidth(texture);
-		spec.TextureHeight = Texture2D_GetHeight(texture);
+		spec.TextureWidth = Texture2D_GetWidth(s_Data.WeaponSpriteRenderer->Texture);
+		spec.TextureHeight = Texture2D_GetHeight(s_Data.WeaponSpriteRenderer->Texture);
 		spec.ElementsCount = 6;
 		spec.ElementsPerColumn = 6;
 		spec.ElementsPerRow = 1;

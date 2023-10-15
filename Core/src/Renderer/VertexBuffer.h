@@ -27,7 +27,7 @@ struct VertexBufferLayout
 
 struct VertexBuffer
 {
-	ID3D11Buffer* Buffer;
+	ID3D11Buffer* Buffer = nullptr;
 	uint32_t Stride = 0;
 };
 
