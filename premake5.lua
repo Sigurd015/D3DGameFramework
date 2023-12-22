@@ -1,6 +1,6 @@
 workspace "D3DGames"
 	architecture "x86_64"
-	startproject "Sandbox"
+	startproject "dxCraft"
 
 	configurations
 	{
@@ -28,4 +28,4 @@ Library["DirectXTK_Release"] = "%{LibraryDir.DirectXTK}/Release/DirectXTK.lib"
 
 include "Core"
 include "Gunslayer"
-include "Sandbox"
+include "dxCraft"

@@ -1,4 +1,4 @@
-project "Sandbox"
+project "dxCraft"
 	language "C"
 	staticruntime "on"
 

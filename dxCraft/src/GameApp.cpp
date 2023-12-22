@@ -152,7 +152,7 @@ void Game_OnEvent(Event e)
 
 void CreateApplication(Application* appInst, ApplicationCommandLineArgs args)
 {
-	appInst->Spec.Name = "Sandbox";
+	appInst->Spec.Name = "dxCraft";
 	appInst->Spec.Width = 800;
 	appInst->Spec.Height = 600;
 	appInst->Spec.Resizable = true;
