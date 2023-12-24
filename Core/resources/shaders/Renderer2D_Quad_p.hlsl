@@ -1,3 +1,6 @@
+#include "Include/Common.hlsl"
+#define MAX_TEXTURE 16
+
 struct PixelInput
 {
     float4 Pos : SV_Position;
@@ -12,8 +15,7 @@ struct PixelOutput
     float4 Color : SV_Target0;
 };
 
-Texture2D u_Textures[16] : register(t0);
-SamplerState u_SSLinearWrap : register(s0);
+Texture2D u_Textures[MAX_TEXTURE] : register(t0);
 
 PixelOutput main(PixelInput Input)
 {

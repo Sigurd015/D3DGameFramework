@@ -78,9 +78,15 @@ void Texture2D_Create(Texture2D* texture2D, const TextureSpecification& spec)
 	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateShaderResourceView(texture2D->Texture, &resourceView, &texture2D->TextureView));
 }
 
-void Texture2D_Bind(const Texture2D* texture2D, uint32_t slot)
+void Texture2D_Bind(const Texture2D* texture2D, const ShaderResourceDeclaration* decl)
 {
-	RendererContext_GetDeviceContext()->PSSetShaderResources(slot, 1, &texture2D->TextureView);
+	switch (decl->Stage)
+	{
+	case ShaderType_Vertex: RendererContext_GetDeviceContext()->VSSetShaderResources(decl->Slot, 1, &texture2D->TextureView); break;
+	case ShaderType_Geometry: RendererContext_GetDeviceContext()->GSSetShaderResources(decl->Slot, 1, &texture2D->TextureView); break;
+	case ShaderType_Pixel: RendererContext_GetDeviceContext()->PSSetShaderResources(decl->Slot, 1, &texture2D->TextureView); break;
+	case ShaderType_Compute: RendererContext_GetDeviceContext()->CSSetShaderResources(decl->Slot, 1, &texture2D->TextureView); break;
+	}
 }
 
 bool Texture2D_IsSame(const Texture2D* texture2D, const Texture2D* other)

@@ -49,48 +49,90 @@ void RenderPass_SetInput(RenderPass& renderPass, const char* name, RendererResou
 
 void RnederPass_BindInputs(const RenderPass& renderPass)
 {
-	for (size_t i = 0; i < renderPass.InputCount; i++)
+	for (size_t i = 0; i < List_Size(renderPass.ShaderReflectionData); i++)
 	{
-		ResourceElement* element = (ResourceElement*)List_Get(renderPass.Inputs, i);
+		ShaderResourceDeclaration* decl = (ShaderResourceDeclaration*)List_Get(renderPass.ShaderReflectionData, i);
 
-		HashNode* it = HashMap_Find(renderPass.ShaderReflectionData, element->Name);
-		if (it != HashMapEnd)
+		// Bind Common States
+		if (decl->ResourceType == ShaderResourceType_Sampler)
 		{
-			switch (element->Type)
+			switch (decl->Stage)
 			{
-			case RendererResourceType_ConstantBuffer:
+			case ShaderType_Vertex:
 			{
-				uint32_t bindingSlot = *(uint32_t*)it->Value;
-				ConstantBuffer_Bind((ConstantBuffer*)element->Resource, bindingSlot);
+				if (strcmp(decl->Name, "u_SSLinearWrap"))
+				{
+					RendererContext_GetDeviceContext()->PSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearWrap);
+				}
+				else if (strcmp(decl->Name, "u_SSLinearClamp"))
+				{
+					RendererContext_GetDeviceContext()->PSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearClamp);
+				}
 				break;
 			}
-			case RendererResourceType_Texture2D:
+			case ShaderType_Pixel:
 			{
-				uint32_t bindingSlot = *(uint32_t*)it->Value;
-				Texture2D_Bind((Texture2D*)element->Resource, bindingSlot);
+				if (strcmp(decl->Name, "u_SSLinearWrap"))
+				{
+					RendererContext_GetDeviceContext()->PSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearWrap);
+				}
+				else if (strcmp(decl->Name, "u_SSLinearClamp"))
+				{
+					RendererContext_GetDeviceContext()->PSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearClamp);
+				}
 				break;
 			}
-			case RendererResourceType_TextureCube:
-			{}
+			case ShaderType_Compute:
+			{
+				if (strcmp(decl->Name, "u_SSLinearWrap"))
+				{
+					RendererContext_GetDeviceContext()->CSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearWrap);
+				}
+				else if (strcmp(decl->Name, "u_SSLinearClamp"))
+				{
+					RendererContext_GetDeviceContext()->CSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearClamp);
+				}
+				break;
+			}
+			case ShaderType_Geometry:
+			{
+				if (strcmp(decl->Name, "u_SSLinearWrap"))
+				{
+					RendererContext_GetDeviceContext()->GSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearWrap);
+				}
+				else if (strcmp(decl->Name, "u_SSLinearClamp"))
+				{
+					RendererContext_GetDeviceContext()->GSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearClamp);
+				}
+				break;
+			}
 			}
 		}
-	}
+		else
+		{
+			for (size_t i = 0; i < renderPass.InputCount; i++)
+			{
+				ResourceElement* element = (ResourceElement*)List_Get(renderPass.Inputs, i);
 
-	// Bind Common States
-	{
-		HashNode* it = HashMap_Find(renderPass.ShaderReflectionData, "u_SSLinearWrap");
-		if (it != HashMapEnd)
-		{
-			uint32_t bindingSlot = *(uint32_t*)it->Value;
-			RendererContext_GetDeviceContext()->PSSetSamplers(bindingSlot, 1, &s_CommonStates.SSLinearWrap);
-		}
-	}
-	{
-		HashNode* it = HashMap_Find(renderPass.ShaderReflectionData, "u_SSLinearClamp");
-		if (it != HashMapEnd)
-		{
-			uint32_t bindingSlot = *(uint32_t*)it->Value;
-			RendererContext_GetDeviceContext()->PSSetSamplers(bindingSlot, 1, &s_CommonStates.SSLinearClamp);
+				if (strcmp(element->Name, decl->Name) == 0)
+				{
+					switch (element->Type)
+					{
+					case RendererResourceType_ConstantBuffer:
+					{
+						ConstantBuffer_Bind((ConstantBuffer*)element->Resource, decl);
+						break;
+					}
+					case RendererResourceType_Texture2D:
+					{
+						Texture2D_Bind((Texture2D*)element->Resource, decl);
+						break;
+					}
+					case RendererResourceType_TextureCube:
+					{}
+					}
+				}
+			}
 		}
 	}
 }

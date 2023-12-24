@@ -26,10 +26,15 @@ void ConstantBuffer_SetData(ConstantBuffer& constantBuffer, void* data)
 	RendererContext_GetDeviceContext()->Unmap(constantBuffer.Buffer, 0);
 }
 
-void ConstantBuffer_Bind(const ConstantBuffer* constantBuffer, uint32_t bindSlot)
+void ConstantBuffer_Bind(const ConstantBuffer* constantBuffer, const ShaderResourceDeclaration* decl)
 {
-	RendererContext_GetDeviceContext()->VSSetConstantBuffers(bindSlot, 1, &constantBuffer->Buffer);
-	RendererContext_GetDeviceContext()->PSSetConstantBuffers(bindSlot, 1, &constantBuffer->Buffer);
+	switch (decl->Stage)
+	{
+	case ShaderType_Vertex: RendererContext_GetDeviceContext()->VSSetConstantBuffers(decl->Slot, 1, &constantBuffer->Buffer); break;
+	case ShaderType_Geometry: RendererContext_GetDeviceContext()->GSSetConstantBuffers(decl->Slot, 1, &constantBuffer->Buffer); break;
+	case ShaderType_Pixel: RendererContext_GetDeviceContext()->PSSetConstantBuffers(decl->Slot, 1, &constantBuffer->Buffer); break;
+	case ShaderType_Compute: RendererContext_GetDeviceContext()->CSSetConstantBuffers(decl->Slot, 1, &constantBuffer->Buffer); break;
+	}
 }
 
 void ConstantBuffer_Release(ConstantBuffer& constantBuffer)

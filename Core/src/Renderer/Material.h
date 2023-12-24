@@ -8,7 +8,7 @@ struct Material
 	uint32_t TextureCount;
 	List Textures;
 
-	HashMap ShaderReflectionData;
+	List ShaderReflectionData;
 };
 
 void Material_Create(Material& material, const Shader& shader);

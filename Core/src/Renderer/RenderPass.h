@@ -21,7 +21,7 @@ struct RenderPass
 
 	uint32_t InputCount;
 	List Inputs;
-	HashMap ShaderReflectionData;
+	List ShaderReflectionData;
 };
 
 void RenderPass_Create(RenderPass& renderPass, const RenderPassSpecification& specification);

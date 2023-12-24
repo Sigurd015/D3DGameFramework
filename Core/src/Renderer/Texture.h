@@ -1,4 +1,5 @@
 #pragma once
+#include "Shader.h"
 
 #include <stdint.h>
 #include <Windows.h>
@@ -37,7 +38,7 @@ struct Texture2D
 
 void* Texture2D_Create(const char* path);
 void Texture2D_Create(Texture2D* texture2D, const TextureSpecification& spec);
-void Texture2D_Bind(const Texture2D* texture2D, uint32_t slot);
+void Texture2D_Bind(const Texture2D* texture2D, const ShaderResourceDeclaration* decl);
 bool Texture2D_IsSame(const Texture2D* texture2D, const Texture2D* other);
 void Texture2D_Release(Texture2D* texture2D);
 uint32_t Texture2D_GetWidth(const Texture2D* texture2D);

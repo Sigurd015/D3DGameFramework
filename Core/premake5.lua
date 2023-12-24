@@ -25,6 +25,12 @@ project "Core"
  	filter { "files:**_v.hlsl" }
 		removeflags "ExcludeFromBuild"
 		shadertype "Vertex"
+	filter { "files:**_g.hlsl" }
+		removeflags "ExcludeFromBuild"
+		shadertype "Geometry"
+	filter { "files:**_c.hlsl" }
+		removeflags "ExcludeFromBuild"
+		shadertype "Compute"
  	filter {}
 
 	 postbuildcommands 

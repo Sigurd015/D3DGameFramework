@@ -40,15 +40,19 @@ void Material_SetTexture(Material& material, const char* name, const Texture2D* 
 
 void Material_Bind(const Material& material)
 {
-	for (size_t i = 0; i < material.TextureCount; i++)
+	for (size_t i = 0; i < List_Size(material.ShaderReflectionData); i++)
 	{
-		MaterialElement* element = (MaterialElement*)List_Get(material.Textures, i);
+		ShaderResourceDeclaration* decl = (ShaderResourceDeclaration*)List_Get(material.ShaderReflectionData, i);
 
-		HashNode* it = HashMap_Find(material.ShaderReflectionData, element->Name);
-		if (it != HashMapEnd)
+		for (size_t i = 0; i < material.TextureCount; i++)
 		{
-			uint32_t bindingSlot = *(uint32_t*)it->Value;
-			Texture2D_Bind(element->Texture, bindingSlot);
+			MaterialElement* element = (MaterialElement*)List_Get(material.Textures, i);
+
+			if (strcmp(element->Name, decl->Name) == 0)
+			{
+				Texture2D_Bind(element->Texture, decl);
+				break;
+			}
 		}
 	}
 }
