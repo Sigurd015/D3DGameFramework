@@ -14,8 +14,8 @@ workspace "D3DGames"
 		"MultiProcessorCompile"
 	}
 
-outputdir = "%{wks.location}/build/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
-intdir = "%{wks.location}/build/int/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+outputdir = "%{wks.location}/Binaries/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+intdir = "%{wks.location}/Binaries/Intermediates/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"	
 workingdir = "%{wks.location}"
 
 IncludeDir = {}

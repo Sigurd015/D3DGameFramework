@@ -66,71 +66,71 @@ void Entity_AddComponent(Entity* entity, ComponentType type, void* component)
 	case ComponentType_RectTransform:
 	{
 		CORE_ASSERT(!entity->RectTransform, "Entity already has component!");
-		entity->RectTransform = (RectTransformComponent*)malloc(sizeof(RectTransformComponent));
-		memcpy(entity->RectTransform, component, sizeof(RectTransformComponent));
+		entity->RectTransform = (RectTransformComponent*)Memory_Allocate(sizeof(RectTransformComponent), MemoryBlockTag_Component);
+		Memory_Copy(entity->RectTransform, component, sizeof(RectTransformComponent));
 		break;
 	}
 	case ComponentType_Camera:
 	{
 		CORE_ASSERT(!entity->Camera, "Entity already has component!");
-		entity->Camera = (CameraComponent*)malloc(sizeof(CameraComponent));
-		memcpy(entity->Camera, component, sizeof(CameraComponent));
+		entity->Camera = (CameraComponent*)Memory_Allocate(sizeof(CameraComponent), MemoryBlockTag_Component);
+		Memory_Copy(entity->Camera, component, sizeof(CameraComponent));
 		break;
 	}
 	case ComponentType_SpriteRenderer:
 	{
 		CORE_ASSERT(!entity->SpriteRenderer, "Entity already has component!");
-		entity->SpriteRenderer = (SpriteRendererComponent*)malloc(sizeof(SpriteRendererComponent));
-		memcpy(entity->SpriteRenderer, component, sizeof(SpriteRendererComponent));
+		entity->SpriteRenderer = (SpriteRendererComponent*)Memory_Allocate(sizeof(SpriteRendererComponent), MemoryBlockTag_Component);
+		Memory_Copy(entity->SpriteRenderer, component, sizeof(SpriteRendererComponent));
 		break;
 	}
 	case ComponentType_CircleRenderer:
 	{
 		CORE_ASSERT(!entity->CircleRenderer, "Entity already has component!");
-		entity->CircleRenderer = (CircleRendererComponent*)malloc(sizeof(CircleRendererComponent));
-		memcpy(entity->CircleRenderer, component, sizeof(CircleRendererComponent));
+		entity->CircleRenderer = (CircleRendererComponent*)Memory_Allocate(sizeof(CircleRendererComponent), MemoryBlockTag_Component);
+		Memory_Copy(entity->CircleRenderer, component, sizeof(CircleRendererComponent));
 		break;
 	}
 	case ComponentType_Rigidbody2D:
 	{
 		CORE_ASSERT(!entity->Rigidbody2D, "Entity already has component!");
-		entity->Rigidbody2D = (Rigidbody2DComponent*)malloc(sizeof(Rigidbody2DComponent));
-		memcpy(entity->Rigidbody2D, component, sizeof(Rigidbody2DComponent));
+		entity->Rigidbody2D = (Rigidbody2DComponent*)Memory_Allocate(sizeof(Rigidbody2DComponent), MemoryBlockTag_Component);
+		Memory_Copy(entity->Rigidbody2D, component, sizeof(Rigidbody2DComponent));
 		break;
 	}
 	case ComponentType_BoxCollider2D:
 	{
 		CORE_ASSERT(!entity->BoxCollider2D, "Entity already has component!");
-		entity->BoxCollider2D = (BoxCollider2DComponent*)malloc(sizeof(BoxCollider2DComponent));
-		memcpy(entity->BoxCollider2D, component, sizeof(BoxCollider2DComponent));
+		entity->BoxCollider2D = (BoxCollider2DComponent*)Memory_Allocate(sizeof(BoxCollider2DComponent), MemoryBlockTag_Component);
+		Memory_Copy(entity->BoxCollider2D, component, sizeof(BoxCollider2DComponent));
 		break;
 	}
 	case ComponentType_CircleCollider2D:
 	{
 		CORE_ASSERT(!entity->CircleCollider2D, "Entity already has component!");
-		entity->CircleCollider2D = (CircleCollider2DComponent*)malloc(sizeof(CircleCollider2DComponent));
-		memcpy(entity->CircleCollider2D, component, sizeof(CircleCollider2DComponent));
+		entity->CircleCollider2D = (CircleCollider2DComponent*)Memory_Allocate(sizeof(CircleCollider2DComponent), MemoryBlockTag_Component);
+		Memory_Copy(entity->CircleCollider2D, component, sizeof(CircleCollider2DComponent));
 		break;
 	}
 	case ComponentType_Text:
 	{
 		CORE_ASSERT(!entity->Text, "Entity already has component!");
-		entity->Text = (TextComponent*)malloc(sizeof(TextComponent));
-		memcpy(entity->Text, component, sizeof(TextComponent));
+		entity->Text = (TextComponent*)Memory_Allocate(sizeof(TextComponent), MemoryBlockTag_Component);
+		Memory_Copy(entity->Text, component, sizeof(TextComponent));
 		break;
 	}
 	case ComponentType_Script:
 	{
 		CORE_ASSERT(!entity->Script, "Entity already has component!");
-		entity->Script = (ScriptComponent*)malloc(sizeof(ScriptComponent));
-		memcpy(entity->Script, component, sizeof(ScriptComponent));
+		entity->Script = (ScriptComponent*)Memory_Allocate(sizeof(ScriptComponent), MemoryBlockTag_Component);
+		Memory_Copy(entity->Script, component, sizeof(ScriptComponent));
 		break;
 	}
 	case ComponentType_Audio:
 	{
 		CORE_ASSERT(!entity->Script, "Entity already has component!");
-		entity->Audio = (AudioComponent*)malloc(sizeof(AudioComponent));
-		memcpy(entity->Audio, component, sizeof(AudioComponent));
+		entity->Audio = (AudioComponent*)Memory_Allocate(sizeof(AudioComponent), MemoryBlockTag_Component);
+		Memory_Copy(entity->Audio, component, sizeof(AudioComponent));
 		break;
 	}
 	}
@@ -145,53 +145,53 @@ void Entity_RemoveComponent(Entity* entity, ComponentType type)
 	case ComponentType_Transform:
 		return;
 	case ComponentType_RectTransform:
-		free(entity->RectTransform);
+		Memory_Free(entity->RectTransform, sizeof(RectTransformComponent), MemoryBlockTag_Component);
 		entity->RectTransform = nullptr;
 		return;
 	case ComponentType_Camera:
-		free(entity->Camera);
+		Memory_Free(entity->Camera, sizeof(CameraComponent), MemoryBlockTag_Component);
 		entity->Camera = nullptr;
 		return;
 	case ComponentType_SpriteRenderer:
-		free(entity->SpriteRenderer);
+		Memory_Free(entity->SpriteRenderer, sizeof(SpriteRendererComponent), MemoryBlockTag_Component);
 		entity->SpriteRenderer = nullptr;
 		return;
 	case ComponentType_CircleRenderer:
-		free(entity->CircleRenderer);
+		Memory_Free(entity->CircleRenderer, sizeof(CircleRendererComponent), MemoryBlockTag_Component);
 		entity->CircleRenderer = nullptr;
 		return;
 	case ComponentType_Rigidbody2D:
-		free(entity->Rigidbody2D);
+		Memory_Free(entity->Rigidbody2D, sizeof(Rigidbody2DComponent), MemoryBlockTag_Component);
 		entity->Rigidbody2D = nullptr;
 		return;
 	case ComponentType_BoxCollider2D:
-		free(entity->BoxCollider2D);
+		Memory_Free(entity->BoxCollider2D, sizeof(BoxCollider2DComponent), MemoryBlockTag_Component);
 		entity->BoxCollider2D = nullptr;
 		return;
 	case ComponentType_CircleCollider2D:
-		free(entity->CircleCollider2D);
+		Memory_Free(entity->CircleCollider2D, sizeof(CircleCollider2DComponent), MemoryBlockTag_Component);
 		entity->CircleCollider2D = nullptr;
 		return;
 	case ComponentType_Text:
-		free(entity->Text);
+		Memory_Free(entity->Text, sizeof(TextComponent), MemoryBlockTag_Component);
 		entity->Text = nullptr;
 		return;
 	case ComponentType_Script:
 		if (entity->Script->RuntimeData != nullptr)
 		{
-			free(entity->Script->RuntimeData);
+			Memory_Free(entity->Script->RuntimeData, entity->Script->RuntimeDataSize, MemoryBlockTag_Component);
 			entity->Script->RuntimeData = nullptr;
 		}
-		free(entity->Script);
+		Memory_Free(entity->Script, sizeof(ScriptComponent), MemoryBlockTag_Component);
 		entity->Script = nullptr;
 		return;
 	case ComponentType_Audio:
-		if (entity->Audio->Audio != nullptr)
+		if (entity->Audio->RuntimeAudio != nullptr)
 		{
-			delete entity->Audio->Audio;
-			entity->Audio->Audio = nullptr;
+			delete entity->Audio->RuntimeAudio;
+			entity->Audio->RuntimeAudio = nullptr;
 		}
-		free(entity->Audio);
+		Memory_Free(entity->Audio, sizeof(AudioComponent), MemoryBlockTag_Component);
 		entity->Audio = nullptr;
 		return;
 	}

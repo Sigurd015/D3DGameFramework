@@ -12,30 +12,20 @@ struct MaterialElement
 void Material_Create(Material& material, const Shader& shader)
 {
 	material.ShaderReflectionData = Shader_GetReflectionData(shader);
-	List_Create(material.Textures, MAX_TEXTURE_SLOT);
-	{
-		MaterialElement element;
-		for (size_t i = 0; i < MAX_TEXTURE_SLOT; i++)
-		{
-			element.Name = nullptr;
-			element.Texture = nullptr;
-			List_Add(material.Textures, &element, sizeof(MaterialElement));
-		}
-	}
-	material.TextureCount = 0;
+	List_Create(material.Textures, sizeof(MaterialElement), MAX_TEXTURE_SLOT);
 }
 
 void Material_Release(Material& material)
 {
-	List_Free(material.Textures, true);
+	List_Free(material.Textures);
 }
 
 void Material_SetTexture(Material& material, const char* name, const Texture2D* texture)
 {
-	MaterialElement* element = (MaterialElement*)List_Get(material.Textures, material.TextureCount);
-	element->Name = strdup(name);
-	element->Texture = texture;
-	material.TextureCount++;
+	MaterialElement element;
+	element.Name = strdup(name);
+	element.Texture = texture;
+	List_Add(material.Textures, &element);
 }
 
 void Material_Bind(const Material& material)
@@ -44,7 +34,7 @@ void Material_Bind(const Material& material)
 	{
 		ShaderResourceDeclaration* decl = (ShaderResourceDeclaration*)List_Get(material.ShaderReflectionData, i);
 
-		for (size_t i = 0; i < material.TextureCount; i++)
+		for (size_t i = 0; i < List_Size(material.Textures); i++)
 		{
 			MaterialElement* element = (MaterialElement*)List_Get(material.Textures, i);
 
@@ -59,5 +49,5 @@ void Material_Bind(const Material& material)
 
 void Material_Clear(Material& material)
 {
-	material.TextureCount = 0;
+	List_Clear(material.Textures);
 }

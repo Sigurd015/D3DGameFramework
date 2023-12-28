@@ -4,8 +4,7 @@
 #include "GameMode.h"
 #include "KeyMap/KeyMap.h"
 
-#include <atlbase.h>
-#include <atlconv.h>
+#include <wchar.h>
 
 #define MAX_TIME 120.0f
 

@@ -5,7 +5,6 @@
 
 struct Material
 {
-	uint32_t TextureCount;
 	List Textures;
 
 	List ShaderReflectionData;

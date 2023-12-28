@@ -19,7 +19,6 @@ struct RenderPass
 {
 	RenderPassSpecification Specification;
 
-	uint32_t InputCount;
 	List Inputs;
 	List ShaderReflectionData;
 };

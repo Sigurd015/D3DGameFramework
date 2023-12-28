@@ -2,8 +2,6 @@
 #include "Audio.h"
 
 #include <Audio.h>
-#include <atlbase.h>
-#include <atlconv.h>
 
 struct AudioData
 {
@@ -40,8 +38,16 @@ void Audio_Resume()
 
 void* Audio_CreateSoundEffect(const char* path)
 {
-	char vertexShaderName[256];
-	sprintf_s(vertexShaderName, 256, "%s", path);
-	DirectX::SoundEffect* soundEffect = new DirectX::SoundEffect(s_AudioData.AudioEngine, CA2T(path));
+	size_t newsize = strlen(path) + 1;
+
+	wchar_t* wcstring = new wchar_t[newsize];
+
+	// Convert char* string to a wchar_t* string.
+	size_t convertedChars = 0;
+	mbstowcs_s(&convertedChars, wcstring, newsize, path, _TRUNCATE);
+
+	DirectX::SoundEffect* soundEffect = new DirectX::SoundEffect(s_AudioData.AudioEngine, wcstring);
+
+	delete[]wcstring;
 	return soundEffect;
 }

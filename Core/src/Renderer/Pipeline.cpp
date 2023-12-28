@@ -40,7 +40,8 @@ void Pipeline_Create(Pipeline& pipeline, const PipelineSpecification& spec)
 {
 	pipeline.Spec = spec;
 
-	D3D11_INPUT_ELEMENT_DESC* tempList = (D3D11_INPUT_ELEMENT_DESC*)malloc(sizeof(D3D11_INPUT_ELEMENT_DESC) * pipeline.Spec.Layout.ElementCount);
+	uint32_t memSize = sizeof(D3D11_INPUT_ELEMENT_DESC) * pipeline.Spec.Layout.ElementCount;
+	D3D11_INPUT_ELEMENT_DESC* tempList = (D3D11_INPUT_ELEMENT_DESC*)Memory_Allocate(memSize, MemoryBlockTag_Array);
 	for (size_t i = 0; i < pipeline.Spec.Layout.ElementCount; i++)
 	{
 		tempList[i] = {
@@ -52,7 +53,7 @@ void Pipeline_Create(Pipeline& pipeline, const PipelineSpecification& spec)
 		tempList, (UINT)pipeline.Spec.Layout.ElementCount, pipeline.Spec.Shader.VertexShaderBlob->GetBufferPointer(),
 		pipeline.Spec.Shader.VertexShaderBlob->GetBufferSize(), &pipeline.InputLayout));
 
-	free(tempList);
+	Memory_Free(tempList, memSize, MemoryBlockTag_Array);
 }
 
 void Pipeline_Bind(const Pipeline& pipeline)

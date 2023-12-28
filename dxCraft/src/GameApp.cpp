@@ -14,6 +14,19 @@ void Game_Ininialize(Application* appInst)
 	Scene_Create(s_Data.TestScene);
 	ScriptGlue_CreateTestScene(s_Data.TestScene);
 	Scene_Ininialize(s_Data.TestScene);
+
+
+	List list;
+	List_Create(list, sizeof(int));
+	for (size_t i = 0; i < 100; i++)
+	{
+		List_Add(list, &i);
+	}
+	for (size_t i = 0; i < List_Size(list); i++)
+	{
+		int* data = (int*)List_Get(list, i);
+		APP_LOG_INFO("Data : %d", *data);
+	}
 }
 
 void Game_Update(float timeStep)

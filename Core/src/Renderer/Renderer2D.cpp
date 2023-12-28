@@ -83,7 +83,6 @@ struct Renderer2DData
 	QuadVertex* UIVertexBufferPtr = nullptr;
 
 	List TextRenderCommands;
-	uint32_t TextRenderCommandCount = 0;
 
 	Material DefaultMaterial;
 	Texture2D* Textures[MaxTextureSlots];// 0 is white texture
@@ -282,14 +281,7 @@ void Renderer2D_Initialize()
 	ConstantBuffer_SetData(s_Data.IdentityConstantBuffer, &identity);
 	RenderPass_SetInput(s_Data.UIRenderPass, "Camera", RendererResourceType_ConstantBuffer, &s_Data.IdentityConstantBuffer);
 
-	List_Create(s_Data.TextRenderCommands, COMMAND_BUFFER_SIZE);
-	{
-		TextRenderCommand command;
-		for (size_t i = 0; i < COMMAND_BUFFER_SIZE; i++)
-		{
-			List_Add(s_Data.TextRenderCommands, &command, sizeof(TextRenderCommand));
-		}
-	}
+	List_Create(s_Data.TextRenderCommands, sizeof(TextRenderCommand));
 }
 
 void Renderer2D_Shutdown()
@@ -309,7 +301,7 @@ void Renderer2D_Shutdown()
 	ConstantBuffer_Release(s_Data.CameraConstantBuffer);
 	ConstantBuffer_Release(s_Data.IdentityConstantBuffer);
 
-	List_Free(s_Data.TextRenderCommands, true);
+	List_Free(s_Data.TextRenderCommands);
 
 	delete[] s_Data.QuadVertexBufferBase;
 	delete[] s_Data.CircleVertexBufferBase;
@@ -338,7 +330,7 @@ void StartBatch()
 	s_Data.UIIndexCount = 0;
 	s_Data.UIVertexBufferPtr = s_Data.UIVertexBufferBase;
 
-	s_Data.TextRenderCommandCount = 0;
+	List_Clear(s_Data.TextRenderCommands);
 
 	s_Data.TextureSlotIndex = 1;
 }
@@ -403,9 +395,10 @@ void Flush()
 	RendererAPI_EndRenderPass();
 
 	// Rendering Text after all d3d11 draw calls, to make sure text is always on top (beacuse text is rendered by d2d)
-	if (s_Data.TextRenderCommandCount)
+	uint32_t commandCount = List_Size(s_Data.TextRenderCommands);
+	if (commandCount)
 	{
-		for (size_t i = 0; i < s_Data.TextRenderCommandCount; i++)
+		for (size_t i = 0; i < commandCount; i++)
 		{
 			TextRenderCommand* temp = (TextRenderCommand*)List_Get(s_Data.TextRenderCommands, i);
 			RendererAPI_DrawText(
@@ -580,13 +573,11 @@ void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, float rotation, Textur
 
 void Renderer2D_DrawText(const WCHAR* str, const WCHAR* fontFamilyName, const Vec2& pos, const Vec4& color, float fontSize)
 {
-	TextRenderCommand* command = (TextRenderCommand*)List_Get(s_Data.TextRenderCommands, s_Data.TextRenderCommandCount);
-	command->Text = str;
-	command->FontFamilyName = fontFamilyName;
-	command->Position = pos;
-	command->Color = color;
-	command->FontSize = fontSize;
-	s_Data.TextRenderCommandCount++;
-
-	CORE_ASSERT(s_Data.TextRenderCommandCount < COMMAND_BUFFER_SIZE, "Renderer2D_DrawText: command buffer overflow");
+	TextRenderCommand command = {};
+	command.Text = str;
+	command.FontFamilyName = fontFamilyName;
+	command.Position = pos;
+	command.Color = color;
+	command.FontSize = fontSize;
+	List_Add(s_Data.TextRenderCommands, &command);
 }

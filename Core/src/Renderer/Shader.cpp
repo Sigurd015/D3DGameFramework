@@ -5,8 +5,6 @@
 
 #include <d3dcompiler.h>
 #include <d3d11Shader.h>
-#include <atlbase.h>
-#include <atlconv.h>
 
 #define SHADER_CACHE_DIR "assets/shaders/cache/"
 
@@ -59,22 +57,32 @@ void CreateReflectionData(Shader& shader, ID3DBlob* shaderBlob, ShaderType shade
 			resourceDeclaration.Slot = bindDesc.BindPoint;
 			resourceDeclaration.Stage = shaderType;
 		}
-		List_Add(shader.ReflectionData, &resourceDeclaration, sizeof(ShaderResourceDeclaration));
+		List_Add(shader.ReflectionData, &resourceDeclaration);
 	}
 }
 
 void Shader_Create(Shader& shader, const char* name, ShaderType type)
 {
-	List_Create(shader.ReflectionData, 20);
+	List_Create(shader.ReflectionData, sizeof(ShaderResourceDeclaration));
 
 	if (type & ShaderType_Vertex)
 	{
 		char vertexShaderName[256];
 		sprintf_s(vertexShaderName, 256, "%s%s_v.cso", SHADER_CACHE_DIR, name);
 
-		CORE_CHECK_DX_RESULT(D3DReadFileToBlob(CA2T(vertexShaderName), &shader.VertexShaderBlob));
+		size_t newsize = strlen(vertexShaderName) + 1;
+
+		wchar_t* wcstring = new wchar_t[newsize];
+
+		// Convert char* string to a wchar_t* string.
+		size_t convertedChars = 0;
+		mbstowcs_s(&convertedChars, wcstring, newsize, vertexShaderName, _TRUNCATE);
+
+		CORE_CHECK_DX_RESULT(D3DReadFileToBlob(wcstring, &shader.VertexShaderBlob));
 		CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateVertexShader(shader.VertexShaderBlob->GetBufferPointer(),
 			shader.VertexShaderBlob->GetBufferSize(), nullptr, &shader.VertexShader));
+
+		delete[]wcstring;
 
 		CreateReflectionData(shader, shader.VertexShaderBlob, ShaderType_Vertex);
 	}
@@ -84,10 +92,20 @@ void Shader_Create(Shader& shader, const char* name, ShaderType type)
 		char geometryShaderName[256];
 		sprintf_s(geometryShaderName, 256, "%s%s_g.cso", SHADER_CACHE_DIR, name);
 
+		size_t newsize = strlen(geometryShaderName) + 1;
+
+		wchar_t* wcstring = new wchar_t[newsize];
+
+		// Convert char* string to a wchar_t* string.
+		size_t convertedChars = 0;
+		mbstowcs_s(&convertedChars, wcstring, newsize, geometryShaderName, _TRUNCATE);
+
 		ID3DBlob* blob;
-		CORE_CHECK_DX_RESULT(D3DReadFileToBlob(CA2T(geometryShaderName), &blob));
+		CORE_CHECK_DX_RESULT(D3DReadFileToBlob(wcstring, &blob));
 		CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateGeometryShader(blob->GetBufferPointer(),
 			blob->GetBufferSize(), nullptr, &shader.GeometryShader));
+
+		delete[]wcstring;
 
 		CreateReflectionData(shader, blob, ShaderType_Geometry);
 		blob->Release();
@@ -98,10 +116,20 @@ void Shader_Create(Shader& shader, const char* name, ShaderType type)
 		char pixelShaderName[256];
 		sprintf_s(pixelShaderName, 256, "%s%s_p.cso", SHADER_CACHE_DIR, name);
 
+		size_t newsize = strlen(pixelShaderName) + 1;
+
+		wchar_t* wcstring = new wchar_t[newsize];
+
+		// Convert char* string to a wchar_t* string.
+		size_t convertedChars = 0;
+		mbstowcs_s(&convertedChars, wcstring, newsize, pixelShaderName, _TRUNCATE);
+
 		ID3DBlob* blob;
-		CORE_CHECK_DX_RESULT(D3DReadFileToBlob(CA2T(pixelShaderName), &blob));
+		CORE_CHECK_DX_RESULT(D3DReadFileToBlob(wcstring, &blob));
 		CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreatePixelShader(blob->GetBufferPointer(),
 			blob->GetBufferSize(), nullptr, &shader.PixelShader));
+
+		delete[]wcstring;
 
 		CreateReflectionData(shader, blob, ShaderType_Pixel);
 		blob->Release();
@@ -112,10 +140,20 @@ void Shader_Create(Shader& shader, const char* name, ShaderType type)
 		char computeShaderName[256];
 		sprintf_s(computeShaderName, 256, "%s%s_c.cso", SHADER_CACHE_DIR, name);
 
+		size_t newsize = strlen(computeShaderName) + 1;
+
+		wchar_t* wcstring = new wchar_t[newsize];
+
+		// Convert char* string to a wchar_t* string.
+		size_t convertedChars = 0;
+		mbstowcs_s(&convertedChars, wcstring, newsize, computeShaderName, _TRUNCATE);
+
 		ID3DBlob* blob;
-		CORE_CHECK_DX_RESULT(D3DReadFileToBlob(CA2T(computeShaderName), &blob));
+		CORE_CHECK_DX_RESULT(D3DReadFileToBlob(wcstring, &blob));
 		CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateComputeShader(blob->GetBufferPointer(),
 			blob->GetBufferSize(), nullptr, &shader.ComputeShader));
+
+		delete[]wcstring;
 
 		CreateReflectionData(shader, blob, ShaderType_Compute);
 		blob->Release();
@@ -168,5 +206,5 @@ void Shader_Release(Shader& shader)
 		shader.ComputeShader = nullptr;
 	}
 
-	List_Free(shader.ReflectionData, true);
+	List_Free(shader.ReflectionData);
 }

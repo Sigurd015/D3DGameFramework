@@ -16,35 +16,24 @@ struct ResourceElement
 void RenderPass_Create(RenderPass& renderPass, const RenderPassSpecification& specification)
 {
 	renderPass.Specification = specification;
-	List_Create(renderPass.Inputs, MAX_RESOURCE_SLOT);
-	{
-		ResourceElement element;
-		for (size_t i = 0; i < MAX_RESOURCE_SLOT; i++)
-		{
-			element.Name = nullptr;
-			element.Resource = nullptr;
-			element.Type = RendererResourceType_Unknown;
-			List_Add(renderPass.Inputs, &element, sizeof(ResourceElement));
-		}
-	}
-	renderPass.InputCount = 0;
+	List_Create(renderPass.Inputs, sizeof(ResourceElement), MAX_RESOURCE_SLOT);
 	const auto& pipelineSpecification = Pipeline_GetSpecification(renderPass.Specification.Pipeline);
 	renderPass.ShaderReflectionData = Shader_GetReflectionData(pipelineSpecification.Shader);
 }
 
 void RenderPass_Release(RenderPass& renderPass)
 {
-	List_Free(renderPass.Inputs, true);
+	List_Free(renderPass.Inputs);
 	Pipeline_Release(renderPass.Specification.Pipeline);
 }
 
 void RenderPass_SetInput(RenderPass& renderPass, const char* name, RendererResourceType type, const void* resource)
 {
-	ResourceElement* element = (ResourceElement*)List_Get(renderPass.Inputs, renderPass.InputCount);
-	element->Name = strdup(name);
-	element->Resource = resource;
-	element->Type = type;
-	renderPass.InputCount++;
+	ResourceElement element;
+	element.Name = strdup(name);
+	element.Resource = resource;
+	element.Type = type;
+	List_Add(renderPass.Inputs, &element);
 }
 
 void RnederPass_BindInputs(const RenderPass& renderPass)
@@ -110,7 +99,7 @@ void RnederPass_BindInputs(const RenderPass& renderPass)
 		}
 		else
 		{
-			for (size_t i = 0; i < renderPass.InputCount; i++)
+			for (size_t i = 0; i < List_Size(renderPass.Inputs); i++)
 			{
 				ResourceElement* element = (ResourceElement*)List_Get(renderPass.Inputs, i);
 
