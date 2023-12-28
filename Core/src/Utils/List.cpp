@@ -1,102 +1,83 @@
 #include "pch.h"
 #include "List.h"
 
-#include <corecrt_malloc.h>
+#define LIST_RESIZE_FACTOR 2
 
-void List_Create(List& list, uint32_t capacity)
+void List_Create(List& list, uint32_t stride, uint32_t capacity)
 {
 	list.Capacity = capacity;
-	list.Data = (void**)malloc(list.Capacity * sizeof(void*));
-
-	CORE_ASSERT(list.Data != nullptr, "List_Create: Memory allocation failed");
-
-	list.Index = 0;
+	list.Stride = stride;
+	list.Length = 0;
+	list.Data = Memory_Allocate(list.Capacity * list.Stride, MemoryBlockTag_List);
 }
 
 const void* List_Get(const List& list, uint32_t index)
 {
-	if (index >= list.Index)
+	if (index >= list.Length)
 	{
 		return nullptr;
 	}
-	return list.Data[index];
+	return (void*)((uint8_t*)list.Data + (index * list.Stride));
 }
 
 void List_Set(List& list, uint32_t index, void* data)
 {
-	if (index >= list.Index)
+	if (index >= list.Length)
 	{
 		return;
 	}
-	list.Data[index] = data;
+	Memory_Copy((void*)((uint8_t*)list.Data + (index * list.Stride)), data, list.Stride);
 }
 
-void List_Add(List& list, void* data, uint32_t size)
+void* List_Add(List& list, void* data)
 {
-	if (list.Index + 1 > list.Capacity)
+	if (list.Length >= list.Capacity)
 	{
-		list.Capacity *= 2;
-		list.Data = (void**)realloc(list.Data, list.Capacity * sizeof(void*));
+		uint32_t capacity = list.Capacity;
+		void* temp = list.Data;
 
-		CORE_ASSERT(list.Data != nullptr, "List_Add: Memory allocation failed");
+		list.Capacity *= LIST_RESIZE_FACTOR;
+		list.Data = Memory_Allocate(list.Capacity * list.Stride, MemoryBlockTag_List);
+		Memory_Copy(list.Data, temp, capacity * list.Stride);
+		Memory_Free(temp, capacity * list.Stride, MemoryBlockTag_List);
+
+		// TODO: Which one is better? realloc or malloc + memcpy?
+		//list.Data = realloc(list.Data, list.Capacity * list.Stride);
 	}
 
-	if (size != 0)
-	{
-		list.Data[list.Index] = (void*)malloc(size);
-		memcpy(list.Data[list.Index], data, size);
-	}
-	else
-	{
-		list.Data[list.Index] = data;
-	}
-	list.Index++;
+	void* dest = (void*)((uint8_t*)list.Data + (list.Length * list.Stride));
+	Memory_Copy(dest, data, list.Stride);
+	list.Length++;
+	return dest;
 }
 
 void List_RemoveAt(List& list, uint32_t index)
 {
-	if (index >= list.Index)
+	if (index >= list.Length)
 	{
 		return;
 	}
 
-	for (uint32_t i = index; i < list.Index - 1; i++)
+	for (uint32_t i = index; i < list.Length - 1; i++)
 	{
-		list.Data[i] = list.Data[i + 1];
+		Memory_Copy((void*)((uint8_t*)list.Data + (i * list.Stride)),
+			(void*)((uint8_t*)list.Data + ((i + 1) * list.Stride)), list.Stride);
 	}
 
-	list.Index--;
+	list.Length--;
 }
 
-void List_Clear(List& list, bool freeEachElement)
+void List_Clear(List& list)
 {
-	if (freeEachElement)
-	{
-		for (size_t i = 0; i < list.Index; i++)
-		{
-			if (list.Data[i] != nullptr)
-				free(list.Data[i]);
-		}
-	}
-
-	list.Index = 0;
+	list.Length = 0;
 }
 
-void List_Free(List& list, bool freeEachElement)
+void List_Free(List& list)
 {
-	if (freeEachElement)
-	{
-		for (size_t i = 0; i < list.Index; i++)
-		{
-			if (list.Data[i] != nullptr)
-				free(list.Data[i]);
-		}
-	}
-
-	free(list.Data);
+	Memory_Free(list.Data, list.Capacity * list.Stride, MemoryBlockTag_List);
 }
 
 uint32_t List_Size(const List& list)
 {
-	return list.Index;
+	return list.Length;
 }

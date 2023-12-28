@@ -11,47 +11,25 @@ void PhysicsWorld2D_Create(PhysicsWorld2D& world, void(*CollisionCallback)(void*
 {
 	world.CollisionCallback = CollisionCallback;
 
-	List_Create(world.Rigidbody2Ds, PHYSICS_POOL_SIZE);
-	List_Create(world.ContactPairs, PHYSICS_POOL_SIZE);
-	{
-		Rigidbody2D rigidbody2D;
-		for (size_t i = 0; i < PHYSICS_POOL_SIZE; i++)
-		{
-			List_Add(world.Rigidbody2Ds, &rigidbody2D, sizeof(Rigidbody2D));
-		}
-	}
-	{
-		ContactPair contactPair;
-		for (size_t i = 0; i < PHYSICS_POOL_SIZE; i++)
-		{
-			List_Add(world.ContactPairs, &contactPair, sizeof(ContactPair));
-		}
-	}
-	world.Rigidbody2DCount = 0;
-	world.ContactPairCount = 0;
+	List_Create(world.Rigidbody2Ds, sizeof(Rigidbody2D));
+	List_Create(world.ContactPairs, sizeof(ContactPair));
 }
 
 void PhysicsWorld2D_Destory(PhysicsWorld2D& world)
 {
-	List_Free(world.Rigidbody2Ds, true);
-	List_Free(world.ContactPairs, true);
+	List_Free(world.Rigidbody2Ds);
+	List_Free(world.ContactPairs);
 }
 
 void* PhysicsWorld2D_AddRigidbody2D(PhysicsWorld2D& world, Rigidbody2D& rigidbody2D)
 {
-	Rigidbody2D* rigidbody = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, world.Rigidbody2DCount);
-	*rigidbody = rigidbody2D;
-
-	if (rigidbody->Type == Rigidbody2D::BodyType::Static)
-		rigidbody->InvMass = 0.0f;
+	Rigidbody2D body = rigidbody2D;
+	if (body.Type == Rigidbody2D::BodyType::Static)
+		body.InvMass = 0.0f;
 	else
-		rigidbody->InvMass = 1.0f / rigidbody->Mass;
+		body.InvMass = 1.0f / body.Mass;
 
-	world.Rigidbody2DCount++;
-
-	CORE_ASSERT(world.Rigidbody2DCount < PHYSICS_POOL_SIZE, "PhysicsWorld2D_AddRigidbody2D: Rigidbody2D Pool is full");
-
-	return rigidbody;
+	return List_Add(world.Rigidbody2Ds, &body);
 }
 
 bool Collide(Rigidbody2D* body1, Rigidbody2D* body2, ContactParams& contactParams)
@@ -126,7 +104,7 @@ void ResolveCollision(Rigidbody2D* body1, Rigidbody2D* body2, ContactParams& con
 
 void BroadPhase(PhysicsWorld2D& world)
 {
-	for (size_t i = 0; i < world.Rigidbody2DCount; i++)
+	for (size_t i = 0; i < List_Size(world.Rigidbody2Ds); i++)
 	{
 		Rigidbody2D* body1 = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, i);
 		if (!body1->Enabled)
@@ -134,7 +112,7 @@ void BroadPhase(PhysicsWorld2D& world)
 			continue;
 		}
 
-		for (size_t j = i + 1; j < world.Rigidbody2DCount; j++)
+		for (size_t j = i + 1; j < List_Size(world.Rigidbody2Ds); j++)
 		{
 			Rigidbody2D* body2 = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, j);
 			if (body1->Type == Rigidbody2D::BodyType::Static && body2->Type == Rigidbody2D::BodyType::Static)
@@ -168,10 +146,10 @@ void BroadPhase(PhysicsWorld2D& world)
 				continue;
 			}
 
-			ContactPair* contactPair = (ContactPair*)List_Get(world.ContactPairs, world.ContactPairCount);
-			contactPair->Body1 = i;
-			contactPair->Body2 = j;
-			world.ContactPairCount++;
+			ContactPair contactPair = {};
+			contactPair.Body1 = i;
+			contactPair.Body2 = j;
+			List_Add(world.ContactPairs, &contactPair);
 		}
 	}
 }
@@ -203,7 +181,7 @@ void RayVisualiztion(const Vec2& rayOrigin, const Vec2& rayDirection, float maxD
 
 void NarrowPhase(PhysicsWorld2D& world)
 {
-	for (size_t i = 0; i < world.ContactPairCount; i++)
+	for (size_t i = 0; i < List_Size(world.ContactPairs); i++)
 	{
 		ContactPair* contactPair = (ContactPair*)List_Get(world.ContactPairs, i);
 		Rigidbody2D* body1 = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, contactPair->Body1);
@@ -213,9 +191,9 @@ void NarrowPhase(PhysicsWorld2D& world)
 		if (Collide(body1, body2, contactParams))
 		{
 
-			#ifndef CORE_DIST
+#ifndef CORE_DIST
 			ContactPointVisualiztion(contactParams);
-			#endif 
+#endif 
 
 			if (body1->IsTrigger || body2->IsTrigger)
 			{
@@ -249,7 +227,7 @@ void PhysicsWorld2D_Update(PhysicsWorld2D& world, float timeStep, uint32_t itera
 	{
 		// Rigidbody2D Step
 		{
-			for (size_t i = 0; i < world.Rigidbody2DCount; i++)
+			for (size_t i = 0; i < List_Size(world.Rigidbody2Ds); i++)
 			{
 				Rigidbody2D* rigidbody = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, i);
 
@@ -259,7 +237,7 @@ void PhysicsWorld2D_Update(PhysicsWorld2D& world, float timeStep, uint32_t itera
 
 		// Collide
 		{
-			world.ContactPairCount = 0;
+			List_Clear(world.ContactPairs);
 			BroadPhase(world);
 			NarrowPhase(world);
 		}
@@ -271,7 +249,7 @@ void* PhysicsWorld2D_Raycast(PhysicsWorld2D& world, const Vec2& rayOrigin, const
 	void* result = nullptr;
 	minDistance = FLT_MAX;
 
-	for (size_t i = 0; i < world.Rigidbody2DCount; i++)
+	for (size_t i = 0; i < List_Size(world.Rigidbody2Ds); i++)
 	{
 		Rigidbody2D* rigidbody = (Rigidbody2D*)List_Get(world.Rigidbody2Ds, i);
 
@@ -321,9 +299,9 @@ void* PhysicsWorld2D_Raycast(PhysicsWorld2D& world, const Vec2& rayOrigin, const
 		}
 	}
 
-	#ifndef CORE_DIST
+#ifndef CORE_DIST
 	RayVisualiztion(rayOrigin, rayDirection, minDistance);
-	#endif 
+#endif 
 
 	return result;
 }

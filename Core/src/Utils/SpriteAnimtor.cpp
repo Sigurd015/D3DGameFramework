@@ -4,7 +4,7 @@
 
 void SpriteAnimator_Create(SpriteAnimator& animtor, const SpriteAnimatorSpecification& spec)
 {
-	List_Create(animtor.Elements, spec.ElementsCount);
+	List_Create(animtor.Elements, sizeof(SpriteElement), spec.ElementsCount);
 
 	uint32_t index = 0;
 	for (size_t i = spec.StartElement.y; i < spec.ElementsPerRow; i++)
@@ -14,16 +14,16 @@ void SpriteAnimator_Create(SpriteAnimator& animtor, const SpriteAnimatorSpecific
 			if (index >= spec.ElementsCount)
 				break;
 
-			SpriteElement* element = (SpriteElement*)malloc(sizeof(SpriteElement));
+			SpriteElement element;
 
 			float elementWidth = (float)(j * spec.ElementWidth);
 			float elementHeight = (float)(i * spec.ElementHeight);
 
-			element->UVStart = { elementWidth / (float)spec.TextureWidth,elementHeight / (float)spec.TextureHeight };
-			element->UVEnd = { (float)(elementWidth + spec.ElementWidth) / (float)spec.TextureWidth,
+			element.UVStart = { elementWidth / (float)spec.TextureWidth,elementHeight / (float)spec.TextureHeight };
+			element.UVEnd = { (float)(elementWidth + spec.ElementWidth) / (float)spec.TextureWidth,
 				(float)(elementHeight + spec.ElementHeight) / (float)spec.TextureHeight };
 
-			List_Add(animtor.Elements, element);
+			List_Add(animtor.Elements, &element);
 			index++;
 		}
 	}
@@ -31,7 +31,7 @@ void SpriteAnimator_Create(SpriteAnimator& animtor, const SpriteAnimatorSpecific
 
 void SpriteAnimator_Destroy(SpriteAnimator& animtor)
 {
-	List_Free(animtor.Elements, true);
+	List_Free(animtor.Elements);
 }
 
 SpriteElement* SpriteAnimator_GetElement(SpriteAnimator& animtor, uint32_t index)

@@ -138,7 +138,7 @@ enum AudioComponentType
 struct AudioComponent
 {
 	AudioComponentType Type;
-	void* Audio = nullptr;
+	void* RuntimeAudio = nullptr;
 };
 
 // Forward declarations
@@ -159,4 +159,5 @@ struct ScriptComponent
 
 	// For ScriptComponent that used by multiple entities, this is the runtime data for each entity
 	void* RuntimeData = nullptr;
+	uint32_t RuntimeDataSize = 0;
 };

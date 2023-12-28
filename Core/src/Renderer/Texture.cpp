@@ -22,19 +22,18 @@ void* Texture2D_Create(const char* path)
 {
 	size_t newsize = strlen(path) + 1;
 
-	wchar_t* wcstring = new wchar_t[newsize];
+	wchar_t* wcstring = (wchar_t*)Memory_Allocate(newsize * sizeof(wchar_t), MemoryBlockTag_Array);
 
 	// Convert char* string to a wchar_t* string.
 	size_t convertedChars = 0;
 	mbstowcs_s(&convertedChars, wcstring, newsize, path, _TRUNCATE);
 
-	Texture2D* texture2D = (Texture2D*)malloc(sizeof(Texture2D));
-	*texture2D = {};
+	Texture2D* texture2D = (Texture2D*)Memory_Allocate(sizeof(Texture2D), MemoryBlockTag_Texture);
 
 	CORE_CHECK_DX_RESULT(DirectX::CreateWICTextureFromFileEx(RendererContext_GetDevice(), wcstring, 0, D3D11_USAGE_DEFAULT,
 		D3D11_BIND_SHADER_RESOURCE, 0, 0, DirectX::WIC_LOADER_DEFAULT, reinterpret_cast<ID3D11Resource**>(&texture2D->Texture), &texture2D->TextureView));
 
-	delete[]wcstring;
+	Memory_Free(wcstring, newsize * sizeof(wchar_t), MemoryBlockTag_Array);
 
 	D3D11_TEXTURE2D_DESC desc;
 	texture2D->Texture->GetDesc(&desc);
@@ -122,6 +121,6 @@ void Texture2D_Release(Texture2D* texture2D)
 	}
 	if (texture2D->NeedRelease)
 	{
-		free(texture2D);
+		Memory_Free(texture2D, sizeof(Texture2D), MemoryBlockTag_Texture);
 	}
 }

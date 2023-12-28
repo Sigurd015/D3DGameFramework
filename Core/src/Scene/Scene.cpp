@@ -9,7 +9,7 @@
 
 void Scene_Create(Scene& scene)
 {
-	List_Create(scene.Entities);
+	List_Create(scene.Entities, sizeof(Entity));
 }
 
 void OnCollide(void* entity1, void* entity2)
@@ -47,14 +47,14 @@ void Scene_Ininialize(Scene& scene)
 				{
 					DirectX::AudioListener* listener = new DirectX::AudioListener();
 					listener->SetPosition(tc->Translation);
-					ac->Audio = listener;
+					ac->RuntimeAudio = listener;
 					break;
 				}
 				case AudioComponentType_Emitter:
 				{
 					DirectX::AudioEmitter* emitter = new DirectX::AudioEmitter();
 					emitter->SetPosition(tc->Translation);
-					ac->Audio = emitter;
+					ac->RuntimeAudio = emitter;
 					break;
 				}
 				}
@@ -178,14 +178,14 @@ void Scene_Destroy(Scene& scene)
 		}
 	}
 
-	List_Free(scene.Entities, true);
+	List_Free(scene.Entities);
 	PhysicsWorld2D_Destory(scene.PhysicsWorld);
 }
 
 void Scene_AddEntity(Scene& scene, Entity& entity)
 {
 	entity.Scene = &scene;
-	List_Add(scene.Entities, &entity, sizeof(Entity));
+	List_Add(scene.Entities, &entity);
 }
 
 Entity* Scene_GetEntityByName(const Scene* scene, const char* name)
@@ -229,7 +229,7 @@ void* Scene_GetListener(const Scene* scene)
 			{
 			case AudioComponentType_Listener:
 			{
-				return ac->Audio;
+				return ac->RuntimeAudio;
 			}
 			}
 		}
@@ -377,13 +377,13 @@ void Scene_OnUpdate(Scene& scene, float timeStep)
 				{
 				case AudioComponentType_Listener:
 				{
-					DirectX::AudioListener* listener = (DirectX::AudioListener*)ac->Audio;
+					DirectX::AudioListener* listener = (DirectX::AudioListener*)ac->RuntimeAudio;
 					listener->Update({ tc->Translation.x,tc->Translation.y,tc->Translation.z }, { 0,0,-1.0f }, timeStep);
 					break;
 				}
 				case AudioComponentType_Emitter:
 				{
-					DirectX::AudioEmitter* emitter = (DirectX::AudioEmitter*)ac->Audio;
+					DirectX::AudioEmitter* emitter = (DirectX::AudioEmitter*)ac->RuntimeAudio;
 					emitter->Update({ tc->Translation.x,tc->Translation.y,tc->Translation.z }, { 0,0,-1.0f }, timeStep);
 					break;
 				}
@@ -476,9 +476,9 @@ void Scene_OnUpdate(Scene& scene, float timeStep)
 		}
 	}
 
-	#ifndef CORE_DIST
+#ifndef CORE_DIST
 	ColliderVisualiztion(scene);
-	#endif
+#endif
 
 	Renderer2D_EndScene();
 }

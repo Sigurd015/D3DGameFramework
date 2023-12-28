@@ -13,6 +13,7 @@ int Main(int argc, char** argv)
 	Application_Ininialize(&app);
 	Application_Run();
 	Application_Shutdown();
+	Memory_CheckMemoryLeaks();
 	Log_Shutdown();
 	return 0;
 }

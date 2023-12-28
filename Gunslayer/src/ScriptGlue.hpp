@@ -125,9 +125,10 @@ void ScriptGlue_CreateTitleScene(Scene& scene)
 		scriptComponent.OnEnable = LightController_OnEnable;
 		scriptComponent.OnDisable = LightController_OnDisable;
 
-		LightData* data = (LightData*)malloc(sizeof(LightData));
+		LightData* data = (LightData*)Memory_Allocate(sizeof(LightData), MemoryBlockTag_Component);
 		data->Type = LightType::RED;
 		scriptComponent.RuntimeData = data;
+		scriptComponent.RuntimeDataSize = sizeof(LightData);
 
 		Entity_AddComponent(&light, ComponentType::ComponentType_Script, &scriptComponent);
 
@@ -156,9 +157,10 @@ void ScriptGlue_CreateTitleScene(Scene& scene)
 		scriptComponent.OnEnable = LightController_OnEnable;
 		scriptComponent.OnDisable = LightController_OnDisable;
 
-		LightData* data = (LightData*)malloc(sizeof(LightData));
+		LightData* data = (LightData*)Memory_Allocate(sizeof(LightData), MemoryBlockTag_Component);
 		data->Type = LightType::GREEN;
 		scriptComponent.RuntimeData = data;
+		scriptComponent.RuntimeDataSize = sizeof(LightData);
 
 		Entity_AddComponent(&light, ComponentType::ComponentType_Script, &scriptComponent);
 
@@ -168,7 +170,7 @@ void ScriptGlue_CreateTitleScene(Scene& scene)
 
 void ScriptGlue_CreatePlayScene(Scene& scene)
 {
-	#pragma region Camera
+#pragma region Camera
 	{
 		Entity camera = {};
 		camera.Tag.Name = "MainCamera";
@@ -204,7 +206,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 		Scene_AddEntity(scene, camera);
 	}
-	#ifndef CORE_DIST
+#ifndef CORE_DIST
 	{
 		Entity camera;
 		camera.Tag.Name = "DebugCamera";
@@ -229,10 +231,10 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 		Scene_AddEntity(scene, camera);
 	}
-	#endif
-	#pragma endregion
+#endif
+#pragma endregion
 
-	#pragma region Player
+#pragma region Player
 	{
 		Entity player = {};
 		player.Tag.Name = "Player";
@@ -267,9 +269,9 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 
 		Scene_AddEntity(scene, player);
 	}
-	#pragma endregion
+#pragma endregion
 
-	#pragma region Pickable Items
+#pragma region Pickable Items
 	{
 		{
 			Entity enemy = {};
@@ -302,20 +304,19 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			scriptComponent.OnEnable = ItemTrigger_OnEnable;
 			scriptComponent.OnDisable = ItemTrigger_OnDisable;
 
-			ItemTriggerData* itemData = (ItemTriggerData*)malloc(sizeof(EnemyData));
-			*itemData = {};
+			ItemTriggerData* itemData = (ItemTriggerData*)Memory_Allocate(sizeof(ItemTriggerData), MemoryBlockTag_Component);
 			itemData->Type = ItemTriggerType::MEDKIT;
-
 			scriptComponent.RuntimeData = itemData;
+			scriptComponent.RuntimeDataSize = sizeof(ItemTriggerData);
 
 			Entity_AddComponent(&enemy, ComponentType::ComponentType_Script, &scriptComponent);
 
 			Scene_AddEntity(scene, enemy);
 		}
 	}
-	#pragma endregion
+#pragma endregion
 
-	#pragma region Enemy	
+#pragma region Enemy	
 	{
 		{
 			Entity enemy = {};
@@ -350,15 +351,14 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			scriptComponent.OnEnable = EnemyController_OnEnable;
 			scriptComponent.OnDisable = EnemyController_OnDisable;
 
-			EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
-			*enemyData = {};
+			EnemyData* enemyData = (EnemyData*)Memory_Allocate(sizeof(EnemyData), MemoryBlockTag_Component);
 			enemyData->Type = EnemyType::CACO_DEMON;
 			enemyData->WalkSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_CacoDemonWalkSprite);
 			enemyData->AttackSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_CacoDemonAttackSprite);
 			enemyData->DeathSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_CacoDemonDeathSprite);
 			enemyData->PainSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_CacoDemonPainSprite);
-
 			scriptComponent.RuntimeData = enemyData;
+			scriptComponent.RuntimeDataSize = sizeof(EnemyData);
 
 			Entity_AddComponent(&enemy, ComponentType::ComponentType_Script, &scriptComponent);
 
@@ -397,15 +397,14 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			scriptComponent.OnEnable = EnemyController_OnEnable;
 			scriptComponent.OnDisable = EnemyController_OnDisable;
 
-			EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
-			*enemyData = {};
+			EnemyData* enemyData = (EnemyData*)Memory_Allocate(sizeof(EnemyData), MemoryBlockTag_Component);
 			enemyData->Type = EnemyType::CYBER_DEMON;
 			enemyData->WalkSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_CyberDemonWalkSprite);
 			enemyData->AttackSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_CyberDemonAttackSprite);
 			enemyData->DeathSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_CyberDemonDeathSprite);
 			enemyData->PainSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_CyberDemonPainSprite);
-
 			scriptComponent.RuntimeData = enemyData;
+			scriptComponent.RuntimeDataSize = sizeof(EnemyData);
 
 			Entity_AddComponent(&enemy, ComponentType::ComponentType_Script, &scriptComponent);
 
@@ -444,24 +443,23 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			scriptComponent.OnEnable = EnemyController_OnEnable;
 			scriptComponent.OnDisable = EnemyController_OnDisable;
 
-			EnemyData* enemyData = (EnemyData*)malloc(sizeof(EnemyData));
-			*enemyData = {};
+			EnemyData* enemyData = (EnemyData*)Memory_Allocate(sizeof(EnemyData), MemoryBlockTag_Component);
 			enemyData->Type = EnemyType::SOLDIER;
 			enemyData->WalkSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_SoldierWalkSprite);
 			enemyData->AttackSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_SoldierAttackSprite);
 			enemyData->DeathSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_SoldierDeathSprite);
 			enemyData->PainSpriteSheet = (Texture2D*)AssetManager_GetAsset(s_SoldierPainSprite);
-
 			scriptComponent.RuntimeData = enemyData;
+			scriptComponent.RuntimeDataSize = sizeof(EnemyData);
 
 			Entity_AddComponent(&enemy, ComponentType::ComponentType_Script, &scriptComponent);
 
 			Scene_AddEntity(scene, enemy);
 		}
 	}
-	#pragma endregion
+#pragma endregion
 
-	#pragma region UI
+#pragma region UI
 	{
 		//Background and UI manager
 		{
@@ -577,9 +575,9 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			Scene_AddEntity(scene, hpBarFront);
 		}
 	}
-	#pragma endregion
+#pragma endregion
 
-	#pragma region Map
+#pragma region Map
 	{
 		{
 			Entity fieldManager = {};
@@ -739,7 +737,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 			Scene_AddEntity(scene, quad);
 		}
 
-		#pragma region MAP_ELEMENT_1
+#pragma region MAP_ELEMENT_1
 		{
 			{
 				Entity light = {};
@@ -770,9 +768,10 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				scriptComponent.OnEnable = LightController_OnEnable;
 				scriptComponent.OnDisable = LightController_OnDisable;
 
-				LightData* data = (LightData*)malloc(sizeof(LightData));
+				LightData* data = (LightData*)Memory_Allocate(sizeof(LightData), MemoryBlockTag_Component);
 				data->Type = LightType::RED;
 				scriptComponent.RuntimeData = data;
+				scriptComponent.RuntimeDataSize = sizeof(LightData);
 
 				Entity_AddComponent(&light, ComponentType::ComponentType_Script, &scriptComponent);
 
@@ -807,9 +806,10 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				scriptComponent.OnEnable = LightController_OnEnable;
 				scriptComponent.OnDisable = LightController_OnDisable;
 
-				LightData* data = (LightData*)malloc(sizeof(LightData));
+				LightData* data = (LightData*)Memory_Allocate(sizeof(LightData), MemoryBlockTag_Component);
 				data->Type = LightType::GREEN;
 				scriptComponent.RuntimeData = data;
+				scriptComponent.RuntimeDataSize = sizeof(LightData);
 
 				Entity_AddComponent(&light, ComponentType::ComponentType_Script, &scriptComponent);
 
@@ -869,9 +869,10 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				scriptComponent.OnEnable = FieldController_OnEnable;
 				scriptComponent.OnDisable = FieldController_OnDisable;
 
-				FieldTriggerData* data = (FieldTriggerData*)malloc(sizeof(FieldTriggerData));
+				FieldTriggerData* data = (FieldTriggerData*)Memory_Allocate(sizeof(FieldTriggerData), MemoryBlockTag_Component);
 				data->Type = FieldTriggerType::GEN_MAP;
 				scriptComponent.RuntimeData = data;
+				scriptComponent.RuntimeDataSize = sizeof(FieldTriggerData);
 
 				Entity_AddComponent(&wall, ComponentType::ComponentType_Script, &scriptComponent);
 
@@ -1171,9 +1172,9 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Scene_AddEntity(scene, wall);
 			}
 		}
-		#pragma endregion
+#pragma endregion
 
-		#pragma region MAP_ELEMENT_2
+#pragma region MAP_ELEMENT_2
 		{
 			{
 				Entity light = {};
@@ -1204,9 +1205,10 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				scriptComponent.OnEnable = LightController_OnEnable;
 				scriptComponent.OnDisable = LightController_OnDisable;
 
-				LightData* data = (LightData*)malloc(sizeof(LightData));
+				LightData* data = (LightData*)Memory_Allocate(sizeof(LightData), MemoryBlockTag_Component);
 				data->Type = LightType::GREEN;
 				scriptComponent.RuntimeData = data;
+				scriptComponent.RuntimeDataSize = sizeof(LightData);
 
 				Entity_AddComponent(&light, ComponentType::ComponentType_Script, &scriptComponent);
 
@@ -1241,9 +1243,10 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				scriptComponent.OnEnable = LightController_OnEnable;
 				scriptComponent.OnDisable = LightController_OnDisable;
 
-				LightData* data = (LightData*)malloc(sizeof(LightData));
+				LightData* data = (LightData*)Memory_Allocate(sizeof(LightData), MemoryBlockTag_Component);
 				data->Type = LightType::RED;
 				scriptComponent.RuntimeData = data;
+				scriptComponent.RuntimeDataSize = sizeof(LightData);
 
 				Entity_AddComponent(&light, ComponentType::ComponentType_Script, &scriptComponent);
 
@@ -1351,9 +1354,10 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				scriptComponent.OnEnable = FieldController_OnEnable;
 				scriptComponent.OnDisable = FieldController_OnDisable;
 
-				FieldTriggerData* data = (FieldTriggerData*)malloc(sizeof(FieldTriggerData));
+				FieldTriggerData* data = (FieldTriggerData*)Memory_Allocate(sizeof(FieldTriggerData), MemoryBlockTag_Component);
 				data->Type = FieldTriggerType::GEN_MAP;
 				scriptComponent.RuntimeData = data;
+				scriptComponent.RuntimeDataSize = sizeof(FieldTriggerData);
 
 				Entity_AddComponent(&wall, ComponentType::ComponentType_Script, &scriptComponent);
 
@@ -1605,7 +1609,7 @@ void ScriptGlue_CreatePlayScene(Scene& scene)
 				Scene_AddEntity(scene, wall);
 			}
 		}
-		#pragma endregion
+#pragma endregion
 	}
-	#pragma endregion
+#pragma endregion
 }

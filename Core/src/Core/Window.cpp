@@ -3,8 +3,6 @@
 #include "Renderer/RendererContext.h"
 
 #include <Windows.h>
-#include <atlbase.h>
-#include <atlconv.h>
 
 struct WindowState
 {
@@ -165,7 +163,9 @@ void Window_Create(const WindowProps& props)
 			WndProc, 0, 0, GetModuleHandle(nullptr), nullptr,
 			nullptr, nullptr, nullptr, L"GMAE_CORE", nullptr };
 
-	CORE_ASSERT(RegisterClassEx(&wndClass), "RegisterClass - Failed");
+	bool result = RegisterClassEx(&wndClass);
+
+	CORE_ASSERT(result, "RegisterClass - Failed");
 
 	DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU;
 
@@ -181,9 +181,19 @@ void Window_Create(const WindowProps& props)
 	RECT rect = { 0, 0, s_WindowState.Props.Width, s_WindowState.Props.Height };
 	AdjustWindowRect(&rect, style, false);
 
-	s_WindowState.WndHandle = CreateWindowEx(0, wndClass.lpszClassName, CA2T(s_WindowState.Props.Title),
+	size_t newsize = strlen(s_WindowState.Props.Title) + 1;
+
+	wchar_t* wcstring = new wchar_t[newsize];
+
+	// Convert char* string to a wchar_t* string.
+	size_t convertedChars = 0;
+	mbstowcs_s(&convertedChars, wcstring, newsize, s_WindowState.Props.Title, _TRUNCATE);
+
+	s_WindowState.WndHandle = CreateWindowEx(0, wndClass.lpszClassName, wcstring,
 		style, CW_USEDEFAULT, CW_USEDEFAULT,
 		rect.right - rect.left, rect.bottom - rect.top, nullptr, nullptr, wndClass.hInstance, nullptr);
+
+	delete[]wcstring;
 
 	CORE_ASSERT(s_WindowState.WndHandle, "CreateWindow - Failed");
 

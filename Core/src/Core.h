@@ -2,6 +2,7 @@
 
 //-------Log------------
 #include "Core/Log.h"
+#include "Core/Memory.h"
 
 //-------Core-----------
 #include "Core/Application.h"
