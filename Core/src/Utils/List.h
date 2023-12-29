@@ -15,5 +15,6 @@ void List_Set(List& list, uint32_t index, void* data);
 void* List_Add(List& list, void* data);
 void List_RemoveAt(List& list, uint32_t index);
 void List_Clear(List& list);
+void List_Foreach(const List& list, void(*callback)(void* data));
 void List_Free(List& list);
 uint32_t List_Size(const List& list);

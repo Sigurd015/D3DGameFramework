@@ -137,7 +137,7 @@ void PlayerController_OnCollision(Entity* entity, Entity* other, void* runtimeDa
 
 void PlayerController_OnRaycastHit(Entity* entity, Entity* other, void* runtimeData)
 {
-	if (strstr(other->Tag.Name, "Enemy") != NULL)
+	if (String_Contains(other->Tag.Name, "Enemy"))
 	{
 
 		#ifndef CORE_DIST

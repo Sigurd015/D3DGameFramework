@@ -33,16 +33,13 @@ void* List_Add(List& list, void* data)
 {
 	if (list.Length >= list.Capacity)
 	{
-		uint32_t capacity = list.Capacity;
-		void* temp = list.Data;
+		uint32_t oldCapacity = list.Capacity;
+		void* oldData = list.Data;
 
 		list.Capacity *= LIST_RESIZE_FACTOR;
 		list.Data = Memory_Allocate(list.Capacity * list.Stride, MemoryBlockTag_List);
-		Memory_Copy(list.Data, temp, capacity * list.Stride);
-		Memory_Free(temp, capacity * list.Stride, MemoryBlockTag_List);
-
-		// TODO: Which one is better? realloc or malloc + memcpy?
-		//list.Data = realloc(list.Data, list.Capacity * list.Stride);
+		Memory_Copy(list.Data, oldData, oldCapacity * list.Stride);
+		Memory_Free(oldData, oldCapacity * list.Stride, MemoryBlockTag_List);
 	}
 
 	void* dest = (void*)((uint8_t*)list.Data + (list.Length * list.Stride));
@@ -70,6 +67,14 @@ void List_RemoveAt(List& list, uint32_t index)
 void List_Clear(List& list)
 {
 	list.Length = 0;
+}
+
+void List_Foreach(const List& list, void(*callback)(void* data))
+{
+	for (uint32_t i = 0; i < list.Length; i++)
+	{
+		callback((void*)((uint8_t*)list.Data + (i * list.Stride)));
+	}
 }
 
 void List_Free(List& list)

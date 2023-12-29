@@ -20,6 +20,7 @@
 //-------Renderer-------
 #include "Renderer/RendererAPI.h"
 #include "Renderer/Renderer2D.h"
+#include "Renderer/SceneRenderer.h"
 #include "Renderer/VertexBuffer.h"
 #include "Renderer/IndexBuffer.h"
 #include "Renderer/Shader.h"
@@ -48,3 +49,4 @@
 #include "Utils/SpriteAnimtor.h"
 #include "Utils/SpriteTimer.h"
 #include "Utils/RefPtr.h"
+#include "Utils/String.h"

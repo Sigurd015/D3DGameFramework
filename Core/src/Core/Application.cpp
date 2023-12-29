@@ -72,6 +72,9 @@ void Application_Ininialize(Application* appInst)
 
 	Window_Create(props);
 
+	// Make sure AssetManager is initialized before RendererAPI
+	// because RendererAPI will use AssetManager to load shaders which are memory assets
+	AssetManager_Init();
 	RendererAPI_Initialize();
 
 	if (appInst->Spec.FullScreen)
@@ -81,7 +84,6 @@ void Application_Ininialize(Application* appInst)
 
 	Audio_Init();
 	Input_Init();
-	AssetManager_Init();
 
 	s_AppState.AppInst->Ininialize(s_AppState.AppInst);
 }

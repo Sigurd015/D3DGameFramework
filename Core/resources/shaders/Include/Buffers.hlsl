@@ -36,7 +36,7 @@ struct Material
     float3 Albedo;
     float Emission;
     float Metalness;
-	float Roughness;
+    float Roughness;
     bool UseNormalMap;
 };
 

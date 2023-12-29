@@ -4,8 +4,6 @@
 #include "RendererContext.h"
 #include "RenderStates.h"
 
-#define MAX_RESOURCE_SLOT 16
-
 struct ResourceElement
 {
 	char* Name;
@@ -16,13 +14,20 @@ struct ResourceElement
 void RenderPass_Create(RenderPass& renderPass, const RenderPassSpecification& specification)
 {
 	renderPass.Specification = specification;
-	List_Create(renderPass.Inputs, sizeof(ResourceElement), MAX_RESOURCE_SLOT);
+	List_Create(renderPass.Inputs, sizeof(ResourceElement));
 	const auto& pipelineSpecification = Pipeline_GetSpecification(renderPass.Specification.Pipeline);
 	renderPass.ShaderReflectionData = Shader_GetReflectionData(pipelineSpecification.Shader);
 }
 
 void RenderPass_Release(RenderPass& renderPass)
 {
+	// Free string in the data, list can't free it, because it doesn't know the type of the data
+	List_Foreach(renderPass.Inputs, [](void* data)
+		{
+			ResourceElement* element = (ResourceElement*)data;
+			String_Free(element->Name);
+		});
+
 	List_Free(renderPass.Inputs);
 	Pipeline_Release(renderPass.Specification.Pipeline);
 }
@@ -30,7 +35,7 @@ void RenderPass_Release(RenderPass& renderPass)
 void RenderPass_SetInput(RenderPass& renderPass, const char* name, RendererResourceType type, const void* resource)
 {
 	ResourceElement element;
-	element.Name = strdup(name);
+	element.Name = String_Duplicate(name);
 	element.Resource = resource;
 	element.Type = type;
 	List_Add(renderPass.Inputs, &element);
@@ -49,11 +54,11 @@ void RnederPass_BindInputs(const RenderPass& renderPass)
 			{
 			case ShaderType_Vertex:
 			{
-				if (strcmp(decl->Name, "u_SSLinearWrap"))
+				if (String_Compare(decl->Name, "u_SSLinearWrap"))
 				{
 					RendererContext_GetDeviceContext()->PSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearWrap);
 				}
-				else if (strcmp(decl->Name, "u_SSLinearClamp"))
+				else if (String_Compare(decl->Name, "u_SSLinearClamp"))
 				{
 					RendererContext_GetDeviceContext()->PSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearClamp);
 				}
@@ -61,11 +66,11 @@ void RnederPass_BindInputs(const RenderPass& renderPass)
 			}
 			case ShaderType_Pixel:
 			{
-				if (strcmp(decl->Name, "u_SSLinearWrap"))
+				if (String_Compare(decl->Name, "u_SSLinearWrap"))
 				{
 					RendererContext_GetDeviceContext()->PSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearWrap);
 				}
-				else if (strcmp(decl->Name, "u_SSLinearClamp"))
+				else if (String_Compare(decl->Name, "u_SSLinearClamp"))
 				{
 					RendererContext_GetDeviceContext()->PSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearClamp);
 				}
@@ -73,11 +78,11 @@ void RnederPass_BindInputs(const RenderPass& renderPass)
 			}
 			case ShaderType_Compute:
 			{
-				if (strcmp(decl->Name, "u_SSLinearWrap"))
+				if (String_Compare(decl->Name, "u_SSLinearWrap"))
 				{
 					RendererContext_GetDeviceContext()->CSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearWrap);
 				}
-				else if (strcmp(decl->Name, "u_SSLinearClamp"))
+				else if (String_Compare(decl->Name, "u_SSLinearClamp"))
 				{
 					RendererContext_GetDeviceContext()->CSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearClamp);
 				}
@@ -85,11 +90,11 @@ void RnederPass_BindInputs(const RenderPass& renderPass)
 			}
 			case ShaderType_Geometry:
 			{
-				if (strcmp(decl->Name, "u_SSLinearWrap"))
+				if (String_Compare(decl->Name, "u_SSLinearWrap"))
 				{
 					RendererContext_GetDeviceContext()->GSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearWrap);
 				}
-				else if (strcmp(decl->Name, "u_SSLinearClamp"))
+				else if (String_Compare(decl->Name, "u_SSLinearClamp"))
 				{
 					RendererContext_GetDeviceContext()->GSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearClamp);
 				}
@@ -103,7 +108,7 @@ void RnederPass_BindInputs(const RenderPass& renderPass)
 			{
 				ResourceElement* element = (ResourceElement*)List_Get(renderPass.Inputs, i);
 
-				if (strcmp(element->Name, decl->Name) == 0)
+				if (String_Compare(element->Name, decl->Name))
 				{
 					switch (element->Type)
 					{
@@ -134,7 +139,7 @@ const Pipeline& RenderPass_GetPipeline(const RenderPass& renderPass)
 const Framebuffer& RenderPass_GetTargetFramebuffer(const RenderPass& renderPass)
 {
 	const auto& specification = Pipeline_GetSpecification(renderPass.Specification.Pipeline);
-	return specification.TargetFrameBuffer;
+	return specification.TargetFramebuffer;
 }
 
 const RenderPassSpecification& RenderPass_GetSpecification(const RenderPass& renderPass)

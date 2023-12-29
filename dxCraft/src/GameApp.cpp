@@ -27,6 +27,7 @@ void Game_Ininialize(Application* appInst)
 		int* data = (int*)List_Get(list, i);
 		APP_LOG_INFO("Data : %d", *data);
 	}
+	List_Free(list);
 }
 
 void Game_Update(float timeStep)

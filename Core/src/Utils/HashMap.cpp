@@ -1,110 +1,156 @@
 ﻿#include "pch.h"
 #include "HashMap.h"
 
-#define TABLE_SIZE 100
-
-void HashMap_Create(HashMap& hashMap)
+uint64_t GenHash(const char* key, uint32_t elementCount)
 {
-	hashMap.Table = (HashNode**)malloc(TABLE_SIZE * sizeof(HashNode*));
-	for (size_t i = 0; i < TABLE_SIZE; i++)
-	{
-		hashMap.Table[i] = nullptr;
-	}
-}
+	static const uint64_t multiplier = 97;
 
-uint32_t GenHash(const char* key)
-{
-	uint32_t hash = 0;
+	uint64_t hash = 0;
 	for (size_t i = 0; key[i]; i++)
 	{
-		hash += key[i];
+		hash = hash * multiplier + key[i];
 	}
-	return hash % TABLE_SIZE;
+	return hash % elementCount;
 }
 
-void HashMap_Set(HashMap& hashMap, const char* key, void* value, uint32_t size)
+void SetValue(HashNode* node, void* value, bool isPtrType, uint32_t elementSize)
 {
-	uint32_t index = GenHash(key);
-	HashNode* newNode = (HashNode*)malloc(sizeof(HashNode));
-	newNode->Key = strdup(key);
-	if (size != 0)
+	void* dest = (uint8_t*)node + sizeof(HashNode);
+	if (isPtrType)
 	{
-		newNode->Value = malloc(size);
-		memcpy(newNode->Value, value, size);
+		Memory_Copy(dest, &value, sizeof(void*));
 	}
 	else
 	{
-		newNode->Value = value;
-	}
-	newNode->Next = nullptr;
-
-	if (hashMap.Table[index] == nullptr)
-	{
-		hashMap.Table[index] = newNode;
-	}
-	else
-	{
-		HashNode* currentNode = hashMap.Table[index];
-		while (currentNode->Next != nullptr)
-		{
-			currentNode = currentNode->Next;
-		}
-		currentNode->Next = newNode;
+		Memory_Copy(dest, value, elementSize);
 	}
 }
 
-HashNode* HashMap_Find(const HashMap& hashMap, const char* key)
+void FreeNode(HashNode* node, uint32_t elementSize, bool freeNode)
 {
-	unsigned int index = GenHash(key);
-	HashNode* currentNode = hashMap.Table[index];
-
-	while (currentNode != nullptr)
+	if (node->Key != nullptr)
 	{
-		if (strcmp(currentNode->Key, key) == 0)
-		{
-			return currentNode;
-		}
-		currentNode = currentNode->Next;
+		String_Free(node->Key);
+		node->Key = nullptr;
 	}
 
+	if (freeNode)
+		Memory_Free(node, (sizeof(HashNode) + elementSize), MemoryBlockTag_HashMap);
+}
+
+void HashMap_Create(HashMap& hashMap, bool isPtrType, uint32_t elementSize, uint32_t elementCount)
+{
+	hashMap.IsPtrType = isPtrType;
+	hashMap.ElementCount = elementCount;
+	if (hashMap.IsPtrType)
+	{
+		hashMap.ElementSize = sizeof(void*);
+	}
+	else
+	{
+		hashMap.ElementSize = elementSize;
+	}
+	hashMap.Table = Memory_Allocate((sizeof(HashNode) + hashMap.ElementSize) * elementCount, MemoryBlockTag_HashMap);
+	HashNode emptyNode = {};
+	HashMap_Fill(hashMap, &emptyNode);
+}
+
+void HashMap_Set(HashMap& hashMap, const char* key, void* value)
+{
+	uint64_t index = GenHash(key, hashMap.ElementCount);
+	HashNode* node = (HashNode*)((uint8_t*)hashMap.Table + index * (sizeof(HashNode) + hashMap.ElementSize));
+	if (node->Key == nullptr)
+	{
+		node->Key = String_Duplicate(key);
+		SetValue(node, value, hashMap.IsPtrType, hashMap.ElementSize);
+	}
+	else
+	{
+		HashNode* newNode = (HashNode*)(uint8_t*)Memory_Allocate((sizeof(HashNode) + hashMap.ElementSize), MemoryBlockTag_HashMap);
+		newNode->Key = String_Duplicate(key);
+		SetValue(newNode, value, hashMap.IsPtrType, hashMap.ElementSize);
+		newNode->Next = nullptr;
+
+		while (node->Next != nullptr)
+		{
+			node = node->Next;
+		}
+		node->Next = newNode;
+	}
+}
+
+void* HashMap_Find(const HashMap& hashMap, const char* key)
+{
+	uint64_t index = GenHash(key, hashMap.ElementCount);
+	HashNode* node = (HashNode*)((uint8_t*)hashMap.Table + index * (sizeof(HashNode) + hashMap.ElementSize));
+	if (node->Key == nullptr)
+	{
+		return nullptr;
+	}
+	else
+	{
+		while (node != nullptr)
+		{
+			if (String_Compare(node->Key, key))
+			{
+				return (void*)((uint8_t*)node + sizeof(HashNode));
+			}
+			node = node->Next;
+		}
+	}
 	return nullptr;
 }
 
-void HashMap_Free(HashMap& hashMap, bool freeEachElement)
+void HashMap_Fill(HashMap& hashMap, void* value)
 {
-	for (size_t i = 0; i < TABLE_SIZE; i++)
+	for (size_t i = 0; i < hashMap.ElementCount; i++)
 	{
-		HashNode* currentNode = hashMap.Table[i];
-		if (currentNode == nullptr)
+		HashNode* currentNode = (HashNode*)((uint8_t*)hashMap.Table + i * (sizeof(HashNode) + hashMap.ElementSize));
+
+		SetValue(currentNode, value, hashMap.IsPtrType, hashMap.ElementSize);
+	}
+}
+
+void HashMap_Free(HashMap& hashMap)
+{
+	for (size_t i = 0; i < hashMap.ElementCount; i++)
+	{
+		HashNode* currentNode = (HashNode*)((uint8_t*)hashMap.Table + i * (sizeof(HashNode) + hashMap.ElementSize));
+
+		// Notice: Free the string inside the node, but not the node itself, because it's allocated with the table
+		FreeNode(currentNode, hashMap.ElementSize, false);
+
+		currentNode = currentNode->Next;
+
+		while (currentNode != nullptr)
+		{
+			HashNode* temp = currentNode;
+			currentNode = currentNode->Next;
+
+			// Notice: Free all nodes in the linked list
+			FreeNode(temp, hashMap.ElementSize, true);
+		}
+	}
+
+	// Notice: Free the table
+	Memory_Free(hashMap.Table, (sizeof(HashNode) + hashMap.ElementSize) * hashMap.ElementCount, MemoryBlockTag_HashMap);
+}
+
+void HashMap_Foreach(const HashMap& hashMap, void(*callback)(void* value))
+{
+	for (size_t i = 0; i < hashMap.ElementCount; i++)
+	{
+		HashNode* currentNode = (HashNode*)((uint8_t*)hashMap.Table + i * (sizeof(HashNode) + hashMap.ElementSize));
+
+		if (currentNode->Key == nullptr)
 		{
 			continue;
 		}
 
-		while (currentNode->Next != nullptr)
-		{
-			HashNode* nextNode = currentNode->Next;
-			free(currentNode->Key);
-			if (freeEachElement)
-				free(currentNode->Value);
-			free(currentNode);
-			currentNode = nextNode;
-		}
+		do {
+			void* dest = (uint8_t*)currentNode + sizeof(HashNode);
+			callback(dest);
+			currentNode = currentNode->Next;
+		} while (currentNode != nullptr);
 	}
-	free(hashMap.Table);
-}
-
-uint32_t HashMap_GetTableSize()
-{
-	return TABLE_SIZE;
-}
-
-HashNode* HashMap_Get(const HashMap& hashMap, uint32_t index)
-{
-	CORE_ASSERT(index < TABLE_SIZE, "Index out of range");
-	return hashMap.Table[index];
-}
-
-void* HashMap_Find(HashMap* hashMap, const char* key)
-{
-	return nullptr;
 }

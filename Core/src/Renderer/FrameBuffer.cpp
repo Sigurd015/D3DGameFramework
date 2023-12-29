@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "FrameBuffer.h"
 
-void Framebuffer_Create(Framebuffer& frameBuffer, const FrameBufferSpecification& spec)
+void Framebuffer_Create(Framebuffer& frameBuffer, const FramebufferSpecification& spec)
 {}
 
 void Framebuffer_Bind(const Framebuffer& frameBuffer)
@@ -16,8 +16,8 @@ void Framebuffer_ClearAttachment(const Framebuffer& frameBuffer, const Vec4& col
 void Framebuffer_ClearAttachment(const Framebuffer& frameBuffer)
 {}
 
-const FrameBufferSpecification& Framebuffer_GetSpecification(const Framebuffer& frameBuffer)
+const FramebufferSpecification& Framebuffer_GetSpecification(const Framebuffer& frameBuffer)
 {
 	// TODO: insert return statement here
-	return FrameBufferSpecification();
+	return FramebufferSpecification();
 }

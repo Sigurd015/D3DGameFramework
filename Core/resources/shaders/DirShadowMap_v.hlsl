@@ -18,8 +18,8 @@ struct VertexOutput
 VertexOutput main(VertexInput Input)
 {
     VertexOutput Output;
-    float3 worldPos = mul(u_Transform, float4(Input.a_Position, 1.0f));
-    Output.Position = mul(u_DirLightViewProjection, float4(worldPos, 1.0));
-    Output.TexCoord = Input.a_TexCoord;
+    float3 worldPos = mul(float4(Input.a_Position, 1.0f), u_Transform);
+    Output.Position = mul(float4(worldPos, 1.0), u_DirLightViewProjection);
+    Output.TexCoord = float2(Input.a_TexCoord.x, 1.0f - Input.a_TexCoord.y);
     return Output;
 }

@@ -34,9 +34,9 @@ enum BlendMode
 
 struct PipelineSpecification
 {
-	Shader Shader;
+	Shader* Shader;
 	VertexBufferLayout Layout;
-	Framebuffer TargetFrameBuffer;
+	Framebuffer TargetFramebuffer;
 	PrimitiveTopology Topology = PrimitiveTopology::PrimitiveTopology_Triangles;
 	DepthCompareOperator DepthOperator = DepthCompareOperator::DepthCompareOperator_Less;
 	BlendMode Blend = BlendMode::BlendMode_Disabled;

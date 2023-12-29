@@ -50,8 +50,8 @@ void Pipeline_Create(Pipeline& pipeline, const PipelineSpecification& spec)
 	}
 
 	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateInputLayout(
-		tempList, (UINT)pipeline.Spec.Layout.ElementCount, pipeline.Spec.Shader.VertexShaderBlob->GetBufferPointer(),
-		pipeline.Spec.Shader.VertexShaderBlob->GetBufferSize(), &pipeline.InputLayout));
+		tempList, (UINT)pipeline.Spec.Layout.ElementCount, pipeline.Spec.Shader->VertexShaderBlob->GetBufferPointer(),
+		pipeline.Spec.Shader->VertexShaderBlob->GetBufferSize(), &pipeline.InputLayout));
 
 	Memory_Free(tempList, memSize, MemoryBlockTag_Array);
 }
@@ -75,5 +75,4 @@ void Pipeline_Release(Pipeline& pipeline)
 		pipeline.InputLayout->Release();
 		pipeline.InputLayout = nullptr;
 	}
-	Shader_Release(pipeline.Spec.Shader);
 }

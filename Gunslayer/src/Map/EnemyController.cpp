@@ -481,7 +481,7 @@ void EnemyController_OnCollision(Entity* entity, Entity* other, void* runtimeDat
 
 void EnemyController_OnRaycastHit(Entity* entity, Entity* other, void* runtimeData)
 {
-	if (!strcmp(other->Tag.Name, "Player"))
+	if (String_Compare(other->Tag.Name, "Player"))
 	{
 		EnemyData* data = (EnemyData*)runtimeData;
 

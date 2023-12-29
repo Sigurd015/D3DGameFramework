@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "AssetManager.h"
+#include "Audio/Audio.h"
+#include "Renderer/Shader.h"
 #include "Renderer/Texture.h"
 #include "Audio/Audio.h"
 
@@ -9,6 +11,7 @@ enum AssetType
 	AssetType_Texture,
 	AssetType_Mesh,
 	AssetType_Sound,
+	AssetType_Shader,
 	AssetType_Count
 };
 
@@ -48,7 +51,7 @@ static AssetType GetAssetType(const char* assetPath)
 {
 	for (int i = 0; i < MAX_ASSET_EXTENSIONS_COUNT; i++)
 	{
-		if (strstr(assetPath, s_Extensions[i].Extension) != NULL)
+		if (String_Contains(assetPath, s_Extensions[i].Extension))
 		{
 			return s_Extensions[i].Type;
 		}
@@ -57,13 +60,23 @@ static AssetType GetAssetType(const char* assetPath)
 	return AssetType_Unknown;
 }
 
-void* AssetManager_GetAsset(const char* assetPath)
+void* AssetManager_GetAsset(const char* assetPath, bool isMemoryAsset)
 {
-	HashNode* it = HashMap_Find(s_Assets, assetPath);
-	if (it != HashMapEnd)
+	void* result = HashMap_Find(s_Assets, assetPath);
+	if (result)
 	{
-		AssetElement* element = (AssetElement*)it->Value;
+		AssetElement* element = (AssetElement*)result;
 		return element->Asset;
+	}
+
+	if (isMemoryAsset)
+	{
+		// TODO: Now we only support shader as memory asset
+		AssetElement element;
+		element.Type = AssetType_Shader;
+		element.Asset = Shader_Create(assetPath);
+		HashMap_Set(s_Assets, assetPath, &element);
+		return element.Asset;
 	}
 
 	AssetElement element;
@@ -88,28 +101,20 @@ void* AssetManager_GetAsset(const char* assetPath)
 		break;
 	}
 	}
-	HashMap_Set(s_Assets, assetPath, &element, sizeof(AssetElement));
+	HashMap_Set(s_Assets, assetPath, &element);
 	return element.Asset;
 }
 
 void AssetManager_Init()
 {
-	HashMap_Create(s_Assets);
+	HashMap_Create(s_Assets, false, sizeof(AssetElement));
 }
 
 void AssetManager_Shutdown()
 {
-	for (size_t i = 0; i < HashMap_GetTableSize(); i++)
-	{
-		HashNode* currentNode = HashMap_Get(s_Assets, i);
-		if (currentNode == nullptr)
+	HashMap_Foreach(s_Assets, [](void* value)
 		{
-			continue;
-		}
-
-		while (currentNode != nullptr)
-		{
-			AssetElement* element = (AssetElement*)currentNode->Value;
+			AssetElement* element = (AssetElement*)value;
 			switch (element->Type)
 			{
 			case AssetType_Texture:
@@ -119,12 +124,16 @@ void AssetManager_Shutdown()
 			}
 			case AssetType_Sound:
 			{
-				delete element->Asset;
+				Audio_ReleaseSoundEffect(element->Asset);
+				break;
+			}
+			case AssetType_Shader:
+			{
+				Shader_Release((Shader*)element->Asset);
 				break;
 			}
 			}
-			currentNode = currentNode->Next;
-		}
-	}
-	HashMap_Free(s_Assets, true);
+		});
+
+	HashMap_Free(s_Assets);
 }

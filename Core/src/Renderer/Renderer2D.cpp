@@ -8,6 +8,7 @@
 #include "ConstantBuffer.h"
 #include "Texture.h"
 #include "Material.h"
+#include "Asset/AssetManager.h"
 
 struct QuadVertex
 {
@@ -108,11 +109,14 @@ struct Renderer2DData
 	CameraData SceneBuffer;
 	ConstantBuffer CameraConstantBuffer;
 	ConstantBuffer IdentityConstantBuffer;
+
+	Renderer2DStatistics Stats;
 };
 static Renderer2DData s_Data;
 
-void Renderer2D_Initialize()
+void Renderer2D_Init()
 {
+	s_Data = {};
 	//Quad
 	{
 		PipelineSpecification pipelineSpec;
@@ -149,7 +153,7 @@ void Renderer2D_Initialize()
 		IndexBuffer_Create(s_Data.QuadIndexBuffer, indices, s_Data.MaxIndices);
 		delete[] indices;
 
-		Shader_Create(pipelineSpec.Shader, "Renderer2D_Quad");
+		pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("Renderer2D_Quad", true);
 		pipelineSpec.DepthTest = true;
 		pipelineSpec.BackfaceCulling = true;
 		pipelineSpec.DepthOperator = DepthCompareOperator_Less;
@@ -180,7 +184,7 @@ void Renderer2D_Initialize()
 		VertexBuffer_Create(s_Data.CircleVertexBuffer, s_Data.MaxVertices * sizeof(CircleVertex));
 		VertexBuffer_SetLayout(s_Data.CircleVertexBuffer, pipelineSpec.Layout);
 
-		Shader_Create(pipelineSpec.Shader, "Renderer2D_Circle");
+		pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("Renderer2D_Circle", true);
 		pipelineSpec.DepthTest = true;
 		pipelineSpec.BackfaceCulling = true;
 		pipelineSpec.DepthOperator = DepthCompareOperator_Less;
@@ -207,7 +211,7 @@ void Renderer2D_Initialize()
 		VertexBuffer_Create(s_Data.LineVertexBuffer, s_Data.MaxVertices * sizeof(LineVertex));
 		VertexBuffer_SetLayout(s_Data.LineVertexBuffer, pipelineSpec.Layout);
 
-		Shader_Create(pipelineSpec.Shader, "Renderer2D_Line");
+		pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("Renderer2D_Line", true);
 		pipelineSpec.DepthTest = true;
 		pipelineSpec.BackfaceCulling = true;
 		pipelineSpec.DepthOperator = DepthCompareOperator_Less;
@@ -239,7 +243,7 @@ void Renderer2D_Initialize()
 
 		// Using the same shader as quads, but binding a identity viewProjection matrix.
 		// Because UI position is already in screen space.
-		Shader_Create(pipelineSpec.Shader, "Renderer2D_Quad");
+		pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("Renderer2D_Quad", true);
 		pipelineSpec.DepthTest = false;
 		pipelineSpec.BackfaceCulling = true;
 		pipelineSpec.DepthOperator = DepthCompareOperator_Less;
@@ -267,6 +271,7 @@ void Renderer2D_Initialize()
 
 	for (size_t i = 0; i < s_Data.MaxTextureSlots; i++)
 	{
+		//String_Format(s_Data.TextureSlotsNames[i], "u_Textures[%d]", i);
 		s_Data.TextureSlotsNames[i] = new char[256];
 		sprintf_s(s_Data.TextureSlotsNames[i], 256, "u_Textures[%d]", i);
 	}
@@ -318,6 +323,8 @@ void Renderer2D_Shutdown()
 
 void StartBatch()
 {
+	Renderer2D_ResetStats();
+
 	s_Data.QuadIndexCount = 0;
 	s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
 
@@ -360,6 +367,7 @@ void Flush()
 		VertexBuffer_SetData(s_Data.QuadVertexBuffer, s_Data.QuadVertexBufferBase, dataSize);
 
 		RendererAPI_DrawIndexed(s_Data.QuadVertexBuffer, s_Data.QuadIndexBuffer, s_Data.DefaultMaterial, s_Data.QuadIndexCount);
+		s_Data.Stats.DrawCalls++;
 	}
 	RendererAPI_EndRenderPass();
 
@@ -371,6 +379,7 @@ void Flush()
 
 		// Use quad QuadIndexBuffer
 		RendererAPI_DrawIndexed(s_Data.CircleVertexBuffer, s_Data.QuadIndexBuffer, s_Data.CircleIndexCount);
+		s_Data.Stats.DrawCalls++;
 	}
 	RendererAPI_EndRenderPass();
 
@@ -381,6 +390,7 @@ void Flush()
 		VertexBuffer_SetData(s_Data.LineVertexBuffer, s_Data.LineVertexBufferBase, dataSize);
 
 		RendererAPI_DrawLines(s_Data.LineVertexBuffer, s_Data.LineVertexCount);
+		s_Data.Stats.DrawCalls++;
 	}
 	RendererAPI_EndRenderPass();
 
@@ -391,6 +401,7 @@ void Flush()
 		VertexBuffer_SetData(s_Data.UIVertexBuffer, s_Data.UIVertexBufferBase, dataSize);
 
 		RendererAPI_DrawIndexed(s_Data.UIVertexBuffer, s_Data.QuadIndexBuffer, s_Data.DefaultMaterial, s_Data.UIIndexCount);
+		s_Data.Stats.DrawCalls++;
 	}
 	RendererAPI_EndRenderPass();
 
@@ -408,6 +419,7 @@ void Flush()
 				temp->Color,
 				temp->FontSize
 			);
+			s_Data.Stats.DrawCalls++;
 		}
 	}
 }
@@ -436,6 +448,8 @@ void SetQuadVertex(const Mat& transform,
 		s_Data.QuadVertexBufferPtr++;
 	}
 	s_Data.QuadIndexCount += 6;
+
+	s_Data.Stats.QuadCount++;
 }
 
 void Renderer2D_DrawQuad(const Mat& transform, const Vec4& color)
@@ -498,6 +512,8 @@ void Renderer2D_DrawCircle(const Mat& transform, const Vec4& color, float thickn
 	}
 
 	s_Data.CircleIndexCount += 6;
+
+	s_Data.Stats.QuadCount++;
 }
 
 void Renderer2D_DrawLine(const Vec3& p0, Vec3& p1, const Vec4& color)
@@ -524,6 +540,8 @@ void Renderer2D_DrawRect(const Vec3& position, const Vec2& size, const Vec4& col
 	Renderer2D_DrawLine(p1, p2, color);
 	Renderer2D_DrawLine(p2, p3, color);
 	Renderer2D_DrawLine(p3, p0, color);
+
+	s_Data.Stats.LineCount += 4;
 }
 
 void Renderer2D_DrawRect(const Mat& transform, const Vec4& color)
@@ -536,6 +554,8 @@ void Renderer2D_DrawRect(const Mat& transform, const Vec4& color)
 	Renderer2D_DrawLine(lineVertices[1], lineVertices[2], color);
 	Renderer2D_DrawLine(lineVertices[2], lineVertices[3], color);
 	Renderer2D_DrawLine(lineVertices[3], lineVertices[0], color);
+
+	s_Data.Stats.LineCount += 4;
 }
 
 void SetUIVertex(const Vec2& pos, const Vec2& size, float rotation,
@@ -555,6 +575,8 @@ void SetUIVertex(const Vec2& pos, const Vec2& size, float rotation,
 		s_Data.UIVertexBufferPtr++;
 	}
 	s_Data.UIIndexCount += 6;
+
+	s_Data.Stats.QuadCount++;
 }
 
 void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, float rotation, const Vec4& color)
@@ -580,4 +602,14 @@ void Renderer2D_DrawText(const WCHAR* str, const WCHAR* fontFamilyName, const Ve
 	command.Color = color;
 	command.FontSize = fontSize;
 	List_Add(s_Data.TextRenderCommands, &command);
+}
+
+void Renderer2D_ResetStats()
+{
+	s_Data.Stats = {};
+}
+
+Renderer2DStatistics Renderer2D_GetStats()
+{
+	return s_Data.Stats;
 }

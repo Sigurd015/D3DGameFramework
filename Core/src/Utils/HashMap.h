@@ -1,23 +1,25 @@
 ﻿#pragma once
 #include <stdint.h>
 
-#define HashMapEnd nullptr
-
 struct HashNode
 {
-	char* Key;
-	void* Value = nullptr;
-	struct HashNode* Next = nullptr;
+	char* Key = nullptr;
+	HashNode* Next = nullptr;
 };
 
 struct HashMap
 {
-	HashNode** Table;
+	void* Table;
+	bool IsPtrType;
+	uint32_t ElementCount;
+	uint32_t ElementSize;
 };
 
-void HashMap_Create(HashMap& hashMap);
-void HashMap_Set(HashMap& hashMap, const char* key, void* value, uint32_t size = 0);
-HashNode* HashMap_Find(const HashMap& hashMap, const char* key);
-HashNode* HashMap_Get(const HashMap& hashMap, uint32_t index);
-uint32_t HashMap_GetTableSize();
-void HashMap_Free(HashMap& hashMap, bool freeEachElement);
+void HashMap_Create(HashMap& hashMap, bool isPtrType = true, uint32_t elementSize = 0, uint32_t elementCount = 100);
+void* HashMap_Find(const HashMap& hashMap, const char* key);
+void HashMap_Set(HashMap& hashMap, const char* key, void* value);
+void HashMap_Fill(HashMap& hashMap, void* value);
+
+// Custom callback function for the value, whatever hashmap is ptr type or not
+void HashMap_Foreach(const HashMap& hashMap, void(*callback)(void* value));
+void HashMap_Free(HashMap& hashMap);

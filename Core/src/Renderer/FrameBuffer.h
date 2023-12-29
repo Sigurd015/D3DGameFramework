@@ -1,6 +1,6 @@
 #pragma once
 
-struct FrameBufferSpecification
+struct FramebufferSpecification
 {
 	uint32_t Width = 0;
 	uint32_t Height = 0;
@@ -10,12 +10,12 @@ struct FrameBufferSpecification
 
 struct Framebuffer
 {
-	FrameBufferSpecification Specification;
+	FramebufferSpecification Specification;
 };
 
-void Framebuffer_Create(Framebuffer& frameBuffer, const  FrameBufferSpecification& spec);
+void Framebuffer_Create(Framebuffer& frameBuffer, const  FramebufferSpecification& spec);
 void Framebuffer_Bind(const Framebuffer& frameBuffer);
 void Framebuffer_Release(Framebuffer& frameBuffer);
 void Framebuffer_ClearAttachment(const Framebuffer& frameBuffer, const Vec4& color);
 void Framebuffer_ClearAttachment(const Framebuffer& frameBuffer);
-const FrameBufferSpecification& Framebuffer_GetSpecification(const Framebuffer& frameBuffer);
+const FramebufferSpecification& Framebuffer_GetSpecification(const Framebuffer& frameBuffer);

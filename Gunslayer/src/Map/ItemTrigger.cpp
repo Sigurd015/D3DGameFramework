@@ -55,7 +55,7 @@ void ItemTrigger_OnCollision(Entity* entity, Entity* other, void* runtimeData)
 	{
 	case ItemTriggerType::MEDKIT:
 	{
-		if (!strcmp(other->Tag.Name, "Player"))
+		if (String_Compare(other->Tag.Name, "Player"))
 		{
 			PlayerController_AddHp(HEAL_AMOUNT);
 

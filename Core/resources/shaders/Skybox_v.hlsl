@@ -14,7 +14,7 @@ struct VertexOutput
 VertexOutput main(VertexInput Input)
 {
     VertexOutput Output;
-    Output.Pos = mul(u_ViewProjection, float4(Input.a_Position, 0.0f));
+    Output.Pos = mul(float4(Input.a_Position, 0.0f), u_ViewProjection);
     Output.Pos.z = Output.Pos.w;
     Output.WorldPos = Input.a_Position;
     return Output;

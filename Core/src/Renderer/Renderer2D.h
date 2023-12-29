@@ -2,7 +2,7 @@
 #include "../Math/Math.h"
 #include "Texture.h"
 
-void Renderer2D_Initialize();
+void Renderer2D_Init();
 void Renderer2D_Shutdown();
 void Renderer2D_BeginScene(const Mat& viewProjection);
 void Renderer2D_EndScene();
@@ -18,3 +18,16 @@ void Renderer2D_DrawUI(const Vec2& pos, const Vec2& size, float rotation, Textur
 	const Vec4& tintColor, float tilingFactor = 1.0f);
 // Notice: Make sure the str is long lived
 void Renderer2D_DrawText(const WCHAR* str, const WCHAR* fontFamilyName, const Vec2& pos, const Vec4& color, float fontSize);
+
+struct Renderer2DStatistics
+{
+	uint32_t DrawCalls = 0;
+	uint32_t QuadCount = 0;
+	uint32_t LineCount = 0;
+
+	uint32_t GetTotalVertexCount() const { return QuadCount * 4 + LineCount * 2; }
+	uint32_t GetTotalIndexCount() const { return QuadCount * 6 + LineCount * 2; }
+};
+
+void Renderer2D_ResetStats();
+Renderer2DStatistics Renderer2D_GetStats();

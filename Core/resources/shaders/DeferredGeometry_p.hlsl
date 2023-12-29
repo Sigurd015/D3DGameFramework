@@ -13,7 +13,7 @@ struct PixelInput
 struct PixelOutput
 {
     float4 Albedo : SV_Target0;
-    float4 MRE : SV_Target1;  // Metalness, Roughness, Emission
+    float4 MRE : SV_Target1; // Metalness, Roughness, Emission
     float4 Normal : SV_Target2;
     float4 Position : SV_Target3;
 };
@@ -35,7 +35,7 @@ PixelOutput main(PixelInput Input)
     if (u_Material.UseNormalMap)
     {
         normal = normalize(u_NormalTex.Sample(u_SSLinearWrap, Input.TexCoord).rgb * 2.0f - 1.0f); // from RGB[0, 1] to [-1, 1]
-        normal = normalize(mul(Input.TBN, normal));
+        normal = normalize(mul(normal, Input.TBN));
     }
 
     // Convert albedo from sRGB to linear space

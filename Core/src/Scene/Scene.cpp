@@ -194,7 +194,7 @@ Entity* Scene_GetEntityByName(const Scene* scene, const char* name)
 	for (size_t i = 0; i < size; i++)
 	{
 		Entity* temp = (Entity*)List_Get(scene->Entities, i);
-		if (!strcmp(temp->Tag.Name, name))
+		if (String_Compare(temp->Tag.Name, name))
 			return temp;
 	}
 	return nullptr;
@@ -504,7 +504,7 @@ void Scene_OnViewportResize(Scene& scene, uint32_t width, uint32_t height)
 bool LayerMask(void* entity, const char* mask)
 {
 	Entity* ent = (Entity*)entity;
-	return strstr(ent->Tag.Name, mask) != NULL;
+	return String_Contains(ent->Tag.Name, mask);
 }
 
 bool Scene_Raycast(Scene* scene, Entity* entity, const Vec2& rayDirection, const char* mask, float maxDistance)

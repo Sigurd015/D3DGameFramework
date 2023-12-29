@@ -22,7 +22,7 @@ void FieldTrigger_OnCollision(Entity* entity, Entity* other, void* runtimeData)
 	{
 	case FieldTriggerType::GEN_MAP:
 	{
-		if (!strcmp(other->Tag.Name, "Player"))
+		if (String_Compare(other->Tag.Name, "Player"))
 		{
 			FieldController_GenMap();
 		}

@@ -15,7 +15,6 @@ int Main(int argc, char** argv)
 	Application_Shutdown();
 	Memory_CheckMemoryLeaks();
 	Log_Shutdown();
-	Memory_CheckMemoryLeaks();
 	return 0;
 }
 

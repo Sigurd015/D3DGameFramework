@@ -51,3 +51,8 @@ void* Audio_CreateSoundEffect(const char* path)
 	delete[]wcstring;
 	return soundEffect;
 }
+
+void Audio_ReleaseSoundEffect(void* soundEffect)
+{
+	delete (DirectX::SoundEffect*)soundEffect;
+}

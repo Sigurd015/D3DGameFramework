@@ -13,8 +13,8 @@ void main(uint3 ThreadID : SV_DispatchThreadID)
 	
     // Calculate sampling coords for equirectangular texture
 	// https://en.wikipedia.org/wiki/Spherical_coordinate_system#Cartesian_coordinates
-	float phi = atan2(cubeTC.z, cubeTC.x);
-	float theta = acos(cubeTC.y);
+    float phi = atan2(cubeTC.z, cubeTC.x);
+    float theta = acos(cubeTC.y);
     float2 uv = float2(phi / (TwoPI) + 0.5, theta / PI);
 	
     // Sample equirectangular texture.

@@ -6,6 +6,7 @@
 #include "RendererContext.h"
 #include "FrameBuffer.h"
 #include "RenderStates.h"
+#include "SceneRenderer.h"
 
 #include <d2d1.h>
 #include <dwrite.h>
@@ -77,13 +78,14 @@ void RendererAPI_Initialize()
 
 	SetBuffer(Window_GetWidth(), Window_GetHeight());
 	CommonStates_Init();
-	Renderer2D_Initialize();
+	Renderer2D_Init();
+	SceneRenderer_Init();
 }
 
 void RendererAPI_Shutdown()
 {
+	SceneRenderer_Shutdown();
 	Renderer2D_Shutdown();
-
 	CommonStates_Release();
 
 	s_RendererAPIState.RenderTargetView->Release();
@@ -131,7 +133,7 @@ void RendererAPI_BeginRenderPass(const RenderPass& renderPass, bool clear)
 	const Framebuffer& framebuffer = RenderPass_GetTargetFramebuffer(renderPass);
 	const Pipeline& pipeline = RenderPass_GetPipeline(renderPass);
 	const PipelineSpecification& pipelineSpec = Pipeline_GetSpecification(pipeline);
-	const FrameBufferSpecification& framebufferSpec = Framebuffer_GetSpecification(framebuffer);
+	const FramebufferSpecification& framebufferSpec = Framebuffer_GetSpecification(framebuffer);
 
 	//if (clear)
 	//{
