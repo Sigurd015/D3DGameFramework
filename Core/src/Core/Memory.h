@@ -12,6 +12,7 @@ enum MemoryBlockTag
 	MemoryBlockTag_Shader,
 	MemoryBlockTag_Texture,
 	MemoryBlockTag_Component,
+	MemoryBlockTag_Buffer,
 	MemoryBlockTag_CPPNew,
 	MemoryBlockTag_Count
 };

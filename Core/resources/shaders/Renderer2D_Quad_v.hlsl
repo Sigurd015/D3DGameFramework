@@ -25,7 +25,7 @@ VertexOutput main(VertexInput Input)
 {
     VertexOutput Output;
     Output.Color = Input.a_Color;
-    Output.TexCoord = float2(Input.a_TexCoord.x, 1.0f - Input.a_TexCoord.y);
+    Output.TexCoord = Input.a_TexCoord;
     Output.TexIndex = Input.a_TexIndex;
     Output.TilingFactor = Input.a_TilingFactor;
     Output.Pos = mul(float4(Input.a_Position, 1.0f), u_ViewProjection);

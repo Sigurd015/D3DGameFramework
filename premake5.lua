@@ -20,6 +20,7 @@ workingdir = "%{wks.location}"
 
 IncludeDir = {}
 IncludeDir["DirectXTK"] = "%{wks.location}/Core/vendor/DirectXTK_Desktop_2022_Win10/include"
+IncludeDir["stb_image"] = "%{wks.location}/Core/vendor/stb_image"
 LibraryDir = {}
 LibraryDir["DirectXTK"] = "%{wks.location}/Core/vendor/DirectXTK_Desktop_2022_Win10/lib"
 Library = {}

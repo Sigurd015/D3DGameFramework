@@ -25,6 +25,8 @@ struct RenderPass
 
 void RenderPass_Create(RenderPass& renderPass, const RenderPassSpecification& specification);
 void RenderPass_Release(RenderPass& renderPass);
+const Image2D* RenderPass_GetOutput(RenderPass& renderPass, uint32_t index = 0);
+const Image2D* RenderPass_GetDepthOutput(RenderPass& renderPass);
 void RenderPass_SetInput(RenderPass& renderPass, const char* name, RendererResourceType type, const void* resource);
 void RnederPass_BindInputs(const RenderPass& renderPass);
 const Pipeline& RenderPass_GetPipeline(const RenderPass& renderPass);

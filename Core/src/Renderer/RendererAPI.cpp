@@ -137,10 +137,7 @@ void RendererAPI_BeginRenderPass(const RenderPass& renderPass, bool clear)
 
 	//if (clear)
 	//{
-	//	if (!framebufferSpec.UseUniqueClearColor)
-	//		Framebuffer_ClearAttachment(framebuffer, s_RendererAPIState.ClearColor);
-	//	else
-	//		Framebuffer_ClearAttachment(framebuffer);
+	//	Framebuffer_ClearAttachment(framebuffer);
 	//}
 	//Framebuffer_Bind(framebuffer);
 	Pipeline_Bind(pipeline);
@@ -193,24 +190,24 @@ void RendererAPI_BeginRenderPass(const RenderPass& renderPass, bool clear)
 	}
 	}
 
-	//D3D11_VIEWPORT viewPort{};
-	//viewPort.MinDepth = 0;
-	//viewPort.MaxDepth = 1.0f;
-	//viewPort.TopLeftX = 0;
-	//viewPort.TopLeftY = 0;
+	/*D3D11_VIEWPORT viewPort{};
+	viewPort.MinDepth = 0;
+	viewPort.MaxDepth = 1.0f;
+	viewPort.TopLeftX = 0;
+	viewPort.TopLeftY = 0;
 
-	//if (framebufferSpec.SwapChainTarget)
-	//{
-	//	viewPort.Width = s_RendererAPIState.Width;
-	//	viewPort.Height = s_RendererAPIState.Height;
-	//}
-	//else
-	//{
-	//	viewPort.Width = framebufferSpec.Width;
-	//	viewPort.Height = framebufferSpec.Height;
-	//}
+	if (framebufferSpec.SwapChainTarget)
+	{
+		viewPort.Width = s_RendererAPIState.Width;
+		viewPort.Height = s_RendererAPIState.Height;
+	}
+	else
+	{
+		viewPort.Width = framebufferSpec.Width;
+		viewPort.Height = framebufferSpec.Height;
+	}
 
-	//s_RendererAPIState.DeviceContext->RSSetViewports(1, &viewPort);
+	s_RendererAPIState.DeviceContext->RSSetViewports(1, &viewPort);*/
 	RnederPass_BindInputs(renderPass);
 }
 

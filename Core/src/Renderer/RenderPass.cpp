@@ -32,6 +32,18 @@ void RenderPass_Release(RenderPass& renderPass)
 	Pipeline_Release(renderPass.Specification.Pipeline);
 }
 
+const Image2D* RenderPass_GetOutput(RenderPass& renderPass, uint32_t index)
+{
+	const auto& framebufferSpecification = RenderPass_GetTargetFramebuffer(renderPass);
+	return Framebuffer_GetImage(framebufferSpecification, index);
+}
+
+const Image2D* RenderPass_GetDepthOutput(RenderPass& renderPass)
+{
+	const auto& framebufferSpecification = RenderPass_GetTargetFramebuffer(renderPass);
+	return Framebuffer_GetDepthImage(framebufferSpecification);
+}
+
 void RenderPass_SetInput(RenderPass& renderPass, const char* name, RendererResourceType type, const void* resource)
 {
 	ResourceElement element;

@@ -4,96 +4,38 @@
 #include "Texture.h"
 #include "RendererAPI.h"
 
-#include <WICTextureLoader.h>
-
-DXGI_FORMAT ImageFormatToDXDataFormat(ImageFormat format)
-{
-	switch (format)
-	{
-	case ImageFormat::RGB8:  return DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	case ImageFormat::RGBA8: return DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	}
-
-	CORE_ASSERT(false, "Unknown ImageFormat!");
-	return DXGI_FORMAT_UNKNOWN;
-}
-
-void* Texture2D_Create(const char* path)
-{
-	size_t newsize = strlen(path) + 1;
-
-	wchar_t* wcstring = (wchar_t*)Memory_Allocate(newsize * sizeof(wchar_t), MemoryBlockTag_Array);
-
-	// Convert char* string to a wchar_t* string.
-	size_t convertedChars = 0;
-	mbstowcs_s(&convertedChars, wcstring, newsize, path, _TRUNCATE);
-
-	Texture2D* texture2D = (Texture2D*)Memory_Allocate(sizeof(Texture2D), MemoryBlockTag_Texture);
-
-	CORE_CHECK_DX_RESULT(DirectX::CreateWICTextureFromFileEx(RendererContext_GetDevice(), wcstring, 0, D3D11_USAGE_DEFAULT,
-		D3D11_BIND_SHADER_RESOURCE, 0, 0, DirectX::WIC_LOADER_DEFAULT, reinterpret_cast<ID3D11Resource**>(&texture2D->Texture), &texture2D->TextureView));
-
-	Memory_Free(wcstring, newsize * sizeof(wchar_t), MemoryBlockTag_Array);
-
-	D3D11_TEXTURE2D_DESC desc;
-	texture2D->Texture->GetDesc(&desc);
-	texture2D->DataFormat = desc.Format;
-	texture2D->Spec.Width = desc.Width;
-	texture2D->Spec.Height = desc.Height;
-	texture2D->Spec.Format = ImageFormat::RGBA8;
-
-	texture2D->NeedRelease = true;
-
-	return texture2D;
-}
-
-void Texture2D_Create(Texture2D* texture2D, const TextureSpecification& spec)
+void Texture2D_Create(Texture2D* texture2D, const TextureSpecification& spec, Buffer data)
 {
 	texture2D->Spec = spec;
-	texture2D->DataFormat = ImageFormatToDXDataFormat(spec.Format);
 
-	D3D11_TEXTURE2D_DESC textureDesc = {};
-	textureDesc.Width = texture2D->Spec.Width;
-	textureDesc.Height = texture2D->Spec.Height;
-	textureDesc.MipLevels = 1;
-	textureDesc.ArraySize = 1;
-	textureDesc.Format = texture2D->DataFormat;
-	textureDesc.SampleDesc.Count = 1;
-	textureDesc.SampleDesc.Quality = 0;
-	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	textureDesc.MiscFlags = 0;
-	textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureDesc.CPUAccessFlags = 0;
-	D3D11_SUBRESOURCE_DATA subresourceData = {};
-	subresourceData.pSysMem = texture2D->Spec.Data;
-	subresourceData.SysMemPitch = texture2D->Spec.Width * 4;  // size of one row in bytes
-	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateTexture2D(&textureDesc, &subresourceData, &texture2D->Texture));
+	ImageSpecification imageSpec = {};
+	imageSpec.Width = spec.Width;
+	imageSpec.Height = spec.Height;
+	imageSpec.Format = spec.Format;
+	imageSpec.Usage = ImageUsage_Texture2D;
+	imageSpec.Mips = spec.GenerateMips ? 0 : 1;
 
-	D3D11_SHADER_RESOURCE_VIEW_DESC resourceView = {};
-	resourceView.Format = texture2D->DataFormat;
-	resourceView.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	resourceView.Texture2D.MostDetailedMip = 0;
-	resourceView.Texture2D.MipLevels = 1;
-	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateShaderResourceView(texture2D->Texture, &resourceView, &texture2D->TextureView));
+	CORE_ASSERT(data.Data, "Texture2D_Create: Data is null!");
+
+	Image2D_Create(texture2D->Image, imageSpec, data);
+
+	if (spec.GenerateMips)
+	{
+		RendererContext_GetDeviceContext()->GenerateMips(Image2D_GetTextureSRV(texture2D->Image));
+	}
 }
 
 void Texture2D_Bind(const Texture2D* texture2D, const ShaderResourceDeclaration* decl)
 {
-	switch (decl->Stage)
-	{
-	case ShaderType_Vertex: RendererContext_GetDeviceContext()->VSSetShaderResources(decl->Slot, 1, &texture2D->TextureView); break;
-	case ShaderType_Geometry: RendererContext_GetDeviceContext()->GSSetShaderResources(decl->Slot, 1, &texture2D->TextureView); break;
-	case ShaderType_Pixel: RendererContext_GetDeviceContext()->PSSetShaderResources(decl->Slot, 1, &texture2D->TextureView); break;
-	case ShaderType_Compute: RendererContext_GetDeviceContext()->CSSetShaderResources(decl->Slot, 1, &texture2D->TextureView); break;
-	}
+	Image2D_Bind(texture2D->Image, decl);
 }
 
 bool Texture2D_IsSame(const Texture2D* texture2D, const Texture2D* other)
 {
 	ID3D11Resource* resource1;
 	ID3D11Resource* resource2;
-	texture2D->TextureView->GetResource(&resource1);
-	other->TextureView->GetResource(&resource2);
+	Image2D_GetTextureSRV(texture2D->Image)->GetResource(&resource1);
+	Image2D_GetTextureSRV(other->Image)->GetResource(&resource2);
 	return resource1 == resource2;
 }
 
@@ -109,18 +51,5 @@ uint32_t Texture2D_GetHeight(const Texture2D* texture2D)
 
 void Texture2D_Release(Texture2D* texture2D)
 {
-	if (texture2D->Texture)
-	{
-		texture2D->Texture->Release();
-		texture2D->Texture = nullptr;
-	}
-	if (texture2D->TextureView)
-	{
-		texture2D->TextureView->Release();
-		texture2D->TextureView = nullptr;
-	}
-	if (texture2D->NeedRelease)
-	{
-		Memory_Free(texture2D, sizeof(Texture2D), MemoryBlockTag_Texture);
-	}
+	Image2D_Release(texture2D->Image);
 }

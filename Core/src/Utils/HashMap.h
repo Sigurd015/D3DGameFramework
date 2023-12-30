@@ -1,6 +1,11 @@
 ﻿#pragma once
 #include <stdint.h>
 
+// This is a simple hashmap implementation
+// Data is stored like this:
+// [HashNode][---Data---][HashNode][---Data---][HashNode][---Data---]
+// If hash collision occurs, the data is stored like linked list
+
 struct HashNode
 {
 	char* Key = nullptr;
@@ -9,7 +14,7 @@ struct HashNode
 
 struct HashMap
 {
-	void* Table;
+	uint8_t* Table;
 	bool IsPtrType;
 	uint32_t ElementCount;
 	uint32_t ElementSize;

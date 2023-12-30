@@ -50,7 +50,7 @@ void HashMap_Create(HashMap& hashMap, bool isPtrType, uint32_t elementSize, uint
 	{
 		hashMap.ElementSize = elementSize;
 	}
-	hashMap.Table = Memory_Allocate((sizeof(HashNode) + hashMap.ElementSize) * elementCount, MemoryBlockTag_HashMap);
+	hashMap.Table = (uint8_t*)Memory_Allocate((sizeof(HashNode) + hashMap.ElementSize) * elementCount, MemoryBlockTag_HashMap);
 	HashNode emptyNode = {};
 	HashMap_Fill(hashMap, &emptyNode);
 }
@@ -58,7 +58,7 @@ void HashMap_Create(HashMap& hashMap, bool isPtrType, uint32_t elementSize, uint
 void HashMap_Set(HashMap& hashMap, const char* key, void* value)
 {
 	uint64_t index = GenHash(key, hashMap.ElementCount);
-	HashNode* node = (HashNode*)((uint8_t*)hashMap.Table + index * (sizeof(HashNode) + hashMap.ElementSize));
+	HashNode* node = (HashNode*)(hashMap.Table + index * (sizeof(HashNode) + hashMap.ElementSize));
 	if (node->Key == nullptr)
 	{
 		node->Key = String_Duplicate(key);
@@ -82,7 +82,7 @@ void HashMap_Set(HashMap& hashMap, const char* key, void* value)
 void* HashMap_Find(const HashMap& hashMap, const char* key)
 {
 	uint64_t index = GenHash(key, hashMap.ElementCount);
-	HashNode* node = (HashNode*)((uint8_t*)hashMap.Table + index * (sizeof(HashNode) + hashMap.ElementSize));
+	HashNode* node = (HashNode*)(hashMap.Table + index * (sizeof(HashNode) + hashMap.ElementSize));
 	if (node->Key == nullptr)
 	{
 		return nullptr;
@@ -105,7 +105,7 @@ void HashMap_Fill(HashMap& hashMap, void* value)
 {
 	for (size_t i = 0; i < hashMap.ElementCount; i++)
 	{
-		HashNode* currentNode = (HashNode*)((uint8_t*)hashMap.Table + i * (sizeof(HashNode) + hashMap.ElementSize));
+		HashNode* currentNode = (HashNode*)(hashMap.Table + i * (sizeof(HashNode) + hashMap.ElementSize));
 
 		SetValue(currentNode, value, hashMap.IsPtrType, hashMap.ElementSize);
 	}
@@ -115,7 +115,7 @@ void HashMap_Free(HashMap& hashMap)
 {
 	for (size_t i = 0; i < hashMap.ElementCount; i++)
 	{
-		HashNode* currentNode = (HashNode*)((uint8_t*)hashMap.Table + i * (sizeof(HashNode) + hashMap.ElementSize));
+		HashNode* currentNode = (HashNode*)(hashMap.Table + i * (sizeof(HashNode) + hashMap.ElementSize));
 
 		// Notice: Free the string inside the node, but not the node itself, because it's allocated with the table
 		FreeNode(currentNode, hashMap.ElementSize, false);
@@ -140,7 +140,7 @@ void HashMap_Foreach(const HashMap& hashMap, void(*callback)(void* value))
 {
 	for (size_t i = 0; i < hashMap.ElementCount; i++)
 	{
-		HashNode* currentNode = (HashNode*)((uint8_t*)hashMap.Table + i * (sizeof(HashNode) + hashMap.ElementSize));
+		HashNode* currentNode = (HashNode*)(hashMap.Table + i * (sizeof(HashNode) + hashMap.ElementSize));
 
 		if (currentNode->Key == nullptr)
 		{

@@ -13,6 +13,7 @@ static const char* s_MemoryBlockStr[MemoryBlockTag_Count] =
 	"Shader",
 	"Texture",
 	"Component",
+	"Buffer",
 	"CPPNew"
 };
 

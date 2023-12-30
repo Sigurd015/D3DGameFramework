@@ -2,18 +2,8 @@
 #include "AssetManager.h"
 #include "Audio/Audio.h"
 #include "Renderer/Shader.h"
-#include "Renderer/Texture.h"
 #include "Audio/Audio.h"
-
-enum AssetType
-{
-	AssetType_Unknown,
-	AssetType_Texture,
-	AssetType_Mesh,
-	AssetType_Sound,
-	AssetType_Shader,
-	AssetType_Count
-};
+#include "TextureLoader.h"
 
 struct AssetExtensions
 {
@@ -60,7 +50,7 @@ static AssetType GetAssetType(const char* assetPath)
 	return AssetType_Unknown;
 }
 
-void* AssetManager_GetAsset(const char* assetPath, bool isMemoryAsset)
+void* AssetManager_GetAsset(const char* assetPath, AssetType type, void* optionalData)
 {
 	void* result = HashMap_Find(s_Assets, assetPath);
 	if (result)
@@ -69,23 +59,53 @@ void* AssetManager_GetAsset(const char* assetPath, bool isMemoryAsset)
 		return element->Asset;
 	}
 
-	if (isMemoryAsset)
+	AssetElement element;
+
+	// Memory only assets, assetPath is the name of the asset
+	// Shader is kind of a special case, use the name of the shader to load it, not the path
+	// So use Memory only assets for shaders
+	if (type != AssetType_Unknown)
 	{
-		// TODO: Now we only support shader as memory asset
-		AssetElement element;
-		element.Type = AssetType_Shader;
-		element.Asset = Shader_Create(assetPath);
+		switch (type)
+		{
+		case AssetType_Texture:
+		{
+			if (!optionalData)
+			{
+				CORE_LOG_ERROR("AssetManager_GetAsset: optionalData is null");
+				return nullptr;
+			}
+			TextureCreationOptionalData* data = (TextureCreationOptionalData*)optionalData;
+			element.Type = AssetType_Texture;
+			element.Asset = Memory_Allocate(sizeof(Texture2D), MemoryBlockTag_Texture);
+			Texture2D_Create((Texture2D*)element.Asset, data->Spec, data->TextureData);
+			break;
+		}
+		case AssetType_Shader:
+		{
+			element.Type = AssetType_Shader;
+			element.Asset = Memory_Allocate(sizeof(Shader), MemoryBlockTag_Shader);
+			Shader_Create((Shader*)element.Asset, assetPath);
+			break;
+		}
+		}
 		HashMap_Set(s_Assets, assetPath, &element);
 		return element.Asset;
 	}
 
-	AssetElement element;
 	switch (GetAssetType(assetPath))
 	{
 	case AssetType_Texture:
 	{
 		element.Type = AssetType_Texture;
-		element.Asset = Texture2D_Create(assetPath);
+		element.Asset = Memory_Allocate(sizeof(Texture2D), MemoryBlockTag_Texture);
+
+		bool result = TextureLoader_TryLoad((Texture2D*)element.Asset, assetPath);
+		if (!result)
+		{
+			CORE_LOG_ERROR("AssetManager_GetAsset: Failed to load texture from file: %s", assetPath);
+			return nullptr;
+		}
 		break;
 	}
 	case AssetType_Mesh:
@@ -120,6 +140,7 @@ void AssetManager_Shutdown()
 			case AssetType_Texture:
 			{
 				Texture2D_Release((Texture2D*)element->Asset);
+				Memory_Free(element->Asset, sizeof(Texture2D), MemoryBlockTag_Texture);
 				break;
 			}
 			case AssetType_Sound:
@@ -130,6 +151,7 @@ void AssetManager_Shutdown()
 			case AssetType_Shader:
 			{
 				Shader_Release((Shader*)element->Asset);
+				Memory_Free(element->Asset, sizeof(Shader), MemoryBlockTag_Shader);
 				break;
 			}
 			}

@@ -1,9 +1,13 @@
 #pragma once
 #include <stdint.h>
 
+// This is a simple list implementation
+// Data is stored like this:
+// [---Data---][---Data---][---Data---][---Data---][---Data---]
+
 struct List
 {
-	void* Data = nullptr;
+	uint8_t* Data = nullptr;
 	uint32_t Length = 0;
 	uint32_t Stride = 0;
 	uint32_t Capacity = 50;
@@ -18,3 +22,5 @@ void List_Clear(List& list);
 void List_Foreach(const List& list, void(*callback)(void* data));
 void List_Free(List& list);
 uint32_t List_Size(const List& list);
+// Returns the pointer to the first element
+void* List_GetData(const List& list);

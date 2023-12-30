@@ -8,7 +8,7 @@ void List_Create(List& list, uint32_t stride, uint32_t capacity)
 	list.Capacity = capacity;
 	list.Stride = stride;
 	list.Length = 0;
-	list.Data = Memory_Allocate(list.Capacity * list.Stride, MemoryBlockTag_List);
+	list.Data = (uint8_t*)Memory_Allocate(list.Capacity * list.Stride, MemoryBlockTag_List);
 }
 
 const void* List_Get(const List& list, uint32_t index)
@@ -17,7 +17,7 @@ const void* List_Get(const List& list, uint32_t index)
 	{
 		return nullptr;
 	}
-	return (void*)((uint8_t*)list.Data + (index * list.Stride));
+	return (void*)(list.Data + (index * list.Stride));
 }
 
 void List_Set(List& list, uint32_t index, void* data)
@@ -26,7 +26,7 @@ void List_Set(List& list, uint32_t index, void* data)
 	{
 		return;
 	}
-	Memory_Copy((void*)((uint8_t*)list.Data + (index * list.Stride)), data, list.Stride);
+	Memory_Copy((void*)(list.Data + (index * list.Stride)), data, list.Stride);
 }
 
 void* List_Add(List& list, void* data)
@@ -37,12 +37,12 @@ void* List_Add(List& list, void* data)
 		void* oldData = list.Data;
 
 		list.Capacity *= LIST_RESIZE_FACTOR;
-		list.Data = Memory_Allocate(list.Capacity * list.Stride, MemoryBlockTag_List);
+		list.Data = (uint8_t*)Memory_Allocate(list.Capacity * list.Stride, MemoryBlockTag_List);
 		Memory_Copy(list.Data, oldData, oldCapacity * list.Stride);
 		Memory_Free(oldData, oldCapacity * list.Stride, MemoryBlockTag_List);
 	}
 
-	void* dest = (void*)((uint8_t*)list.Data + (list.Length * list.Stride));
+	void* dest = (void*)(list.Data + (list.Length * list.Stride));
 	Memory_Copy(dest, data, list.Stride);
 	list.Length++;
 	return dest;
@@ -57,8 +57,8 @@ void List_RemoveAt(List& list, uint32_t index)
 
 	for (uint32_t i = index; i < list.Length - 1; i++)
 	{
-		Memory_Copy((void*)((uint8_t*)list.Data + (i * list.Stride)),
-			(void*)((uint8_t*)list.Data + ((i + 1) * list.Stride)), list.Stride);
+		Memory_Copy((void*)(list.Data + (i * list.Stride)),
+			(void*)(list.Data + ((i + 1) * list.Stride)), list.Stride);
 	}
 
 	list.Length--;
@@ -73,7 +73,7 @@ void List_Foreach(const List& list, void(*callback)(void* data))
 {
 	for (uint32_t i = 0; i < list.Length; i++)
 	{
-		callback((void*)((uint8_t*)list.Data + (i * list.Stride)));
+		callback((void*)(list.Data + (i * list.Stride)));
 	}
 }
 
@@ -85,4 +85,9 @@ void List_Free(List& list)
 uint32_t List_Size(const List& list)
 {
 	return list.Length;
+}
+
+void* List_GetData(const List& list)
+{
+	return list.Data;
 }

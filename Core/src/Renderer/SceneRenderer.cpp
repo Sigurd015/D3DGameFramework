@@ -147,7 +147,7 @@ struct SceneRendererData
 	RenderPass SkyboxPass;
 	RenderPass CompositePass;
 
-	Material* DefaultMaterial;
+	Material DefaultMaterial;
 
 	struct GeoDrawCommand
 	{
@@ -197,13 +197,22 @@ void SceneRenderer_Init()
 		PipelineSpecification pipelineSpec;
 		{
 			FramebufferSpecification spec;
-
-			// TODO: Implement Framebuffer
+			FramebufferTextureSpecification colorAttachmentSpec[5] = {
+				{ImageFormat_RGBA32F},
+				{ImageFormat_RGBA16F},
+				{ImageFormat_RGBA16F},
+				{ImageFormat_RGBA16F},
+				{ImageFormat_Depth}
+			};
+			spec.Attachments = { colorAttachmentSpec, 5 };
+			spec.Width = 1920;
+			spec.Height = 1080;
+			spec.SwapChainTarget = false;
 			Framebuffer_Create(pipelineSpec.TargetFramebuffer, spec);
 		}
 		{
 			pipelineSpec.Layout = { GeoLayout, 5 };
-			pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("DeferredGeometry", true);
+			pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("DeferredGeometry", AssetType_Shader);
 			pipelineSpec.BackfaceCulling = true;
 			pipelineSpec.DepthTest = true;
 			pipelineSpec.Topology = PrimitiveTopology_Triangles;
@@ -214,7 +223,13 @@ void SceneRenderer_Init()
 			RenderPass_Create(s_Data.DeferredGeoPass, renderPassSpec);
 
 			// Create default material
-			//Material_Create(s_Data.DefaultMaterial, pipelineSpec.Shader);
+			Material_Create(s_Data.DefaultMaterial, pipelineSpec.Shader);
+			Material_SetTexture(s_Data.DefaultMaterial, "u_AlbedoTex",
+				(Texture2D*)AssetManager_GetAsset("WhiteTexture", AssetType_Texture));
+			Material_SetTexture(s_Data.DefaultMaterial, "u_MetallicRoughnessTex",
+				(Texture2D*)AssetManager_GetAsset("WhiteTexture", AssetType_Texture));
+			Material_SetTexture(s_Data.DefaultMaterial, "u_NormalTex",
+				(Texture2D*)AssetManager_GetAsset("WhiteTexture", AssetType_Texture));
 		}
 	}
 
@@ -223,15 +238,21 @@ void SceneRenderer_Init()
 		PipelineSpecification pipelineSpec;
 		{
 			FramebufferSpecification spec;
-
-			// TODO: Implement Framebuffer
+			FramebufferTextureSpecification colorAttachmentSpec = {
+				ImageFormat_ShadowMap
+			};
+			spec.Attachments = { &colorAttachmentSpec,1 };
+			spec.Width = 2048;
+			spec.Height = 2048;
+			spec.SwapChainTarget = false;
+			spec.DepthClearValue = 1.0f;
 			Framebuffer_Create(pipelineSpec.TargetFramebuffer, spec);
 		}
 		{
 			// Notice: Use the same layout as DeferredGeoPass, 
 			// because transparent objects need check alpha value from Albedo Texture
 			pipelineSpec.Layout = { GeoLayout, 5 };
-			pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("DirShadowMap", true);
+			pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("DirShadowMap", AssetType_Shader);
 			pipelineSpec.BackfaceCulling = true;
 			pipelineSpec.DepthTest = true;
 			pipelineSpec.Topology = PrimitiveTopology_Triangles;
@@ -247,15 +268,21 @@ void SceneRenderer_Init()
 		PipelineSpecification pipelineSpec;
 		{
 			FramebufferSpecification spec;
-
-			// TODO: Implement Framebuffer
+			FramebufferTextureSpecification colorAttachmentSpec = {
+				ImageFormat_ShadowMap, 6
+			};
+			spec.Attachments = { &colorAttachmentSpec,1 };
+			spec.Width = 2048;
+			spec.Height = 2048;
+			spec.SwapChainTarget = false;
+			spec.DepthClearValue = 1.0f;
 			Framebuffer_Create(pipelineSpec.TargetFramebuffer, spec);
 		}
 		{
 			// Notice: Use the same layout as DeferredGeoPass, 
 			// because transparent objects need check alpha value from Albedo Texture
 			pipelineSpec.Layout = { GeoLayout, 5 };
-			pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("PointShadowMap", true);
+			pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("PointShadowMap", AssetType_Shader);
 			pipelineSpec.BackfaceCulling = true;
 			pipelineSpec.DepthTest = true;
 			pipelineSpec.Topology = PrimitiveTopology_Triangles;
@@ -271,13 +298,18 @@ void SceneRenderer_Init()
 		PipelineSpecification pipelineSpec;
 		{
 			FramebufferSpecification spec;
-
-			// TODO: Implement Framebuffer
+			FramebufferTextureSpecification colorAttachmentSpec = {
+				ImageFormat_RGBA32F
+			};
+			spec.Attachments = { &colorAttachmentSpec,1 };
+			spec.Width = 1920;
+			spec.Height = 1080;
+			spec.SwapChainTarget = false;
 			Framebuffer_Create(pipelineSpec.TargetFramebuffer, spec);
 		}
 		{
 			pipelineSpec.Layout = { FullScreenQuadLayout, 2 };
-			pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("DeferredLighting", true);
+			pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("DeferredLighting", AssetType_Shader);
 			pipelineSpec.BackfaceCulling = false;
 			pipelineSpec.DepthTest = false;
 			pipelineSpec.Topology = PrimitiveTopology_Triangles;
@@ -292,13 +324,18 @@ void SceneRenderer_Init()
 		PipelineSpecification pipelineSpec;
 		{
 			FramebufferSpecification spec;
-
-			// TODO: Implement Framebuffer
+			FramebufferTextureSpecification colorAttachmentSpec = {
+				ImageFormat_RGBA32F
+			};
+			spec.Attachments = { &colorAttachmentSpec,1 };
+			spec.Width = 1920;
+			spec.Height = 1080;
+			spec.SwapChainTarget = false;
 			Framebuffer_Create(pipelineSpec.TargetFramebuffer, spec);
 		}
 		{
 			pipelineSpec.Layout = { FullScreenQuadLayout, 2 };
-			pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("Composite", true);
+			pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("Composite", AssetType_Shader);
 			pipelineSpec.BackfaceCulling = false;
 			pipelineSpec.DepthTest = false;
 			pipelineSpec.Topology = PrimitiveTopology_Triangles;
@@ -313,13 +350,24 @@ void SceneRenderer_Init()
 		PipelineSpecification pipelineSpec;
 		{
 			FramebufferSpecification spec;
-
-			// TODO: Implement Framebuffer
+			FramebufferTextureSpecification colorAttachmentSpec[2] = {
+				{ImageFormat_RGBA32F},
+				{ImageFormat_Depth}
+			};
+			spec.Attachments = { colorAttachmentSpec,2 };
+			spec.Width = 1920;
+			spec.Height = 1080;
+			spec.SwapChainTarget = false;
+			ExistingImage existingImage[2] = {
+				{RenderPass_GetOutput(s_Data.CompositePass),0},
+				{RenderPass_GetDepthOutput(s_Data.DeferredGeoPass),1}
+			};
+			spec.ExistingImages = { existingImage,2 };
 			Framebuffer_Create(pipelineSpec.TargetFramebuffer, spec);
 		}
 		{
 			pipelineSpec.Layout = { SkyboxLayout, 1 };
-			pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("Skybox", true);
+			pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("Skybox", AssetType_Shader);
 			pipelineSpec.BackfaceCulling = false;
 			pipelineSpec.DepthTest = true;
 			pipelineSpec.Topology = PrimitiveTopology_Triangles;
@@ -345,16 +393,17 @@ void SceneRenderer_Init()
 	RenderPass_SetInput(s_Data.DeferredLightingPass, "CBPointLight", RendererResourceType_ConstantBuffer, (void*)&s_Data.PointLightDataBuffer);
 	RenderPass_SetInput(s_Data.DeferredLightingPass, "CBSpotLight", RendererResourceType_ConstantBuffer, (void*)&s_Data.SpotLightDataBuffer);
 	RenderPass_SetInput(s_Data.DeferredLightingPass, "CBDirShadow", RendererResourceType_ConstantBuffer, (void*)&s_Data.DirShadowDataBuffer);
-	//RenderPass_SetInput(s_Data.DeferredLightingPass, "u_AlbedoBuffer", RendererResourceType_Texture2D, (void*)s_Data.DeferredGeoPass->GetOutput(0));
-	//RenderPass_SetInput(s_Data.DeferredLightingPass, "u_MREBuffer", RendererResourceType_Texture2D, (void*)s_Data.DeferredGeoPass->GetOutput(1));
-	//RenderPass_SetInput(s_Data.DeferredLightingPass, "u_NormalBuffer", RendererResourceType_Texture2D, (void*)s_Data.DeferredGeoPass->GetOutput(2));
-	//RenderPass_SetInput(s_Data.DeferredLightingPass, "u_PositionBuffer", RendererResourceType_Texture2D, (void*)s_Data.DeferredGeoPass->GetOutput(3));
+	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_AlbedoBuffer", RendererResourceType_Texture2D, (void*)RenderPass_GetOutput(s_Data.DeferredGeoPass));
+	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_MREBuffer", RendererResourceType_Texture2D, (void*)RenderPass_GetOutput(s_Data.DeferredGeoPass));
+	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_NormalBuffer", RendererResourceType_Texture2D, (void*)RenderPass_GetOutput(s_Data.DeferredGeoPass));
+	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_PositionBuffer", RendererResourceType_Texture2D, (void*)RenderPass_GetOutput(s_Data.DeferredGeoPass));
 
-	//RenderPass_SetInput(s_Data.DeferredLightingPass, "u_DirShadowMap", RendererResourceType_Texture2D, (void*)s_Data.DirShadowMapPass->GetDepthOutput());
-	//RenderPass_SetInput(s_Data.DeferredLightingPass, "u_PointShadowMap", RendererResourceType_Texture2D, (void*)s_Data.PointShadowMapPass->GetDepthOutput());
-	//RenderPass_SetInput(s_Data.DeferredLightingPass, "u_BRDFLUTTex", RendererResourceType_Texture2D, (void*)Renderer::GetTexture<Texture2D>("BRDFLut"));
+	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_DirShadowMap", RendererResourceType_Texture2D, (void*)RenderPass_GetDepthOutput(s_Data.DirShadowMapPass));
+	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_PointShadowMap", RendererResourceType_Texture2D, (void*)RenderPass_GetDepthOutput(s_Data.PointShadowMapPass));
+	// TODO: Better implementation for brdf lut (Directly use asset manager to get asset will generate mipmaps which is not needed)
+	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_BRDFLUTTex", RendererResourceType_Texture2D, AssetManager_GetAsset("assets/renderer/BRDF_LUT.png"));
 
-	//RenderPass_SetInput(s_Data.CompositePass, "u_Color", RendererResourceType_Texture2D, (void*)s_Data.DeferredLightingPass->GetOutput());
+	RenderPass_SetInput(s_Data.CompositePass, "u_Color", RendererResourceType_Texture2D, (void*)RenderPass_GetOutput(s_Data.DeferredLightingPass));
 
 	RenderPass_SetInput(s_Data.SkyboxPass, "CBCamera", RendererResourceType_ConstantBuffer, (void*)&s_Data.CameraDataBuffer);
 }
@@ -374,9 +423,10 @@ void SceneRenderer_Shutdown()
 	RenderPass_Release(s_Data.PointShadowMapPass);
 	RenderPass_Release(s_Data.DeferredLightingPass);
 	RenderPass_Release(s_Data.CompositePass);
-	RenderPass_Release(s_Data.SkyboxPass);
+	//TODO: Fix release issue (skybox pass use existing image, can't release twice)
+	//RenderPass_Release(s_Data.SkyboxPass);
 
-	//Material_Release(s_Data.DefaultMaterial);
+	Material_Release(s_Data.DefaultMaterial);
 }
 
 void SceneRenderer_SetViewportSize(uint32_t width, uint32_t height)

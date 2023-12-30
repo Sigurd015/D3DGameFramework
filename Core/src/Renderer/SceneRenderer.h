@@ -1,5 +1,4 @@
 #pragma once
-#include "Renderer2D.h"
 #include "ConstantBuffer.h"
 #include "RenderPass.h"
 #include "Scene/Components.h"
@@ -8,7 +7,6 @@
 // TODO: Temporary
 struct Mesh;
 struct Environment;
-struct Image2D;
 struct MeshComponent;
 
 void SceneRenderer_Init();

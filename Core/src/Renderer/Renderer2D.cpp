@@ -88,7 +88,6 @@ struct Renderer2DData
 	Material DefaultMaterial;
 	Texture2D* Textures[MaxTextureSlots];// 0 is white texture
 	char* TextureSlotsNames[MaxTextureSlots];
-	Texture2D WhiteTexture;
 	uint32_t TextureSlotIndex = 1;
 
 	Vec4 QuadVertexPositions[4] =
@@ -153,7 +152,7 @@ void Renderer2D_Init()
 		IndexBuffer_Create(s_Data.QuadIndexBuffer, indices, s_Data.MaxIndices);
 		delete[] indices;
 
-		pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("Renderer2D_Quad", true);
+		pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("Renderer2D_Quad", AssetType_Shader);
 		pipelineSpec.DepthTest = true;
 		pipelineSpec.BackfaceCulling = true;
 		pipelineSpec.DepthOperator = DepthCompareOperator_Less;
@@ -184,7 +183,7 @@ void Renderer2D_Init()
 		VertexBuffer_Create(s_Data.CircleVertexBuffer, s_Data.MaxVertices * sizeof(CircleVertex));
 		VertexBuffer_SetLayout(s_Data.CircleVertexBuffer, pipelineSpec.Layout);
 
-		pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("Renderer2D_Circle", true);
+		pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("Renderer2D_Circle", AssetType_Shader);
 		pipelineSpec.DepthTest = true;
 		pipelineSpec.BackfaceCulling = true;
 		pipelineSpec.DepthOperator = DepthCompareOperator_Less;
@@ -211,7 +210,7 @@ void Renderer2D_Init()
 		VertexBuffer_Create(s_Data.LineVertexBuffer, s_Data.MaxVertices * sizeof(LineVertex));
 		VertexBuffer_SetLayout(s_Data.LineVertexBuffer, pipelineSpec.Layout);
 
-		pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("Renderer2D_Line", true);
+		pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("Renderer2D_Line", AssetType_Shader);
 		pipelineSpec.DepthTest = true;
 		pipelineSpec.BackfaceCulling = true;
 		pipelineSpec.DepthOperator = DepthCompareOperator_Less;
@@ -243,7 +242,7 @@ void Renderer2D_Init()
 
 		// Using the same shader as quads, but binding a identity viewProjection matrix.
 		// Because UI position is already in screen space.
-		pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("Renderer2D_Quad", true);
+		pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("Renderer2D_Quad", AssetType_Shader);
 		pipelineSpec.DepthTest = false;
 		pipelineSpec.BackfaceCulling = true;
 		pipelineSpec.DepthOperator = DepthCompareOperator_Less;
@@ -262,12 +261,15 @@ void Renderer2D_Init()
 	TextureSpecification spec;
 	spec.Width = 1;
 	spec.Height = 1;
-	spec.Format = ImageFormat::RGBA8;
-	spec.Data = &whiteTextureData;
-	spec.DataSize = sizeof(uint32_t);
+	spec.Format = ImageFormat_RGBA;
+	spec.GenerateMips = false;
+	Buffer buffer;
+	Buffer_Create(buffer, sizeof(uint32_t), &whiteTextureData);
 
-	Texture2D_Create(&s_Data.WhiteTexture, spec);
-	s_Data.Textures[0] = &s_Data.WhiteTexture;
+	TextureCreationOptionalData optionalData;
+	optionalData.Spec = spec;
+	optionalData.TextureData = buffer;
+	s_Data.Textures[0] = (Texture2D*)AssetManager_GetAsset("WhiteTexture", AssetType_Texture, &optionalData);
 
 	for (size_t i = 0; i < s_Data.MaxTextureSlots; i++)
 	{
@@ -317,8 +319,6 @@ void Renderer2D_Shutdown()
 	{
 		delete[] s_Data.TextureSlotsNames[i];
 	}
-
-	Texture2D_Release(&s_Data.WhiteTexture);
 }
 
 void StartBatch()

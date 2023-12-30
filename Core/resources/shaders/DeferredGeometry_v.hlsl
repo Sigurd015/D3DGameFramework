@@ -23,7 +23,7 @@ VertexOutput main(VertexInput Input)
     VertexOutput Output;
     float4 worldPosition = mul(float4(Input.a_Position, 1.0f), u_Transform);
     Output.WorldPosition = worldPosition.xyz;
-    Output.TexCoord = float2(Input.a_TexCoord.x, 1.0f - Input.a_TexCoord.y);
+    Output.TexCoord = Input.a_TexCoord;
     Output.Normal = mul(Input.a_Normal, (float3x3) u_Transform);
     Output.TBN = mul(float3x3(Input.a_Tangent, Input.a_Bitangent, Input.a_Normal), (float3x3) u_Transform);
     Output.Position = mul(worldPosition, u_ViewProjection);

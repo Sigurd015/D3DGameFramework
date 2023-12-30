@@ -42,11 +42,9 @@ struct Shader
 
 	ID3DBlob* VertexShaderBlob = nullptr;
 	List ReflectionData;
-
-	bool NeedRelease = false;
 };
 
-void* Shader_Create(const char* name);
+void Shader_Create(Shader* shader, const char* name);
 const List& Shader_GetReflectionData(const Shader* shader);
 void Shader_Bind(const Shader* shader);
 void Shader_Release(Shader* shader);

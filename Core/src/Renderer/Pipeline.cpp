@@ -75,4 +75,5 @@ void Pipeline_Release(Pipeline& pipeline)
 		pipeline.InputLayout->Release();
 		pipeline.InputLayout = nullptr;
 	}
+	Framebuffer_Release(pipeline.Spec.TargetFramebuffer);
 }

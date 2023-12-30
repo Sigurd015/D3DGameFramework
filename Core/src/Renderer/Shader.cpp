@@ -96,11 +96,8 @@ void CreateReflectionData(Shader* shader, ID3DBlob* shaderBlob, ShaderType shade
 	}
 }
 
-void* Shader_Create(const char* name)
+void Shader_Create(Shader* shader, const char* name)
 {
-	Shader* shader = (Shader*)Memory_Allocate(sizeof(Shader), MemoryBlockTag_Shader);
-	shader->NeedRelease = true;
-
 	List_Create(shader->ReflectionData, sizeof(ShaderResourceDeclaration));
 
 	ShaderType type = GetShaderTypeByName(name);
@@ -198,7 +195,6 @@ void* Shader_Create(const char* name)
 		CreateReflectionData(shader, blob, ShaderType_Compute);
 		blob->Release();
 	}
-	return shader;
 }
 
 const List& Shader_GetReflectionData(const Shader* shader)
@@ -255,9 +251,4 @@ void Shader_Release(Shader* shader)
 		});
 
 	List_Free(shader->ReflectionData);
-
-	if (shader->NeedRelease)
-	{
-		Memory_Free(shader, sizeof(Shader), MemoryBlockTag_Shader);
-	}
 }

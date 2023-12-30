@@ -13,6 +13,8 @@ project "Core"
 	{
 		"src/**.h",
 		"src/**.cpp",
+		"vendor/stb_image/**.h",
+		"vendor/stb_image/**.cpp",
 		"Resources/Shaders/**.hlsl"
 	}
 
@@ -31,17 +33,18 @@ project "Core"
 	filter { "files:**_c.hlsl" }
 		removeflags "ExcludeFromBuild"
 		shadertype "Compute"
- 	filter {}
+	filter {}
 
-	 postbuildcommands 
-	 {
-		 '{COPY} "%{cfg.targetdir}"/*.cso %{wks.location}/assets/shaders/cache/'
-	 }
+	postbuildcommands 
+	{
+		'{COPY} "%{cfg.targetdir}"/*.cso %{wks.location}/assets/shaders/cache/'
+	}
 
 	includedirs
 	{
 		"src",
 		"%{IncludeDir.DirectXTK}",
+		"%{IncludeDir.stb_image}",
 	}
 
 	links
@@ -52,6 +55,9 @@ project "Core"
 		"dwrite.lib",
 		"dxguid.lib",
 	}
+
+	filter "files:vendor/stb_image/**.cpp"
+		flags { "NoPCH" }
 
 	filter "system:windows"
 		systemversion "latest"

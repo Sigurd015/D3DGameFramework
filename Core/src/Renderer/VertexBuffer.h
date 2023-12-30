@@ -18,6 +18,7 @@ struct VertexBufferLayoutEmelent
 	uint32_t Offset = 0;
 };
 
+// Used for defining dynamic size vertex buffer layouts, works with VertexBufferLayoutEmelent
 struct VertexBufferLayout
 {
 	VertexBufferLayoutEmelent* Elements;
