@@ -10,9 +10,11 @@ enum MemoryBlockTag
 	MemoryBlockTag_List,
 	MemoryBlockTag_HashMap,
 	MemoryBlockTag_Shader,
-	MemoryBlockTag_Texture,
+	MemoryBlockTag_Texture2D,
+	MemoryBlockTag_TextureCube,
 	MemoryBlockTag_Component,
 	MemoryBlockTag_Buffer,
+	MemoryBlockTag_RefPtr,
 	MemoryBlockTag_CPPNew,
 	MemoryBlockTag_Count
 };

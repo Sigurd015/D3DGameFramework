@@ -3,13 +3,7 @@
 #include "Texture.h"
 #include "RendererContext.h"
 #include "RenderStates.h"
-
-struct ResourceElement
-{
-	char* Name;
-	RendererResourceType Type;
-	const void* Resource;
-};
+#include "FrameBuffer.h"
 
 void RenderPass_Create(RenderPass& renderPass, const RenderPassSpecification& specification)
 {
@@ -32,16 +26,14 @@ void RenderPass_Release(RenderPass& renderPass)
 	Pipeline_Release(renderPass.Specification.Pipeline);
 }
 
-const Image2D* RenderPass_GetOutput(RenderPass& renderPass, uint32_t index)
+RefPtr* RenderPass_GetOutput(RenderPass& renderPass, uint32_t index)
 {
-	const auto& framebufferSpecification = RenderPass_GetTargetFramebuffer(renderPass);
-	return Framebuffer_GetImage(framebufferSpecification, index);
+	return Framebuffer_GetImage((Framebuffer*)RefPtr_Get(RenderPass_GetTargetFramebuffer(renderPass)), index);
 }
 
-const Image2D* RenderPass_GetDepthOutput(RenderPass& renderPass)
+RefPtr* RenderPass_GetDepthOutput(RenderPass& renderPass)
 {
-	const auto& framebufferSpecification = RenderPass_GetTargetFramebuffer(renderPass);
-	return Framebuffer_GetDepthImage(framebufferSpecification);
+	return Framebuffer_GetDepthImage((Framebuffer*)RefPtr_Get(RenderPass_GetTargetFramebuffer(renderPass)));
 }
 
 void RenderPass_SetInput(RenderPass& renderPass, const char* name, RendererResourceType type, const void* resource)
@@ -148,7 +140,12 @@ const Pipeline& RenderPass_GetPipeline(const RenderPass& renderPass)
 	return renderPass.Specification.Pipeline;
 }
 
-const Framebuffer& RenderPass_GetTargetFramebuffer(const RenderPass& renderPass)
+void RenderPass_SetTargetFramebuffer(RenderPass& renderPass, RefPtr* framebuffer)
+{
+	Pipeline_SetFramebuffer(renderPass.Specification.Pipeline, framebuffer);
+}
+
+RefPtr* RenderPass_GetTargetFramebuffer(const RenderPass& renderPass)
 {
 	const auto& specification = Pipeline_GetSpecification(renderPass.Specification.Pipeline);
 	return specification.TargetFramebuffer;

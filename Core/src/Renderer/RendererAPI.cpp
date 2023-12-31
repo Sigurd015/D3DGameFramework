@@ -7,6 +7,7 @@
 #include "FrameBuffer.h"
 #include "RenderStates.h"
 #include "SceneRenderer.h"
+#include "Asset/AssetManager.h"
 
 #include <d2d1.h>
 #include <dwrite.h>
@@ -27,6 +28,30 @@ struct RendererAPIState
 	ID3D11DepthStencilView* DepthStencilView;
 };
 static RendererAPIState s_RendererAPIState;
+
+struct RendererData
+{
+	// For Equirectangular To CubemapPass
+	ComputePass EquirectangularToCubemapPass;
+	ComputePass EnvironmentMipFilterPass;
+	ComputePass EnvironmentIrradiancePass;
+
+	struct CBFilterParam
+	{
+		float Roughness;
+
+		char padding[12];
+	};
+	ConstantBuffer FilterParam;
+	struct CBSamplesParams
+	{
+		uint32_t Samples;
+
+		char padding[12];
+	};
+	ConstantBuffer SamplesParam;
+};
+static RendererData s_Data;
 
 void SetBuffer(uint32_t width, uint32_t height)
 {
@@ -68,6 +93,9 @@ void SetBuffer(uint32_t width, uint32_t height)
 
 void RendererAPI_Initialize()
 {
+	s_Data = { };
+	s_RendererAPIState = { };
+
 	s_RendererAPIState.SwapChain = RendererContext_GetSwapChain();
 	s_RendererAPIState.Device = RendererContext_GetDevice();
 	s_RendererAPIState.DeviceContext = RendererContext_GetDeviceContext();
@@ -80,6 +108,37 @@ void RendererAPI_Initialize()
 	CommonStates_Init();
 	Renderer2D_Init();
 	SceneRenderer_Init();
+
+	// For Equirectangular To CubemapPass
+	{
+		ComputePassSpecification spec = {};
+		ComputePipelineSpecification pipelineSpec = {};
+		pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("EquirectangularToCubeMap", AssetType_Shader);
+		ComputePipeline_Create(spec.Pipeline, pipelineSpec);
+		ComputePass_Create(s_Data.EquirectangularToCubemapPass, spec);
+	}
+
+	{
+		ComputePassSpecification spec = {};
+		ComputePipelineSpecification pipelineSpec = {};
+		pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("EnvironmentMipFilter", AssetType_Shader);
+		ComputePipeline_Create(spec.Pipeline, pipelineSpec);
+		ComputePass_Create(s_Data.EnvironmentMipFilterPass, spec);
+
+		ConstantBuffer_Create(s_Data.FilterParam, sizeof(RendererData::CBFilterParam));
+		ComputePass_SetInput(s_Data.EnvironmentMipFilterPass, "CBFilterParam", RendererResourceType_ConstantBuffer, &s_Data.FilterParam);
+	}
+
+	{
+		ComputePassSpecification spec = {};
+		ComputePipelineSpecification pipelineSpec = {};
+		pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("EnvironmentIrradiance", AssetType_Shader);
+		ComputePipeline_Create(spec.Pipeline, pipelineSpec);
+		ComputePass_Create(s_Data.EnvironmentIrradiancePass, spec);
+
+		ConstantBuffer_Create(s_Data.SamplesParam, sizeof(RendererData::CBSamplesParams));
+		ComputePass_SetInput(s_Data.EnvironmentIrradiancePass, "CBSamplesParams", RendererResourceType_ConstantBuffer, &s_Data.SamplesParam);
+	}
 }
 
 void RendererAPI_Shutdown()
@@ -97,6 +156,16 @@ void RendererAPI_Shutdown()
 	s_RendererAPIState.D2DFactory->Release();
 	s_RendererAPIState.DWriteFactory->Release();
 	s_RendererAPIState.D2DRenderTarget->Release();
+
+	{
+		ComputePass_Release(s_Data.EquirectangularToCubemapPass);
+
+		ConstantBuffer_Release(s_Data.FilterParam);
+		ComputePass_Release(s_Data.EnvironmentMipFilterPass);
+
+		ConstantBuffer_Release(s_Data.SamplesParam);
+		ComputePass_Release(s_Data.EnvironmentIrradiancePass);
+	}
 }
 
 void RendererAPI_SetViewport(uint32_t width, uint32_t height)
@@ -114,6 +183,15 @@ void RendererAPI_SetClearColor(const Vec4& color)
 
 void RendererAPI_Clear()
 {
+	RendererAPI_ResetToSwapChain();
+
+	s_RendererAPIState.DeviceContext->ClearRenderTargetView(s_RendererAPIState.RenderTargetView, &s_RendererAPIState.ClearColor.x);
+	s_RendererAPIState.DeviceContext->ClearDepthStencilView(s_RendererAPIState.DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+	s_RendererAPIState.DeviceContext->OMSetRenderTargets(1, &s_RendererAPIState.RenderTargetView, s_RendererAPIState.DepthStencilView);
+}
+
+void RendererAPI_ResetToSwapChain()
+{
 	D3D11_VIEWPORT viewPort{};
 	viewPort.Width = s_RendererAPIState.Width;
 	viewPort.Height = s_RendererAPIState.Height;
@@ -122,24 +200,141 @@ void RendererAPI_Clear()
 	viewPort.TopLeftX = 0;
 	viewPort.TopLeftY = 0;
 	s_RendererAPIState.DeviceContext->RSSetViewports(1, &viewPort);
+}
 
-	s_RendererAPIState.DeviceContext->ClearRenderTargetView(s_RendererAPIState.RenderTargetView, &s_RendererAPIState.ClearColor.x);
-	s_RendererAPIState.DeviceContext->ClearDepthStencilView(s_RendererAPIState.DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
-	s_RendererAPIState.DeviceContext->OMSetRenderTargets(1, &s_RendererAPIState.RenderTargetView, s_RendererAPIState.DepthStencilView);
+void RendererAPI_BeginComputePass(const ComputePass& computePass)
+{
+	const ComputePipeline& pipeline = ComputePass_GetPipeline(computePass);
+	ComputePipeline_Bind(pipeline);
+
+	ComputePass_BindInputs(computePass);
+}
+
+void RendererAPI_EndComputePass(const ComputePass& computePass)
+{
+	ComputePass_UnbindInputs(computePass);
+}
+
+EnvMap RendererAPI_CreateEnvironmentMap(Texture2D* equirectangularMap)
+{
+	CORE_ASSERT(Texture2D_GetFormat(equirectangularMap) == ImageFormat_RGBA32F, "Texture is not HDR!");
+
+	EnvMap envMap;
+
+	static const uint32_t cubemapSize = 1024;
+	static const uint32_t irradianceMapSize = 32;
+
+	TextureSpecification cubemapSpec = {};
+	cubemapSpec.Width = cubemapSize;
+	cubemapSpec.Height = cubemapSize;
+	cubemapSpec.Format = ImageFormat_RGBA32F;
+
+	TextureCube envUnfiltered;
+	TextureCube_Create(&envUnfiltered, cubemapSpec);
+
+	// Radiance map (Equirectangular to cubemap) 
+	{
+		TextureCube_CreateUAV(&envUnfiltered);
+
+		ComputePass_SetInput(s_Data.EquirectangularToCubemapPass, "u_EquirectangularMap", RendererResourceType_TextureCube, equirectangularMap);
+		ComputePass_SetInput(s_Data.EquirectangularToCubemapPass, "o_OutputTex", RendererResourceType_TextureCube, &envUnfiltered);
+
+		RendererAPI_BeginComputePass(s_Data.EquirectangularToCubemapPass);
+		RendererContext_GetDeviceContext()->Dispatch(cubemapSize / 32, cubemapSize / 32, 6);
+		RendererAPI_EndComputePass(s_Data.EquirectangularToCubemapPass);
+
+		TextureCube_GenerateMips(&envUnfiltered);
+	}
+
+	// Radiance map (Filter)	
+	TextureCube envFiltered;
+	TextureCube_Create(&envFiltered, cubemapSpec);
+	{
+		// Copy Unfiltered envmap to Filtered envmap (Keep the first mip level)
+		RendererContext_GetDeviceContext()->CopyResource(TextureCube_GetTexture(&envFiltered), TextureCube_GetTexture(&envUnfiltered));
+
+		// Cubemap size is 1024, so we need 11 mip levels (1024 -> 512 -> 256 -> 128 -> 64 -> 32 -> 16 -> 8 -> 4 -> 2 -> 1)
+		const static uint32_t mipCount = 11;
+
+		ComputePass_SetInput(s_Data.EnvironmentMipFilterPass, "u_InputTex", RendererResourceType_TextureCube, &envUnfiltered);
+
+		const float deltaRoughness = 1.0f / DirectX::XMMax((float)mipCount - 1.0f, 1.0f);
+		for (uint32_t i = 1, size = cubemapSize; i < mipCount; i++, size /= 2)
+		{
+			uint32_t numGroups = DirectX::XMMax(1u, size / 32);
+			RendererData::CBFilterParam filterParam = { i * deltaRoughness };
+			ConstantBuffer_SetData(s_Data.FilterParam, &filterParam);
+			TextureCube_CreateUAV(&envFiltered, i);
+
+			ComputePass_SetInput(s_Data.EnvironmentMipFilterPass, "o_OutputTex", RendererResourceType_TextureCube, &envFiltered);
+
+			RendererAPI_BeginComputePass(s_Data.EnvironmentMipFilterPass);
+			RendererContext_GetDeviceContext()->Dispatch(numGroups, numGroups, 6);
+			RendererAPI_EndComputePass(s_Data.EnvironmentMipFilterPass);
+		}
+	}
+
+	// Irradiance map
+	cubemapSpec.Width = irradianceMapSize;
+	cubemapSpec.Height = irradianceMapSize;
+	TextureCube irradianceMap;
+	TextureCube_Create(&irradianceMap, cubemapSpec);
+	{
+		TextureCube_CreateUAV(&irradianceMap);
+
+		ComputePass_SetInput(s_Data.EnvironmentIrradiancePass, "u_RadianceMap", RendererResourceType_TextureCube, &envFiltered);
+		ComputePass_SetInput(s_Data.EnvironmentIrradiancePass, "o_IrradianceMap", RendererResourceType_TextureCube, &irradianceMap);
+
+		RendererData::CBSamplesParams samplesParams = { 512 };
+		ConstantBuffer_SetData(s_Data.SamplesParam, &samplesParams);
+
+		RendererAPI_BeginComputePass(s_Data.EnvironmentIrradiancePass);
+		RendererContext_GetDeviceContext()->Dispatch(irradianceMapSize / 32, irradianceMapSize / 32, 6);
+		RendererAPI_EndComputePass(s_Data.EnvironmentIrradiancePass);
+
+		TextureCube_GenerateMips(&irradianceMap);
+	}
+	envMap.RadianceMap = envFiltered;
+	envMap.IrradianceMap = irradianceMap;
+
+	return envMap;
 }
 
 void RendererAPI_BeginRenderPass(const RenderPass& renderPass, bool clear)
 {
-	const Framebuffer& framebuffer = RenderPass_GetTargetFramebuffer(renderPass);
+	const Framebuffer* framebuffer = (Framebuffer*)RefPtr_Get(RenderPass_GetTargetFramebuffer(renderPass));
 	const Pipeline& pipeline = RenderPass_GetPipeline(renderPass);
 	const PipelineSpecification& pipelineSpec = Pipeline_GetSpecification(pipeline);
 	const FramebufferSpecification& framebufferSpec = Framebuffer_GetSpecification(framebuffer);
 
-	//if (clear)
-	//{
-	//	Framebuffer_ClearAttachment(framebuffer);
-	//}
-	//Framebuffer_Bind(framebuffer);
+	if (framebufferSpec.SwapChainTarget)
+	{
+		if (clear)
+		{
+			RendererAPI_Clear();
+		}
+
+		RendererAPI_ResetToSwapChain();
+	}
+	else
+	{
+		if (clear)
+		{
+			Framebuffer_ClearAttachment(framebuffer);
+		}
+
+		D3D11_VIEWPORT viewPort{};
+		viewPort.MinDepth = 0;
+		viewPort.MaxDepth = 1.0f;
+		viewPort.TopLeftX = 0;
+		viewPort.TopLeftY = 0;
+		viewPort.Width = framebufferSpec.Width;
+		viewPort.Height = framebufferSpec.Height;
+
+		s_RendererAPIState.DeviceContext->RSSetViewports(1, &viewPort);
+		Framebuffer_Bind(framebuffer);
+	}
+
 	Pipeline_Bind(pipeline);
 
 	if (!pipelineSpec.DepthTest)
@@ -190,31 +385,12 @@ void RendererAPI_BeginRenderPass(const RenderPass& renderPass, bool clear)
 	}
 	}
 
-	/*D3D11_VIEWPORT viewPort{};
-	viewPort.MinDepth = 0;
-	viewPort.MaxDepth = 1.0f;
-	viewPort.TopLeftX = 0;
-	viewPort.TopLeftY = 0;
-
-	if (framebufferSpec.SwapChainTarget)
-	{
-		viewPort.Width = s_RendererAPIState.Width;
-		viewPort.Height = s_RendererAPIState.Height;
-	}
-	else
-	{
-		viewPort.Width = framebufferSpec.Width;
-		viewPort.Height = framebufferSpec.Height;
-	}
-
-	s_RendererAPIState.DeviceContext->RSSetViewports(1, &viewPort);*/
 	RnederPass_BindInputs(renderPass);
 }
 
 void RendererAPI_EndRenderPass()
 {
 	//s_RendererAPIState.DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
-	//RendererAPI_Clear();
 }
 
 void RendererAPI_DrawIndexed(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, const Material& material, uint32_t indexCount)

@@ -5,6 +5,8 @@ enum AssetType
 {
 	AssetType_Unknown,
 	AssetType_Texture,
+	AssetType_TextureCube,
+	AssetType_EnvMap,
 	AssetType_Mesh,
 	AssetType_Sound,
 	AssetType_Shader,

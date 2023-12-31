@@ -18,7 +18,7 @@ void SceneRenderer_EndScene();
 
 void ScnenRenderer_SubmitStaticMesh(const Mat4& transform, MeshComponent& meshComponent, Material* overrideMaterial = nullptr);
 
-RenderPass* SceneRenderer_GetFinalPass();
+const RenderPass& SceneRenderer_GetFinalPass();
 //----- GBuffer Debugging -----
 Image2D* SceneRenderer_GetGBufferAlbedo();
 Image2D* SceneRenderer_GetGBufferMRE();

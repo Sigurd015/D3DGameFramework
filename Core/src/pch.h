@@ -13,6 +13,5 @@
 #include "Math/Math.h"
 #include "Utils/List.h"
 #include "Utils/HashMap.h"
-#include "Utils/RefPtr.h"
 
 #include <Windows.h>

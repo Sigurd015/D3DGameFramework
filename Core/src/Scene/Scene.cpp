@@ -4,6 +4,7 @@
 #include "Renderer/Renderer2D.h"
 #include "Renderer/RendererAPI.h"
 #include "Core/Application.h"
+#include "Renderer/SceneRenderer.h"
 
 #include <Audio.h>
 
@@ -307,14 +308,14 @@ void ColliderVisualiztion(const Scene& scene)
 void Scene_OnUpdate(Scene& scene, float timeStep)
 {
 	// Find primary camera
+	Mat viewProjection;
 	{
 		Entity* mainCamera = Scene_GetPrimaryCamera(scene);
 		if (!mainCamera)
 			return;
 
-		Mat viewProjection = DirectX::XMMatrixInverse(nullptr, TransformComponent_GetTransform(mainCamera->Transform))
+		viewProjection = DirectX::XMMatrixInverse(nullptr, TransformComponent_GetTransform(mainCamera->Transform))
 			* SceneCamera_GetProjectionMatrix(mainCamera->Camera->Camera);
-		Renderer2D_BeginScene(viewProjection);
 	}
 
 	uint32_t size = List_Size(scene.Entities);
@@ -394,6 +395,20 @@ void Scene_OnUpdate(Scene& scene, float timeStep)
 
 	// Rendering
 	{
+		// 3D rendering
+
+		//SceneRenderer_BeginScene(scene);
+		for (size_t i = 0; i < size; i++)
+		{
+
+		}
+		//SceneRenderer_EndScene();
+
+		//Renderer2D_SetTargetFrameBuffer(RenderPass_GetTargetFramebuffer(SceneRenderer_GetFinalPass()));
+
+		// 2D rendering
+		Renderer2D_BeginScene(viewProjection);
+
 		for (size_t i = 0; i < size; i++)
 		{
 			Entity* temp = (Entity*)List_Get(scene.Entities, i);

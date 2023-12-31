@@ -1,11 +1,15 @@
 #pragma once
 #include "../Math/Math.h"
 #include "Texture.h"
+#include "Utils/RefPtr.h"
 
 void Renderer2D_Init();
 void Renderer2D_Shutdown();
 void Renderer2D_BeginScene(const Mat& viewProjection);
 void Renderer2D_EndScene();
+// Notice: When directly draw something, remember to call Renderer2D_ResetTargetFrameBuffer before Renderer2D_BeginScene
+void Renderer2D_ResetTargetFrameBuffer();
+void Renderer2D_SetTargetFrameBuffer(RefPtr* frameBuffer);
 void Renderer2D_DrawQuad(const Mat& transform, const Vec4& color);
 void Renderer2D_DrawQuad(const Mat& transform, Texture2D* texture, const Vec2& uv0, const Vec2& uv1,
 	const Vec4& tintColor, float tilingFactor = 1.0f);

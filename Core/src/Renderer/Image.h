@@ -53,16 +53,17 @@ struct Image2D
 	Buffer ImageData;
 };
 
-void Image2D_Create(Image2D& image2D, const ImageSpecification& spec, Buffer buffer = { nullptr,0 });
-void Image2D_Release(Image2D& image2D);
-void Image2D_Bind(const Image2D& image2D, const ShaderResourceDeclaration* decl);
-void* Image2D_GetRendererID(const Image2D& image2D);
-uint32_t Image2D_GetWidth(const Image2D& image2D);
-uint32_t Image2D_GetHeight(const Image2D& image2D);
-DXGI_FORMAT Image2D_GetDXGIFormat(const Image2D& image2D);
-ID3D11Texture2D* Image2D_GetTexture(const Image2D& image2D);
-ID3D11ShaderResourceView* Image2D_GetTextureSRV(const Image2D& image2D);
-const ImageSpecification& Image2D_GetSpecification(const Image2D& image2D);
+void Image2D_Create(Image2D* image2D, const ImageSpecification& spec, Buffer buffer = { nullptr,0 });
+void Image2D_Release(Image2D* image2D);
+void Image2D_Bind(const Image2D* image2D, const ShaderResourceDeclaration* decl);
+void* Image2D_GetRendererID(const Image2D* image2D);
+uint32_t Image2D_GetWidth(const Image2D* image2D);
+uint32_t Image2D_GetHeight(const Image2D* image2D);
+DXGI_FORMAT Image2D_GetDXGIFormat(const Image2D* image2D);
+ID3D11Texture2D* Image2D_GetTexture(const Image2D* image2D);
+ID3D11ShaderResourceView* Image2D_GetTextureSRV(const Image2D* image2D);
+const ImageSpecification& Image2D_GetSpecification(const Image2D* image2D);
 
 bool Image2D_IsDepthFormat(ImageFormat format);
 DXGI_FORMAT Image2D_ImageFormatToDXDepthDSVFormat(ImageFormat format);
+DXGI_FORMAT Image2D_ImageFormatToDXTextureFormat(ImageFormat format);

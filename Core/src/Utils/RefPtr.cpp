@@ -1,56 +1,28 @@
 #include "pch.h"
 #include "RefPtr.h"
 
-RefPtr* RefPtr_Create(uint32_t size, void* ptr)
+RefPtr* RefPtr_Create(uint32_t size, const void* ptr)
 {
-	RefPtr* refPtr = (RefPtr*)malloc(sizeof(RefPtr));
+	RefPtr* refPtr = (RefPtr*)Memory_Allocate(sizeof(RefPtr), MemoryBlockTag_RefPtr);
 	refPtr->RefCount = 0;
-	refPtr->Ptr = (void*)malloc(size);
-	memcpy(refPtr->Ptr, ptr, size);
+	refPtr->Size = size;
+	refPtr->Ptr = Memory_Allocate(size, MemoryBlockTag_RefPtr);
+	Memory_Copy(refPtr->Ptr, ptr, size);
 	return refPtr;
 }
 
-RefPtr* RefPtr_Create(void* ptr)
-{
-	RefPtr* refPtr = (RefPtr*)malloc(sizeof(RefPtr));
-	refPtr->Ptr = ptr;
-	return refPtr;
-}
-
-void RefPtr_Reset(RefPtr* refPtr, uint32_t size, void* ptr)
-{
-	refPtr->Ptr = (void*)malloc(size);
-	memcpy(refPtr->Ptr, ptr, size);
-}
-
-void RefPtr_Reset(RefPtr* refPtr, void* ptr)
-{
-	refPtr->Ptr = ptr;
-}
-
-RefPtr* RefPtr_AddRef(RefPtr* refPtr)
-{
-	refPtr->RefCount++;
-	return refPtr;
-}
-
-void RefPtr_DecRef(RefPtr* refPtr)
-{
-	refPtr->RefCount--;
-}
-
-void* RefPtr_Get(RefPtr* refPtr)
+void* RefPtr_Get(const RefPtr* refPtr)
 {
 	return refPtr->Ptr;
 }
 
-void RefPtr_Release(RefPtr* refPtr, void(*ReleaseFunc)(void* prt))
+void RefPtr_Release(RefPtr* refPtr, void(*ReleaseFunc)(void* ptr))
 {
 	refPtr->RefCount--;
 	if (refPtr->RefCount == 0)
 	{
 		ReleaseFunc(refPtr->Ptr);
-		free(refPtr->Ptr);
-		free(refPtr);
+		Memory_Free(refPtr->Ptr, refPtr->Size, MemoryBlockTag_RefPtr);
+		Memory_Free(refPtr, sizeof(RefPtr), MemoryBlockTag_RefPtr);
 	}
 }

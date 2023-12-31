@@ -3,7 +3,6 @@
 #include "SceneCamera.h"
 #include "Renderer/Texture.h"
 #include "Physics/Rigidbody.h"
-#include "Utils/RefPtr.h"
 
 enum ComponentType
 {
@@ -38,7 +37,7 @@ Mat TransformComponent_GetTransform(const TransformComponent& transform);
 
 struct RectTransformComponent
 {
-	//Notice: Position is left bottom, [0,0] is left bottom, [1,1] is right top
+	//Notice: [0,0] is left bottom, [1,1] is right top
 	//but for Text, [0,0] is left top, [1,1] is right bottom (Text handled by D2D)
 	Vec2 Position = { 0.0f, 0.0f };
 	float Rotation = 0.0f;

@@ -13,17 +13,10 @@ uint64_t GenHash(const char* key, uint32_t elementCount)
 	return hash % elementCount;
 }
 
-void SetValue(HashNode* node, void* value, bool isPtrType, uint32_t elementSize)
+void SetValue(HashNode* node, void* value, uint32_t elementSize)
 {
 	void* dest = (uint8_t*)node + sizeof(HashNode);
-	if (isPtrType)
-	{
-		Memory_Copy(dest, &value, sizeof(void*));
-	}
-	else
-	{
-		Memory_Copy(dest, value, elementSize);
-	}
+	Memory_Copy(dest, value, elementSize);
 }
 
 void FreeNode(HashNode* node, uint32_t elementSize, bool freeNode)
@@ -38,18 +31,10 @@ void FreeNode(HashNode* node, uint32_t elementSize, bool freeNode)
 		Memory_Free(node, (sizeof(HashNode) + elementSize), MemoryBlockTag_HashMap);
 }
 
-void HashMap_Create(HashMap& hashMap, bool isPtrType, uint32_t elementSize, uint32_t elementCount)
+void HashMap_Create(HashMap& hashMap, uint32_t elementSize, uint32_t elementCount)
 {
-	hashMap.IsPtrType = isPtrType;
 	hashMap.ElementCount = elementCount;
-	if (hashMap.IsPtrType)
-	{
-		hashMap.ElementSize = sizeof(void*);
-	}
-	else
-	{
-		hashMap.ElementSize = elementSize;
-	}
+	hashMap.ElementSize = elementSize;
 	hashMap.Table = (uint8_t*)Memory_Allocate((sizeof(HashNode) + hashMap.ElementSize) * elementCount, MemoryBlockTag_HashMap);
 	HashNode emptyNode = {};
 	HashMap_Fill(hashMap, &emptyNode);
@@ -62,13 +47,13 @@ void HashMap_Set(HashMap& hashMap, const char* key, void* value)
 	if (node->Key == nullptr)
 	{
 		node->Key = String_Duplicate(key);
-		SetValue(node, value, hashMap.IsPtrType, hashMap.ElementSize);
+		SetValue(node, value, hashMap.ElementSize);
 	}
 	else
 	{
 		HashNode* newNode = (HashNode*)(uint8_t*)Memory_Allocate((sizeof(HashNode) + hashMap.ElementSize), MemoryBlockTag_HashMap);
 		newNode->Key = String_Duplicate(key);
-		SetValue(newNode, value, hashMap.IsPtrType, hashMap.ElementSize);
+		SetValue(newNode, value, hashMap.ElementSize);
 		newNode->Next = nullptr;
 
 		while (node->Next != nullptr)
@@ -107,7 +92,7 @@ void HashMap_Fill(HashMap& hashMap, void* value)
 	{
 		HashNode* currentNode = (HashNode*)(hashMap.Table + i * (sizeof(HashNode) + hashMap.ElementSize));
 
-		SetValue(currentNode, value, hashMap.IsPtrType, hashMap.ElementSize);
+		SetValue(currentNode, value, hashMap.ElementSize);
 	}
 }
 

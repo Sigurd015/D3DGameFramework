@@ -50,6 +50,7 @@ void Game_Update(float timeStep)
 	{
 		RendererAPI_SetClearColor({ 0,0,0,0 });
 		RendererAPI_Clear();
+		Renderer2D_ResetTargetFrameBuffer();
 
 		Renderer2D_BeginScene(DirectX::XMMatrixIdentity());
 
@@ -61,6 +62,7 @@ void Game_Update(float timeStep)
 	{
 		RendererAPI_SetClearColor({ 0,0,0,0 });
 		RendererAPI_Clear();
+		Renderer2D_ResetTargetFrameBuffer();
 
 		Renderer2D_BeginScene(DirectX::XMMatrixIdentity());
 
@@ -151,7 +153,7 @@ void CreateApplication(Application* appInst, ApplicationCommandLineArgs args)
 		appInst->Spec.FullScreen = false;
 		char* temp = "nonfullscreen";
 		for (size_t i = 0; i < strlen(temp); i++)
-		{		
+		{
 			if (tolower(appInst->Spec.CommandLineArgs.Args[1][i]) != temp[i])
 			{
 				appInst->Spec.FullScreen = true;

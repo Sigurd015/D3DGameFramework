@@ -68,6 +68,11 @@ const PipelineSpecification& Pipeline_GetSpecification(const Pipeline& pipeline)
 	return pipeline.Spec;
 }
 
+void Pipeline_SetFramebuffer(Pipeline& pipeline, RefPtr* framebuffer)
+{
+	pipeline.Spec.TargetFramebuffer = framebuffer;
+}
+
 void Pipeline_Release(Pipeline& pipeline)
 {
 	if (pipeline.InputLayout)
@@ -75,5 +80,11 @@ void Pipeline_Release(Pipeline& pipeline)
 		pipeline.InputLayout->Release();
 		pipeline.InputLayout = nullptr;
 	}
-	Framebuffer_Release(pipeline.Spec.TargetFramebuffer);
+	if (pipeline.Spec.TargetFramebuffer)
+	{
+		RefPtr_Release(pipeline.Spec.TargetFramebuffer, [](void* framebuffer) {
+			Framebuffer_Release((Framebuffer*)framebuffer);
+			});
+		pipeline.Spec.TargetFramebuffer = nullptr;
+	}
 }

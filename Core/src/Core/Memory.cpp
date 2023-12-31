@@ -11,9 +11,11 @@ static const char* s_MemoryBlockStr[MemoryBlockTag_Count] =
 	"List",
 	"HashMap",
 	"Shader",
-	"Texture",
+	"Texture2D",
+	"TextureCube",
 	"Component",
 	"Buffer",
+	"RefPtr",
 	"CPPNew"
 };
 
@@ -79,7 +81,7 @@ void Memory_CheckMemoryLeaks()
 				CORE_LOG_ERROR("--------Total allocated by tag %s: %d", s_MemoryBlockStr[i], s_MemoryStats.TotalAllocatedByTag[i]);
 				CORE_LOG_ERROR("--------Total allocated by tag %s: %d KB", s_MemoryBlockStr[i], s_MemoryStats.TotalAllocatedByTag[i] / 1024);
 				CORE_LOG_ERROR("--------Total allocated by tag %s: %d MB", s_MemoryBlockStr[i], s_MemoryStats.TotalAllocatedByTag[i] / (1024 * 1024));
-				CORE_LOG_ERROR("--------Total allocated by tag %s: %d GB", s_MemoryBlockStr[i], s_MemoryStats.TotalAllocatedByTag[i] / (1024 * 1024 * 1024));			
+				CORE_LOG_ERROR("--------Total allocated by tag %s: %d GB", s_MemoryBlockStr[i], s_MemoryStats.TotalAllocatedByTag[i] / (1024 * 1024 * 1024));
 			}
 		}
 	}

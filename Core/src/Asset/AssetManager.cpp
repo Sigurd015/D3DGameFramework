@@ -4,6 +4,8 @@
 #include "Renderer/Shader.h"
 #include "Audio/Audio.h"
 #include "TextureLoader.h"
+#include "Renderer/EnvMap.h"
+#include "Renderer/RendererAPI.h"
 
 struct AssetExtensions
 {
@@ -19,7 +21,7 @@ static AssetExtensions s_Extensions[MAX_ASSET_EXTENSIONS_COUNT] =
 	{ ".jpg",  AssetType_Texture },
 	{ ".jpeg", AssetType_Texture },
 	{ ".tga",  AssetType_Texture },
-	{ ".hdr",  AssetType_Texture },
+	{ ".hdr",  AssetType_EnvMap },
 
 	{ ".obj", AssetType_Mesh },
 	{ ".fbx", AssetType_Mesh },
@@ -68,6 +70,22 @@ void* AssetManager_GetAsset(const char* assetPath, AssetType type, void* optiona
 	{
 		switch (type)
 		{
+			// AssetType_TextureCube and AssetType_EnvMap are the same
+			// AssetType_TextureCube is used for memory only assets
+			// AssetType_EnvMap is used for loading from hdr files
+		case AssetType_TextureCube:
+		{
+			if (!optionalData)
+			{
+				CORE_LOG_ERROR("AssetManager_GetAsset: optionalData is null");
+				return nullptr;
+			}
+			TextureCreationOptionalData* data = (TextureCreationOptionalData*)optionalData;
+			element.Type = AssetType_TextureCube;
+			element.Asset = Memory_Allocate(sizeof(TextureCube), MemoryBlockTag_TextureCube);
+			TextureCube_Create((TextureCube*)element.Asset, data->Spec, data->TextureData);
+			break;
+		}
 		case AssetType_Texture:
 		{
 			if (!optionalData)
@@ -77,7 +95,7 @@ void* AssetManager_GetAsset(const char* assetPath, AssetType type, void* optiona
 			}
 			TextureCreationOptionalData* data = (TextureCreationOptionalData*)optionalData;
 			element.Type = AssetType_Texture;
-			element.Asset = Memory_Allocate(sizeof(Texture2D), MemoryBlockTag_Texture);
+			element.Asset = Memory_Allocate(sizeof(Texture2D), MemoryBlockTag_Texture2D);
 			Texture2D_Create((Texture2D*)element.Asset, data->Spec, data->TextureData);
 			break;
 		}
@@ -93,12 +111,33 @@ void* AssetManager_GetAsset(const char* assetPath, AssetType type, void* optiona
 		return element.Asset;
 	}
 
+	// If the asset is not in memory, load it from file
 	switch (GetAssetType(assetPath))
 	{
+	case AssetType_EnvMap:
+	{
+		element.Type = AssetType_TextureCube;
+		element.Asset = Memory_Allocate(sizeof(EnvMap), MemoryBlockTag_TextureCube);
+
+		Texture2D hdrTexture;
+		bool result = TextureLoader_TryLoad(&hdrTexture, assetPath);
+		if (!result)
+		{
+			CORE_LOG_ERROR("AssetManager_GetAsset: Failed to load texture from file: %s", assetPath);
+			return nullptr;
+		}
+		EnvMap envMap;
+		envMap = RendererAPI_CreateEnvironmentMap(&hdrTexture);
+		Memory_Copy(element.Asset, &envMap, sizeof(EnvMap));
+
+		Texture2D_Release(&hdrTexture);
+		break;
+
+	}
 	case AssetType_Texture:
 	{
 		element.Type = AssetType_Texture;
-		element.Asset = Memory_Allocate(sizeof(Texture2D), MemoryBlockTag_Texture);
+		element.Asset = Memory_Allocate(sizeof(Texture2D), MemoryBlockTag_Texture2D);
 
 		bool result = TextureLoader_TryLoad((Texture2D*)element.Asset, assetPath);
 		if (!result)
@@ -127,7 +166,7 @@ void* AssetManager_GetAsset(const char* assetPath, AssetType type, void* optiona
 
 void AssetManager_Init()
 {
-	HashMap_Create(s_Assets, false, sizeof(AssetElement));
+	HashMap_Create(s_Assets, sizeof(AssetElement));
 }
 
 void AssetManager_Shutdown()
@@ -140,7 +179,21 @@ void AssetManager_Shutdown()
 			case AssetType_Texture:
 			{
 				Texture2D_Release((Texture2D*)element->Asset);
-				Memory_Free(element->Asset, sizeof(Texture2D), MemoryBlockTag_Texture);
+				Memory_Free(element->Asset, sizeof(Texture2D), MemoryBlockTag_Texture2D);
+				break;
+			}
+			case AssetType_TextureCube:
+			{
+				TextureCube_Release((TextureCube*)element->Asset);
+				Memory_Free(element->Asset, sizeof(TextureCube), MemoryBlockTag_TextureCube);
+				break;
+			}
+			case AssetType_EnvMap:
+			{
+				EnvMap* envMap = (EnvMap*)element->Asset;
+				TextureCube_Release(&envMap->IrradianceMap);
+				TextureCube_Release(&envMap->RadianceMap);
+				Memory_Free(element->Asset, sizeof(EnvMap), MemoryBlockTag_TextureCube);
 				break;
 			}
 			case AssetType_Sound:

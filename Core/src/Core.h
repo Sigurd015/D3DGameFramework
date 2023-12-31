@@ -48,5 +48,4 @@
 #include "Utils/List.h"
 #include "Utils/SpriteAnimtor.h"
 #include "Utils/SpriteTimer.h"
-#include "Utils/RefPtr.h"
 #include "Utils/String.h"

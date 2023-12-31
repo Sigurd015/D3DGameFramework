@@ -57,6 +57,8 @@ struct Renderer2DData
 	static const uint32_t MaxIndices = MaxQuads * 6;
 	static const uint32_t MaxTextureSlots = 16;
 
+	RefPtr* TargetFramebuffer = nullptr;
+
 	RenderPass QuadRenderPass;
 	VertexBuffer QuadVertexBuffer;
 	IndexBuffer QuadIndexBuffer;
@@ -116,6 +118,17 @@ static Renderer2DData s_Data;
 void Renderer2D_Init()
 {
 	s_Data = {};
+
+	// Framebuffer for some effect which directly render to screen
+	{
+		static const Framebuffer null = {};
+		s_Data.TargetFramebuffer = RefPtr_Create(sizeof(Framebuffer), &null);
+
+		FramebufferSpecification spec;
+		spec.SwapChainTarget = true;
+		Framebuffer_Create((Framebuffer*)RefPtr_Get(s_Data.TargetFramebuffer), spec);
+	}
+
 	//Quad
 	{
 		PipelineSpecification pipelineSpec;
@@ -158,6 +171,7 @@ void Renderer2D_Init()
 		pipelineSpec.DepthOperator = DepthCompareOperator_Less;
 		pipelineSpec.Topology = PrimitiveTopology_Triangles;
 		pipelineSpec.Blend = BlendMode_Disabled;
+		pipelineSpec.TargetFramebuffer = s_Data.TargetFramebuffer;
 
 		RenderPassSpecification renderPassSpec;
 		Pipeline_Create(renderPassSpec.Pipeline, pipelineSpec);
@@ -189,6 +203,7 @@ void Renderer2D_Init()
 		pipelineSpec.DepthOperator = DepthCompareOperator_Less;
 		pipelineSpec.Topology = PrimitiveTopology_Triangles;
 		pipelineSpec.Blend = BlendMode_Disabled;
+		pipelineSpec.TargetFramebuffer = s_Data.TargetFramebuffer;
 
 		RenderPassSpecification renderPassSpec;
 		Pipeline_Create(renderPassSpec.Pipeline, pipelineSpec);
@@ -216,6 +231,7 @@ void Renderer2D_Init()
 		pipelineSpec.DepthOperator = DepthCompareOperator_Less;
 		pipelineSpec.Topology = PrimitiveTopology_Lines;
 		pipelineSpec.Blend = BlendMode_Disabled;
+		pipelineSpec.TargetFramebuffer = s_Data.TargetFramebuffer;
 
 		RenderPassSpecification renderPassSpec;
 		Pipeline_Create(renderPassSpec.Pipeline, pipelineSpec);
@@ -248,6 +264,7 @@ void Renderer2D_Init()
 		pipelineSpec.DepthOperator = DepthCompareOperator_Less;
 		pipelineSpec.Topology = PrimitiveTopology_Triangles;
 		pipelineSpec.Blend = BlendMode_Alpha;
+		pipelineSpec.TargetFramebuffer = s_Data.TargetFramebuffer;
 
 		RenderPassSpecification renderPassSpec;
 		Pipeline_Create(renderPassSpec.Pipeline, pipelineSpec);
@@ -405,6 +422,7 @@ void Flush()
 	}
 	RendererAPI_EndRenderPass();
 
+	// TODO: Fix text rendering
 	// Rendering Text after all d3d11 draw calls, to make sure text is always on top (beacuse text is rendered by d2d)
 	uint32_t commandCount = List_Size(s_Data.TextRenderCommands);
 	if (commandCount)
@@ -427,6 +445,22 @@ void Flush()
 void Renderer2D_EndScene()
 {
 	Flush();
+}
+
+void Renderer2D_ResetTargetFrameBuffer()
+{
+	RenderPass_SetTargetFramebuffer(s_Data.QuadRenderPass, s_Data.TargetFramebuffer);
+	RenderPass_SetTargetFramebuffer(s_Data.CircleRenderPass, s_Data.TargetFramebuffer);
+	RenderPass_SetTargetFramebuffer(s_Data.LineRenderPass, s_Data.TargetFramebuffer);
+	RenderPass_SetTargetFramebuffer(s_Data.UIRenderPass, s_Data.TargetFramebuffer);
+}
+
+void Renderer2D_SetTargetFrameBuffer(RefPtr* frameBuffer)
+{
+	RenderPass_SetTargetFramebuffer(s_Data.QuadRenderPass, frameBuffer);
+	RenderPass_SetTargetFramebuffer(s_Data.CircleRenderPass, frameBuffer);
+	RenderPass_SetTargetFramebuffer(s_Data.LineRenderPass, frameBuffer);
+	RenderPass_SetTargetFramebuffer(s_Data.UIRenderPass, frameBuffer);
 }
 
 void NextBatch()

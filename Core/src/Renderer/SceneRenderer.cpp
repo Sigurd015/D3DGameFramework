@@ -192,6 +192,8 @@ void SceneRenderer_Init()
 		{ ShaderDataType::Float3, "a_Position" },
 	};
 
+	const static Framebuffer nullFramebuffer = {};
+
 	// Deferred Geometry Pass
 	{
 		PipelineSpecification pipelineSpec;
@@ -208,7 +210,9 @@ void SceneRenderer_Init()
 			spec.Width = 1920;
 			spec.Height = 1080;
 			spec.SwapChainTarget = false;
-			Framebuffer_Create(pipelineSpec.TargetFramebuffer, spec);
+
+			pipelineSpec.TargetFramebuffer = RefPtr_Create(sizeof(Framebuffer), &nullFramebuffer);
+			Framebuffer_Create((Framebuffer*)RefPtr_Get(pipelineSpec.TargetFramebuffer), spec);
 		}
 		{
 			pipelineSpec.Layout = { GeoLayout, 5 };
@@ -246,7 +250,9 @@ void SceneRenderer_Init()
 			spec.Height = 2048;
 			spec.SwapChainTarget = false;
 			spec.DepthClearValue = 1.0f;
-			Framebuffer_Create(pipelineSpec.TargetFramebuffer, spec);
+
+			pipelineSpec.TargetFramebuffer = RefPtr_Create(sizeof(Framebuffer), &nullFramebuffer);
+			Framebuffer_Create((Framebuffer*)RefPtr_Get(pipelineSpec.TargetFramebuffer), spec);
 		}
 		{
 			// Notice: Use the same layout as DeferredGeoPass, 
@@ -276,7 +282,9 @@ void SceneRenderer_Init()
 			spec.Height = 2048;
 			spec.SwapChainTarget = false;
 			spec.DepthClearValue = 1.0f;
-			Framebuffer_Create(pipelineSpec.TargetFramebuffer, spec);
+
+			pipelineSpec.TargetFramebuffer = RefPtr_Create(sizeof(Framebuffer), &nullFramebuffer);
+			Framebuffer_Create((Framebuffer*)RefPtr_Get(pipelineSpec.TargetFramebuffer), spec);
 		}
 		{
 			// Notice: Use the same layout as DeferredGeoPass, 
@@ -305,7 +313,9 @@ void SceneRenderer_Init()
 			spec.Width = 1920;
 			spec.Height = 1080;
 			spec.SwapChainTarget = false;
-			Framebuffer_Create(pipelineSpec.TargetFramebuffer, spec);
+
+			pipelineSpec.TargetFramebuffer = RefPtr_Create(sizeof(Framebuffer), &nullFramebuffer);
+			Framebuffer_Create((Framebuffer*)RefPtr_Get(pipelineSpec.TargetFramebuffer), spec);
 		}
 		{
 			pipelineSpec.Layout = { FullScreenQuadLayout, 2 };
@@ -331,7 +341,9 @@ void SceneRenderer_Init()
 			spec.Width = 1920;
 			spec.Height = 1080;
 			spec.SwapChainTarget = false;
-			Framebuffer_Create(pipelineSpec.TargetFramebuffer, spec);
+
+			pipelineSpec.TargetFramebuffer = RefPtr_Create(sizeof(Framebuffer), &nullFramebuffer);
+			Framebuffer_Create((Framebuffer*)RefPtr_Get(pipelineSpec.TargetFramebuffer), spec);
 		}
 		{
 			pipelineSpec.Layout = { FullScreenQuadLayout, 2 };
@@ -363,7 +375,9 @@ void SceneRenderer_Init()
 				{RenderPass_GetDepthOutput(s_Data.DeferredGeoPass),1}
 			};
 			spec.ExistingImages = { existingImage,2 };
-			Framebuffer_Create(pipelineSpec.TargetFramebuffer, spec);
+
+			pipelineSpec.TargetFramebuffer = RefPtr_Create(sizeof(Framebuffer), &nullFramebuffer);
+			Framebuffer_Create((Framebuffer*)RefPtr_Get(pipelineSpec.TargetFramebuffer), spec);
 		}
 		{
 			pipelineSpec.Layout = { SkyboxLayout, 1 };
@@ -406,6 +420,18 @@ void SceneRenderer_Init()
 	RenderPass_SetInput(s_Data.CompositePass, "u_Color", RendererResourceType_Texture2D, (void*)RenderPass_GetOutput(s_Data.DeferredLightingPass));
 
 	RenderPass_SetInput(s_Data.SkyboxPass, "CBCamera", RendererResourceType_ConstantBuffer, (void*)&s_Data.CameraDataBuffer);
+
+
+	TextureCreationOptionalData optionalData;
+	optionalData.Spec.Format = ImageFormat_RGBA;
+	optionalData.Spec.Width = 1;
+	optionalData.Spec.Height = 1;
+	optionalData.Spec.GenerateMips = false;
+	constexpr uint32_t blackCubeTextureData[6] = { 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000 };
+	Buffer_Create(optionalData.TextureData, sizeof(blackCubeTextureData), blackCubeTextureData);
+
+	// Forget the return value, just make sure the asset is loaded, may use it in the anthor place
+	AssetManager_GetAsset("BlackCube", AssetType_TextureCube, &optionalData);
 }
 
 void SceneRenderer_Shutdown()
@@ -423,8 +449,7 @@ void SceneRenderer_Shutdown()
 	RenderPass_Release(s_Data.PointShadowMapPass);
 	RenderPass_Release(s_Data.DeferredLightingPass);
 	RenderPass_Release(s_Data.CompositePass);
-	//TODO: Fix release issue (skybox pass use existing image, can't release twice)
-	//RenderPass_Release(s_Data.SkyboxPass);
+	RenderPass_Release(s_Data.SkyboxPass);
 
 	Material_Release(s_Data.DefaultMaterial);
 }
@@ -449,9 +474,9 @@ void ScnenRenderer_SubmitStaticMesh(const Mat4& transform, MeshComponent& meshCo
 
 }
 
-RenderPass* SceneRenderer_GetFinalPass()
+const RenderPass& SceneRenderer_GetFinalPass()
 {
-	return nullptr;
+	return s_Data.SkyboxPass;
 }
 
 Image2D* SceneRenderer_GetGBufferAlbedo()

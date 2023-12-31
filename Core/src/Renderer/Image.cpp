@@ -4,7 +4,7 @@
 // UNORM: Unsigned normalized
 // SNORM: Signed normalized
 // FLOAT: Signed float
-DXGI_FORMAT ImageFormatToDXTextureFormat(ImageFormat format)
+DXGI_FORMAT Image2D_ImageFormatToDXTextureFormat(ImageFormat format)
 {
 	switch (format)
 	{
@@ -69,23 +69,23 @@ DXGI_SAMPLE_DESC Multisample(UINT count, DXGI_FORMAT format)
 	return sampleDesc;
 }
 
-void Image2D_Create(Image2D& image2D, const ImageSpecification& spec, Buffer buffer)
+void Image2D_Create(Image2D* image2D, const ImageSpecification& spec, Buffer buffer)
 {
-	image2D.Specification = spec;
+	image2D->Specification = spec;
 
-	image2D.DataFormat = ImageFormatToDXTextureFormat(spec.Format);
-	image2D.ImageData = buffer;
+	image2D->DataFormat = Image2D_ImageFormatToDXTextureFormat(spec.Format);
+	image2D->ImageData = buffer;
 
-	switch (image2D.Specification.Usage)
+	switch (image2D->Specification.Usage)
 	{
 	case ImageUsage_Attachment:
 	{
 		D3D11_TEXTURE2D_DESC textureDesc = {};
-		textureDesc.Width = image2D.Specification.Width;
-		textureDesc.Height = image2D.Specification.Height;
+		textureDesc.Width = image2D->Specification.Width;
+		textureDesc.Height = image2D->Specification.Height;
 		textureDesc.MipLevels = 1;
-		textureDesc.ArraySize = image2D.Specification.Layers;
-		textureDesc.Format = image2D.DataFormat;
+		textureDesc.ArraySize = image2D->Specification.Layers;
+		textureDesc.Format = image2D->DataFormat;
 		// TODO: Implement multisampling
 		textureDesc.SampleDesc.Count = 1;
 		textureDesc.SampleDesc.Quality = 0;
@@ -114,12 +114,12 @@ void Image2D_Create(Image2D& image2D, const ImageSpecification& spec, Buffer buf
 			shaderResourceDesc.Texture2D.MipLevels = 1;
 		}
 
-		if (Image2D_IsDepthFormat(image2D.Specification.Format))
+		if (Image2D_IsDepthFormat(image2D->Specification.Format))
 		{
 			// If it's a depth attachment, we need to create a depth stencil view and usa a depth stencil format
 			textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 
-			shaderResourceDesc.Format = ImageFormatToDXDepthSRVFormat(image2D.Specification.Format);
+			shaderResourceDesc.Format = ImageFormatToDXDepthSRVFormat(image2D->Specification.Format);
 		}
 		else
 		{
@@ -128,39 +128,39 @@ void Image2D_Create(Image2D& image2D, const ImageSpecification& spec, Buffer buf
 
 			shaderResourceDesc.Format = textureDesc.Format;
 		}
-		CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateTexture2D(&textureDesc, nullptr, &image2D.Texture));
+		CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateTexture2D(&textureDesc, nullptr, &image2D->Texture));
 
-		CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateShaderResourceView(image2D.Texture, &shaderResourceDesc, &image2D.TextureSRV));
+		CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateShaderResourceView(image2D->Texture, &shaderResourceDesc, &image2D->TextureSRV));
 		break;
 	}
 	case ImageUsage_Texture2D:
 	{
 		D3D11_TEXTURE2D_DESC textureDesc = {};
-		textureDesc.Width = image2D.Specification.Width;
-		textureDesc.Height = image2D.Specification.Height;
-		textureDesc.MipLevels = image2D.Specification.Mips;
+		textureDesc.Width = image2D->Specification.Width;
+		textureDesc.Height = image2D->Specification.Height;
+		textureDesc.MipLevels = image2D->Specification.Mips;
 		textureDesc.ArraySize = 1;
-		textureDesc.Format = image2D.DataFormat;
+		textureDesc.Format = image2D->DataFormat;
 		textureDesc.SampleDesc.Count = 1;
 		textureDesc.SampleDesc.Quality = 0;
 		textureDesc.Usage = D3D11_USAGE_DEFAULT;
 		textureDesc.CPUAccessFlags = 0;
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC resourceView = {};
-		resourceView.Format = image2D.DataFormat;
+		resourceView.Format = image2D->DataFormat;
 		resourceView.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		resourceView.Texture2D.MostDetailedMip = 0;
 
 		// Notice: Must sure load image data as RGBA 4 channels
 		const static uint32_t defalutDataSize = 4;
-		if (image2D.Specification.Mips != 1)
+		if (image2D->Specification.Mips != 1)
 		{
 			// If we have mipmaps, we need to create the texture without data and then update the first mip level with the data
 			textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 			textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
-			CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateTexture2D(&textureDesc, nullptr, &image2D.Texture));
-			RendererContext_GetDeviceContext()->UpdateSubresource(image2D.Texture, 0, nullptr,
-				image2D.ImageData.Data, image2D.Specification.Width * defalutDataSize, 0);
+			CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateTexture2D(&textureDesc, nullptr, &image2D->Texture));
+			RendererContext_GetDeviceContext()->UpdateSubresource(image2D->Texture, 0, nullptr,
+				image2D->ImageData.Data, image2D->Specification.Width * defalutDataSize, 0);
 
 			resourceView.Texture2D.MipLevels = -1;
 		}
@@ -171,82 +171,82 @@ void Image2D_Create(Image2D& image2D, const ImageSpecification& spec, Buffer buf
 			textureDesc.MiscFlags = 0;
 
 			D3D11_SUBRESOURCE_DATA subresourceData = {};
-			subresourceData.pSysMem = image2D.ImageData.Data;
+			subresourceData.pSysMem = image2D->ImageData.Data;
 
 			// Notice: RGBA32F format used for HDR image
-			if (image2D.Specification.Format == ImageFormat_RGBA32F)
-				subresourceData.SysMemPitch = image2D.Specification.Width * defalutDataSize * sizeof(float);  // size of one row in bytes
+			if (image2D->Specification.Format == ImageFormat_RGBA32F)
+				subresourceData.SysMemPitch = image2D->Specification.Width * defalutDataSize * sizeof(float);  // size of one row in bytes
 			else
-				subresourceData.SysMemPitch = image2D.Specification.Width * defalutDataSize;  // size of one row in bytes
+				subresourceData.SysMemPitch = image2D->Specification.Width * defalutDataSize;  // size of one row in bytes
 
-			CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateTexture2D(&textureDesc, &subresourceData, &image2D.Texture));
+			CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateTexture2D(&textureDesc, &subresourceData, &image2D->Texture));
 
 			resourceView.Texture2D.MipLevels = 1;
 		}
 
-		CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateShaderResourceView(image2D.Texture, &resourceView, &image2D.TextureSRV));
+		CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateShaderResourceView(image2D->Texture, &resourceView, &image2D->TextureSRV));
 		break;
 	}
 	}
 }
 
-void Image2D_Release(Image2D& image2D)
+void Image2D_Release(Image2D* image2D)
 {
-	if (image2D.Texture)
+	if (image2D->Texture)
 	{
-		image2D.Texture->Release();
-		image2D.Texture = nullptr;
+		image2D->Texture->Release();
+		image2D->Texture = nullptr;
 	}
 
-	if (image2D.TextureSRV)
+	if (image2D->TextureSRV)
 	{
-		image2D.TextureSRV->Release();
-		image2D.TextureSRV = nullptr;
+		image2D->TextureSRV->Release();
+		image2D->TextureSRV = nullptr;
 	}
 }
 
-void Image2D_Bind(const Image2D& image2D, const ShaderResourceDeclaration* decl)
+void Image2D_Bind(const Image2D* image2D, const ShaderResourceDeclaration* decl)
 {
 	switch (decl->Stage)
 	{
-	case ShaderType_Vertex: RendererContext_GetDeviceContext()->VSSetShaderResources(decl->Slot, 1, &image2D.TextureSRV); break;
-	case ShaderType_Geometry: RendererContext_GetDeviceContext()->GSSetShaderResources(decl->Slot, 1, &image2D.TextureSRV); break;
-	case ShaderType_Pixel: RendererContext_GetDeviceContext()->PSSetShaderResources(decl->Slot, 1, &image2D.TextureSRV); break;
-	case ShaderType_Compute: RendererContext_GetDeviceContext()->CSSetShaderResources(decl->Slot, 1, &image2D.TextureSRV); break;
+	case ShaderType_Vertex: RendererContext_GetDeviceContext()->VSSetShaderResources(decl->Slot, 1, &image2D->TextureSRV); break;
+	case ShaderType_Geometry: RendererContext_GetDeviceContext()->GSSetShaderResources(decl->Slot, 1, &image2D->TextureSRV); break;
+	case ShaderType_Pixel: RendererContext_GetDeviceContext()->PSSetShaderResources(decl->Slot, 1, &image2D->TextureSRV); break;
+	case ShaderType_Compute: RendererContext_GetDeviceContext()->CSSetShaderResources(decl->Slot, 1, &image2D->TextureSRV); break;
 	}
 }
 
-void* Image2D_GetRendererID(const Image2D& image2D)
+void* Image2D_GetRendererID(const Image2D* image2D)
 {
-	return image2D.TextureSRV;
+	return image2D->TextureSRV;
 }
 
-uint32_t Image2D_GetWidth(const Image2D& image2D)
+uint32_t Image2D_GetWidth(const Image2D* image2D)
 {
-	return image2D.Specification.Width;
+	return image2D->Specification.Width;
 }
 
-uint32_t Image2D_GetHeight(const Image2D& image2D)
+uint32_t Image2D_GetHeight(const Image2D* image2D)
 {
-	return image2D.Specification.Height;
+	return image2D->Specification.Height;
 }
 
-DXGI_FORMAT Image2D_GetDXGIFormat(const Image2D& image2D)
+DXGI_FORMAT Image2D_GetDXGIFormat(const Image2D* image2D)
 {
-	return image2D.DataFormat;
+	return image2D->DataFormat;
 }
 
-ID3D11Texture2D* Image2D_GetTexture(const Image2D& image2D)
+ID3D11Texture2D* Image2D_GetTexture(const Image2D* image2D)
 {
-	return image2D.Texture;
+	return image2D->Texture;
 }
 
-ID3D11ShaderResourceView* Image2D_GetTextureSRV(const Image2D& image2D)
+ID3D11ShaderResourceView* Image2D_GetTextureSRV(const Image2D* image2D)
 {
-	return image2D.TextureSRV;
+	return image2D->TextureSRV;
 }
 
-const ImageSpecification& Image2D_GetSpecification(const Image2D& image2D)
+const ImageSpecification& Image2D_GetSpecification(const Image2D* image2D)
 {
-	return image2D.Specification;
+	return image2D->Specification;
 }

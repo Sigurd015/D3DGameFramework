@@ -1,5 +1,6 @@
 #pragma once
 #include "Image.h"
+#include "Utils/RefPtr.h"
 
 struct FramebufferTextureSpecification
 {
@@ -11,12 +12,12 @@ struct FramebufferTextureSpecification
 struct FramebufferAttachmentSpecification
 {
 	FramebufferTextureSpecification* Elements;
-	uint32_t ElementCount;
+	uint32_t ElementCount = 0;
 };
 
 struct ExistingImage
 {
-	const Image2D* Image;
+	RefPtr* Image;
 	uint32_t AttachmentIndex;
 };
 
@@ -39,11 +40,6 @@ struct FramebufferSpecification
 	ExistingImages ExistingImages;
 };
 
-struct RenderTargetView
-{
-	ID3D11RenderTargetView* RTV = nullptr;
-};
-
 struct Framebuffer
 {
 	FramebufferSpecification Specification;
@@ -51,18 +47,16 @@ struct Framebuffer
 	List ColorAttachments;
 	List ColorAttachmentRTV;
 
-	Image2D DsAttachment;
+	RefPtr* DsAttachment = nullptr;
 	ID3D11DepthStencilView* DsAttachmentDSV = nullptr;
 };
 
-void Framebuffer_Create(Framebuffer& frameBuffer, const  FramebufferSpecification& spec);
-void Framebuffer_Bind(const Framebuffer& frameBuffer);
-void Framebuffer_Release(Framebuffer& frameBuffer, bool releaseList = true);
-void Framebuffer_ClearAttachment(const Framebuffer& frameBuffer, uint32_t attachmentIndex);
-void Framebuffer_ClearAttachment(const Framebuffer& frameBuffer);
-void Framebuffer_ClearDepthAttachment(const Framebuffer& frameBuffer);
-
-const Image2D* Framebuffer_GetImage(const Framebuffer& frameBuffer, uint32_t attachmentIndex = 0);
-const Image2D* Framebuffer_GetDepthImage(const Framebuffer& frameBuffer);
-
-const FramebufferSpecification& Framebuffer_GetSpecification(const Framebuffer& frameBuffer);
+void Framebuffer_Create(Framebuffer* frameBuffer, const  FramebufferSpecification& spec);
+void Framebuffer_Bind(const Framebuffer* frameBuffer);
+void Framebuffer_Release(Framebuffer* frameBuffer, bool releaseList = true);
+void Framebuffer_ClearAttachment(const Framebuffer* frameBuffer, uint32_t attachmentIndex);
+void Framebuffer_ClearAttachment(const Framebuffer* frameBuffer);
+void Framebuffer_ClearDepthAttachment(const Framebuffer* frameBuffer);
+RefPtr* Framebuffer_GetImage(const Framebuffer* frameBuffer, uint32_t attachmentIndex = 0);
+RefPtr* Framebuffer_GetDepthImage(const Framebuffer* frameBuffer);
+const FramebufferSpecification& Framebuffer_GetSpecification(const Framebuffer* frameBuffer);
