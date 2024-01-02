@@ -40,20 +40,29 @@ void Pipeline_Create(Pipeline& pipeline, const PipelineSpecification& spec)
 {
 	pipeline.Spec = spec;
 
-	uint32_t memSize = sizeof(D3D11_INPUT_ELEMENT_DESC) * pipeline.Spec.Layout.ElementCount;
-	D3D11_INPUT_ELEMENT_DESC* tempList = (D3D11_INPUT_ELEMENT_DESC*)Memory_Allocate(memSize, MemoryBlockTag_Array);
+	List tempList;
+	List_Create(tempList, sizeof(D3D11_INPUT_ELEMENT_DESC), pipeline.Spec.Layout.ElementCount);
 	for (size_t i = 0; i < pipeline.Spec.Layout.ElementCount; i++)
 	{
-		tempList[i] = {
-			pipeline.Spec.Layout.Elements[i].Name,0,ShaderDataTypeToDX11BaseType(pipeline.Spec.Layout.Elements[i].Type),
-			0,(UINT)pipeline.Spec.Layout.Elements[i].Offset ,D3D11_INPUT_PER_VERTEX_DATA ,0 };
+		D3D11_INPUT_ELEMENT_DESC elementDesc = {};
+		elementDesc.SemanticName = pipeline.Spec.Layout.Elements[i].Name;
+		elementDesc.SemanticIndex = 0;
+		elementDesc.Format = ShaderDataTypeToDX11BaseType(pipeline.Spec.Layout.Elements[i].Type);
+		elementDesc.InputSlot = 0;
+		elementDesc.AlignedByteOffset = pipeline.Spec.Layout.Elements[i].Offset;
+		elementDesc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+		elementDesc.InstanceDataStepRate = 0;
+
+		List_Add(tempList, &elementDesc);
 	}
 
 	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateInputLayout(
-		tempList, (UINT)pipeline.Spec.Layout.ElementCount, pipeline.Spec.Shader->VertexShaderBlob->GetBufferPointer(),
-		pipeline.Spec.Shader->VertexShaderBlob->GetBufferSize(), &pipeline.InputLayout));
+		(D3D11_INPUT_ELEMENT_DESC*)List_GetData(tempList), List_Size(tempList),
+		pipeline.Spec.Shader->VertexShaderBlob->GetBufferPointer(),
+		pipeline.Spec.Shader->VertexShaderBlob->GetBufferSize(),
+		&pipeline.InputLayout));
 
-	Memory_Free(tempList, memSize, MemoryBlockTag_Array);
+	List_Free(tempList);
 }
 
 void Pipeline_Bind(const Pipeline& pipeline)
@@ -68,23 +77,17 @@ const PipelineSpecification& Pipeline_GetSpecification(const Pipeline& pipeline)
 	return pipeline.Spec;
 }
 
-void Pipeline_SetFramebuffer(Pipeline& pipeline, RefPtr* framebuffer)
+void Pipeline_SetFramebuffer(Pipeline& pipeline, Framebuffer* framebuffer)
 {
 	pipeline.Spec.TargetFramebuffer = framebuffer;
 }
 
 void Pipeline_Release(Pipeline& pipeline)
 {
+	// Framebuffer release is handled by the RendererResourcePool
 	if (pipeline.InputLayout)
 	{
 		pipeline.InputLayout->Release();
 		pipeline.InputLayout = nullptr;
-	}
-	if (pipeline.Spec.TargetFramebuffer)
-	{
-		RefPtr_Release(pipeline.Spec.TargetFramebuffer, [](void* framebuffer) {
-			Framebuffer_Release((Framebuffer*)framebuffer);
-			});
-		pipeline.Spec.TargetFramebuffer = nullptr;
 	}
 }

@@ -26,14 +26,14 @@ void RenderPass_Release(RenderPass& renderPass)
 	Pipeline_Release(renderPass.Specification.Pipeline);
 }
 
-RefPtr* RenderPass_GetOutput(RenderPass& renderPass, uint32_t index)
+Image2D* RenderPass_GetOutput(const RenderPass& renderPass, uint32_t index)
 {
-	return Framebuffer_GetImage((Framebuffer*)RefPtr_Get(RenderPass_GetTargetFramebuffer(renderPass)), index);
+	return Framebuffer_GetImage(RenderPass_GetTargetFramebuffer(renderPass), index);
 }
 
-RefPtr* RenderPass_GetDepthOutput(RenderPass& renderPass)
+Image2D* RenderPass_GetDepthOutput(const RenderPass& renderPass)
 {
-	return Framebuffer_GetDepthImage((Framebuffer*)RefPtr_Get(RenderPass_GetTargetFramebuffer(renderPass)));
+	return Framebuffer_GetDepthImage(RenderPass_GetTargetFramebuffer(renderPass));
 }
 
 void RenderPass_SetInput(RenderPass& renderPass, const char* name, RendererResourceType type, const void* resource)
@@ -127,7 +127,15 @@ void RnederPass_BindInputs(const RenderPass& renderPass)
 						break;
 					}
 					case RendererResourceType_TextureCube:
-					{}
+					{
+						TextureCube_Bind((TextureCube*)element->Resource, decl);
+						break;
+					}
+					case RendererResourceType_Image:
+					{
+						Image2D_Bind((Image2D*)element->Resource, decl);
+						break;
+					}
 					}
 				}
 			}
@@ -140,12 +148,12 @@ const Pipeline& RenderPass_GetPipeline(const RenderPass& renderPass)
 	return renderPass.Specification.Pipeline;
 }
 
-void RenderPass_SetTargetFramebuffer(RenderPass& renderPass, RefPtr* framebuffer)
+void RenderPass_SetTargetFramebuffer(RenderPass& renderPass, Framebuffer* framebuffer)
 {
 	Pipeline_SetFramebuffer(renderPass.Specification.Pipeline, framebuffer);
 }
 
-RefPtr* RenderPass_GetTargetFramebuffer(const RenderPass& renderPass)
+Framebuffer* RenderPass_GetTargetFramebuffer(const RenderPass& renderPass)
 {
 	const auto& specification = Pipeline_GetSpecification(renderPass.Specification.Pipeline);
 	return specification.TargetFramebuffer;

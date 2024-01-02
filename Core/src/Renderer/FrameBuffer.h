@@ -1,6 +1,5 @@
 #pragma once
 #include "Image.h"
-#include "Utils/RefPtr.h"
 
 struct FramebufferTextureSpecification
 {
@@ -17,7 +16,7 @@ struct FramebufferAttachmentSpecification
 
 struct ExistingImage
 {
-	RefPtr* Image;
+	Image2D* Image;
 	uint32_t AttachmentIndex;
 };
 
@@ -47,7 +46,7 @@ struct Framebuffer
 	List ColorAttachments;
 	List ColorAttachmentRTV;
 
-	RefPtr* DsAttachment = nullptr;
+	Image2D* DsAttachment = nullptr;
 	ID3D11DepthStencilView* DsAttachmentDSV = nullptr;
 };
 
@@ -57,6 +56,6 @@ void Framebuffer_Release(Framebuffer* frameBuffer, bool releaseList = true);
 void Framebuffer_ClearAttachment(const Framebuffer* frameBuffer, uint32_t attachmentIndex);
 void Framebuffer_ClearAttachment(const Framebuffer* frameBuffer);
 void Framebuffer_ClearDepthAttachment(const Framebuffer* frameBuffer);
-RefPtr* Framebuffer_GetImage(const Framebuffer* frameBuffer, uint32_t attachmentIndex = 0);
-RefPtr* Framebuffer_GetDepthImage(const Framebuffer* frameBuffer);
+Image2D* Framebuffer_GetImage(const Framebuffer* frameBuffer, uint32_t attachmentIndex = 0);
+Image2D* Framebuffer_GetDepthImage(const Framebuffer* frameBuffer);
 const FramebufferSpecification& Framebuffer_GetSpecification(const Framebuffer* frameBuffer);

@@ -3,11 +3,12 @@
 #include "SceneCamera.h"
 #include "Renderer/Texture.h"
 #include "Physics/Rigidbody.h"
+#include "Renderer/EnvMap.h"
+#include "Renderer/Mesh.h"
+#include "Renderer/Material.h"
 
 enum ComponentType
 {
-	ComponentType_Tag = 0,
-	ComponentType_Transform,
 	ComponentType_RectTransform,
 	ComponentType_Camera,
 	ComponentType_SpriteRenderer,
@@ -18,7 +19,14 @@ enum ComponentType
 	ComponentType_Text,
 	ComponentType_Script,
 	ComponentType_Audio,
-	ComponentType_Count
+	ComponentType_Mesh,
+	ComponentType_SkyLight,
+	ComponentType_Light,
+	ComponentType_Count,
+
+	// Any entity must have these two components
+	ComponentType_Tag,
+	ComponentType_Transform,
 };
 
 struct TagComponent
@@ -34,6 +42,7 @@ struct TransformComponent
 };
 
 Mat TransformComponent_GetTransform(const TransformComponent& transform);
+Mat TransformComponent_GetRotation(const TransformComponent& transform);
 
 struct RectTransformComponent
 {
@@ -53,6 +62,43 @@ struct CameraComponent
 	SceneCamera Camera;
 	bool Primary = true;
 	bool FixedAspectRatio = false;
+};
+
+struct MeshComponent
+{
+	Mesh* Mesh = nullptr;
+	Material* Material = nullptr;
+};
+
+struct SkyLightComponent
+{
+	EnvMap* EnvMap = nullptr;
+	float Intensity = 1.0f;
+};
+
+struct LightComponent
+{
+	enum LightType {
+		LightType_None = 0,
+		LightType_Directional,
+		LightType_Point,
+		LightType_Spot
+	};
+	LightType Type = LightType_None;
+	Vec3 Radiance = { 1.0f,1.0f,1.0f };
+	float Intensity = 0.0f;
+	float Radius = 0.0f;
+	float Falloff = 0.0f;
+	float AngleAttenuation = 0.0f;
+	float Range = 0.0f;
+	float Angle = 0.0f;
+
+	enum ShadowType {
+		ShadowType_None = 0,
+		ShadowType_Hard,
+		ShadowType_Soft
+	};
+	ShadowType Shadow = ShadowType_None;
 };
 
 struct CircleRendererComponent

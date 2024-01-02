@@ -6,6 +6,7 @@
 #include "TextureLoader.h"
 #include "Renderer/EnvMap.h"
 #include "Renderer/RendererAPI.h"
+#include "Renderer/Mesh.h"
 
 struct AssetExtensions
 {
@@ -106,6 +107,14 @@ void* AssetManager_GetAsset(const char* assetPath, AssetType type, void* optiona
 			Shader_Create((Shader*)element.Asset, assetPath);
 			break;
 		}
+		case AssetType_Mesh:
+		{
+			element.Type = AssetType_Mesh;
+			element.Asset = Memory_Allocate(sizeof(Mesh), MemoryBlockTag_Mesh);
+			MeshSource* meshSource = (MeshSource*)optionalData;
+			Mesh_Create((Mesh*)element.Asset, meshSource);
+			break;
+		}
 		}
 		HashMap_Set(s_Assets, assetPath, &element);
 		return element.Asset;
@@ -186,6 +195,12 @@ void AssetManager_Shutdown()
 			{
 				TextureCube_Release((TextureCube*)element->Asset);
 				Memory_Free(element->Asset, sizeof(TextureCube), MemoryBlockTag_TextureCube);
+				break;
+			}
+			case AssetType_Mesh:
+			{
+				Mesh_Release((Mesh*)element->Asset);
+				Memory_Free(element->Asset, sizeof(Mesh), MemoryBlockTag_Mesh);
 				break;
 			}
 			case AssetType_EnvMap:

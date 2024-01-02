@@ -46,6 +46,22 @@ void VertexBuffer_Create(VertexBuffer& vertexBuffer, uint32_t size)
 	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateBuffer(&bufferDesc, nullptr, &vertexBuffer.Buffer));
 }
 
+void VertexBuffer_Create(VertexBuffer& vertexBuffer, const void* vertices, uint32_t size)
+{
+	D3D11_SUBRESOURCE_DATA resourceData = {};
+	resourceData.pSysMem = vertices;
+
+	D3D11_BUFFER_DESC bufferDesc = { 0 };
+	bufferDesc.ByteWidth = size;
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bufferDesc.CPUAccessFlags = 0;
+	bufferDesc.MiscFlags = 0;
+	bufferDesc.StructureByteStride = vertexBuffer.Stride;
+	CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateBuffer(&bufferDesc, &resourceData, &vertexBuffer.Buffer));
+}
+
+// Notice: Do not call this function if the vertex buffer wasn't created with D3D11_USAGE_DYNAMIC
 void VertexBuffer_SetData(VertexBuffer& vertexBuffer, void* data, uint32_t size)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;

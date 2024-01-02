@@ -48,7 +48,9 @@ void Game_Update(float timeStep)
 	{
 	case LOADING_SCENE:
 	{
-		RendererAPI_SetClearColor({ 0,0,0,0 });
+		// For some effect, which need to directly draw to swap chain, 
+		// call RendererAPI_Clear to clear the back buffer
+		// and the call Renderer2D_ResetTargetFrameBuffer to reset the target frame buffer to swap chain
 		RendererAPI_Clear();
 		Renderer2D_ResetTargetFrameBuffer();
 
@@ -60,7 +62,6 @@ void Game_Update(float timeStep)
 	}
 	case STARTUP_TITLE:
 	{
-		RendererAPI_SetClearColor({ 0,0,0,0 });
 		RendererAPI_Clear();
 		Renderer2D_ResetTargetFrameBuffer();
 
@@ -72,20 +73,24 @@ void Game_Update(float timeStep)
 	}
 	case TITLE_MENU:
 	{
-		RendererAPI_SetClearColor({ 0.3f,0.3f,0.3f,1.0f });
-		RendererAPI_Clear();
-
+		// For scene rendering, which will be composited to swap chain,
+		// remember to call RendererAPI_CompositeToSwapChain at the last,
+		// and pass the final image, get from SceneRenderer_GetFinalPass,
+		// rendering result can automatically be composited to back buffer
 		Scene_OnViewportResize(s_Data.TitleScene, Window_GetWidth(), Window_GetHeight());
 		Scene_OnUpdate(s_Data.TitleScene, timeStep);
+		
+		// TODO: Better way to do this       	
+		RendererAPI_CompositeToSwapChain(RenderPass_GetOutput(SceneRenderer_GetFinalPass()));
 		break;
 	}
 	case PLAY_SCENE:
 	{
-		RendererAPI_SetClearColor({ 0.3f,0.3f,0.3f,1.0f });
-		RendererAPI_Clear();
-
 		Scene_OnViewportResize(s_Data.PlayScene, Window_GetWidth(), Window_GetHeight());
 		Scene_OnUpdate(s_Data.PlayScene, timeStep);
+	
+		// TODO: Better way to do this    	
+		RendererAPI_CompositeToSwapChain(RenderPass_GetOutput(SceneRenderer_GetFinalPass()));
 		break;
 	}
 	}

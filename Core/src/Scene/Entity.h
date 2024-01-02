@@ -11,16 +11,8 @@ struct Entity
 
 	TagComponent Tag;
 	TransformComponent Transform;
-	RectTransformComponent* RectTransform = nullptr;
-	SpriteRendererComponent* SpriteRenderer = nullptr;
-	CameraComponent* Camera = nullptr;
-	CircleRendererComponent* CircleRenderer = nullptr;
-	Rigidbody2DComponent* Rigidbody2D = nullptr;
-	BoxCollider2DComponent* BoxCollider2D = nullptr;
-	CircleCollider2DComponent* CircleCollider2D = nullptr;
-	TextComponent* Text = nullptr;
-	ScriptComponent* Script = nullptr;
-	AudioComponent* Audio = nullptr;
+
+	void* Components[ComponentType_Count] = { nullptr };
 };
 
 bool Entity_HasComponent(Entity* entity, ComponentType type);

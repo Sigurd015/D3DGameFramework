@@ -11,6 +11,9 @@
 void Scene_Create(Scene& scene)
 {
 	List_Create(scene.Entities, sizeof(Entity));
+
+	List_Create(scene.Environment.PointLights, sizeof(PointLight), MAX_POINT_LIGHT);
+	List_Create(scene.Environment.SpotLights, sizeof(SpotLight), MAX_SPOT_LIGHT);
 }
 
 void OnCollide(void* entity1, void* entity2)
@@ -19,12 +22,14 @@ void OnCollide(void* entity1, void* entity2)
 	Entity* ent2 = (Entity*)entity2;
 	if (Entity_HasComponent(ent1, ComponentType_Script))
 	{
-		ent1->Script->OnCollision(ent1, ent2, ent1->Script->RuntimeData);
+		ScriptComponent* sc = (ScriptComponent*)Entity_GetComponent(ent1, ComponentType_Script);
+		sc->OnCollision(ent1, ent2, sc->RuntimeData);
 	}
 
 	if (Entity_HasComponent(ent2, ComponentType_Script))
 	{
-		ent2->Script->OnCollision(ent2, ent1, ent2->Script->RuntimeData);
+		ScriptComponent* sc = (ScriptComponent*)Entity_GetComponent(ent2, ComponentType_Script);
+		sc->OnCollision(ent2, ent1, sc->RuntimeData);
 	}
 }
 
@@ -41,7 +46,7 @@ void Scene_Ininialize(Scene& scene)
 
 			if (Entity_HasComponent(temp, ComponentType_Audio))
 			{
-				AudioComponent* ac = temp->Audio;
+				AudioComponent* ac = (AudioComponent*)Entity_GetComponent(temp, ComponentType_Audio);
 				switch (ac->Type)
 				{
 				case AudioComponentType_Listener:
@@ -73,7 +78,7 @@ void Scene_Ininialize(Scene& scene)
 
 			if (Entity_HasComponent(temp, ComponentType_Rigidbody2D))
 			{
-				Rigidbody2DComponent* rb2d = temp->Rigidbody2D;
+				Rigidbody2DComponent* rb2d = (Rigidbody2DComponent*)Entity_GetComponent(temp, ComponentType_Rigidbody2D);
 
 				Rigidbody2D rigidbody2D;
 				rigidbody2D.Type = rb2d->Type;
@@ -85,7 +90,7 @@ void Scene_Ininialize(Scene& scene)
 
 				if (Entity_HasComponent(temp, ComponentType_CircleCollider2D))
 				{
-					CircleCollider2DComponent* cc2d = temp->CircleCollider2D;
+					CircleCollider2DComponent* cc2d = (CircleCollider2DComponent*)Entity_GetComponent(temp, ComponentType_CircleCollider2D);
 
 					rigidbody2D.Density = cc2d->Density;
 					rigidbody2D.Restitution = cc2d->Restitution;
@@ -99,7 +104,7 @@ void Scene_Ininialize(Scene& scene)
 
 				if (Entity_HasComponent(temp, ComponentType_BoxCollider2D))
 				{
-					BoxCollider2DComponent* bc2d = temp->BoxCollider2D;
+					BoxCollider2DComponent* bc2d = (BoxCollider2DComponent*)Entity_GetComponent(temp, ComponentType_BoxCollider2D);
 
 					rigidbody2D.Density = bc2d->Density;
 					rigidbody2D.Restitution = bc2d->Restitution;
@@ -122,7 +127,8 @@ void Scene_Ininialize(Scene& scene)
 			Entity* temp = (Entity*)List_Get(scene.Entities, i);
 			if (Entity_HasComponent(temp, ComponentType_Script))
 			{
-				temp->Script->OnCreate(temp, temp->Script->RuntimeData);
+				ScriptComponent* sc = (ScriptComponent*)Entity_GetComponent(temp, ComponentType_Script);
+				sc->OnCreate(temp, sc->RuntimeData);
 			}
 		}
 	}
@@ -136,13 +142,17 @@ void Scene_Destroy(Scene& scene)
 	{
 		Entity* temp = (Entity*)List_Get(scene.Entities, i);
 
+		//Entity_RemoveComponent(temp, ComponentType_Tag);
+		//Entity_RemoveComponent(temp, ComponentType_Transform);
+
 		if (Entity_HasComponent(temp, ComponentType_RectTransform))
 		{
 			Entity_RemoveComponent(temp, ComponentType_RectTransform);
 		}
 		if (Entity_HasComponent(temp, ComponentType_Script))
 		{
-			temp->Script->OnDestroy(temp, temp->Script->RuntimeData);
+			ScriptComponent* sc = (ScriptComponent*)Entity_GetComponent(temp, ComponentType_Script);
+			sc->OnDestroy(temp, sc->RuntimeData);
 			Entity_RemoveComponent(temp, ComponentType_Script);
 		}
 		if (Entity_HasComponent(temp, ComponentType_Camera))
@@ -180,6 +190,8 @@ void Scene_Destroy(Scene& scene)
 	}
 
 	List_Free(scene.Entities);
+	List_Free(scene.Environment.PointLights);
+	List_Free(scene.Environment.SpotLights);
 	PhysicsWorld2D_Destory(scene.PhysicsWorld);
 }
 
@@ -208,8 +220,11 @@ Entity* Scene_GetPrimaryCamera(const Scene& scene)
 	{
 		Entity* temp = (Entity*)List_Get(scene.Entities, i);
 		if (Entity_HasComponent(temp, ComponentType_Camera))
-			if (temp->Camera->Primary)
+		{
+			CameraComponent* cc = (CameraComponent*)Entity_GetComponent(temp, ComponentType_Camera);
+			if (cc->Primary)
 				return temp;
+		}
 	}
 	return nullptr;
 }
@@ -225,7 +240,7 @@ void* Scene_GetListener(const Scene* scene)
 
 		if (Entity_HasComponent(temp, ComponentType_Audio))
 		{
-			AudioComponent* ac = temp->Audio;
+			AudioComponent* ac = (AudioComponent*)Entity_GetComponent(temp, ComponentType_Audio);
 			switch (ac->Type)
 			{
 			case AudioComponentType_Listener:
@@ -243,16 +258,18 @@ void Scene_SetEntityEnabled(Entity* entity, bool enabled)
 	entity->Enabled = enabled;
 	if (Entity_HasComponent(entity, ComponentType_Rigidbody2D))
 	{
-		Rigidbody2D* rigidbody2D = (Rigidbody2D*)entity->Rigidbody2D->RuntimeBody;
+		Rigidbody2DComponent* rb2d = (Rigidbody2DComponent*)Entity_GetComponent(entity, ComponentType_Rigidbody2D);
+		Rigidbody2D* rigidbody2D = (Rigidbody2D*)rb2d->RuntimeBody;
 		rigidbody2D->Enabled = enabled;
 	}
 
 	if (Entity_HasComponent(entity, ComponentType_Script))
 	{
+		ScriptComponent* sc = (ScriptComponent*)Entity_GetComponent(entity, ComponentType_Script);
 		if (enabled)
-			entity->Script->OnEnable(entity, entity->Script->RuntimeData);
+			sc->OnEnable(entity, sc->RuntimeData);
 		else
-			entity->Script->OnDisable(entity, entity->Script->RuntimeData);
+			sc->OnDisable(entity, sc->RuntimeData);
 	}
 }
 
@@ -272,7 +289,7 @@ void ColliderVisualiztion(const Scene& scene)
 		{
 			if (Entity_HasComponent(temp, ComponentType_CircleCollider2D))
 			{
-				CircleCollider2DComponent* cc2d = temp->CircleCollider2D;
+				CircleCollider2DComponent* cc2d = (CircleCollider2DComponent*)Entity_GetComponent(temp, ComponentType_CircleCollider2D);
 
 				Vec3 translation = Vec3Add(tc->Translation, Vec3(cc2d->Offset.x, cc2d->Offset.y, 0.001f));
 				float radius = cc2d->Radius * 2.05f;
@@ -286,7 +303,7 @@ void ColliderVisualiztion(const Scene& scene)
 
 			if (Entity_HasComponent(temp, ComponentType_BoxCollider2D))
 			{
-				BoxCollider2DComponent* bc2d = temp->BoxCollider2D;
+				BoxCollider2DComponent* bc2d = (BoxCollider2DComponent*)Entity_GetComponent(temp, ComponentType_BoxCollider2D);
 
 				Vec3 bc2dTranslation = Vec3(bc2d->Offset.x, bc2d->Offset.y, 0.001f);
 				Vec3 translation = Vec3Add(tc->Translation, bc2dTranslation);
@@ -314,9 +331,13 @@ void Scene_OnUpdate(Scene& scene, float timeStep)
 		if (!mainCamera)
 			return;
 
+		CameraComponent* cc = (CameraComponent*)Entity_GetComponent(mainCamera, ComponentType_Camera);
+
 		viewProjection = DirectX::XMMatrixInverse(nullptr, TransformComponent_GetTransform(mainCamera->Transform))
-			* SceneCamera_GetProjectionMatrix(mainCamera->Camera->Camera);
+			* SceneCamera_GetProjectionMatrix(cc->Camera);
 	}
+
+	scene.Environment.ViewProjection = viewProjection;
 
 	uint32_t size = List_Size(scene.Entities);
 
@@ -328,7 +349,8 @@ void Scene_OnUpdate(Scene& scene, float timeStep)
 
 			if (Entity_HasComponent(temp, ComponentType_Script) && temp->Enabled)
 			{
-				temp->Script->OnUpdate(temp, timeStep, temp->Script->RuntimeData);
+				ScriptComponent* sc = (ScriptComponent*)Entity_GetComponent(temp, ComponentType_Script);
+				sc->OnUpdate(temp, timeStep, sc->RuntimeData);
 			}
 		}
 	}
@@ -351,7 +373,7 @@ void Scene_OnUpdate(Scene& scene, float timeStep)
 
 				if (Entity_HasComponent(temp, ComponentType_Rigidbody2D))
 				{
-					Rigidbody2DComponent* rb2d = temp->Rigidbody2D;
+					Rigidbody2DComponent* rb2d = (Rigidbody2DComponent*)Entity_GetComponent(temp, ComponentType_Rigidbody2D);
 					Rigidbody2D* rb = (Rigidbody2D*)rb2d->RuntimeBody;
 					tc->Translation = { rb->Position.x, rb->Position.y, tc->Translation.z };
 					tc->Rotation.z = rb->Rotation;
@@ -373,7 +395,7 @@ void Scene_OnUpdate(Scene& scene, float timeStep)
 
 			if (Entity_HasComponent(temp, ComponentType_Audio))
 			{
-				AudioComponent* ac = temp->Audio;
+				AudioComponent* ac = (AudioComponent*)Entity_GetComponent(temp, ComponentType_Audio);
 				switch (ac->Type)
 				{
 				case AudioComponentType_Listener:
@@ -396,106 +418,193 @@ void Scene_OnUpdate(Scene& scene, float timeStep)
 	// Rendering
 	{
 		// 3D rendering
-
-		//SceneRenderer_BeginScene(scene);
-		for (size_t i = 0; i < size; i++)
+		//----------------- 3D Scene Rendering -----------------//					
 		{
+			// Lights
+			{
+				List_Clear(scene.Environment.PointLights);
+				List_Clear(scene.Environment.SpotLights);
 
+				for (size_t i = 0; i < size; i++)
+				{
+					Entity* temp = (Entity*)List_Get(scene.Entities, i);
+
+					if (!temp->Enabled)
+						continue;
+
+					TransformComponent* tc = (TransformComponent*)Entity_GetComponent(temp, ComponentType_Transform);
+
+					if (Entity_HasComponent(temp, ComponentType_SkyLight))
+					{
+						SkyLightComponent* skylight = (SkyLightComponent*)Entity_GetComponent(temp, ComponentType_SkyLight);
+						scene.Environment.EnvMap = skylight->EnvMap;
+						scene.Environment.SkyLightIntensity = skylight->Intensity;
+					}
+					else if (Entity_HasComponent(temp, ComponentType_Light))
+					{
+						LightComponent* light = (LightComponent*)Entity_GetComponent(temp, ComponentType_Light);
+						switch (light->Type)
+						{
+						case LightComponent::LightType_Directional:
+						{
+							scene.Environment.DirLight = {
+								light->Radiance,
+								light->Intensity,
+								Vec3Normalize(Vec3MulMat(Vec3(1.0f, 1.0f, 1.0f),Mat4ToMat3(TransformComponent_GetTransform(*tc)))),
+								light->Shadow,
+							};
+							break;
+						}
+						case LightComponent::LightType_Point:
+						{
+							PointLight pointLight = {
+								tc->Translation,
+								light->Intensity,
+								light->Radiance,
+								light->Radius,
+								light->Falloff,
+								light->Shadow,
+							};
+							List_Add(scene.Environment.PointLights, &pointLight);
+							break;
+						}
+						case LightComponent::LightType_Spot:
+						{
+							SpotLight spotLight = {
+								tc->Translation,
+								light->Intensity,
+								light->Radiance,
+								light->Radius,
+								Vec3Normalize(Vec3MulMat(Vec3(1.0f, 0.0f, 0.0f),Mat4ToMat3(TransformComponent_GetRotation(*tc)))),
+								light->Range,
+								light->Angle,
+								light->Falloff,
+								light->Shadow,
+							};
+							List_Add(scene.Environment.SpotLights, &spotLight);
+							break;
+						}
+						}
+					}
+				}
+			}
+			// Draw 3D objects
+			{
+				SceneRenderer_BeginScene(scene.Environment);
+
+				for (size_t i = 0; i < size; i++)
+				{
+					Entity* temp = (Entity*)List_Get(scene.Entities, i);
+
+					if (!temp->Enabled)
+						continue;
+
+					TransformComponent* tc = (TransformComponent*)Entity_GetComponent(temp, ComponentType_Transform);
+
+					if (Entity_HasComponent(temp, ComponentType_Mesh))
+					{
+						MeshComponent* mesh = (MeshComponent*)Entity_GetComponent(temp, ComponentType_Mesh);
+						//ScnenRenderer_SubmitStaticMesh(TransformComponent_GetTransform(*tc), mesh);
+					}
+				}
+				SceneRenderer_EndScene();
+			}
 		}
-		//SceneRenderer_EndScene();
-
-		//Renderer2D_SetTargetFrameBuffer(RenderPass_GetTargetFramebuffer(SceneRenderer_GetFinalPass()));
+		//----------------- 3D Scene Rendering -----------------//	
 
 		// 2D rendering
-		Renderer2D_BeginScene(viewProjection);
-
-		for (size_t i = 0; i < size; i++)
+		//----------------- 2D Scene Rendering -----------------//
 		{
-			Entity* temp = (Entity*)List_Get(scene.Entities, i);
+			Renderer2D_SetTargetFrameBuffer(RenderPass_GetTargetFramebuffer(SceneRenderer_GetFinalPass()));
+			Renderer2D_BeginScene(viewProjection);
 
-			if (!temp->Enabled)
-				continue;
-
-			if (!Entity_HasComponent(temp, ComponentType_RectTransform))
+			for (size_t i = 0; i < size; i++)
 			{
-				TransformComponent& tc = temp->Transform;
-				if (Entity_HasComponent(temp, ComponentType_SpriteRenderer))
-				{
-					SpriteRendererComponent* sprite = temp->SpriteRenderer;
+				Entity* temp = (Entity*)List_Get(scene.Entities, i);
 
-					if (sprite->Texture)
+				if (!temp->Enabled)
+					continue;
+
+				if (!Entity_HasComponent(temp, ComponentType_RectTransform))
+				{
+					TransformComponent& tc = temp->Transform;
+					if (Entity_HasComponent(temp, ComponentType_SpriteRenderer))
 					{
-						Renderer2D_DrawQuad(
+						SpriteRendererComponent* sprite = (SpriteRendererComponent*)Entity_GetComponent(temp, ComponentType_SpriteRenderer);
+
+						if (sprite->Texture)
+						{
+							Renderer2D_DrawQuad(
+								TransformComponent_GetTransform(tc),
+								sprite->Texture,
+								sprite->UVStart,
+								sprite->UVEnd,
+								sprite->Color,
+								sprite->TilingFactor
+							);
+						}
+						else
+						{
+							Renderer2D_DrawQuad(TransformComponent_GetTransform(tc), sprite->Color);
+						}
+					}
+
+					if (Entity_HasComponent(temp, ComponentType_CircleRenderer))
+					{
+						CircleRendererComponent* circle = (CircleRendererComponent*)Entity_GetComponent(temp, ComponentType_CircleRenderer);
+
+						Renderer2D_DrawCircle(
 							TransformComponent_GetTransform(tc),
-							sprite->Texture,
-							sprite->UVStart,
-							sprite->UVEnd,
-							sprite->Color,
-							sprite->TilingFactor
+							circle->Color,
+							circle->Thickness,
+							circle->Fade
 						);
 					}
-					else
-					{
-						Renderer2D_DrawQuad(TransformComponent_GetTransform(tc), sprite->Color);
-					}
 				}
-
-				if (Entity_HasComponent(temp, ComponentType_CircleRenderer))
+				else
 				{
-					CircleRendererComponent* circle = temp->CircleRenderer;
+					RectTransformComponent* rect = (RectTransformComponent*)Entity_GetComponent(temp, ComponentType_RectTransform);
+					Vec2 position, size, ndcPos;
+					Vec2 viewPortSize = { (float)scene.ViewportWidth,(float)scene.ViewportHeight };
+					RectTransformComponent_GetPositionAndSize(*rect, viewPortSize, &ndcPos, &position, &size);
 
-					Renderer2D_DrawCircle(
-						TransformComponent_GetTransform(tc),
-						circle->Color,
-						circle->Thickness,
-						circle->Fade
-					);
+					if (Entity_HasComponent(temp, ComponentType_SpriteRenderer))
+					{
+						SpriteRendererComponent* sprite = (SpriteRendererComponent*)Entity_GetComponent(temp, ComponentType_SpriteRenderer);
+
+						if (sprite->Texture)
+						{
+							Renderer2D_DrawUI(
+								ndcPos,
+								size,
+								rect->Rotation,
+								sprite->Texture,
+								sprite->UVStart,
+								sprite->UVEnd,
+								sprite->Color,
+								sprite->TilingFactor
+							);
+						}
+						else
+						{
+							Renderer2D_DrawUI(ndcPos, size, rect->Rotation, sprite->Color);
+						}
+					}
+
+					if (Entity_HasComponent(temp, ComponentType_Text))
+					{
+						TextComponent* text = (TextComponent*)Entity_GetComponent(temp, ComponentType_Text);
+						Renderer2D_DrawText(text->TextString, text->FontName, position, text->Color, text->FontSize);
+					}
 				}
 			}
-			else
-			{
-				RectTransformComponent* rect = temp->RectTransform;
-				Vec2 position, size, ndcPos;
-				Vec2 viewPortSize = { (float)scene.ViewportWidth,(float)scene.ViewportHeight };
-				RectTransformComponent_GetPositionAndSize(*rect, viewPortSize, &ndcPos, &position, &size);
-
-				if (Entity_HasComponent(temp, ComponentType_SpriteRenderer))
-				{
-					SpriteRendererComponent* sprite = temp->SpriteRenderer;
-
-					if (sprite->Texture)
-					{
-						Renderer2D_DrawUI(
-							ndcPos,
-							size,
-							rect->Rotation,
-							sprite->Texture,
-							sprite->UVStart,
-							sprite->UVEnd,
-							sprite->Color,
-							sprite->TilingFactor
-						);
-					}
-					else
-					{
-						Renderer2D_DrawUI(ndcPos, size, rect->Rotation, sprite->Color);
-					}
-				}
-
-				if (Entity_HasComponent(temp, ComponentType_Text))
-				{
-					TextComponent* text = temp->Text;
-					Renderer2D_DrawText(text->TextString, text->FontName, position, text->Color, text->FontSize);
-				}
-			}
-		}
-	}
-
 #ifndef CORE_DIST
-	ColliderVisualiztion(scene);
+			ColliderVisualiztion(scene);
 #endif
-
-	Renderer2D_EndScene();
+			Renderer2D_EndScene();
+		}
+		//----------------- 2D Scene Rendering -----------------//
+	}
 }
 
 void Scene_OnViewportResize(Scene& scene, uint32_t width, uint32_t height)
@@ -511,8 +620,11 @@ void Scene_OnViewportResize(Scene& scene, uint32_t width, uint32_t height)
 	{
 		Entity* temp = (Entity*)List_Get(scene.Entities, i);
 		if (Entity_HasComponent(temp, ComponentType_Camera))
-			if (!temp->Camera->FixedAspectRatio)
-				SceneCamera_SetViewportSize(temp->Camera->Camera, width, height);
+		{
+			CameraComponent* cc = (CameraComponent*)Entity_GetComponent(temp, ComponentType_Camera);
+			if (!cc->FixedAspectRatio)
+				SceneCamera_SetViewportSize(cc->Camera, width, height);
+		}
 	}
 }
 
@@ -530,7 +642,8 @@ bool Scene_Raycast(Scene* scene, Entity* entity, const Vec2& rayDirection, const
 	Rigidbody2D* rigidbody2D = nullptr;
 	if (Entity_HasComponent(entity, ComponentType_Rigidbody2D))
 	{
-		rigidbody2D = (Rigidbody2D*)entity->Rigidbody2D->RuntimeBody;
+		Rigidbody2DComponent* rb2d = (Rigidbody2DComponent*)Entity_GetComponent(entity, ComponentType_Rigidbody2D);
+		rigidbody2D = (Rigidbody2D*)rb2d->RuntimeBody;
 		rigidbody2D->Enabled = false;
 	}
 	float distance;
@@ -543,7 +656,8 @@ bool Scene_Raycast(Scene* scene, Entity* entity, const Vec2& rayDirection, const
 		Entity* temp = (Entity*)ent;
 		if (Entity_HasComponent(temp, ComponentType_Script))
 		{
-			temp->Script->OnRaycastHit(temp, entity, temp->Script->RuntimeData);
+			ScriptComponent* sc = (ScriptComponent*)Entity_GetComponent(temp, ComponentType_Script);
+			sc->OnRaycastHit(temp, entity, sc->RuntimeData);
 		}
 		return true;
 	}

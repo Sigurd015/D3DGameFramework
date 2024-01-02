@@ -57,7 +57,7 @@ struct Renderer2DData
 	static const uint32_t MaxIndices = MaxQuads * 6;
 	static const uint32_t MaxTextureSlots = 16;
 
-	RefPtr* TargetFramebuffer = nullptr;
+	Framebuffer* TargetFramebuffer = nullptr;
 
 	RenderPass QuadRenderPass;
 	VertexBuffer QuadVertexBuffer;
@@ -121,12 +121,10 @@ void Renderer2D_Init()
 
 	// Framebuffer for some effect which directly render to screen
 	{
-		static const Framebuffer null = {};
-		s_Data.TargetFramebuffer = RefPtr_Create(sizeof(Framebuffer), &null);
-
 		FramebufferSpecification spec;
 		spec.SwapChainTarget = true;
-		Framebuffer_Create((Framebuffer*)RefPtr_Get(s_Data.TargetFramebuffer), spec);
+
+		s_Data.TargetFramebuffer = (Framebuffer*)RendererResourcePool_GetResource(RendererResourceType_FrameBuffer, &spec);
 	}
 
 	//Quad
@@ -455,7 +453,7 @@ void Renderer2D_ResetTargetFrameBuffer()
 	RenderPass_SetTargetFramebuffer(s_Data.UIRenderPass, s_Data.TargetFramebuffer);
 }
 
-void Renderer2D_SetTargetFrameBuffer(RefPtr* frameBuffer)
+void Renderer2D_SetTargetFrameBuffer(Framebuffer* frameBuffer)
 {
 	RenderPass_SetTargetFramebuffer(s_Data.QuadRenderPass, frameBuffer);
 	RenderPass_SetTargetFramebuffer(s_Data.CircleRenderPass, frameBuffer);

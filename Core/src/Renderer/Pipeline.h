@@ -37,7 +37,7 @@ struct PipelineSpecification
 {
 	Shader* Shader;
 	VertexBufferLayout Layout;
-	RefPtr* TargetFramebuffer = nullptr;
+	Framebuffer* TargetFramebuffer = nullptr;
 	PrimitiveTopology Topology = PrimitiveTopology::PrimitiveTopology_Triangles;
 	DepthCompareOperator DepthOperator = DepthCompareOperator::DepthCompareOperator_Less;
 	BlendMode Blend = BlendMode::BlendMode_Disabled;
@@ -55,5 +55,5 @@ struct Pipeline
 void Pipeline_Create(Pipeline& pipeline, const PipelineSpecification& spec);
 void Pipeline_Bind(const Pipeline& pipeline);
 const PipelineSpecification& Pipeline_GetSpecification(const Pipeline& pipeline);
-void Pipeline_SetFramebuffer(Pipeline& pipeline, RefPtr* framebuffer);
+void Pipeline_SetFramebuffer(Pipeline& pipeline, Framebuffer* framebuffer);
 void Pipeline_Release(Pipeline& pipeline);

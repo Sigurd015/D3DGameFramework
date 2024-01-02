@@ -3,11 +3,7 @@
 #include "RenderPass.h"
 #include "Scene/Components.h"
 #include "Material.h"
-
-// TODO: Temporary
-struct Mesh;
-struct Environment;
-struct MeshComponent;
+#include "Scene/Scene.h"
 
 void SceneRenderer_Init();
 void SceneRenderer_Shutdown();
@@ -16,7 +12,7 @@ void SceneRenderer_SetViewportSize(uint32_t width, uint32_t height);
 void SceneRenderer_BeginScene(const Environment& environment);
 void SceneRenderer_EndScene();
 
-void ScnenRenderer_SubmitStaticMesh(const Mat4& transform, MeshComponent& meshComponent, Material* overrideMaterial = nullptr);
+void ScnenRenderer_SubmitStaticMesh(const Mat& transform, MeshComponent* meshComponent);
 
 const RenderPass& SceneRenderer_GetFinalPass();
 //----- GBuffer Debugging -----

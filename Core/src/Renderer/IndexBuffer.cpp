@@ -33,3 +33,8 @@ void IndexBuffer_Release(IndexBuffer& indexBuffer)
 		indexBuffer.Buffer = nullptr;
 	}
 }
+
+uint32_t IndexBuffer_GetCount(const IndexBuffer& indexBuffer)
+{
+	return indexBuffer.Count;
+}

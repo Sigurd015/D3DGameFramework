@@ -156,6 +156,20 @@ bool Vec2NearlyEqual(const Vec2& a, const Vec2& b, float smallAmount)
 	return Vec2DistanceSq(a, b) < smallAmount * smallAmount;
 }
 
+Vec3 Vec3Sub(const Vec3& a, const Vec3& b)
+{
+	Vec3 result;
+	DirectX::XMStoreFloat3(&result, DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&a), DirectX::XMLoadFloat3(&b)));
+	return result;
+}
+
+Vec3 Vec3Normalize(const Vec3& vec)
+{
+	Vec3 result;
+	DirectX::XMStoreFloat3(&result, DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&vec)));
+	return result;
+}
+
 Vec3 Vec3Add(const Vec3& a, const Vec3& b)
 {
 	Vec3 result;
@@ -174,6 +188,13 @@ Vec3 Vec3MulVec3(const Vec3& a, const Vec3& b)
 {
 	Vec3 result;
 	DirectX::XMStoreFloat3(&result, DirectX::XMVectorMultiply(DirectX::XMLoadFloat3(&a), DirectX::XMLoadFloat3(&b)));
+	return result;
+}
+
+Vec3 Vec3MulMat(const Vec3& vec, const Mat& mat)
+{
+	Vec3 result;
+	DirectX::XMStoreFloat3(&result, DirectX::XMVector3Transform(DirectX::XMLoadFloat3(&vec), mat));
 	return result;
 }
 
@@ -199,6 +220,24 @@ float Vec3Length(const Vec3& vec)
 	float result;
 	DirectX::XMStoreFloat(&result, DirectX::XMVector3Length(DirectX::XMLoadFloat3(&vec)));
 	return result;
+}
+
+Mat Mat4ToMat3(const Mat& mat)
+{
+	Mat mat3;
+
+	// Extract the upper-left 3x3 submatrix from the original 4x4 matrix
+	mat3.r[0] = mat.r[0];
+	mat3.r[1] = mat.r[1];
+	mat3.r[2] = mat.r[2];
+
+	// Set the last row and column to identity values
+	mat3.r[3] = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+	mat3.r[0].m128_f32[3] = 0.0f;
+	mat3.r[1].m128_f32[3] = 0.0f;
+	mat3.r[2].m128_f32[3] = 0.0f;
+
+	return mat3;
 }
 
 float FloatMax(float a, float b)

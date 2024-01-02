@@ -2,12 +2,69 @@
 #include "Entity.h"
 #include "Physics/PhysicsWorld.h"
 
+#define MAX_POINT_LIGHT 32
+#define MAX_SPOT_LIGHT 32
+
+struct DirectionalLight
+{
+	Vec3 Radiance = { 1.0f,1.0f,1.0f };
+	float Intensity = 0.0f;
+	Vec3 Direction = { 0.0f, 0.0f, 0.0f };
+
+	LightComponent::ShadowType ShadowType = LightComponent::ShadowType_None;
+};
+
+struct PointLight
+{
+	Vec3 Position = { 0.0f, 0.0f, 0.0f };
+	float Intensity = 0.0f;
+	Vec3 Radiance = { 1.0f,1.0f,1.0f };
+	float Radius = 0.0f;
+	float Falloff = 0.0f;
+
+	LightComponent::ShadowType ShadowType = LightComponent::ShadowType_None;
+};
+
+struct SpotLight
+{
+	Vec3 Position = { 0.0f, 0.0f, 0.0f };
+	float Intensity = 0.0f;
+	Vec3 Radiance = { 1.0f,1.0f,1.0f };
+	float AngleAttenuation;
+	Vec3 Direction = { 0.0f, 0.0f, 0.0f };
+	float Range = 0.0f;
+	float Angle = 0.0f;
+	float Falloff = 0.0f;
+
+	LightComponent::ShadowType ShadowType = LightComponent::ShadowType_None;
+};
+
+struct Environment
+{
+	Vec3 CameraPosition;
+	float CameraNearClip;
+	float CameraFarClip;
+	Mat View;
+	Mat Projection;
+	Mat ViewProjection;
+
+	EnvMap* EnvMap = nullptr;
+	float SkyLightIntensity = 0.0f;
+
+	DirectionalLight DirLight;
+
+	List PointLights;
+	List SpotLights;
+};
+
 struct Scene
 {
 	List Entities;
 
 	uint32_t ViewportWidth;
 	uint32_t ViewportHeight;
+
+	Environment Environment;
 
 	PhysicsWorld2D PhysicsWorld;
 };

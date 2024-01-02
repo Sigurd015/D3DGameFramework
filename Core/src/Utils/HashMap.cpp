@@ -49,6 +49,10 @@ void HashMap_Set(HashMap& hashMap, const char* key, void* value)
 		node->Key = String_Duplicate(key);
 		SetValue(node, value, hashMap.ElementSize);
 	}
+	else if (String_Compare(node->Key, key))
+	{
+		SetValue(node, value, hashMap.ElementSize);
+	}
 	else
 	{
 		HashNode* newNode = (HashNode*)(uint8_t*)Memory_Allocate((sizeof(HashNode) + hashMap.ElementSize), MemoryBlockTag_HashMap);

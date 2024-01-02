@@ -38,13 +38,18 @@ Vec2 Vec2Sub(const Vec2& a, const Vec2& b);
 Vec2 Vec2Lerp(const Vec2& a, const Vec2& b, float t);
 bool Vec2NearlyEqual(const Vec2& a, const Vec2& b, float smallAmount = 0.0005f);
 
+Vec3 Vec3Sub(const Vec3& a, const Vec3& b);
+Vec3 Vec3Normalize(const Vec3& vec);
 Vec3 Vec3Add(const Vec3& a, const Vec3& b);
 Vec3 Vec3MulFloat(const Vec3& vec, float f);
 Vec3 Vec3MulVec3(const Vec3& a, const Vec3& b);
+Vec3 Vec3MulMat(const Vec3& vec, const Mat& mat);
 Vec3 Vec3Lerp(const Vec3& a, const Vec3& b, float t);
 Vec2 Vec3ToVec2(const Vec3& vec);
 float Vec3Distance(const Vec3& a, const Vec3& b);
 float Vec3Length(const Vec3& vec);
+
+Mat Mat4ToMat3(const Mat& mat);
 
 float FloatMax(float a, float b);
 float FloatMin(float a, float b);

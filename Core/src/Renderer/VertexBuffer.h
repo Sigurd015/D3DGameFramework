@@ -35,6 +35,7 @@ struct VertexBuffer
 void VertexBufferLayout_CalculateOffsetsAndStride(VertexBufferLayout& layout);
 
 void VertexBuffer_Create(VertexBuffer& vertexBuffer, uint32_t size);
+void VertexBuffer_Create(VertexBuffer& vertexBuffer, const void* vertices, uint32_t size);
 void VertexBuffer_SetData(VertexBuffer& vertexBuffer, void* data, uint32_t size);
 void VertexBuffer_SetLayout(VertexBuffer& vertexBuffer, VertexBufferLayout& layout);
 void VertexBuffer_Bind(const VertexBuffer& vertexBuffer);

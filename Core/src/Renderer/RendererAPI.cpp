@@ -8,6 +8,7 @@
 #include "RenderStates.h"
 #include "SceneRenderer.h"
 #include "Asset/AssetManager.h"
+#include "RendererResource.h"
 
 #include <d2d1.h>
 #include <dwrite.h>
@@ -23,9 +24,8 @@ struct RendererAPIState
 	ID2D1RenderTarget* D2DRenderTarget;
 
 	uint32_t Width, Height;
-	Vec4 ClearColor = { 0,0,0,0 };
-	ID3D11RenderTargetView* RenderTargetView;
-	ID3D11DepthStencilView* DepthStencilView;
+	float ClearColor[4] = { 0,0,0,0 };
+	ID3D11RenderTargetView* RenderTargetView = nullptr;
 };
 static RendererAPIState s_RendererAPIState;
 
@@ -35,6 +35,9 @@ struct RendererData
 	ComputePass EquirectangularToCubemapPass;
 	ComputePass EnvironmentMipFilterPass;
 	ComputePass EnvironmentIrradiancePass;
+
+	// Composite To SwapChain Pass
+	RenderPass CompositePass;
 
 	struct CBFilterParam
 	{
@@ -53,44 +56,6 @@ struct RendererData
 };
 static RendererData s_Data;
 
-void SetBuffer(uint32_t width, uint32_t height)
-{
-	ID3D11Texture2D* backBuffer;
-	CORE_CHECK_DX_RESULT(s_RendererAPIState.SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBuffer));
-	CORE_CHECK_DX_RESULT(s_RendererAPIState.Device->CreateRenderTargetView(backBuffer, nullptr, &s_RendererAPIState.RenderTargetView));
-
-	ID3D11Texture2D* depthTexture;
-	D3D11_TEXTURE2D_DESC depthStencilDesc = {};
-	depthStencilDesc.Width = width;
-	depthStencilDesc.Height = height;
-	depthStencilDesc.MipLevels = 1;
-	depthStencilDesc.ArraySize = 1;
-	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthStencilDesc.SampleDesc.Count = 1;
-	depthStencilDesc.SampleDesc.Quality = 0;
-	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
-	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	CORE_CHECK_DX_RESULT(s_RendererAPIState.Device->CreateTexture2D(&depthStencilDesc, nullptr, &depthTexture));
-	CORE_CHECK_DX_RESULT(s_RendererAPIState.Device->CreateDepthStencilView(depthTexture, nullptr, &s_RendererAPIState.DepthStencilView));
-	s_RendererAPIState.DeviceContext->OMSetRenderTargets(1, &s_RendererAPIState.RenderTargetView, s_RendererAPIState.DepthStencilView);
-
-	s_RendererAPIState.Width = width;
-	s_RendererAPIState.Height = height;
-
-	// D2D
-	{
-		IDXGISurface* backBuffer;
-		s_RendererAPIState.SwapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer));
-
-		FLOAT dpiX;
-		FLOAT dpiY;
-		s_RendererAPIState.D2DFactory->GetDesktopDpi(&dpiX, &dpiY);
-		D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT,
-			D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED), dpiX, dpiY);
-		s_RendererAPIState.D2DFactory->CreateDxgiSurfaceRenderTarget(backBuffer, &props, &s_RendererAPIState.D2DRenderTarget);
-	}
-}
-
 void RendererAPI_Initialize()
 {
 	s_Data = { };
@@ -104,7 +69,8 @@ void RendererAPI_Initialize()
 	CORE_CHECK_DX_RESULT(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory),
 		reinterpret_cast<IUnknown**>(&s_RendererAPIState.DWriteFactory)));
 
-	SetBuffer(Window_GetWidth(), Window_GetHeight());
+	RendererAPI_SetViewport(Window_GetWidth(), Window_GetHeight());
+	RendererResourcePool_Init();
 	CommonStates_Init();
 	Renderer2D_Init();
 	SceneRenderer_Init();
@@ -139,6 +105,35 @@ void RendererAPI_Initialize()
 		ConstantBuffer_Create(s_Data.SamplesParam, sizeof(RendererData::CBSamplesParams));
 		ComputePass_SetInput(s_Data.EnvironmentIrradiancePass, "CBSamplesParams", RendererResourceType_ConstantBuffer, &s_Data.SamplesParam);
 	}
+
+	// Composite To SwapChain Pass
+	{
+		PipelineSpecification pipelineSpec;
+		{
+			FramebufferSpecification spec;
+			spec.SwapChainTarget = true;
+			pipelineSpec.TargetFramebuffer = (Framebuffer*)RendererResourcePool_GetResource(RendererResourceType_FrameBuffer, &spec);
+		}
+		{
+			VertexBufferLayoutEmelent FullScreenQuadLayout[2] = {
+				{ ShaderDataType::Float3, "a_Position" },
+				{ ShaderDataType::Float2, "a_TexCoord" },
+			};
+
+			VertexBufferLayout FullScreenQuadLayoutInfo = { FullScreenQuadLayout, 2 };
+			VertexBufferLayout_CalculateOffsetsAndStride(FullScreenQuadLayoutInfo);
+
+			pipelineSpec.Layout = FullScreenQuadLayoutInfo;
+			pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("CompositeToSwapChain", AssetType_Shader);
+			pipelineSpec.BackfaceCulling = false;
+			pipelineSpec.DepthTest = false;
+			pipelineSpec.Topology = PrimitiveTopology_Triangles;
+
+			RenderPassSpecification renderPassSpec;
+			Pipeline_Create(renderPassSpec.Pipeline, pipelineSpec);
+			RenderPass_Create(s_Data.CompositePass, renderPassSpec);
+		}
+	}
 }
 
 void RendererAPI_Shutdown()
@@ -146,9 +141,9 @@ void RendererAPI_Shutdown()
 	SceneRenderer_Shutdown();
 	Renderer2D_Shutdown();
 	CommonStates_Release();
+	RendererResourcePool_Shutdown();
 
 	s_RendererAPIState.RenderTargetView->Release();
-	s_RendererAPIState.DepthStencilView->Release();
 	s_RendererAPIState.SwapChain->Release();
 	s_RendererAPIState.DeviceContext->Release();
 	s_RendererAPIState.Device->Release();
@@ -166,28 +161,41 @@ void RendererAPI_Shutdown()
 		ConstantBuffer_Release(s_Data.SamplesParam);
 		ComputePass_Release(s_Data.EnvironmentIrradiancePass);
 	}
+
+	{
+		RenderPass_Release(s_Data.CompositePass);
+	}
 }
 
 void RendererAPI_SetViewport(uint32_t width, uint32_t height)
 {
-	s_RendererAPIState.RenderTargetView->Release();
-	s_RendererAPIState.DepthStencilView->Release();
+	if (s_RendererAPIState.RenderTargetView)
+		s_RendererAPIState.RenderTargetView->Release();
 
-	SetBuffer(width, height);
-}
+	ID3D11Texture2D* backBuffer;
+	CORE_CHECK_DX_RESULT(s_RendererAPIState.SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBuffer));
+	CORE_CHECK_DX_RESULT(s_RendererAPIState.Device->CreateRenderTargetView(backBuffer, nullptr, &s_RendererAPIState.RenderTargetView));
 
-void RendererAPI_SetClearColor(const Vec4& color)
-{
-	s_RendererAPIState.ClearColor = color;
+	s_RendererAPIState.Width = width;
+	s_RendererAPIState.Height = height;
+
+	// D2D
+	{
+		IDXGISurface* backBuffer;
+		s_RendererAPIState.SwapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer));
+
+		FLOAT dpiX;
+		FLOAT dpiY;
+		s_RendererAPIState.D2DFactory->GetDesktopDpi(&dpiX, &dpiY);
+		D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT,
+			D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED), dpiX, dpiY);
+		s_RendererAPIState.D2DFactory->CreateDxgiSurfaceRenderTarget(backBuffer, &props, &s_RendererAPIState.D2DRenderTarget);
+	}
 }
 
 void RendererAPI_Clear()
 {
-	RendererAPI_ResetToSwapChain();
-
-	s_RendererAPIState.DeviceContext->ClearRenderTargetView(s_RendererAPIState.RenderTargetView, &s_RendererAPIState.ClearColor.x);
-	s_RendererAPIState.DeviceContext->ClearDepthStencilView(s_RendererAPIState.DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
-	s_RendererAPIState.DeviceContext->OMSetRenderTargets(1, &s_RendererAPIState.RenderTargetView, s_RendererAPIState.DepthStencilView);
+	s_RendererAPIState.DeviceContext->ClearRenderTargetView(s_RendererAPIState.RenderTargetView, s_RendererAPIState.ClearColor);
 }
 
 void RendererAPI_ResetToSwapChain()
@@ -200,6 +208,8 @@ void RendererAPI_ResetToSwapChain()
 	viewPort.TopLeftX = 0;
 	viewPort.TopLeftY = 0;
 	s_RendererAPIState.DeviceContext->RSSetViewports(1, &viewPort);
+
+	s_RendererAPIState.DeviceContext->OMSetRenderTargets(1, &s_RendererAPIState.RenderTargetView, nullptr);
 }
 
 void RendererAPI_BeginComputePass(const ComputePass& computePass)
@@ -302,7 +312,7 @@ EnvMap RendererAPI_CreateEnvironmentMap(Texture2D* equirectangularMap)
 
 void RendererAPI_BeginRenderPass(const RenderPass& renderPass, bool clear)
 {
-	const Framebuffer* framebuffer = (Framebuffer*)RefPtr_Get(RenderPass_GetTargetFramebuffer(renderPass));
+	const Framebuffer* framebuffer = RenderPass_GetTargetFramebuffer(renderPass);
 	const Pipeline& pipeline = RenderPass_GetPipeline(renderPass);
 	const PipelineSpecification& pipelineSpec = Pipeline_GetSpecification(pipeline);
 	const FramebufferSpecification& framebufferSpec = Framebuffer_GetSpecification(framebuffer);
@@ -390,7 +400,9 @@ void RendererAPI_BeginRenderPass(const RenderPass& renderPass, bool clear)
 
 void RendererAPI_EndRenderPass()
 {
-	//s_RendererAPIState.DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+	s_RendererAPIState.DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+
+	RendererAPI_ResetToSwapChain();
 }
 
 void RendererAPI_DrawIndexed(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, const Material& material, uint32_t indexCount)
@@ -438,4 +450,35 @@ void RendererAPI_DrawText(const WCHAR* str, const WCHAR* fontFamilyName, const V
 	s_RendererAPIState.D2DRenderTarget->BeginDraw();
 	s_RendererAPIState.D2DRenderTarget->DrawTextLayout(pounts, textLayout, solidBrush);
 	s_RendererAPIState.D2DRenderTarget->EndDraw();
+}
+
+
+void RendererAPI_DrawMesh(const Mesh* mesh, const Material* material)
+{
+	if (material)
+		Material_Bind(*material);
+
+	const VertexBuffer& vertexBuffer = Mesh_GetVertexBuffers(mesh);
+	const IndexBuffer& indexBuffer = Mesh_GetIndexBuffer(mesh);
+
+	VertexBuffer_Bind(vertexBuffer);
+	IndexBuffer_Bind(indexBuffer);
+
+	s_RendererAPIState.DeviceContext->DrawIndexed(IndexBuffer_GetCount(indexBuffer), 0, 0);
+}
+
+void RendererAPI_DrawFullScreenQuad()
+{
+	s_RendererAPIState.DeviceContext->Draw(3, 0);
+}
+
+void RendererAPI_CompositeToSwapChain(const Image2D* finalImage)
+{
+	RendererAPI_ResetToSwapChain();
+
+	RenderPass_SetInput(s_Data.CompositePass, "u_FinalImage", RendererResourceType_Image, finalImage);
+
+	RendererAPI_BeginRenderPass(s_Data.CompositePass, true);
+	RendererAPI_DrawFullScreenQuad();
+	RendererAPI_EndRenderPass();
 }
