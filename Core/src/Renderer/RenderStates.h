@@ -18,8 +18,10 @@ struct CommonStates
 
 	ID3D11SamplerState* SSLinearWrap;
 	ID3D11SamplerState* SSLinearClamp;
+	ID3D11SamplerState* SSPointClamp;
+	ID3D11SamplerState* SSAnisotropicWrap;
 };
-// Keep this global static, so we can use it simply
+// Keep this global, make it easier to use
 extern CommonStates s_CommonStates;
 
 void CommonStates_Init();

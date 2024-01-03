@@ -160,7 +160,7 @@ void Renderer2D_Init()
 
 			offset += 4;
 		}
-		IndexBuffer_Create(s_Data.QuadIndexBuffer, indices, s_Data.MaxIndices);
+		IndexBuffer_Create(s_Data.QuadIndexBuffer, indices, s_Data.MaxIndices * sizeof(uint32_t));
 		delete[] indices;
 
 		pipelineSpec.Shader = (Shader*)AssetManager_GetAsset("Renderer2D_Quad", AssetType_Shader);

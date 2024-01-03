@@ -246,7 +246,7 @@ EnvMap RendererAPI_CreateEnvironmentMap(Texture2D* equirectangularMap)
 	{
 		TextureCube_CreateUAV(&envUnfiltered);
 
-		ComputePass_SetInput(s_Data.EquirectangularToCubemapPass, "u_EquirectangularMap", RendererResourceType_TextureCube, equirectangularMap);
+		ComputePass_SetInput(s_Data.EquirectangularToCubemapPass, "u_EquirectangularMap", RendererResourceType_Texture2D, equirectangularMap);
 		ComputePass_SetInput(s_Data.EquirectangularToCubemapPass, "o_OutputTex", RendererResourceType_TextureCube, &envUnfiltered);
 
 		RendererAPI_BeginComputePass(s_Data.EquirectangularToCubemapPass);
@@ -283,6 +283,7 @@ EnvMap RendererAPI_CreateEnvironmentMap(Texture2D* equirectangularMap)
 			RendererAPI_EndComputePass(s_Data.EnvironmentMipFilterPass);
 		}
 	}
+	TextureCube_Release(&envUnfiltered);
 
 	// Irradiance map
 	cubemapSpec.Width = irradianceMapSize;

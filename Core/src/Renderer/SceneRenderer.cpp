@@ -5,6 +5,7 @@
 #include "MeshFactory.h"
 #include "Scene/Scene.h"
 #include "RendererAPI.h"
+#include "Core/Window.h"
 
 struct SceneRendererData
 {
@@ -162,7 +163,6 @@ struct SceneRendererData
 };
 static SceneRendererData s_Data;
 
-
 void SceneRenderer_Init()
 {
 	s_Data = {};
@@ -214,8 +214,8 @@ void SceneRenderer_Init()
 				{ImageFormat_Depth}
 			};
 			spec.Attachments = { colorAttachmentSpec, 5 };
-			spec.Width = 1920;
-			spec.Height = 1080;
+			spec.Width = Window_GetWidth();
+			spec.Height = Window_GetHeight();
 			spec.SwapChainTarget = false;
 
 			pipelineSpec.TargetFramebuffer = (Framebuffer*)RendererResourcePool_GetResource(RendererResourceType_FrameBuffer, &spec);
@@ -234,12 +234,12 @@ void SceneRenderer_Init()
 
 			// Create default material
 			Material_Create(s_Data.DefaultMaterial, pipelineSpec.Shader);
-			Material_SetTexture(s_Data.DefaultMaterial, "u_AlbedoTex",
-				(Texture2D*)AssetManager_GetAsset("WhiteTexture", AssetType_Texture));
-			Material_SetTexture(s_Data.DefaultMaterial, "u_MetallicRoughnessTex",
-				(Texture2D*)AssetManager_GetAsset("WhiteTexture", AssetType_Texture));
-			Material_SetTexture(s_Data.DefaultMaterial, "u_NormalTex",
-				(Texture2D*)AssetManager_GetAsset("WhiteTexture", AssetType_Texture));
+			Material_SetAlbedoMap(s_Data.DefaultMaterial,
+				(Texture2D*)AssetManager_GetAsset("WhiteTexture"));
+			Material_SetMetallicRoughnessMap(s_Data.DefaultMaterial,
+				(Texture2D*)AssetManager_GetAsset("WhiteTexture"));
+			Material_SetNormalMap(s_Data.DefaultMaterial,
+				(Texture2D*)AssetManager_GetAsset("WhiteTexture"));
 		}
 	}
 
@@ -314,8 +314,8 @@ void SceneRenderer_Init()
 				ImageFormat_RGBA32F
 			};
 			spec.Attachments = { &colorAttachmentSpec,1 };
-			spec.Width = 1920;
-			spec.Height = 1080;
+			spec.Width = Window_GetWidth();
+			spec.Height = Window_GetHeight();
 			spec.SwapChainTarget = false;
 
 			pipelineSpec.TargetFramebuffer = (Framebuffer*)RendererResourcePool_GetResource(RendererResourceType_FrameBuffer, &spec);
@@ -341,8 +341,8 @@ void SceneRenderer_Init()
 				ImageFormat_RGBA32F
 			};
 			spec.Attachments = { &colorAttachmentSpec,1 };
-			spec.Width = 1920;
-			spec.Height = 1080;
+			spec.Width = Window_GetWidth();
+			spec.Height = Window_GetHeight();
 			spec.SwapChainTarget = false;
 
 			pipelineSpec.TargetFramebuffer = (Framebuffer*)RendererResourcePool_GetResource(RendererResourceType_FrameBuffer, &spec);
@@ -369,8 +369,8 @@ void SceneRenderer_Init()
 				{ImageFormat_Depth}
 			};
 			spec.Attachments = { colorAttachmentSpec,2 };
-			spec.Width = 1920;
-			spec.Height = 1080;
+			spec.Width = Window_GetWidth();
+			spec.Height = Window_GetHeight();
 			spec.SwapChainTarget = false;
 			ExistingImage existingImage[2] = {
 				{RenderPass_GetOutput(s_Data.CompositePass),0},
@@ -408,20 +408,19 @@ void SceneRenderer_Init()
 	RenderPass_SetInput(s_Data.DeferredLightingPass, "CBPointLight", RendererResourceType_ConstantBuffer, &s_Data.PointLightDataBuffer);
 	RenderPass_SetInput(s_Data.DeferredLightingPass, "CBSpotLight", RendererResourceType_ConstantBuffer, &s_Data.SpotLightDataBuffer);
 	RenderPass_SetInput(s_Data.DeferredLightingPass, "CBDirShadow", RendererResourceType_ConstantBuffer, &s_Data.DirShadowDataBuffer);
-	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_AlbedoBuffer", RendererResourceType_Texture2D, RenderPass_GetOutput(s_Data.DeferredGeoPass, 0));
-	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_MREBuffer", RendererResourceType_Texture2D, RenderPass_GetOutput(s_Data.DeferredGeoPass, 1));
-	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_NormalBuffer", RendererResourceType_Texture2D, RenderPass_GetOutput(s_Data.DeferredGeoPass, 2));
-	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_PositionBuffer", RendererResourceType_Texture2D, RenderPass_GetOutput(s_Data.DeferredGeoPass, 3));
+	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_AlbedoBuffer", RendererResourceType_Image, RenderPass_GetOutput(s_Data.DeferredGeoPass, 0));
+	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_MREBuffer", RendererResourceType_Image, RenderPass_GetOutput(s_Data.DeferredGeoPass, 1));
+	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_NormalBuffer", RendererResourceType_Image, RenderPass_GetOutput(s_Data.DeferredGeoPass, 2));
+	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_PositionBuffer", RendererResourceType_Image, RenderPass_GetOutput(s_Data.DeferredGeoPass, 3));
 
-	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_DirShadowMap", RendererResourceType_Texture2D, RenderPass_GetDepthOutput(s_Data.DirShadowMapPass));
-	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_PointShadowMap", RendererResourceType_Texture2D, RenderPass_GetDepthOutput(s_Data.PointShadowMapPass));
+	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_DirShadowMap", RendererResourceType_Image, RenderPass_GetDepthOutput(s_Data.DirShadowMapPass));
+	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_PointShadowMap", RendererResourceType_Image, RenderPass_GetDepthOutput(s_Data.PointShadowMapPass));
 	// TODO: Better implementation for brdf lut (Directly use asset manager to get asset will generate mipmaps which is not needed)
 	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_BRDFLUTTex", RendererResourceType_Texture2D, AssetManager_GetAsset("assets/renderer/BRDF_LUT.png"));
 
-	RenderPass_SetInput(s_Data.CompositePass, "u_Color", RendererResourceType_Texture2D, RenderPass_GetOutput(s_Data.DeferredLightingPass));
+	RenderPass_SetInput(s_Data.CompositePass, "u_Color", RendererResourceType_Image, RenderPass_GetOutput(s_Data.DeferredLightingPass));
 
 	RenderPass_SetInput(s_Data.SkyboxPass, "CBCamera", RendererResourceType_ConstantBuffer, &s_Data.CameraDataBuffer);
-
 
 	TextureCreationOptionalData optionalData;
 	optionalData.Spec.Format = ImageFormat_RGBA;
@@ -436,6 +435,8 @@ void SceneRenderer_Init()
 
 	MeshSource meshSource = MeshFactory_CreateBox({ 1.0f,1.0f,1.0f });
 	AssetManager_GetAsset("Box", AssetType_Mesh, &meshSource);
+
+	List_Create(s_Data.DrawCommands, sizeof(SceneRendererData::GeoDrawCommand));
 }
 
 void SceneRenderer_Shutdown()
@@ -456,6 +457,8 @@ void SceneRenderer_Shutdown()
 	RenderPass_Release(s_Data.SkyboxPass);
 
 	Material_Release(s_Data.DefaultMaterial);
+
+	List_Free(s_Data.DrawCommands);
 }
 
 void SceneRenderer_SetViewportSize(uint32_t width, uint32_t height)
@@ -467,7 +470,7 @@ void SceneRenderer_BeginScene(const Environment& environment)
 {
 	SceneRenderer_ResetStats();
 
-	s_Data.CameraData.ViewProj = environment.ViewProjection;
+	s_Data.CameraData.ViewProj = DirectX::XMMatrixTranspose(environment.ViewProjection);
 	s_Data.CameraData.CameraPosition = environment.CameraPosition;
 	ConstantBuffer_SetData(s_Data.CameraDataBuffer, &s_Data.CameraData);
 
@@ -544,8 +547,7 @@ void ExecuteDrawCommands()
 	List_Foreach(s_Data.DrawCommands, [](void* command) {
 		SceneRendererData::GeoDrawCommand* drawCommand = (SceneRendererData::GeoDrawCommand*)command;
 
-		s_Data.ModelData.Transform = drawCommand->ModelData.Transform;
-		s_Data.ModelData.Material = drawCommand->ModelData.Material;
+		s_Data.ModelData = drawCommand->ModelData;
 
 		ConstantBuffer_SetData(s_Data.ModelDataBuffer, &s_Data.ModelData);
 
@@ -576,7 +578,7 @@ void ShadowMapPass()
 			Mat lightViewMatrix = DirectX::XMMatrixLookAtRH(DirectX::XMLoadFloat3(&lightPosition),
 				DirectX::XMLoadFloat3(&Zero), DirectX::XMLoadFloat3(&Up));
 			Mat lightOrthoMatrix = DirectX::XMMatrixOrthographicOffCenterRH(-350.0f, 350.0f, -350.0f, 350.0f, 0.1f, 750.0f);
-			s_Data.DirShadowData.LightViewProj = lightOrthoMatrix * lightViewMatrix;
+			s_Data.DirShadowData.LightViewProj = DirectX::XMMatrixTranspose(lightOrthoMatrix * lightViewMatrix);
 
 			ConstantBuffer_SetData(s_Data.DirShadowDataBuffer, &s_Data.DirShadowData);
 			ExecuteDrawCommands();
@@ -585,6 +587,13 @@ void ShadowMapPass()
 		{
 			ConstantBuffer_SetData(s_Data.DirShadowDataBuffer, &s_Data.DirShadowData);
 		}
+		RendererAPI_EndRenderPass();
+	}
+
+	// TODO: Implement Point Shadow Map Pass
+	{
+		RendererAPI_BeginRenderPass(s_Data.PointShadowMapPass);
+		s_Data.DirShadowData.ShadowType = (uint32_t)LightComponent::ShadowType_None;
 		RendererAPI_EndRenderPass();
 	}
 }
@@ -624,7 +633,18 @@ void SceneRenderer_EndScene()
 
 void ScnenRenderer_SubmitStaticMesh(const Mat& transform, MeshComponent* meshComponent)
 {
+	Material* material = meshComponent->Material ? meshComponent->Material : &s_Data.DefaultMaterial;
+	SceneRendererData::GeoDrawCommand drawCommand = {};
+	drawCommand.Mesh = meshComponent->Mesh;
+	drawCommand.Material = material;
+	drawCommand.ModelData.Transform = DirectX::XMMatrixTranspose(transform);
+	drawCommand.ModelData.Material.Albedo = Material_GetAlbedo(*material);
+	drawCommand.ModelData.Material.Emission = Material_GetEmission(*material);
+	drawCommand.ModelData.Material.Metalness = Material_GetMetallic(*material);
+	drawCommand.ModelData.Material.Roughness = Material_GetRoughness(*material);
+	drawCommand.ModelData.Material.UseNormalMap = Material_GetUseNormalMap(*material);
 
+	List_Add(s_Data.DrawCommands, &drawCommand);
 }
 
 const RenderPass& SceneRenderer_GetFinalPass()

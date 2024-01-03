@@ -115,6 +115,17 @@ void* AssetManager_GetAsset(const char* assetPath, AssetType type, void* optiona
 			Mesh_Create((Mesh*)element.Asset, meshSource);
 			break;
 		}
+		case AssetType_Material:
+		{
+			if (!optionalData)
+			{
+				CORE_LOG_ERROR("AssetManager_GetAsset: optionalData is null");
+				return nullptr;
+			}
+			element.Type = AssetType_Material;
+			element.Asset = Memory_Allocate(sizeof(Material), MemoryBlockTag_Material);
+			Memory_Copy(element.Asset, optionalData, sizeof(Material));
+		}
 		}
 		HashMap_Set(s_Assets, assetPath, &element);
 		return element.Asset;
@@ -141,7 +152,6 @@ void* AssetManager_GetAsset(const char* assetPath, AssetType type, void* optiona
 
 		Texture2D_Release(&hdrTexture);
 		break;
-
 	}
 	case AssetType_Texture:
 	{

@@ -10,6 +10,7 @@ enum MemoryBlockTag
 	MemoryBlockTag_List,
 	MemoryBlockTag_HashMap,
 	MemoryBlockTag_Shader,
+	MemoryBlockTag_Material,
 	MemoryBlockTag_RendererResource,
 	MemoryBlockTag_Mesh,
 	MemoryBlockTag_Texture2D,

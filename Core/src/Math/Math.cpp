@@ -156,6 +156,11 @@ bool Vec2NearlyEqual(const Vec2& a, const Vec2& b, float smallAmount)
 	return Vec2DistanceSq(a, b) < smallAmount * smallAmount;
 }
 
+Vec3 Vec3Rotate(const Vec3& vec, const Vec3& axis, float angle)
+{
+	return Vec3MulMat(vec, DirectX::XMMatrixRotationAxis(DirectX::XMLoadFloat3(&axis), angle));
+}
+
 Vec3 Vec3Sub(const Vec3& a, const Vec3& b)
 {
 	Vec3 result;

@@ -335,9 +335,10 @@ void Scene_OnUpdate(Scene& scene, float timeStep)
 
 		viewProjection = DirectX::XMMatrixInverse(nullptr, TransformComponent_GetTransform(mainCamera->Transform))
 			* SceneCamera_GetProjectionMatrix(cc->Camera);
-	}
 
-	scene.Environment.ViewProjection = viewProjection;
+		scene.Environment.CameraPosition = mainCamera->Transform.Translation;
+		scene.Environment.ViewProjection = viewProjection;
+	}
 
 	uint32_t size = List_Size(scene.Entities);
 
@@ -432,7 +433,7 @@ void Scene_OnUpdate(Scene& scene, float timeStep)
 					if (!temp->Enabled)
 						continue;
 
-					TransformComponent* tc = (TransformComponent*)Entity_GetComponent(temp, ComponentType_Transform);
+					TransformComponent& tc = temp->Transform;
 
 					if (Entity_HasComponent(temp, ComponentType_SkyLight))
 					{
@@ -450,7 +451,7 @@ void Scene_OnUpdate(Scene& scene, float timeStep)
 							scene.Environment.DirLight = {
 								light->Radiance,
 								light->Intensity,
-								Vec3Normalize(Vec3MulMat(Vec3(1.0f, 1.0f, 1.0f),Mat4ToMat3(TransformComponent_GetTransform(*tc)))),
+								Vec3MulFloat(Vec3Normalize(Vec3MulMat(Vec3(1.0f, 1.0f, 1.0f),Mat4ToMat3(TransformComponent_GetTransform(tc)))),-1.0f),
 								light->Shadow,
 							};
 							break;
@@ -458,7 +459,7 @@ void Scene_OnUpdate(Scene& scene, float timeStep)
 						case LightComponent::LightType_Point:
 						{
 							PointLight pointLight = {
-								tc->Translation,
+								tc.Translation,
 								light->Intensity,
 								light->Radiance,
 								light->Radius,
@@ -471,11 +472,11 @@ void Scene_OnUpdate(Scene& scene, float timeStep)
 						case LightComponent::LightType_Spot:
 						{
 							SpotLight spotLight = {
-								tc->Translation,
+								tc.Translation,
 								light->Intensity,
 								light->Radiance,
 								light->Radius,
-								Vec3Normalize(Vec3MulMat(Vec3(1.0f, 0.0f, 0.0f),Mat4ToMat3(TransformComponent_GetRotation(*tc)))),
+								Vec3MulFloat(Vec3Normalize(Vec3MulMat(Vec3(1.0f, 0.0f, 0.0f),Mat4ToMat3(TransformComponent_GetRotation(tc)))),-1.0f),
 								light->Range,
 								light->Angle,
 								light->Falloff,
@@ -499,12 +500,12 @@ void Scene_OnUpdate(Scene& scene, float timeStep)
 					if (!temp->Enabled)
 						continue;
 
-					TransformComponent* tc = (TransformComponent*)Entity_GetComponent(temp, ComponentType_Transform);
+					TransformComponent& tc = temp->Transform;
 
 					if (Entity_HasComponent(temp, ComponentType_Mesh))
 					{
 						MeshComponent* mesh = (MeshComponent*)Entity_GetComponent(temp, ComponentType_Mesh);
-						//ScnenRenderer_SubmitStaticMesh(TransformComponent_GetTransform(*tc), mesh);
+						ScnenRenderer_SubmitStaticMesh(TransformComponent_GetTransform(tc), mesh);
 					}
 				}
 				SceneRenderer_EndScene();

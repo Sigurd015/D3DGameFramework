@@ -123,6 +123,27 @@ void CommonStates_Init()
 		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 		CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateSamplerState(&samplerDesc, &s_CommonStates.SSLinearClamp));
 	}
+	{
+		D3D11_SAMPLER_DESC samplerDesc = {};
+		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+		CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateSamplerState(&samplerDesc, &s_CommonStates.SSPointClamp));
+	}
+	{
+		// TODO: Make MaxAnisotropy configurable
+		D3D11_SAMPLER_DESC samplerDesc = {};
+		samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
+		samplerDesc.MipLODBias = 0.0f;
+		samplerDesc.MinLOD = 0.0f;
+		samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+		CORE_CHECK_DX_RESULT(RendererContext_GetDevice()->CreateSamplerState(&samplerDesc, &s_CommonStates.SSAnisotropicWrap));
+	}
 }
 
 void CommonStates_Release()

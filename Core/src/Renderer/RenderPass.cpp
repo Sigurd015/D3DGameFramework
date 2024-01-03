@@ -60,11 +60,19 @@ void RnederPass_BindInputs(const RenderPass& renderPass)
 			{
 				if (String_Compare(decl->Name, "u_SSLinearWrap"))
 				{
-					RendererContext_GetDeviceContext()->PSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearWrap);
+					RendererContext_GetDeviceContext()->VSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearWrap);
 				}
 				else if (String_Compare(decl->Name, "u_SSLinearClamp"))
 				{
-					RendererContext_GetDeviceContext()->PSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearClamp);
+					RendererContext_GetDeviceContext()->VSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearClamp);
+				}
+				else if (String_Compare(decl->Name, "u_SSPointClamp"))
+				{
+					RendererContext_GetDeviceContext()->VSSetSamplers(decl->Slot, 1, &s_CommonStates.SSPointClamp);
+				}
+				else if (String_Compare(decl->Name, "u_SSAnisotropicWrap"))
+				{
+					RendererContext_GetDeviceContext()->VSSetSamplers(decl->Slot, 1, &s_CommonStates.SSAnisotropicWrap);
 				}
 				break;
 			}
@@ -78,6 +86,14 @@ void RnederPass_BindInputs(const RenderPass& renderPass)
 				{
 					RendererContext_GetDeviceContext()->PSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearClamp);
 				}
+				else if (String_Compare(decl->Name, "u_SSPointClamp"))
+				{
+					RendererContext_GetDeviceContext()->PSSetSamplers(decl->Slot, 1, &s_CommonStates.SSPointClamp);
+				}
+				else if (String_Compare(decl->Name, "u_SSAnisotropicWrap"))
+				{
+					RendererContext_GetDeviceContext()->PSSetSamplers(decl->Slot, 1, &s_CommonStates.SSAnisotropicWrap);
+				}
 				break;
 			}
 			case ShaderType_Compute:
@@ -90,6 +106,14 @@ void RnederPass_BindInputs(const RenderPass& renderPass)
 				{
 					RendererContext_GetDeviceContext()->CSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearClamp);
 				}
+				else if (String_Compare(decl->Name, "u_SSPointClamp"))
+				{
+					RendererContext_GetDeviceContext()->CSSetSamplers(decl->Slot, 1, &s_CommonStates.SSPointClamp);
+				}
+				else if (String_Compare(decl->Name, "u_SSAnisotropicWrap"))
+				{
+					RendererContext_GetDeviceContext()->CSSetSamplers(decl->Slot, 1, &s_CommonStates.SSAnisotropicWrap);
+				}
 				break;
 			}
 			case ShaderType_Geometry:
@@ -101,6 +125,14 @@ void RnederPass_BindInputs(const RenderPass& renderPass)
 				else if (String_Compare(decl->Name, "u_SSLinearClamp"))
 				{
 					RendererContext_GetDeviceContext()->GSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearClamp);
+				}
+				else if (String_Compare(decl->Name, "u_SSPointClamp"))
+				{
+					RendererContext_GetDeviceContext()->GSSetSamplers(decl->Slot, 1, &s_CommonStates.SSPointClamp);
+				}
+				else if (String_Compare(decl->Name, "u_SSAnisotropicWrap"))
+				{
+					RendererContext_GetDeviceContext()->GSSetSamplers(decl->Slot, 1, &s_CommonStates.SSAnisotropicWrap);
 				}
 				break;
 			}

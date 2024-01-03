@@ -1,5 +1,10 @@
 #include "pch.h"
 #include "Material.h"
+#include "Asset/AssetManager.h"
+
+static const char* s_AlbedoMap = "u_AlbedoTex";
+static const char* s_NormalMap = "u_NormalTex";
+static const char* s_MetallicRoughnessMap = "u_MetallicRoughnessTex";
 
 struct MaterialElement
 {
@@ -7,9 +12,16 @@ struct MaterialElement
 	const Texture2D* Texture;
 };
 
+// Notice: Material used for both Renderer2D and SceneRenderer
+// Renderer2D passed Renderer2D_Quad shader, SceneRenderer passed DeferredGeometry shader
+// For not passing shader to Material_Create, use DeferredGeometry shader as default PBR material
 void Material_Create(Material& material, const Shader* shader)
 {
-	material.ShaderReflectionData = Shader_GetReflectionData(shader);
+	if (shader)
+		material.ShaderReflectionData = Shader_GetReflectionData(shader);
+	else
+		material.ShaderReflectionData = Shader_GetReflectionData((Shader*)AssetManager_GetAsset("DeferredGeometry", AssetType_Shader));
+
 	List_Create(material.Textures, sizeof(MaterialElement));
 }
 
@@ -62,4 +74,78 @@ void Material_Clear(Material& material)
 		});
 
 	List_Clear(material.Textures);
+}
+
+void Material_SetAlbedo(Material& material, const Vec3& albedo)
+{
+	material.Albedo = albedo;
+}
+
+void Material_SetEmission(Material& material, float emission)
+{
+	material.Emission = emission;
+}
+
+void Material_SetMetallic(Material& material, float metallic)
+{
+	material.Metallic = metallic;
+}
+
+void Material_SetRoughness(Material& material, float roughness)
+{
+	material.Roughness = roughness;
+}
+
+void Material_SetUseNormalMap(Material& material, bool useNormalMap)
+{
+	material.UseNormalMap = useNormalMap;
+}
+
+void Material_SetNormalMap(Material& material, const Texture2D* texture)
+{
+	MaterialElement element;
+	element.Name = String_Duplicate(s_NormalMap);
+	element.Texture = texture;
+	List_Add(material.Textures, &element);
+}
+
+void Material_SetMetallicRoughnessMap(Material& material, const Texture2D* texture)
+{
+	MaterialElement element;
+	element.Name = String_Duplicate(s_MetallicRoughnessMap);
+	element.Texture = texture;
+	List_Add(material.Textures, &element);
+}
+
+void Material_SetAlbedoMap(Material& material, const Texture2D* texture)
+{
+	MaterialElement element;
+	element.Name = String_Duplicate(s_AlbedoMap);
+	element.Texture = texture;
+	List_Add(material.Textures, &element);
+}
+
+Vec3 Material_GetAlbedo(Material& material)
+{
+	return material.Albedo;
+}
+
+float Material_GetEmission(Material& material)
+{
+	return material.Emission;
+}
+
+float Material_GetMetallic(Material& material)
+{
+	return material.Metallic;
+}
+
+float Material_GetRoughness(Material& material)
+{
+	return material.Roughness;
+}
+
+bool Material_GetUseNormalMap(Material& material)
+{
+	return material.UseNormalMap;
 }

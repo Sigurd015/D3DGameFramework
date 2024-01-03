@@ -6,10 +6,8 @@
 
 Mat TransformComponent_GetTransform(const TransformComponent& transform)
 {
-	// TODO: Why quaternion rotation has gimbal lock problem?
 	return DirectX::XMMatrixScaling(transform.Scale.x, transform.Scale.y, transform.Scale.z)
 		* TransformComponent_GetRotation(transform)
-		//* DirectX::XMMatrixRotationQuaternion(DirectX::XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&transform.Rotation)))
 		* DirectX::XMMatrixTranslation(transform.Translation.x, transform.Translation.y, transform.Translation.z);
 }
 
@@ -19,6 +17,8 @@ Mat TransformComponent_GetRotation(const TransformComponent& transform)
 	Mat yRotation = DirectX::XMMatrixRotationY(transform.Rotation.y);
 	Mat zRotation = DirectX::XMMatrixRotationZ(transform.Rotation.z);
 
+	// TODO: Why quaternion rotation has gimbal lock problem?
+	//return DirectX::XMMatrixRotationQuaternion(DirectX::XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&transform.Rotation)));
 	return xRotation * yRotation * zRotation;
 }
 

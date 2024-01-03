@@ -192,7 +192,7 @@ void NarrowPhase(PhysicsWorld2D& world)
 		{
 
 #ifndef CORE_DIST
-			ContactPointVisualiztion(contactParams);
+			//ContactPointVisualiztion(contactParams);
 #endif 
 
 			if (body1->IsTrigger || body2->IsTrigger)
@@ -300,7 +300,7 @@ void* PhysicsWorld2D_Raycast(PhysicsWorld2D& world, const Vec2& rayOrigin, const
 	}
 
 #ifndef CORE_DIST
-	RayVisualiztion(rayOrigin, rayDirection, minDistance);
+	//RayVisualiztion(rayOrigin, rayDirection, minDistance);
 #endif 
 
 	return result;

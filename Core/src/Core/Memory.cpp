@@ -11,6 +11,7 @@ static const char* s_MemoryBlockStr[MemoryBlockTag_Count] =
 	"List",
 	"HashMap",
 	"Shader",
+	"Material",
 	"RendererResource",
 	"Mesh",
 	"Texture2D",

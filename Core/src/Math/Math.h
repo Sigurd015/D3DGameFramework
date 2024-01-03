@@ -38,6 +38,7 @@ Vec2 Vec2Sub(const Vec2& a, const Vec2& b);
 Vec2 Vec2Lerp(const Vec2& a, const Vec2& b, float t);
 bool Vec2NearlyEqual(const Vec2& a, const Vec2& b, float smallAmount = 0.0005f);
 
+Vec3 Vec3Rotate(const Vec3& vec, const Vec3& axis, float angle);
 Vec3 Vec3Sub(const Vec3& a, const Vec3& b);
 Vec3 Vec3Normalize(const Vec3& vec);
 Vec3 Vec3Add(const Vec3& a, const Vec3& b);

@@ -3,6 +3,10 @@
 #include "FrameBuffer.h"
 #include "Texture.h"
 
+// Notice: Renderer2D uses the swap chain's back buffer as the default target frame buffer,
+// For scene rendering, you need to pass the final image, get from SceneRenderer_GetFinalPass,
+// 2D rendering result can draw to the scene rendering result as an overlay
+
 void Renderer2D_Init();
 void Renderer2D_Shutdown();
 void Renderer2D_BeginScene(const Mat& viewProjection);

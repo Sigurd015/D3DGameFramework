@@ -18,3 +18,5 @@ bool Input_GetKeyDown(KeyCode key);
 bool Input_GetMouseButton(MouseCode button);
 bool Input_GetMouseButtonDown(MouseCode button);
 Vec2 Input_GetMousePosition();
+Vec2 Input_GetMousePosDelta();
+void Input_SetCursorVisible(bool visible);

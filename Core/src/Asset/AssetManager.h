@@ -7,6 +7,7 @@ enum AssetType
 	AssetType_Texture,
 	AssetType_TextureCube,
 	AssetType_EnvMap,
+	AssetType_Material,
 	AssetType_Mesh,
 	AssetType_Sound,
 	AssetType_Shader,
