@@ -43,6 +43,9 @@ struct TransformComponent
 
 Mat TransformComponent_GetTransform(const TransformComponent& transform);
 Mat TransformComponent_GetRotation(const TransformComponent& transform);
+Vec3 TransformComponent_GetUp(const TransformComponent& transform);
+Vec3 TransformComponent_GetForward(const TransformComponent& transform);
+Vec3 TransformComponent_GetRight(const TransformComponent& transform);
 
 struct RectTransformComponent
 {

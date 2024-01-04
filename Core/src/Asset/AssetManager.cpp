@@ -7,6 +7,7 @@
 #include "Renderer/EnvMap.h"
 #include "Renderer/RendererAPI.h"
 #include "Renderer/Mesh.h"
+#include "MeshLoader.h"
 
 struct AssetExtensions
 {
@@ -169,7 +170,9 @@ void* AssetManager_GetAsset(const char* assetPath, AssetType type, void* optiona
 	case AssetType_Mesh:
 	{
 		element.Type = AssetType_Mesh;
-		// TODO: Load mesh
+		element.Asset = Memory_Allocate(sizeof(Mesh), MemoryBlockTag_Mesh);
+		MeshSource meshSource = MeshLoader_Load(assetPath);
+		Mesh_Create((Mesh*)element.Asset, &meshSource);
 		break;
 	}
 	case AssetType_Sound:

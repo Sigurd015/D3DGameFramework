@@ -6,17 +6,19 @@ struct CameraControllerData
 {
 	TransformComponent* Transform = nullptr;
 
-	Vec3 Forward = { 0.0f, 0.0f, -1.0f };
-	Vec3 Right = { 1.0f, 0.0f, 0.0f };
-
 	float MoveSpeed = 5.0f;
-	Vec2 RotationSpeed = { DirectX::XMConvertToRadians(45.0f), DirectX::XMConvertToRadians(45.0f) }; // Yaw, Pitch
+	float RotationSpeedYaw = DirectX::XMConvertToRadians(45.0f);
+	float RotationSpeedPitch = DirectX::XMConvertToRadians(45.0f);
 
 	float MinPitch = -DirectX::XMConvertToRadians(85.0f);
 	float MaxPitch = DirectX::XMConvertToRadians(85.0f);
 
 	bool UseMouse = false;
 	Vec2 MouseSensitivity = { 0.1f, 0.1f };
+
+	// Debug
+	bool LockOnPlane = false;
+	float ClimbSpeed = 5.0f;
 };
 static CameraControllerData s_Data;
 
@@ -30,27 +32,42 @@ void CameraController_OnCreate(Entity* entity, void* runtimeData)
 
 void CameraController_OnUpdate(Entity* entity, float timeStep, void* runtimeData)
 {
+	Vec3 forward = TransformComponent_GetForward(*s_Data.Transform);
+	Vec3 right = TransformComponent_GetRight(*s_Data.Transform);
+
 	Vec3 pos = s_Data.Transform->Translation;
+	float yaw = s_Data.Transform->Rotation.y;
+	float pitch = s_Data.Transform->Rotation.x;
+
+	// Debug
+	{
+		if (Input_GetKeyDown(KeyCode_P))
+			s_Data.LockOnPlane = !s_Data.LockOnPlane;
+
+		if (s_Data.LockOnPlane)
+		{
+			forward.y = 0.0f;
+			right.y = 0.0f;
+		}
+	}
+
 	if (Input_GetKey(KeyCode_W))
 	{
-		pos = Vec3Add(pos, Vec3MulFloat(s_Data.Forward, s_Data.MoveSpeed));
+		pos = Vec3Add(pos, Vec3MulFloat(forward, s_Data.MoveSpeed));
 	}
 	else if (Input_GetKey(KeyCode_S))
 	{
-		pos = Vec3Sub(pos, Vec3MulFloat(s_Data.Forward, s_Data.MoveSpeed));
+		pos = Vec3Sub(pos, Vec3MulFloat(forward, s_Data.MoveSpeed));
 	}
 
 	if (Input_GetKey(KeyCode_A))
 	{
-		pos = Vec3Sub(pos, Vec3MulFloat(s_Data.Right, s_Data.MoveSpeed));
+		pos = Vec3Sub(pos, Vec3MulFloat(right, s_Data.MoveSpeed));
 	}
 	else if (Input_GetKey(KeyCode_D))
 	{
-		pos = Vec3Add(pos, Vec3MulFloat(s_Data.Right, s_Data.MoveSpeed));
+		pos = Vec3Add(pos, Vec3MulFloat(right, s_Data.MoveSpeed));
 	}
-
-	float yaw = s_Data.Transform->Rotation.y;
-	float pitch = s_Data.Transform->Rotation.x;
 
 	if (Input_GetKeyDown(KeyCode_M))
 	{
@@ -63,50 +80,44 @@ void CameraController_OnUpdate(Entity* entity, float timeStep, void* runtimeData
 		// Keyboard
 		if (Input_GetKey(KeyCode_J))
 		{
-			yaw += s_Data.RotationSpeed.y;
+			yaw += s_Data.RotationSpeedYaw;
 		}
 		else if (Input_GetKey(KeyCode_L))
 		{
-			yaw -= s_Data.RotationSpeed.y;
+			yaw -= s_Data.RotationSpeedYaw;
 		}
 
 		if (Input_GetKey(KeyCode_I))
 		{
-			pitch += s_Data.RotationSpeed.x;
+			pitch += s_Data.RotationSpeedPitch;
 		}
 		else if (Input_GetKey(KeyCode_K))
 		{
-			pitch -= s_Data.RotationSpeed.x;
+			pitch -= s_Data.RotationSpeedPitch;
 		}
 	}
 	else
 	{
 		// Mouse
 		Vec2 mouseDelta = Input_GetMousePosDelta();
-		yaw -= mouseDelta.x * s_Data.RotationSpeed.y * s_Data.MouseSensitivity.x;
-		pitch -= mouseDelta.y * s_Data.RotationSpeed.x * s_Data.MouseSensitivity.y;
+		yaw -= mouseDelta.x * s_Data.RotationSpeedYaw * s_Data.MouseSensitivity.x;
+		pitch -= mouseDelta.y * s_Data.RotationSpeedPitch * s_Data.MouseSensitivity.y;
 	}
 
 	pitch = FloatClamp(pitch, s_Data.MinPitch, s_Data.MaxPitch);
 
-	APP_LOG_INFO("Yaw: %f, Pitch: %f", yaw, pitch);
-	APP_LOG_INFO("Move: %f, %f, %f", pos.x, pos.y, pos.z);
-
 	s_Data.Transform->Translation = Vec3Lerp(s_Data.Transform->Translation, pos, timeStep);
 	s_Data.Transform->Rotation = Vec3Lerp(s_Data.Transform->Rotation, { pitch, yaw, 0.0f }, timeStep);
-
-	s_Data.Forward = Vec3Normalize(Vec3Rotate(s_Data.Forward, { 0.0f, 1.0f, 0.0f }, s_Data.Transform->Rotation.y));
-	s_Data.Right = Vec3Normalize(Vec3Rotate(s_Data.Right, { 0.0f, 1.0f, 0.0f }, s_Data.Transform->Rotation.y));
 
 	// Debug
 	{
 		if (Input_GetKey(KeyCode_F))
 		{
-			s_Data.Transform->Translation.y -= 5.0f * timeStep;
+			s_Data.Transform->Translation.y -= s_Data.ClimbSpeed * timeStep;
 		}
 		else if (Input_GetKey(KeyCode_R))
 		{
-			s_Data.Transform->Translation.y += 5.0f * timeStep;
+			s_Data.Transform->Translation.y += s_Data.ClimbSpeed * timeStep;
 		}
 	}
 }

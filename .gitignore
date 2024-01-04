@@ -8,3 +8,5 @@ packages/
 *.config
 assets/shaders/cache
 log.txt
+assimp-vc143-mtd.dll
+assimp-vc143-mt.dll

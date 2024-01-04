@@ -5,12 +5,19 @@
 struct GameData
 {
 	Scene TestScene;
+
+#ifndef CORE_DIST
+	uint32_t RenderingMode = 0; // 0: Final, 1: Albedo, 2: MRE, 3: Normal, 4: Position
+#endif 
 };
 static GameData s_Data;
 
 void Game_Ininialize(Application* appInst)
 {
 	s_Data = {};
+
+	ScriptGlue_LoadAssets();
+
 	Scene_Create(s_Data.TestScene);
 	ScriptGlue_CreateTestScene(s_Data.TestScene);
 	Scene_Ininialize(s_Data.TestScene);
@@ -21,7 +28,50 @@ void Game_Update(float timeStep)
 	Scene_OnViewportResize(s_Data.TestScene, Window_GetWidth(), Window_GetHeight());
 	Scene_OnUpdate(s_Data.TestScene, timeStep);
 
-	RendererAPI_CompositeToSwapChain(RenderPass_GetOutput(SceneRenderer_GetFinalPass()));
+	Image2D* image = RenderPass_GetOutput(SceneRenderer_GetFinalPass());
+
+#ifndef CORE_DIST
+	if (Input_GetKeyDown(KeyCode_D0))
+	{
+		s_Data.RenderingMode = 0;
+	}
+	else if (Input_GetKeyDown(KeyCode_D1))
+	{
+		s_Data.RenderingMode = 1;
+	}
+	else if (Input_GetKeyDown(KeyCode_D2))
+	{
+		s_Data.RenderingMode = 2;
+	}
+	else if (Input_GetKeyDown(KeyCode_D3))
+	{
+		s_Data.RenderingMode = 3;
+	}
+	else if (Input_GetKeyDown(KeyCode_D4))
+	{
+		s_Data.RenderingMode = 4;
+	}
+
+	switch (s_Data.RenderingMode)
+	{
+	case 0:
+		image = RenderPass_GetOutput(SceneRenderer_GetFinalPass());
+		break;
+	case 1:
+		image = SceneRenderer_GetGBufferAlbedo();
+		break;
+	case 2:
+		image = SceneRenderer_GetGBufferMRE();
+		break;
+	case 3:
+		image = SceneRenderer_GetGBufferNormal();
+		break;
+	case 4:
+		image = SceneRenderer_GetGBufferPosition();
+		break;
+	}
+#endif
+	RendererAPI_CompositeToSwapChain(image);
 }
 
 void Game_Shutdown()
@@ -52,8 +102,8 @@ void Game_OnEvent(Event e)
 void CreateApplication(Application* appInst, ApplicationCommandLineArgs args)
 {
 	appInst->Spec.Name = "dxCraft";
-	appInst->Spec.Width = 800;
-	appInst->Spec.Height = 600;
+	appInst->Spec.Width = 1920;
+	appInst->Spec.Height = 1080;
 	appInst->Spec.Resizable = true;
 	appInst->Spec.Maximizable = true;
 	appInst->Spec.Minimizable = true;

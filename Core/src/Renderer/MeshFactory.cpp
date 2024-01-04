@@ -18,42 +18,6 @@ MeshSource MeshFactory_CreateBox(const Vec3& size)
 	vertices[6].Position = { size.x / 2.0f,  size.y / 2.0f, -size.z / 2.0f };
 	vertices[7].Position = { -size.x / 2.0f,  size.y / 2.0f, -size.z / 2.0f };
 
-	vertices[0].TexCoord = { 0.0f, 0.0f };
-	vertices[1].TexCoord = { 1.0f, 0.0f };
-	vertices[2].TexCoord = { 1.0f, 1.0f };
-	vertices[3].TexCoord = { 0.0f, 1.0f };
-	vertices[4].TexCoord = { 0.0f, 0.0f };
-	vertices[5].TexCoord = { 1.0f, 0.0f };
-	vertices[6].TexCoord = { 1.0f, 1.0f };
-	vertices[7].TexCoord = { 0.0f, 1.0f };
-
-	vertices[0].Normal = { -1.0f, -1.0f,  1.0f };
-	vertices[1].Normal = { 1.0f, -1.0f,  1.0f };
-	vertices[2].Normal = { 1.0f,  1.0f,  1.0f };
-	vertices[3].Normal = { -1.0f,  1.0f,  1.0f };
-	vertices[4].Normal = { -1.0f, -1.0f, -1.0f };
-	vertices[5].Normal = { 1.0f, -1.0f, -1.0f };
-	vertices[6].Normal = { 1.0f,  1.0f, -1.0f };
-	vertices[7].Normal = { -1.0f,  1.0f, -1.0f };
-
-	vertices[0].Binormal = { 0.0f, 0.0f, 0.0f };
-	vertices[1].Binormal = { 0.0f, 0.0f, 0.0f };
-	vertices[2].Binormal = { 0.0f, 0.0f, 0.0f };
-	vertices[3].Binormal = { 0.0f, 0.0f, 0.0f };
-	vertices[4].Binormal = { 0.0f, 0.0f, 0.0f };
-	vertices[5].Binormal = { 0.0f, 0.0f, 0.0f };
-	vertices[6].Binormal = { 0.0f, 0.0f, 0.0f };
-	vertices[7].Binormal = { 0.0f, 0.0f, 0.0f };
-
-	vertices[0].Tangent = { 0.0f, 0.0f, 0.0f };
-	vertices[1].Tangent = { 0.0f, 0.0f, 0.0f };
-	vertices[2].Tangent = { 0.0f, 0.0f, 0.0f };
-	vertices[3].Tangent = { 0.0f, 0.0f, 0.0f };
-	vertices[4].Tangent = { 0.0f, 0.0f, 0.0f };
-	vertices[5].Tangent = { 0.0f, 0.0f, 0.0f };
-	vertices[6].Tangent = { 0.0f, 0.0f, 0.0f };
-	vertices[7].Tangent = { 0.0f, 0.0f, 0.0f };
-
 	Index indices[12];
 	indices[0] = { 0, 1, 2 };
 	indices[1] = { 2, 3, 0 };
@@ -78,4 +42,11 @@ MeshSource MeshFactory_CreateBox(const Vec3& size)
 	}
 
 	return meshSource;
+}
+
+MeshSource MeshFactory_CreateBoxEx(const Vec3& size)
+{
+	MeshSource meshSource;
+
+	return MeshSource();
 }

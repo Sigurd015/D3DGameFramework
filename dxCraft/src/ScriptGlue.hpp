@@ -1,25 +1,36 @@
 #pragma once
 #include "Core.h"
 #include "Camera/CameraController.h"
-#include "Player/PlayerController.h"
 
 static const char* s_SkyBoxHDRTexPath = "assets/textures/envmap/rustig_koppie_puresky_4k.hdr";
+static const char* s_CubePath = "assets/models/Cube.gltf";
+static const char* s_SpherePath = "assets/models/Sphere.gltf";
 
 // Debug
 static const char* s_AlbedoTexPath = "assets/textures/used-stainless-steel2-ue/used-stainless-steel2_albedo.png";
 static const char* s_NormalTexPath = "assets/textures/used-stainless-steel2-ue/used-stainless-steel2_normal-dx.png";
 static const char* s_MetallicRoughnessTexPath = "assets/textures/used-stainless-steel2-ue/used-stainless-steel2_roughness.png";
 
-// Hardcoded scene
-void ScriptGlue_CreateTestScene(Scene& scene)
+// Load all assets, whatever it used in the title screen or game
+// But no need to free them, AssetManager will handle it
+void ScriptGlue_LoadAssets()
 {
+	AssetManager_GetAsset(s_CubePath);
+	AssetManager_GetAsset(s_SkyBoxHDRTexPath);
+	AssetManager_GetAsset(s_SpherePath);
+
+	// Debug
 	Material PBRTestMaterial;
 	Material_Create(PBRTestMaterial);
 	Material_SetAlbedoMap(PBRTestMaterial, (Texture2D*)AssetManager_GetAsset(s_AlbedoTexPath));
 	Material_SetNormalMap(PBRTestMaterial, (Texture2D*)AssetManager_GetAsset(s_NormalTexPath));
 	Material_SetMetallicRoughnessMap(PBRTestMaterial, (Texture2D*)AssetManager_GetAsset(s_MetallicRoughnessTexPath));
 	AssetManager_GetAsset("PBRTestMaterial", AssetType_Material, &PBRTestMaterial);
+}
 
+// Hardcoded scene
+void ScriptGlue_CreateTestScene(Scene& scene)
+{
 	//Main Camera
 	{
 		Entity camera = {};
@@ -74,7 +85,7 @@ void ScriptGlue_CreateTestScene(Scene& scene)
 		testObj.Transform.Scale = { 1.0f, 1.0f, 1.0f };
 
 		MeshComponent mesh = {};
-		mesh.Mesh = (Mesh*)AssetManager_GetAsset("Box");
+		mesh.Mesh = (Mesh*)AssetManager_GetAsset(s_CubePath);
 		mesh.Material = (Material*)AssetManager_GetAsset("PBRTestMaterial");
 		Entity_AddComponent(&testObj, ComponentType::ComponentType_Mesh, &mesh);
 
@@ -88,7 +99,7 @@ void ScriptGlue_CreateTestScene(Scene& scene)
 		testObj.Transform.Scale = { 1.0f, 1.0f, 1.0f };
 
 		MeshComponent mesh = {};
-		mesh.Mesh = (Mesh*)AssetManager_GetAsset("Box");
+		mesh.Mesh = (Mesh*)AssetManager_GetAsset(s_CubePath);
 		mesh.Material = (Material*)AssetManager_GetAsset("PBRTestMaterial");
 		Entity_AddComponent(&testObj, ComponentType::ComponentType_Mesh, &mesh);
 
@@ -102,7 +113,50 @@ void ScriptGlue_CreateTestScene(Scene& scene)
 		testObj.Transform.Scale = { 1.0f, 1.0f, 1.0f };
 
 		MeshComponent mesh = {};
-		mesh.Mesh = (Mesh*)AssetManager_GetAsset("Box");
+		mesh.Mesh = (Mesh*)AssetManager_GetAsset(s_CubePath);
+		mesh.Material = (Material*)AssetManager_GetAsset("PBRTestMaterial");
+		Entity_AddComponent(&testObj, ComponentType::ComponentType_Mesh, &mesh);
+
+		Scene_AddEntity(scene, testObj);
+	}
+
+	{
+		Entity testObj = {};
+		testObj.Tag.Name = "Sphere-1";
+		testObj.Transform.Translation = { 0.0f, 5.0f, 0.0f };
+		testObj.Transform.Rotation = { 0, 0, 0 };
+		testObj.Transform.Scale = { 1.0f, 1.0f, 1.0f };
+
+		MeshComponent mesh = {};
+		mesh.Mesh = (Mesh*)AssetManager_GetAsset(s_SpherePath);
+		mesh.Material = (Material*)AssetManager_GetAsset("PBRTestMaterial");
+		Entity_AddComponent(&testObj, ComponentType::ComponentType_Mesh, &mesh);
+
+		Scene_AddEntity(scene, testObj);
+	}
+	{
+		Entity testObj = {};
+		testObj.Tag.Name = "Sphere-2";
+		testObj.Transform.Translation = { 5.0f, 5.0f, 0.0f };
+		testObj.Transform.Rotation = { 0, 0, 0 };
+		testObj.Transform.Scale = { 1.0f, 1.0f, 1.0f };
+
+		MeshComponent mesh = {};
+		mesh.Mesh = (Mesh*)AssetManager_GetAsset(s_SpherePath);
+		mesh.Material = (Material*)AssetManager_GetAsset("PBRTestMaterial");
+		Entity_AddComponent(&testObj, ComponentType::ComponentType_Mesh, &mesh);
+
+		Scene_AddEntity(scene, testObj);
+	}
+	{
+		Entity testObj = {};
+		testObj.Tag.Name = "Sphere-3";
+		testObj.Transform.Translation = { 10.0f, 5.0f, 0.0f };
+		testObj.Transform.Rotation = { 0, 0, 0 };
+		testObj.Transform.Scale = { 1.0f, 1.0f, 1.0f };
+
+		MeshComponent mesh = {};
+		mesh.Mesh = (Mesh*)AssetManager_GetAsset(s_SpherePath);
 		mesh.Material = (Material*)AssetManager_GetAsset("PBRTestMaterial");
 		Entity_AddComponent(&testObj, ComponentType::ComponentType_Mesh, &mesh);
 

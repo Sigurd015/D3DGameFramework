@@ -22,6 +22,28 @@ Mat TransformComponent_GetRotation(const TransformComponent& transform)
 	return xRotation * yRotation * zRotation;
 }
 
+// Right handed coordinate system, -z is forward, +y is up, +x is right
+Vec3 TransformComponent_GetUp(const TransformComponent& transform)
+{
+	Vec3 up = { 0.0f, 1.0f, 0.0f };
+	Mat rotation = TransformComponent_GetRotation(transform);
+	return Vec3MulMat(up, rotation);
+}
+
+Vec3 TransformComponent_GetForward(const TransformComponent& transform)
+{
+	Vec3 forward = { 0.0f, 0.0f, -1.0f };
+	Mat rotation = TransformComponent_GetRotation(transform);
+	return Vec3MulMat(forward, rotation);
+}
+
+Vec3 TransformComponent_GetRight(const TransformComponent& transform)
+{
+	Vec3 right = { 1.0f, 0.0f, 0.0f };
+	Mat rotation = TransformComponent_GetRotation(transform);
+	return Vec3MulMat(right, rotation);
+}
+
 void RectTransformComponent_GetPositionAndSize(const RectTransformComponent& rectTransform, const Vec2& currentViewPortSize,
 	Vec2* ndcPos, Vec2* pos, Vec2* size)
 {

@@ -45,6 +45,7 @@ project "Core"
 		"src",
 		"%{IncludeDir.DirectXTK}",
 		"%{IncludeDir.stb_image}",
+		"%{IncludeDir.assimp}",
 	}
 
 	links
@@ -69,7 +70,13 @@ project "Core"
 
 		links
 		{
-			"%{Library.DirectXTK_Debug}"
+			"%{Library.DirectXTK_Debug}",
+			"%{Library.assimp_Debug}"
+		}
+
+		postbuildcommands 
+		{
+			'{COPY} "%{LibraryDir.assimp_Debug}"/assimp-vc143-mtd.dll %{wks.location}'
 		}
 
 	filter "configurations:Release"
@@ -79,9 +86,14 @@ project "Core"
 
 		links
 		{
-			"%{Library.DirectXTK_Release}"
+			"%{Library.DirectXTK_Release}",
+			"%{Library.assimp_Release}"
 		}
 
+		postbuildcommands 
+		{
+			'{COPY} "%{LibraryDir.assimp_Release}"/assimp-vc143-mt.dll %{wks.location}'
+		}
 
 	filter "configurations:Dist"
 		defines "CORE_DIST"
@@ -90,5 +102,11 @@ project "Core"
 
 		links
 		{
-			"%{Library.DirectXTK_Release}"
+			"%{Library.DirectXTK_Release}",
+			"%{Library.assimp_Release}"
+		}
+
+		postbuildcommands 
+		{
+			'{COPY} "%{LibraryDir.assimp_Release}"/assimp-vc143-mt.dll %{wks.location}'
 		}
