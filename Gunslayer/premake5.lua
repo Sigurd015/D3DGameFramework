@@ -16,6 +16,7 @@ project "Gunslayer"
 	{
 		"%{wks.location}/Core/src",
 		"src",
+		"%{IncludeDir.ImGui}",
 	}
 
 	links

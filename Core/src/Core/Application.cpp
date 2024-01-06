@@ -5,6 +5,7 @@
 #include "Input/Input.h"
 #include "Audio/Audio.h"
 #include "Asset/AssetManager.h"
+#include "ImGuiLayer.h"
 
 #include <time.h>
 
@@ -85,6 +86,9 @@ void Application_Ininialize(Application* appInst)
 	Audio_Init();
 	Input_Init();
 
+	if (appInst->Spec.EnableImGui)
+		ImGuiLayer_Init();
+
 	s_AppState.AppInst->Ininialize(s_AppState.AppInst);
 }
 
@@ -124,6 +128,14 @@ void Application_Run()
 			Audio_Update();
 
 			s_AppState.AppInst->Update(timestep);
+
+			// ImGui
+			if (s_AppState.AppInst->Spec.EnableImGui)
+			{
+				ImGuiLayer_Begin();
+				s_AppState.AppInst->OnImGuiRender();
+				ImGuiLayer_End();
+			}
 		}
 
 		Window_Update();
@@ -135,6 +147,10 @@ void Application_Run()
 void Application_Shutdown()
 {
 	s_AppState.AppInst->Shutdown();
+
+	if (s_AppState.AppInst->Spec.EnableImGui)
+		ImGuiLayer_Shutdown();
+
 	Audio_Shutdown();
 	Input_Shutdown();
 	AssetManager_Shutdown();

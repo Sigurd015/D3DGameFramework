@@ -2,6 +2,8 @@
 #include "EntryPoint.h"
 #include "ScriptGlue.hpp"
 
+#include <imgui.h>
+
 struct GameData
 {
 	Scene TestScene;
@@ -74,6 +76,15 @@ void Game_Update(float timeStep)
 	RendererAPI_CompositeToSwapChain(image);
 }
 
+void Game_OnImGuiRender()
+{
+#ifndef CORE_DIST
+	//ImGui::Begin("Debug");
+	//ImGui::Text("Test");
+	//ImGui::End();
+#endif 
+}
+
 void Game_Shutdown()
 {
 	Scene_Destroy(s_Data.TestScene);
@@ -110,8 +121,14 @@ void CreateApplication(Application* appInst, ApplicationCommandLineArgs args)
 	appInst->Spec.VSync = true;
 	appInst->Spec.CommandLineArgs = args;
 	appInst->Spec.FullScreen = false;
+
+#ifndef CORE_DIST
+	appInst->Spec.EnableImGui = true;
+#endif 
+
 	appInst->Ininialize = Game_Ininialize;
 	appInst->Shutdown = Game_Shutdown;
 	appInst->Update = Game_Update;
 	appInst->OnEvent = Game_OnEvent;
+	appInst->OnImGuiRender = Game_OnImGuiRender;
 }

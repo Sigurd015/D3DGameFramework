@@ -1,6 +1,7 @@
 #pragma once
 #include "Core.h"
 #include "Camera/CameraController.h"
+#include <stdio.h>
 
 static const char* s_SkyBoxHDRTexPath = "assets/textures/envmap/rustig_koppie_puresky_4k.hdr";
 static const char* s_CubePath = "assets/models/Cube.gltf";
@@ -21,10 +22,15 @@ void ScriptGlue_LoadAssets()
 
 	// Debug
 	Material PBRTestMaterial;
-	Material_Create(PBRTestMaterial);
-	Material_SetAlbedoMap(PBRTestMaterial, (Texture2D*)AssetManager_GetAsset(s_AlbedoTexPath));
-	Material_SetNormalMap(PBRTestMaterial, (Texture2D*)AssetManager_GetAsset(s_NormalTexPath));
-	Material_SetMetallicRoughnessMap(PBRTestMaterial, (Texture2D*)AssetManager_GetAsset(s_MetallicRoughnessTexPath));
+	Material_Create(&PBRTestMaterial);
+	Material_SetAlbedoMap(&PBRTestMaterial, (Texture2D*)AssetManager_GetAsset(s_AlbedoTexPath));
+	Material_SetNormalMap(&PBRTestMaterial, (Texture2D*)AssetManager_GetAsset(s_NormalTexPath));
+	Material_SetMetallicRoughnessMap(&PBRTestMaterial, (Texture2D*)AssetManager_GetAsset(s_MetallicRoughnessTexPath));
+	Material_SetAlbedo(&PBRTestMaterial, { 1.0f, 1.0f, 1.0f });
+	Material_SetEmission(&PBRTestMaterial, 0.0f);
+	Material_SetMetallic(&PBRTestMaterial, 0.0f);
+	Material_SetRoughness(&PBRTestMaterial, 1.0f);
+	Material_SetUseNormalMap(&PBRTestMaterial, true);
 	AssetManager_GetAsset("PBRTestMaterial", AssetType_Material, &PBRTestMaterial);
 }
 
@@ -71,7 +77,7 @@ void ScriptGlue_CreateTestScene(Scene& scene)
 		testObj.Transform.Scale = { 1.0f, 1.0f, 1.0f };
 
 		SkyLightComponent skyLight = {};
-		skyLight.Intensity = 1.0f;
+		skyLight.Intensity = 0.2f;
 		skyLight.EnvMap = (EnvMap*)AssetManager_GetAsset(s_SkyBoxHDRTexPath);
 		Entity_AddComponent(&testObj, ComponentType::ComponentType_SkyLight, &skyLight);
 
@@ -79,87 +85,42 @@ void ScriptGlue_CreateTestScene(Scene& scene)
 	}
 	{
 		Entity testObj = {};
-		testObj.Tag.Name = "Box-1";
+		testObj.Tag.Name = "DirLight";
 		testObj.Transform.Translation = { 0.0f, 0.0f, 0.0f };
 		testObj.Transform.Rotation = { 0, 0, 0 };
 		testObj.Transform.Scale = { 1.0f, 1.0f, 1.0f };
 
-		MeshComponent mesh = {};
-		mesh.Mesh = (Mesh*)AssetManager_GetAsset(s_CubePath);
-		mesh.Material = (Material*)AssetManager_GetAsset("PBRTestMaterial");
-		Entity_AddComponent(&testObj, ComponentType::ComponentType_Mesh, &mesh);
-
-		Scene_AddEntity(scene, testObj);
-	}
-	{
-		Entity testObj = {};
-		testObj.Tag.Name = "Box-2";
-		testObj.Transform.Translation = { 5.0f, 0.0f, 0.0f };
-		testObj.Transform.Rotation = { 0, 0, 0 };
-		testObj.Transform.Scale = { 1.0f, 1.0f, 1.0f };
-
-		MeshComponent mesh = {};
-		mesh.Mesh = (Mesh*)AssetManager_GetAsset(s_CubePath);
-		mesh.Material = (Material*)AssetManager_GetAsset("PBRTestMaterial");
-		Entity_AddComponent(&testObj, ComponentType::ComponentType_Mesh, &mesh);
-
-		Scene_AddEntity(scene, testObj);
-	}
-	{
-		Entity testObj = {};
-		testObj.Tag.Name = "Box-3";
-		testObj.Transform.Translation = { 10.0f, 0.0f, 0.0f };
-		testObj.Transform.Rotation = { 0, 0, 0 };
-		testObj.Transform.Scale = { 1.0f, 1.0f, 1.0f };
-
-		MeshComponent mesh = {};
-		mesh.Mesh = (Mesh*)AssetManager_GetAsset(s_CubePath);
-		mesh.Material = (Material*)AssetManager_GetAsset("PBRTestMaterial");
-		Entity_AddComponent(&testObj, ComponentType::ComponentType_Mesh, &mesh);
+		LightComponent light = {};
+		light.Type = LightComponent::LightType_Directional;
+		light.Radiance = { 1.0f, 1.0f, 1.0f };
+		light.Intensity = 1.0f;
+		light.Shadow = LightComponent::ShadowType_Hard;
+		Entity_AddComponent(&testObj, ComponentType::ComponentType_Light, &light);
 
 		Scene_AddEntity(scene, testObj);
 	}
 
+	for (size_t i = 0; i < 100; i++)
 	{
-		Entity testObj = {};
-		testObj.Tag.Name = "Sphere-1";
-		testObj.Transform.Translation = { 0.0f, 5.0f, 0.0f };
-		testObj.Transform.Rotation = { 0, 0, 0 };
-		testObj.Transform.Scale = { 1.0f, 1.0f, 1.0f };
+		for (size_t j = 0; j < 100; j++)
+		{
+			Entity testObj = {};
+			char tempName[256];
+			sprintf_s(tempName, 256, "Box-%d-%d", j, i);
 
-		MeshComponent mesh = {};
-		mesh.Mesh = (Mesh*)AssetManager_GetAsset(s_SpherePath);
-		mesh.Material = (Material*)AssetManager_GetAsset("PBRTestMaterial");
-		Entity_AddComponent(&testObj, ComponentType::ComponentType_Mesh, &mesh);
+			testObj.Tag.Name = tempName;
+			testObj.Transform.Translation = { 0.0f, 0.0f, 0.0f };
+			testObj.Transform.Translation.x = (float)j * 2.0f;
+			testObj.Transform.Translation.y = (float)i * 2.0f;
+			testObj.Transform.Rotation = { 0, 0, 0 };
+			testObj.Transform.Scale = { 1.0f, 1.0f, 1.0f };
 
-		Scene_AddEntity(scene, testObj);
-	}
-	{
-		Entity testObj = {};
-		testObj.Tag.Name = "Sphere-2";
-		testObj.Transform.Translation = { 5.0f, 5.0f, 0.0f };
-		testObj.Transform.Rotation = { 0, 0, 0 };
-		testObj.Transform.Scale = { 1.0f, 1.0f, 1.0f };
+			MeshComponent mesh = {};
+			mesh.Mesh = (Mesh*)AssetManager_GetAsset(s_CubePath);
+			mesh.Material = (Material*)AssetManager_GetAsset("PBRTestMaterial");
+			Entity_AddComponent(&testObj, ComponentType::ComponentType_Mesh, &mesh);
 
-		MeshComponent mesh = {};
-		mesh.Mesh = (Mesh*)AssetManager_GetAsset(s_SpherePath);
-		mesh.Material = (Material*)AssetManager_GetAsset("PBRTestMaterial");
-		Entity_AddComponent(&testObj, ComponentType::ComponentType_Mesh, &mesh);
-
-		Scene_AddEntity(scene, testObj);
-	}
-	{
-		Entity testObj = {};
-		testObj.Tag.Name = "Sphere-3";
-		testObj.Transform.Translation = { 10.0f, 5.0f, 0.0f };
-		testObj.Transform.Rotation = { 0, 0, 0 };
-		testObj.Transform.Scale = { 1.0f, 1.0f, 1.0f };
-
-		MeshComponent mesh = {};
-		mesh.Mesh = (Mesh*)AssetManager_GetAsset(s_SpherePath);
-		mesh.Material = (Material*)AssetManager_GetAsset("PBRTestMaterial");
-		Entity_AddComponent(&testObj, ComponentType::ComponentType_Mesh, &mesh);
-
-		Scene_AddEntity(scene, testObj);
+			Scene_AddEntity(scene, testObj);
+		}
 	}
 }

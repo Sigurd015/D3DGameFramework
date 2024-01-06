@@ -46,6 +46,7 @@ project "Core"
 		"%{IncludeDir.DirectXTK}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.assimp}",
+		"%{IncludeDir.ImGui}"
 	}
 
 	links
@@ -71,7 +72,8 @@ project "Core"
 		links
 		{
 			"%{Library.DirectXTK_Debug}",
-			"%{Library.assimp_Debug}"
+			"%{Library.assimp_Debug}",
+			"%{Library.ImGui_Debug}"
 		}
 
 		postbuildcommands 
@@ -87,7 +89,8 @@ project "Core"
 		links
 		{
 			"%{Library.DirectXTK_Release}",
-			"%{Library.assimp_Release}"
+			"%{Library.assimp_Release}",
+			"%{Library.ImGui_Release}"
 		}
 
 		postbuildcommands 
@@ -103,7 +106,8 @@ project "Core"
 		links
 		{
 			"%{Library.DirectXTK_Release}",
-			"%{Library.assimp_Release}"
+			"%{Library.assimp_Release}",
+			"%{Library.ImGui_Release}"
 		}
 
 		postbuildcommands 

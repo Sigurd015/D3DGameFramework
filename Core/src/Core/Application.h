@@ -21,6 +21,7 @@ struct ApplicationSpecification
 	bool Minimizable = false;
 	bool FullScreen = false;
 	bool VSync = true;
+	bool EnableImGui = false;
 
 	ApplicationCommandLineArgs CommandLineArgs;
 };
@@ -33,6 +34,7 @@ struct Application
 	void(*Shutdown)();
 	void(*Update)(float timeStep);
 	void(*OnEvent)(Event e);
+	void(*OnImGuiRender)();
 };
 
 void Application_Ininialize(Application* appInst);

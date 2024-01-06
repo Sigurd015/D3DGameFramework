@@ -233,12 +233,12 @@ void SceneRenderer_Init()
 			RenderPass_Create(s_Data.DeferredGeoPass, renderPassSpec);
 
 			// Create default material
-			Material_Create(s_Data.DefaultMaterial, pipelineSpec.Shader);
-			Material_SetAlbedoMap(s_Data.DefaultMaterial,
+			Material_Create(&s_Data.DefaultMaterial, pipelineSpec.Shader);
+			Material_SetAlbedoMap(&s_Data.DefaultMaterial,
 				(Texture2D*)AssetManager_GetAsset("WhiteTexture"));
-			Material_SetMetallicRoughnessMap(s_Data.DefaultMaterial,
+			Material_SetMetallicRoughnessMap(&s_Data.DefaultMaterial,
 				(Texture2D*)AssetManager_GetAsset("WhiteTexture"));
-			Material_SetNormalMap(s_Data.DefaultMaterial,
+			Material_SetNormalMap(&s_Data.DefaultMaterial,
 				(Texture2D*)AssetManager_GetAsset("WhiteTexture"));
 		}
 	}
@@ -412,7 +412,6 @@ void SceneRenderer_Init()
 	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_MREBuffer", RendererResourceType_Image, RenderPass_GetOutput(s_Data.DeferredGeoPass, 1));
 	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_NormalBuffer", RendererResourceType_Image, RenderPass_GetOutput(s_Data.DeferredGeoPass, 2));
 	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_PositionBuffer", RendererResourceType_Image, RenderPass_GetOutput(s_Data.DeferredGeoPass, 3));
-
 	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_DirShadowMap", RendererResourceType_Image, RenderPass_GetDepthOutput(s_Data.DirShadowMapPass));
 	RenderPass_SetInput(s_Data.DeferredLightingPass, "u_PointShadowMap", RendererResourceType_Image, RenderPass_GetDepthOutput(s_Data.PointShadowMapPass));
 	// TODO: Better implementation for brdf lut (Directly use asset manager to get asset will generate mipmaps which is not needed)
@@ -456,7 +455,7 @@ void SceneRenderer_Shutdown()
 	RenderPass_Release(s_Data.CompositePass);
 	RenderPass_Release(s_Data.SkyboxPass);
 
-	Material_Release(s_Data.DefaultMaterial);
+	Material_Release(&s_Data.DefaultMaterial);
 
 	List_Free(s_Data.DrawCommands);
 }
@@ -638,11 +637,11 @@ void ScnenRenderer_SubmitStaticMesh(const Mat& transform, MeshComponent* meshCom
 	drawCommand.Mesh = meshComponent->Mesh;
 	drawCommand.Material = material;
 	drawCommand.ModelData.Transform = DirectX::XMMatrixTranspose(transform);
-	drawCommand.ModelData.Material.Albedo = Material_GetAlbedo(*material);
-	drawCommand.ModelData.Material.Emission = Material_GetEmission(*material);
-	drawCommand.ModelData.Material.Metalness = Material_GetMetallic(*material);
-	drawCommand.ModelData.Material.Roughness = Material_GetRoughness(*material);
-	drawCommand.ModelData.Material.UseNormalMap = Material_GetUseNormalMap(*material);
+	drawCommand.ModelData.Material.Albedo = Material_GetAlbedo(material);
+	drawCommand.ModelData.Material.Emission = Material_GetEmission(material);
+	drawCommand.ModelData.Material.Metalness = Material_GetMetallic(material);
+	drawCommand.ModelData.Material.Roughness = Material_GetRoughness(material);
+	drawCommand.ModelData.Material.UseNormalMap = Material_GetUseNormalMap(material);
 
 	List_Add(s_Data.DrawCommands, &drawCommand);
 }

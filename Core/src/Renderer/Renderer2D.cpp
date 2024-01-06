@@ -174,7 +174,7 @@ void Renderer2D_Init()
 		RenderPassSpecification renderPassSpec;
 		Pipeline_Create(renderPassSpec.Pipeline, pipelineSpec);
 		RenderPass_Create(s_Data.QuadRenderPass, renderPassSpec);
-		Material_Create(s_Data.DefaultMaterial, pipelineSpec.Shader);
+		Material_Create(&s_Data.DefaultMaterial, pipelineSpec.Shader);
 
 		s_Data.QuadVertexBufferBase = new QuadVertex[s_Data.MaxVertices];
 	}
@@ -369,10 +369,10 @@ void Renderer2D_BeginScene(const Mat& viewProjection)
 void Flush()
 {
 	// Bind textures
-	Material_Clear(s_Data.DefaultMaterial);
+	Material_Clear(&s_Data.DefaultMaterial);
 	for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
 	{
-		Material_SetTexture(s_Data.DefaultMaterial, s_Data.TextureSlotsNames[i], s_Data.Textures[i]);
+		Material_SetTexture(&s_Data.DefaultMaterial, s_Data.TextureSlotsNames[i], s_Data.Textures[i]);
 	}
 
 	RendererAPI_BeginRenderPass(s_Data.QuadRenderPass, false);
@@ -381,7 +381,7 @@ void Flush()
 		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase);
 		VertexBuffer_SetData(s_Data.QuadVertexBuffer, s_Data.QuadVertexBufferBase, dataSize);
 
-		RendererAPI_DrawIndexed(s_Data.QuadVertexBuffer, s_Data.QuadIndexBuffer, s_Data.DefaultMaterial, s_Data.QuadIndexCount);
+		RendererAPI_DrawIndexed(s_Data.QuadVertexBuffer, s_Data.QuadIndexBuffer, &s_Data.DefaultMaterial, s_Data.QuadIndexCount);
 		s_Data.Stats.DrawCalls++;
 	}
 	RendererAPI_EndRenderPass();
@@ -415,7 +415,7 @@ void Flush()
 		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.UIVertexBufferPtr - (uint8_t*)s_Data.UIVertexBufferBase);
 		VertexBuffer_SetData(s_Data.UIVertexBuffer, s_Data.UIVertexBufferBase, dataSize);
 
-		RendererAPI_DrawIndexed(s_Data.UIVertexBuffer, s_Data.QuadIndexBuffer, s_Data.DefaultMaterial, s_Data.UIIndexCount);
+		RendererAPI_DrawIndexed(s_Data.UIVertexBuffer, s_Data.QuadIndexBuffer, &s_Data.DefaultMaterial, s_Data.UIIndexCount);
 		s_Data.Stats.DrawCalls++;
 	}
 	RendererAPI_EndRenderPass();

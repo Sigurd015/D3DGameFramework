@@ -43,10 +43,3 @@ MeshSource MeshFactory_CreateBox(const Vec3& size)
 
 	return meshSource;
 }
-
-MeshSource MeshFactory_CreateBoxEx(const Vec3& size)
-{
-	MeshSource meshSource;
-
-	return MeshSource();
-}

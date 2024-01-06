@@ -18,12 +18,10 @@ aiProcess_Triangulate;            // Make sure we're triangles
 //aiProcess_ValidateDataStructure   // Validation
 //aiProcess_GlobalScale              // e.g. convert cm to m for fbx import (and other formats where cm is native)
 
-MeshSource MeshLoader_Load(const char* path)
+bool MeshLoader_TryLoad(MeshSource* meshSource, const char* path)
 {
-	MeshSource meshSource;
-
-	List_Create(meshSource.Vertices, sizeof(Vertex));
-	List_Create(meshSource.Indices, sizeof(Index));
+	List_Create(meshSource->Vertices, sizeof(Vertex));
+	List_Create(meshSource->Indices, sizeof(Index));
 
 	Assimp::Importer importer;
 	importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
@@ -33,7 +31,7 @@ MeshSource MeshLoader_Load(const char* path)
 	if (!scene)
 	{
 		CORE_LOG_ERROR("Failed to load mesh source: %s", importer.GetErrorString());
-		return meshSource;
+		return false;
 	}
 
 	// TODO: Support multiple meshes
@@ -59,7 +57,7 @@ MeshSource MeshLoader_Load(const char* path)
 			if (mesh->HasTextureCoords(0))
 				vertex.TexCoord = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
 
-			List_Add(meshSource.Vertices, &vertex);
+			List_Add(meshSource->Vertices, &vertex);
 		}
 
 		// Indices
@@ -67,10 +65,10 @@ MeshSource MeshLoader_Load(const char* path)
 		{
 			CORE_ASSERT(mesh->mFaces[i].mNumIndices == 3, "Must have 3 indices.");
 			Index index = { mesh->mFaces[i].mIndices[0], mesh->mFaces[i].mIndices[1], mesh->mFaces[i].mIndices[2] };
-			List_Add(meshSource.Indices, &index);
+			List_Add(meshSource->Indices, &index);
 		}
 	}
 
 	// TODO: May Support Materials, But don't need it now
-	return meshSource;
+	return true;
 }

@@ -75,7 +75,7 @@ void RendererAPI_Initialize()
 	Renderer2D_Init();
 	SceneRenderer_Init();
 
-	// For Equirectangular To CubemapPass
+	// Equirectangular To Cubemap Pass
 	{
 		ComputePassSpecification spec = {};
 		ComputePipelineSpecification pipelineSpec = {};
@@ -83,7 +83,7 @@ void RendererAPI_Initialize()
 		ComputePipeline_Create(spec.Pipeline, pipelineSpec);
 		ComputePass_Create(s_Data.EquirectangularToCubemapPass, spec);
 	}
-
+	// Environment Mip Filter Pass
 	{
 		ComputePassSpecification spec = {};
 		ComputePipelineSpecification pipelineSpec = {};
@@ -94,7 +94,7 @@ void RendererAPI_Initialize()
 		ConstantBuffer_Create(s_Data.FilterParam, sizeof(RendererData::CBFilterParam));
 		ComputePass_SetInput(s_Data.EnvironmentMipFilterPass, "CBFilterParam", RendererResourceType_ConstantBuffer, &s_Data.FilterParam);
 	}
-
+	// Environment Irradiance Pass
 	{
 		ComputePassSpecification spec = {};
 		ComputePipelineSpecification pipelineSpec = {};
@@ -105,7 +105,6 @@ void RendererAPI_Initialize()
 		ConstantBuffer_Create(s_Data.SamplesParam, sizeof(RendererData::CBSamplesParams));
 		ComputePass_SetInput(s_Data.EnvironmentIrradiancePass, "CBSamplesParams", RendererResourceType_ConstantBuffer, &s_Data.SamplesParam);
 	}
-
 	// Composite To SwapChain Pass
 	{
 		PipelineSpecification pipelineSpec;
@@ -406,7 +405,7 @@ void RendererAPI_EndRenderPass()
 	RendererAPI_ResetToSwapChain();
 }
 
-void RendererAPI_DrawIndexed(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, const Material& material, uint32_t indexCount)
+void RendererAPI_DrawIndexed(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, const Material* material, uint32_t indexCount)
 {
 	Material_Bind(material);
 
@@ -457,7 +456,7 @@ void RendererAPI_DrawText(const WCHAR* str, const WCHAR* fontFamilyName, const V
 void RendererAPI_DrawMesh(const Mesh* mesh, const Material* material)
 {
 	if (material)
-		Material_Bind(*material);
+		Material_Bind(material);
 
 	const VertexBuffer& vertexBuffer = Mesh_GetVertexBuffers(mesh);
 	const IndexBuffer& indexBuffer = Mesh_GetIndexBuffer(mesh);

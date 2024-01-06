@@ -16,6 +16,7 @@ project "dxCraft"
 	{
 		"%{wks.location}/Core/src",
 		"src",
+		"%{IncludeDir.ImGui}",
 	}
 
 	links

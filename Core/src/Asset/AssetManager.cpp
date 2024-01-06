@@ -171,7 +171,8 @@ void* AssetManager_GetAsset(const char* assetPath, AssetType type, void* optiona
 	{
 		element.Type = AssetType_Mesh;
 		element.Asset = Memory_Allocate(sizeof(Mesh), MemoryBlockTag_Mesh);
-		MeshSource meshSource = MeshLoader_Load(assetPath);
+		MeshSource meshSource;
+		MeshLoader_TryLoad(&meshSource, assetPath);
 		Mesh_Create((Mesh*)element.Asset, &meshSource);
 		break;
 	}

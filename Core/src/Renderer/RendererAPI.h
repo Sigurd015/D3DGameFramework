@@ -21,7 +21,7 @@ void RendererAPI_EndComputePass(const ComputePass& computePass);
 EnvMap RendererAPI_CreateEnvironmentMap(Texture2D* equirectangularMap);
 void RendererAPI_BeginRenderPass(const RenderPass& renderPass, bool clear = true);
 void RendererAPI_EndRenderPass();
-void RendererAPI_DrawIndexed(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, const Material& material, uint32_t indexCount);
+void RendererAPI_DrawIndexed(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, const Material* material, uint32_t indexCount);
 void RendererAPI_DrawIndexed(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, uint32_t indexCount);
 void RendererAPI_DrawLines(const VertexBuffer& vertexBuffer, uint32_t vertexCount);
 void RendererAPI_DrawText(const WCHAR* str, const WCHAR* fontFamilyName, const Vec2& pos, const Vec4& color, float fontSize);
