@@ -10,7 +10,8 @@ static const char* s_SpherePath = "assets/models/Sphere.gltf";
 // Debug
 static const char* s_AlbedoTexPath = "assets/textures/used-stainless-steel2-ue/used-stainless-steel2_albedo.png";
 static const char* s_NormalTexPath = "assets/textures/used-stainless-steel2-ue/used-stainless-steel2_normal-dx.png";
-static const char* s_MetallicRoughnessTexPath = "assets/textures/used-stainless-steel2-ue/used-stainless-steel2_roughness.png";
+static const char* s_MetalnessTexPath = "assets/textures/used-stainless-steel2-ue/used-stainless-steel2_metallic.png";
+static const char* s_RoughnessTexPath = "assets/textures/used-stainless-steel2-ue/used-stainless-steel2_roughness.png";
 
 // Load all assets, whatever it used in the title screen or game
 // But no need to free them, AssetManager will handle it
@@ -25,11 +26,12 @@ void ScriptGlue_LoadAssets()
 	Material_Create(&PBRTestMaterial);
 	Material_SetAlbedoMap(&PBRTestMaterial, (Texture2D*)AssetManager_GetAsset(s_AlbedoTexPath));
 	Material_SetNormalMap(&PBRTestMaterial, (Texture2D*)AssetManager_GetAsset(s_NormalTexPath));
-	Material_SetMetallicRoughnessMap(&PBRTestMaterial, (Texture2D*)AssetManager_GetAsset(s_MetallicRoughnessTexPath));
+	Material_SetMetalnessMap(&PBRTestMaterial, (Texture2D*)AssetManager_GetAsset(s_MetalnessTexPath));
+	Material_SetRoughnessMap(&PBRTestMaterial, (Texture2D*)AssetManager_GetAsset(s_RoughnessTexPath));
 	Material_SetAlbedo(&PBRTestMaterial, { 1.0f, 1.0f, 1.0f });
 	Material_SetEmission(&PBRTestMaterial, 0.0f);
-	Material_SetMetallic(&PBRTestMaterial, 0.0f);
-	Material_SetRoughness(&PBRTestMaterial, 1.0f);
+	Material_SetMetallic(&PBRTestMaterial, 1.0f);
+	Material_SetRoughness(&PBRTestMaterial, 0.0f);
 	Material_SetUseNormalMap(&PBRTestMaterial, true);
 	AssetManager_GetAsset("PBRTestMaterial", AssetType_Material, &PBRTestMaterial);
 }
@@ -110,8 +112,9 @@ void ScriptGlue_CreateTestScene(Scene& scene)
 
 			testObj.Tag.Name = tempName;
 			testObj.Transform.Translation = { 0.0f, 0.0f, 0.0f };
-			testObj.Transform.Translation.x = (float)j * 2.0f;
-			testObj.Transform.Translation.y = (float)i * 2.0f;
+			testObj.Transform.Translation.x = (float)j;
+			testObj.Transform.Translation.z = (float)i;
+			testObj.Transform.Translation.y = PerlinNoise2D(j, i) * 10.0f;
 			testObj.Transform.Rotation = { 0, 0, 0 };
 			testObj.Transform.Scale = { 1.0f, 1.0f, 1.0f };
 

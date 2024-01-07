@@ -4,7 +4,8 @@
 
 static const char* s_AlbedoMap = "u_AlbedoTex";
 static const char* s_NormalMap = "u_NormalTex";
-static const char* s_MetallicRoughnessMap = "u_MetallicRoughnessTex";
+static const char* s_MetalnessMap = "u_MetalnessTex";
+static const char* s_RoughnessMap = "u_RoughnessTex";
 
 struct MaterialElement
 {
@@ -112,10 +113,18 @@ void Material_SetNormalMap(Material* material, const Texture2D* texture)
 	List_Add(material->Textures, &element);
 }
 
-void Material_SetMetallicRoughnessMap(Material* material, const Texture2D* texture)
+void Material_SetMetalnessMap(Material* material, const Texture2D* texture)
 {
 	MaterialElement element;
-	element.Name = String_Duplicate(s_MetallicRoughnessMap);
+	element.Name = String_Duplicate(s_MetalnessMap);
+	element.Texture = texture;
+	List_Add(material->Textures, &element);
+}
+
+void Material_SetRoughnessMap(Material* material, const Texture2D* texture)
+{
+	MaterialElement element;
+	element.Name = String_Duplicate(s_RoughnessMap);
 	element.Texture = texture;
 	List_Add(material->Textures, &element);
 }

@@ -1,4 +1,4 @@
-#include "Core.h"
+﻿#include "Core.h"
 #include "EntryPoint.h"
 #include "ScriptGlue.hpp"
 

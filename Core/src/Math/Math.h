@@ -57,3 +57,6 @@ float FloatMin(float a, float b);
 float FloatClamp(float value, float min, float max);
 float FloatLerp(float a, float b, float t);
 bool FloatNearlyEqual(float a, float b, float smallAmount = 0.0005f);
+
+// Perlin Noise
+double PerlinNoise2D(double x, double y);

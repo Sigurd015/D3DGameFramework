@@ -236,10 +236,17 @@ void SceneRenderer_Init()
 			Material_Create(&s_Data.DefaultMaterial, pipelineSpec.Shader);
 			Material_SetAlbedoMap(&s_Data.DefaultMaterial,
 				(Texture2D*)AssetManager_GetAsset("WhiteTexture"));
-			Material_SetMetallicRoughnessMap(&s_Data.DefaultMaterial,
+			Material_SetMetalnessMap(&s_Data.DefaultMaterial,
+				(Texture2D*)AssetManager_GetAsset("WhiteTexture"));
+			Material_SetRoughnessMap(&s_Data.DefaultMaterial,
 				(Texture2D*)AssetManager_GetAsset("WhiteTexture"));
 			Material_SetNormalMap(&s_Data.DefaultMaterial,
 				(Texture2D*)AssetManager_GetAsset("WhiteTexture"));
+			Material_SetAlbedo(&s_Data.DefaultMaterial, { 1.0f,1.0f,1.0f });
+			Material_SetEmission(&s_Data.DefaultMaterial, 0.0f);
+			Material_SetMetallic(&s_Data.DefaultMaterial, 0.0f);
+			Material_SetRoughness(&s_Data.DefaultMaterial, 0.0f);
+			Material_SetUseNormalMap(&s_Data.DefaultMaterial, false);
 		}
 	}
 

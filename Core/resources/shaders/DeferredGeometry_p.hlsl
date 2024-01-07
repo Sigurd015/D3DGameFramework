@@ -19,17 +19,16 @@ struct PixelOutput
 };
 
 Texture2D u_AlbedoTex : register(t0);
-Texture2D u_MetallicRoughnessTex : register(t1);
-Texture2D u_NormalTex : register(t2);
+Texture2D u_MetalnessTex : register(t1);
+Texture2D u_RoughnessTex : register(t2);
+Texture2D u_NormalTex : register(t3);
 
 PixelOutput main(PixelInput Input)
 {
     PixelOutput Output;
     float4 albedo = u_AlbedoTex.Sample(u_SSAnisotropicWrap, Input.TexCoord);
-    // Notice: Use GLTF spec, Metalness is in B channel, Roughness is in G channel
-    float4 metallicRoughness = u_MetallicRoughnessTex.Sample(u_SSLinearWrap, Input.TexCoord);
-    float metalness = metallicRoughness.b * u_Material.Metalness;
-    float roughness = metallicRoughness.g * u_Material.Roughness;
+    float metalness = u_MetalnessTex.Sample(u_SSLinearWrap, Input.TexCoord).a * u_Material.Metalness;
+    float roughness = u_RoughnessTex.Sample(u_SSLinearWrap, Input.TexCoord).a * u_Material.Roughness;
 
     float3 normal = normalize(Input.Normal);
     if (u_Material.UseNormalMap)
