@@ -3,79 +3,71 @@
 
 #include <stdio.h>
 
-static int s_RandomValue[512] =
-{
-	193,99,233,105,30,242,6,93,196,78,138,62,212,8,68,142,132,241,158,159,37,14,
-	192,201,10,90,194,224,112,33,57,89,199,215,139,226,153,254,222,181,80,91,1,243,
-	96,128,95,40,229,225,150,143,63,46,79,97,12,43,3,155,214,187,147,52,220,118,127,
-	69,137,27,164,53,11,221,16,111,184,232,204,134,123,149,189,100,131,227,5,49,195,
-	4,125,115,205,172,71,151,135,218,121,110,208,217,246,244,34,130,74,168,219,119,238,
-	140,249,42,15,29,20,88,200,213,39,107,183,13,38,104,191,44,152,202,77,26,102,228,9,48,
-	185,161,157,47,86,45,101,22,234,179,207,248,231,146,17,103,82,223,106,176,239,216,252,
-	237,70,35,116,75,60,240,36,145,136,255,0,108,141,81,59,65,109,156,165,117,73,28,64,211,
-	154,169,61,66,120,67,209,160,31,92,175,122,173,21,7,23,203,87,167,247,84,148,163,32,170,58,
-	210,236,174,171,177,230,197,55,251,190,56,206,198,245,98,54,76,51,85,113,162,19,188,180,83,
-	235,124,2,114,25,178,129,182,94,166,126,41,253,144,186,250,24,72,50,133,18,
+Vec2 RandomGradient(int ix, int iy) {
+	// No precomputed gradients mean this works for any number of grid coordinates
+	const unsigned w = 8 * sizeof(unsigned);
+	const unsigned s = w / 2;
+	unsigned a = ix, b = iy;
+	a *= 3284157443;
 
-	193,99,233,105,30,242,6,93,196,78,138,62,212,8,68,142,132,241,158,159,37,14,
-	192,201,10,90,194,224,112,33,57,89,199,215,139,226,153,254,222,181,80,91,1,243,
-	96,128,95,40,229,225,150,143,63,46,79,97,12,43,3,155,214,187,147,52,220,118,127,
-	69,137,27,164,53,11,221,16,111,184,232,204,134,123,149,189,100,131,227,5,49,195,
-	4,125,115,205,172,71,151,135,218,121,110,208,217,246,244,34,130,74,168,219,119,238,
-	140,249,42,15,29,20,88,200,213,39,107,183,13,38,104,191,44,152,202,77,26,102,228,9,48,
-	185,161,157,47,86,45,101,22,234,179,207,248,231,146,17,103,82,223,106,176,239,216,252,
-	237,70,35,116,75,60,240,36,145,136,255,0,108,141,81,59,65,109,156,165,117,73,28,64,211,
-	154,169,61,66,120,67,209,160,31,92,175,122,173,21,7,23,203,87,167,247,84,148,163,32,170,58,
-	210,236,174,171,177,230,197,55,251,190,56,206,198,245,98,54,76,51,85,113,162,19,188,180,83,
-	235,124,2,114,25,178,129,182,94,166,126,41,253,144,186,250,24,72,50,133,18,
-};
+	b ^= a << s | a >> w - s;
+	b *= 1911520717;
 
-int Floor(double f)
-{
-	return f > 0 ? (int)f : (int)f - 1;
+	a ^= b << s | b >> w - s;
+	a *= 2048419325;
+	float random = a * (3.14159265 / ~(~0u >> 1)); // in [0, 2*Pi]
+
+	// Create the vector from the angle
+	Vec2 v;
+	v.x = sin(random);
+	v.y = cos(random);
+
+	return v;
 }
 
-double Fade(double t)
-{
-	return t * t * t * (t * (t * 6 - 15) + 10);
+// Computes the dot product of the distance and gradient vectors.
+float DotGridGradient(int ix, int iy, float x, float y) {
+	// Get gradient from integer coordinates
+	Vec2 gradient = RandomGradient(ix, iy);
+
+	// Compute the distance vector
+	float dx = x - (float)ix;
+	float dy = y - (float)iy;
+
+	// Compute the dot-product
+	return (dx * gradient.x + dy * gradient.y);
 }
 
-double Lerp(double t, double a, double b)
+float Interpolate(float a0, float a1, float w)
 {
-	return a + t * (b - a);
+	return (a1 - a0) * (3.0 - w * 2.0) * w * w + a0;
 }
 
-double Dot(int hash, double x, double y)
-{
-	switch (hash & 3) {
-	case 0: return  x + y;
-	case 1: return -x + y;
-	case 2: return  x - y;
-	case 3: return -x - y;
-	}
-	return 0;
-}
-
+// Sample Perlin noise at coordinates x, y
 double PerlinNoise2D(double x, double y)
 {
-	int xn = Floor(x);
-	int yn = Floor(y);
+	// Determine grid cell corner coordinates
+	int x0 = (int)x;
+	int y0 = (int)y;
+	int x1 = x0 + 1;
+	int y1 = y0 + 1;
 
-	double xf = x - xn;
-	double yf = y - yn;
+	// Compute Interpolation weights
+	float sx = x - (float)x0;
+	float sy = y - (float)y0;
 
-	double u = Fade(xf);
-	double v = Fade(yf);
+	// Compute and interpolate top two corners
+	float n0 = DotGridGradient(x0, y0, x, y);
+	float n1 = DotGridGradient(x1, y0, x, y);
+	float ix0 = Interpolate(n0, n1, sx);
 
-	xn &= 255;
-	yn &= 255;
+	// Compute and interpolate bottom two corners
+	n0 = DotGridGradient(x0, y1, x, y);
+	n1 = DotGridGradient(x1, y1, x, y);
+	float ix1 = Interpolate(n0, n1, sx);
 
-	int aa = s_RandomValue[s_RandomValue[xn] + yn];
-	int ab = s_RandomValue[s_RandomValue[xn + 1] + yn];
-	int ba = s_RandomValue[s_RandomValue[xn] + yn + 1];
-	int bb = s_RandomValue[s_RandomValue[xn + 1] + yn + 1];
+	// Final step: interpolate between the two previously interpolated values, now in y
+	float value = Interpolate(ix0, ix1, sy);
 
-	return Lerp(v,
-		Lerp(u, Dot(aa, xf, yf), Dot(ba, xf - 1, yf)),
-		Lerp(u, Dot(ab, xf, yf - 1), Dot(bb, xf - 1, yf - 1)));
+	return value;
 }

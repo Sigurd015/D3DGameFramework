@@ -13,9 +13,6 @@ struct InputData
 
 	bool PrevKeyState[256];
 	bool CurrentKeyState[256];
-
-	Vec2 PrevMousePosition;
-	Vec2 CurrentMousePosition;
 };
 static InputData s_InputData;
 
@@ -37,10 +34,6 @@ void Input_Update()
 		s_InputData.PrevKeyState[KeyCode] = s_InputData.CurrentKeyState[KeyCode];
 		s_InputData.CurrentKeyState[KeyCode] = (GetAsyncKeyState(KeyCode) & 0x8000) != 0;
 	}
-
-	// Mouse
-	s_InputData.PrevMousePosition = s_InputData.CurrentMousePosition;
-	s_InputData.CurrentMousePosition = Input_GetMousePosition();
 }
 
 void Input_Shutdown()
@@ -229,7 +222,9 @@ Vec2 Input_GetMousePosition()
 
 Vec2 Input_GetMousePosDelta()
 {
-	return Vec2Sub(s_InputData.CurrentMousePosition, s_InputData.PrevMousePosition);
+	static const Vec2 s_Center = { (float)GetSystemMetrics(SM_CXSCREEN) / 2, (float)GetSystemMetrics(SM_CYSCREEN) / 2 };
+
+	return Vec2Sub(Input_GetMousePosition(), s_Center);
 }
 
 void Input_SetCursorVisible(bool visible)

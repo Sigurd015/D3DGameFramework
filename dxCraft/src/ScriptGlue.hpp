@@ -114,7 +114,13 @@ void ScriptGlue_CreateTestScene(Scene& scene)
 			testObj.Transform.Translation = { 0.0f, 0.0f, 0.0f };
 			testObj.Transform.Translation.x = (float)j;
 			testObj.Transform.Translation.z = (float)i;
-			testObj.Transform.Translation.y = PerlinNoise2D(j, i) * 10.0f;
+			double nx = (double)j / 100.0f - 0.5f, ny = (double)i / 100.0f - 0.5f;
+			double noise = PerlinNoise2D(nx, ny);
+			testObj.Transform.Translation.y = noise * 10.0f;
+
+			//testObj.Transform.Translation.y = 0.0f;
+			APP_LOG_INFO("PerlinNoise2D(%d, %d) = %f", j, i, noise);
+
 			testObj.Transform.Rotation = { 0, 0, 0 };
 			testObj.Transform.Scale = { 1.0f, 1.0f, 1.0f };
 

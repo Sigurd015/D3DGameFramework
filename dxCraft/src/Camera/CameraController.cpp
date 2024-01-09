@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 
+#define MOVE_SPEED_MULTIPLIER 3.0f
+
 struct CameraControllerData
 {
 	TransformComponent* Transform = nullptr;
@@ -14,7 +16,7 @@ struct CameraControllerData
 	float MaxPitch = DirectX::XMConvertToRadians(85.0f);
 
 	bool UseMouse = false;
-	Vec2 MouseSensitivity = { 0.1f, 0.1f };
+	Vec2 MouseSensitivity = { 0.01f, 0.01f };
 
 	// Debug
 	bool LockOnPlane = false;
@@ -38,6 +40,7 @@ void CameraController_OnUpdate(Entity* entity, float timeStep, void* runtimeData
 	Vec3 pos = s_Data.Transform->Translation;
 	float yaw = s_Data.Transform->Rotation.y;
 	float pitch = s_Data.Transform->Rotation.x;
+	float moveSpeed = s_Data.MoveSpeed;
 
 	// Debug
 	{
@@ -51,22 +54,25 @@ void CameraController_OnUpdate(Entity* entity, float timeStep, void* runtimeData
 		}
 	}
 
+	if (Input_GetKey(KeyCode_Shift))
+		moveSpeed *= MOVE_SPEED_MULTIPLIER;
+
 	if (Input_GetKey(KeyCode_W))
 	{
-		pos = Vec3Add(pos, Vec3MulFloat(forward, s_Data.MoveSpeed));
+		pos = Vec3Add(pos, Vec3MulFloat(forward, moveSpeed));
 	}
 	else if (Input_GetKey(KeyCode_S))
 	{
-		pos = Vec3Sub(pos, Vec3MulFloat(forward, s_Data.MoveSpeed));
+		pos = Vec3Sub(pos, Vec3MulFloat(forward, moveSpeed));
 	}
 
 	if (Input_GetKey(KeyCode_A))
 	{
-		pos = Vec3Sub(pos, Vec3MulFloat(right, s_Data.MoveSpeed));
+		pos = Vec3Sub(pos, Vec3MulFloat(right, moveSpeed));
 	}
 	else if (Input_GetKey(KeyCode_D))
 	{
-		pos = Vec3Add(pos, Vec3MulFloat(right, s_Data.MoveSpeed));
+		pos = Vec3Add(pos, Vec3MulFloat(right, moveSpeed));
 	}
 
 	if (Input_GetKeyDown(KeyCode_M))

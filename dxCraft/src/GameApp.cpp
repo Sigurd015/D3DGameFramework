@@ -73,6 +73,7 @@ void Game_Update(float timeStep)
 		break;
 	}
 #endif
+
 	RendererAPI_CompositeToSwapChain(image);
 }
 
@@ -93,7 +94,7 @@ void Game_Shutdown()
 bool OnKeyPressed(Event e)
 {
 	//APP_LOG_INFO("Key Pressed: %c , IsRepeat : %d", (char)e.Context.KeyPressed.Keycode, e.Context.KeyPressed.IsRepeat);
-	return true;
+	return false;
 }
 
 bool OnMouseMoved(Event e)
@@ -101,7 +102,7 @@ bool OnMouseMoved(Event e)
 	//float x = e.Context.MouseMoved.x;
 	//float y = e.Context.MouseMoved.y;
 	//APP_LOG_INFO("Mouse Moved: X: %f, Y: %f", x, y);
-	return true;
+	return false;
 }
 
 void Game_OnEvent(Event e)

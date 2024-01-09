@@ -55,6 +55,14 @@ void ComputePass_BindInputs(const ComputePass& computePass)
 			{
 				RendererContext_GetDeviceContext()->CSSetSamplers(decl->Slot, 1, &s_CommonStates.SSLinearClamp);
 			}
+			else if (String_Compare(decl->Name, "u_SSPointClamp"))
+			{
+				RendererContext_GetDeviceContext()->CSSetSamplers(decl->Slot, 1, &s_CommonStates.SSPointClamp);
+			}
+			else if (String_Compare(decl->Name, "u_SSAnisotropicWrap"))
+			{
+				RendererContext_GetDeviceContext()->CSSetSamplers(decl->Slot, 1, &s_CommonStates.SSAnisotropicWrap);
+			}
 		}
 		else
 		{
@@ -79,6 +87,11 @@ void ComputePass_BindInputs(const ComputePass& computePass)
 					case RendererResourceType_TextureCube:
 					{
 						TextureCube_Bind((TextureCube*)element->Resource, decl);
+						break;
+					}
+					case RendererResourceType_Image:
+					{
+						Image2D_Bind((Image2D*)element->Resource, decl);
 						break;
 					}
 					}
